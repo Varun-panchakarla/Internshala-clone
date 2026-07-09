@@ -1,0 +1,35 @@
+{
+  "personalInfo": {
+    "fullName": "Jane Doe",
+    "email": "jane@example.com",
+    "phone": "+91 9876543210",
+    "location": "San Francisco, CA",
+    "summary": "Ambitious Frontend Developer with hands-on experience in building scalable and responsive web applications. Proficient in React, JavaScript, and Tailwind CSS. Passionate about creating seamless user experiences and optimizing web performance.",
+    "website": "https://janedoe.dev",
+    "github": "https://github.com/janedoe"
+  },
+  "education": [
+    {
+      "institution": "Stanford University",
+      "degree": "Bachelor of Science in Computer Science",
+      "year": "2020 - 2024",
+      "gpa": "3.8/4.0"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Frontend Developer Intern",
+      "company": "Google",
+      "duration": "Summer 2023",
+      "description": "Collaborated with the search UI team to refine client interfaces. Wrote accessible components and helped improve load speeds by 15%."
+    }
+  ],
+  "projects": [
+    {
+      "title": "E-Commerce App Interface",
+      "technologies": "React, Tailwind CSS, Redux Toolkit",
+      "description": "Designed a modern shop frontend utilizing responsive grid designs, fluid scroll behaviors, and local cart management utilities."
+    }
+  ],
+  "skills": ["React", "JavaScript", "Tailwind CSS", "Node.js", "Python", "TypeScript", "Git", "REST APIs"]
+}

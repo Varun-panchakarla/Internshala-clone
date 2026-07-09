@@ -1,0 +1,272 @@
+[
+  {
+    "id": "job-1",
+    "title": "Frontend Engineer Intern",
+    "company": "Google",
+    "logoColor": "bg-red-500",
+    "logoText": "G",
+    "location": "Bangalore, India",
+    "salary": "₹50,000 / month",
+    "experience": "Fresher",
+    "employmentType": "Internship",
+    "skills": ["React", "JavaScript", "CSS", "HTML", "TypeScript"],
+    "description": "Join Google's Frontend team to build accessible, beautiful, and high-performance interfaces. You will work alongside senior engineers to design and implement core search features.",
+    "responsibilities": [
+      "Develop responsive and user-friendly web features using React and TypeScript.",
+      "Collaborate with UX designers to translate wireframes into pixel-perfect mockups.",
+      "Optimize website performance and browser loading times.",
+      "Participate in code reviews and learn development best practices."
+    ],
+    "benefits": [
+      "Stipend of ₹50,000 per month",
+      "Free gourmet meals and snacks",
+      "Mentorship from senior software engineers",
+      "Certificate of Internship"
+    ],
+    "postedAt": "2 days ago",
+    "matchScore": 85
+  },
+  {
+    "id": "job-2",
+    "title": "React Developer",
+    "company": "Stripe",
+    "logoColor": "bg-indigo-600",
+    "logoText": "S",
+    "location": "Remote",
+    "salary": "₹15,00,000 - ₹22,00,000 / year",
+    "experience": "1-3 years",
+    "employmentType": "Full-time",
+    "skills": ["React", "Tailwind CSS", "JavaScript", "Redux", "GraphQL"],
+    "description": "Stripe is looking for a React Developer to join our dashboard team. You will be responsible for creating highly secure, robust, and clean payment interfaces for millions of businesses worldwide.",
+    "responsibilities": [
+      "Build modular, reusable frontend component libraries.",
+      "Ensure API integration flows are smooth and error-tolerant.",
+      "Participate in design sprints to conceptualize payment analytics visualizations.",
+      "Maintain high unit test coverage for frontend modules."
+    ],
+    "benefits": [
+      "Work from anywhere (fully remote)",
+      "Premium health insurance and wellness stipends",
+      "Home office setup allowance",
+      "Equity options"
+    ],
+    "postedAt": "1 day ago",
+    "matchScore": 90
+  },
+  {
+    "id": "job-3",
+    "title": "UI/UX Developer",
+    "company": "Canva",
+    "logoColor": "bg-purple-500",
+    "logoText": "C",
+    "location": "Mumbai, India",
+    "salary": "₹8,00,000 - ₹12,00,000 / year",
+    "experience": "1-3 years",
+    "employmentType": "Full-time",
+    "skills": ["Figma", "CSS", "React", "Tailwind CSS", "Framer Motion"],
+    "description": "At Canva, we empower everyone to design. We are looking for a UI/UX Developer who bridges the gap between design and technology, creating smooth, interactive, and beautiful experiences.",
+    "responsibilities": [
+      "Develop interactive web animations using Framer Motion and CSS transitions.",
+      "Maintain and expand Canva's design system tokens.",
+      "Build prototype interfaces for user testing and feedback loops.",
+      "Collaborate directly with designers to refine user flows."
+    ],
+    "benefits": [
+      "Annual education budget",
+      "Flexible working hours and hybrid options",
+      "Gym membership reimbursement",
+      "Bi-annual team retreats"
+    ],
+    "postedAt": "3 days ago",
+    "matchScore": 75
+  },
+  {
+    "id": "job-4",
+    "title": "Full Stack Developer",
+    "company": "Airbnb",
+    "logoColor": "bg-rose-500",
+    "logoText": "A",
+    "location": "Gurgaon, India",
+    "salary": "₹18,00,000 - ₹26,00,000 / year",
+    "experience": "3+ years",
+    "employmentType": "Full-time",
+    "skills": ["React", "Node.js", "Express", "MongoDB", "Tailwind CSS"],
+    "description": "Airbnb is redefining travel. We need a Full Stack Developer to build search and booking engines for local experiences. You will own features end-to-end.",
+    "responsibilities": [
+      "Design database models in MongoDB and write efficient backend queries.",
+      "Create scalable RESTful APIs with Node.js and Express.",
+      "Integrate complex search filters and maps on the React frontend.",
+      "Perform regular security and vulnerability assessments."
+    ],
+    "benefits": [
+      "Travel credit vouchers annually",
+      "Comprehensive medical coverage",
+      "Performance-based bonuses",
+      "Parental leave benefits"
+    ],
+    "postedAt": "Just now",
+    "matchScore": 60
+  },
+  {
+    "id": "job-5",
+    "title": "Software Engineering Intern",
+    "company": "Slack",
+    "logoColor": "bg-amber-500",
+    "logoText": "S",
+    "location": "Pune, India",
+    "salary": "₹35,000 / month",
+    "experience": "Fresher",
+    "employmentType": "Internship",
+    "skills": ["JavaScript", "React", "Node.js", "Git"],
+    "description": "Join Slack's Core Workflow team. You will help build and polish internal tools that power integration pipelines for thousands of applications.",
+    "responsibilities": [
+      "Fix bugs and implement minor user requests on Slack's admin dashboards.",
+      "Write scripts to automate development setup routines.",
+      "Contribute to technical documentation updates.",
+      "Gain exposure to enterprise-scale React workflows."
+    ],
+    "benefits": [
+      "Stipend of ₹35,000 per month",
+      "Flexible holiday schedules",
+      "Remote work-friendly stipend",
+      "Opportunities for return offers"
+    ],
+    "postedAt": "5 days ago",
+    "matchScore": 80
+  },
+  {
+    "id": "job-6",
+    "title": "Mobile App Developer (React Native)",
+    "company": "Spotify",
+    "logoColor": "bg-emerald-500",
+    "logoText": "S",
+    "location": "Remote",
+    "salary": "₹20,00,000 - ₹30,00,000 / year",
+    "experience": "3+ years",
+    "employmentType": "Full-time",
+    "skills": ["React Native", "JavaScript", "TypeScript", "Redux"],
+    "description": "Spotify wants an expert Mobile App Developer to enhance the podcast delivery interface. You will focus on smooth audio rendering and offline downloads management.",
+    "responsibilities": [
+      "Write cross-platform code optimized for iOS and Android.",
+      "Integrate native device capabilities for audio buffering.",
+      "Implement real-time synchronization of play states across devices.",
+      "Troubleshoot memory leaks and audio lag issues."
+    ],
+    "benefits": [
+      "Free Spotify Premium subscription",
+      "Unlimited paid time off (PTO)",
+      "Co-working space allowance",
+      "Health and mental wellness support plans"
+    ],
+    "postedAt": "1 week ago",
+    "matchScore": 70
+  },
+  {
+    "id": "job-7",
+    "title": "Backend Engineering Intern",
+    "company": "Netflix",
+    "logoColor": "bg-red-600",
+    "logoText": "N",
+    "location": "Remote",
+    "salary": "₹60,000 / month",
+    "experience": "Fresher",
+    "employmentType": "Internship",
+    "skills": ["Node.js", "Python", "SQL", "Git", "Docker"],
+    "description": "Netflix is seeking a Backend Engineering Intern to join our personalization team. Help build backend algorithms that serve movie recommendations to 200M+ viewers.",
+    "responsibilities": [
+      "Write clean, performant API endpoints in Node.js.",
+      "Construct relational database migrations and test SQL query efficiency.",
+      "Participate in Docker-based microservices packaging pipelines.",
+      "Perform code audits and refactor legacy server scripts."
+    ],
+    "benefits": [
+      "Industry-leading stipend of ₹60,000 per month",
+      "High performance computing hardware set",
+      "Direct guidance from engineering managers",
+      "Free Netflix streaming subscription"
+    ],
+    "postedAt": "4 days ago",
+    "matchScore": 65
+  },
+  {
+    "id": "job-8",
+    "title": "Frontend Architect",
+    "company": "Meta",
+    "logoColor": "bg-blue-600",
+    "logoText": "M",
+    "location": "Hyderabad, India",
+    "salary": "₹45,00,000 - ₹60,00,000 / year",
+    "experience": "5+ years",
+    "employmentType": "Full-time",
+    "skills": ["React", "TypeScript", "GraphQL", "Web Performance", "System Design"],
+    "description": "Meta is looking for a Frontend Architect to drive core scalability for next-generation advertising dashboard interfaces. Help shape the future of business analytics.",
+    "responsibilities": [
+      "Define standard project templates and lint parameters for 100+ developers.",
+      "Address bottleneck performance and design client-side data syncing schemas.",
+      "Refactor bloated codebases into micro-frontends.",
+      "Advise engineering leaders on technology adoption roadmaps."
+    ],
+    "benefits": [
+      "Top-tier compensation structure",
+      "Comprehensive global medical and dental support",
+      "Substantial annual performance equity grant",
+      "Relocation package support"
+    ],
+    "postedAt": "1 week ago",
+    "matchScore": 50
+  },
+  {
+    "id": "job-9",
+    "title": "Part-Time Web Developer",
+    "company": "Local Startup incubator",
+    "logoColor": "bg-slate-700",
+    "logoText": "L",
+    "location": "Chennai, India",
+    "salary": "₹20,000 / month",
+    "experience": "Fresher",
+    "employmentType": "Part-time",
+    "skills": ["React", "CSS", "WordPress", "JavaScript"],
+    "description": "Looking for a flexible part-time developer to build landing pages and update portfolio sites for incubating tech startups. Ideal for students.",
+    "responsibilities": [
+      "Create aesthetic landing pages for early stage startups.",
+      "Integrate newsletter signups and contact forms.",
+      "Maintain and update content directories.",
+      "Ensure web layouts are mobile responsive."
+    ],
+    "benefits": [
+      "Flexible schedule (20 hours / week)",
+      "Valuable exposure to multiple early stage businesses",
+      "Direct recommendation letters",
+      "Co-working space access"
+    ],
+    "postedAt": "6 days ago",
+    "matchScore": 88
+  },
+  {
+    "id": "job-10",
+    "title": "UI Developer Contract",
+    "company": "Figma",
+    "logoColor": "bg-orange-500",
+    "logoText": "F",
+    "location": "Remote",
+    "salary": "₹1,50,000 / month",
+    "experience": "3+ years",
+    "employmentType": "Contract",
+    "skills": ["React", "TypeScript", "CSS", "Tailwind CSS"],
+    "description": "Figma is looking for a UI Developer on a 6-month contract basis to help implement custom collaborative features inside Figma design spaces.",
+    "responsibilities": [
+      "Build interactive dashboard components under strict design system guidelines.",
+      "Work closely with product managers to test and polish collaborative design features.",
+      "Write unit tests for UI interactions.",
+      "Identify and debug cross-browser layout inconsistencies."
+    ],
+    "benefits": [
+      "High contracting day rates",
+      "Work in a world-class collaborative design culture",
+      "Flexible hours",
+      "Contract extension possibilities based on output"
+    ],
+    "postedAt": "2 days ago",
+    "matchScore": 72
+  }
+]

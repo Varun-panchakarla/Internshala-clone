@@ -1,0 +1,29 @@
+[
+  {
+    "id": "1",
+    "name": "Jane Doe",
+    "email": "jane@example.com",
+    "password": "password123",
+    "profileCompleted": true,
+    "profileData": {
+      "fullName": "Jane Doe",
+      "profilePhoto": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+      "college": "Stanford University",
+      "degree": "B.S. Computer Science",
+      "skills": ["React", "JavaScript", "Tailwind CSS", "Node.js", "Python"],
+      "experience": "1 year",
+      "preferredRole": "Frontend Developer",
+      "preferredLocation": "San Francisco, CA",
+      "employmentType": "Full-time",
+      "resumeUrl": "jane_doe_resume.pdf"
+    }
+  },
+  {
+    "id": "2",
+    "name": "John Smith",
+    "email": "john@example.com",
+    "password": "password123",
+    "profileCompleted": false,
+    "profileData": null
+  }
+]
