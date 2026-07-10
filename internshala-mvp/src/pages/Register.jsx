@@ -110,7 +110,7 @@ const Register = () => {
             i
           </div>
           <span className="text-2xl font-black tracking-tight">
-            Internshala<span className="text-brand-600">.</span>
+            IncuXAI Careers<span className="text-brand-600">.</span>
           </span>
         </div>
 
@@ -167,7 +167,7 @@ const Register = () => {
               i
             </div>
             <span className="text-xl font-black text-slate-800 tracking-tight">
-              Internshala<span className="text-brand-600">.</span>
+              IncuXAI Careers<span className="text-brand-600">.</span>
             </span>
           </div>
 

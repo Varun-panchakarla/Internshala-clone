@@ -52,7 +52,7 @@ const Navbar = () => {
                 i
               </div>
               <span className="text-xl font-extrabold text-slate-800 dark:text-white tracking-tight">
-                Internshala<span className="text-brand-600 font-black">.</span>
+                IncuXAI Careers<span className="text-brand-600 font-black">.</span>
               </span>
             </Link>
           </div>

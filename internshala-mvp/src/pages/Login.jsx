@@ -99,7 +99,7 @@ const Login = () => {
               i
             </div>
             <span className="text-2xl font-black text-slate-800 tracking-tight">
-              Internshala<span className="text-brand-600">.</span>
+              IncuXAI Careers<span className="text-brand-600">.</span>
             </span>
           </div>
 
@@ -213,7 +213,7 @@ const Login = () => {
             Connecting Top Talent with Premium Work Opportunities.
           </h2>
           <blockquote className="border-l-4 border-emerald-400 pl-6 italic text-lg text-slate-100/90 leading-relaxed font-light">
-            "I built my resume on Internshala, tracked my application matches in real-time, and landed a Full Stack Internship at Google within two weeks!"
+            "I built my resume on IncuXAI Careers, tracked my application matches in real-time, and landed a Full Stack Internship at Google within two weeks!"
             <footer className="mt-2 text-sm font-bold text-white not-italic">— Rohan Kumar, IIT Madras</footer>
           </blockquote>
         </div>
