@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import { useResume } from '../context/ResumeContext';
 import { useToast } from '../components/common/Toast';
 import { FiSave, FiDownload, FiPlus, FiTrash, FiAward, FiAlertCircle, FiChevronRight, FiBriefcase, FiBookOpen, FiUser, FiCode } from 'react-icons/fi';
@@ -153,27 +153,25 @@ const ResumeBuilder = () => {
   }
 
   try {
-    const canvas = await html2canvas(resumeElement, {
-      scale: 2,
+    const dataUrl = await toPng(resumeElement, {
+      cacheBust: true,
+      pixelRatio: 3,
     });
-
-    const imgData = canvas.toDataURL("image/png");
 
     const pdf = new jsPDF("p", "mm", "a4");
 
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+const pdfWidth = pdf.internal.pageSize.getWidth();
+const imgProps = pdf.getImageProperties(dataUrl);
 
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-    pdf.save("ATS_Resume.pdf");
-
-    addToast("Resume downloaded successfully!", "success");
+pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+pdf.save("ATS_Resume.pdf");
+addToast("Resume downloaded successfully!", "success");
   } catch (error) {
-      console.error("PDF Error:", error);
-      alert(error.message);
-      addToast("Failed to download resume.", "error");
-    }
+    console.error(error);
+    addToast("Failed to download resume.", "error");
+  }
 };
 
   const accordionHeaders = [
@@ -520,8 +518,9 @@ const ResumeBuilder = () => {
 
         {/* A4 Paper Container */}
         <div
-          id="resume-preview" 
-          className="w-full max-w-[210mm] aspect-[1/1.4142] bg-white shadow-2xl border border-slate-100 p-[15mm] flex flex-col gap-[8mm] text-slate-800 text-[10px] select-text overflow-y-auto max-h-[85vh] leading-normal font-sans">
+            id="resume-preview"
+            className="w-full max-w-[210mm] bg-white shadow-2xl border border-slate-100 p-[15mm] flex flex-col gap-[8mm] text-slate-800 text-[10px] select-text leading-normal font-sans"
+      >   
           
           {/* Document Header */}
           <div className="text-center flex flex-col gap-1 border-b border-slate-200 pb-4">
