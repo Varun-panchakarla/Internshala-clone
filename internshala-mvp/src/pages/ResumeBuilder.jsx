@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import jsPDF from "jspdf";
+import { toPng } from "html-to-image";
 import { useResume } from '../context/ResumeContext';
 import { useToast } from '../components/common/Toast';
 import { FiSave, FiDownload, FiPlus, FiTrash, FiAward, FiAlertCircle, FiChevronRight, FiBriefcase, FiBookOpen, FiUser, FiCode } from 'react-icons/fi';
@@ -12,6 +14,7 @@ const ResumeBuilder = () => {
     resume,
     loading,
     saving,
+    resumeCompletion,
     atsScore,
     atsSuggestions,
     atsBreakdown,
@@ -139,10 +142,37 @@ const ResumeBuilder = () => {
     }, 2000);
   };
 
-  const handleConfirmDownload = () => {
-    setDownloadModalOpen(false);
-    addToast('Simulating PDF download... Saved as "ATS_Resume.pdf"!', 'success');
-  };
+  const handleConfirmDownload = async () => {
+  setDownloadModalOpen(false);
+
+  const resumeElement = document.getElementById("resume-preview");
+
+  if (!resumeElement) {
+    addToast("Resume preview not found!", "error");
+    return;
+  }
+
+  try {
+    const dataUrl = await toPng(resumeElement, {
+      cacheBust: true,
+      pixelRatio: 3,
+    });
+
+    const pdf = new jsPDF("p", "mm", "a4");
+
+const pdfWidth = pdf.internal.pageSize.getWidth();
+const imgProps = pdf.getImageProperties(dataUrl);
+
+const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+pdf.save("ATS_Resume.pdf");
+addToast("Resume downloaded successfully!", "success");
+  } catch (error) {
+    console.error(error);
+    addToast("Failed to download resume.", "error");
+  }
+};
 
   const accordionHeaders = [
     { id: 'personal', label: '1. Personal Information', icon: FiUser },
@@ -162,21 +192,21 @@ const ResumeBuilder = () => {
         <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-md flex flex-col gap-4">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="font-extrabold text-slate-800 text-sm">Resume ATS Evaluator</h3>
-              <p className="text-xs text-slate-400">Scored dynamically as you edit</p>
+              <h3 className="font-extrabold text-slate-800 text-sm">Resume Completion</h3>
+              <p className="text-xs text-slate-400">Completion updates as you fill your resume</p>
             </div>
             <span className={`text-2xl font-black px-3 py-1.5 rounded-2xl border ${
-              atsScore >= 80 
+              resumeCompletion >= 80 
                 ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                : atsScore >= 50
+                : resumeCompletion >= 50
                 ? 'bg-amber-50 text-amber-700 border-amber-100'
                 : 'bg-rose-50 text-rose-700 border-rose-100'
             }`}>
-              {atsScore}
+              {resumeCompletion}%
             </span>
           </div>
 
-          <ProgressBar value={atsScore} showPercentage={false} size="sm" />
+          <ProgressBar value={resumeCompletion} showPercentage={true} size="sm" />
           
           <div className="flex items-center gap-2">
             <Button variant="primary" size="sm" className="flex-1 shadow-sm font-bold" onClick={handleSaveResume} loading={saving}>
@@ -487,7 +517,10 @@ const ResumeBuilder = () => {
         </span>
 
         {/* A4 Paper Container */}
-        <div className="w-full max-w-[210mm] aspect-[1/1.4142] bg-white shadow-2xl border border-slate-100 p-[15mm] flex flex-col gap-[8mm] text-slate-800 text-[10px] select-text overflow-y-auto max-h-[85vh] leading-normal font-sans">
+        <div
+            id="resume-preview"
+            className="w-full max-w-[210mm] bg-white shadow-2xl border border-slate-100 p-[15mm] flex flex-col gap-[8mm] text-slate-800 text-[10px] select-text leading-normal font-sans"
+      >   
           
           {/* Document Header */}
           <div className="text-center flex flex-col gap-1 border-b border-slate-200 pb-4">

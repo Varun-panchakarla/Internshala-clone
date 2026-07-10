@@ -86,7 +86,64 @@ export const ResumeProvider = ({ children }) => {
       setSaving(false);
     }
   };
+// Calculate Resume Completion Percentage
+const calculateResumeCompletion = (resume) => {
+  if (!resume) return 0;
 
+  let score = 0;
+
+  // Personal Information (20%)
+  const personal = resume.personalInfo || {};
+  if (
+    personal.fullName &&
+    personal.email &&
+    personal.phone &&
+    personal.location
+  ) {
+    score += 20;
+  }
+
+  // Education (20%)
+  if (
+    resume.education?.length > 0 &&
+    resume.education[0].institution &&
+    resume.education[0].degree
+  ) {
+    score += 20;
+  }
+
+  // Experience (20%)
+  if (
+    resume.experience?.length > 0 &&
+    resume.experience[0].role &&
+    resume.experience[0].company
+  ) {
+    score += 20;
+  }
+
+  // Projects (15%)
+  if (
+    resume.projects?.length > 0 &&
+    resume.projects[0].title
+  ) {
+    score += 15;
+  }
+
+  // Skills (15%)
+  if (resume.skills?.length > 0) {
+    score += 15;
+  }
+
+  // Professional Summary (10%)
+  if (personal.summary && personal.summary.length > 30) {
+    score += 10;
+  }
+
+  return score;
+};
+
+const resumeCompletion = calculateResumeCompletion(resume);
+console.log("Resume Completion:", resumeCompletion);
   // Derive ATS score results
   const atsResults = calculateAtsScore(resume);
 
@@ -95,6 +152,7 @@ export const ResumeProvider = ({ children }) => {
     loading,
     saving,
     error,
+    resumeCompletion,
     atsScore: atsResults.score,
     atsSuggestions: atsResults.suggestions,
     atsBreakdown: atsResults.breakdown,

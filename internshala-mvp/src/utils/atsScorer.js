@@ -154,9 +154,76 @@ export const calculateAtsScore = (resume) => {
     });
   }
   score += breakdown.skills;
+// Bonus: Action Verbs
+const actionWords = [
+  "developed",
+  "built",
+  "implemented",
+  "optimized",
+  "designed",
+  "created",
+  "managed",
+  "led",
+  "improved",
+  "collaborated"
+];
 
+const expText = (experience || [])
+  .map(e => e.description || "")
+  .join(" ")
+  .toLowerCase();
+
+const actionMatches = actionWords.filter(word =>
+  expText.includes(word)
+);
+
+if (actionMatches.length >= 3) {
+  score += 5;
+} else {
+  suggestions.push({
+    id: "action-verbs",
+    category: "Experience",
+    message:
+      "Use more action verbs like Developed, Built, Designed, Optimized and Led.",
+    impact: "Medium"
+  });
+}
+// Bonus: Technical Keywords
+const keywords = [
+  "react",
+  "javascript",
+  "html",
+  "css",
+  "node",
+  "express",
+  "mongodb",
+  "sql",
+  "python",
+  "java",
+  "git"
+];
+
+const skillText = (skills || [])
+  .join(" ")
+  .toLowerCase();
+
+const keywordMatches = keywords.filter(word =>
+  skillText.includes(word)
+);
+
+if (keywordMatches.length >= 6) {
+  score += 5;
+} else {
+  suggestions.push({
+    id: "keywords",
+    category: "Skills",
+    message:
+      "Add more technical keywords relevant to your target job.",
+    impact: "High"
+  });
+}
   // Round off the total score
-  const finalScore = Math.round(score);
+  const finalScore = Math.min(100, Math.round(score));
 
   return {
     score: finalScore,
