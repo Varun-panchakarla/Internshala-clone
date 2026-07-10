@@ -13,6 +13,8 @@ import SavedJobs from '../pages/SavedJobs';
 import ResumeBuilder from '../pages/ResumeBuilder';
 import Profile from '../pages/Profile';
 import LandingPage from '../pages/LandingPage';
+import ForgotPassword from '../pages/ForgotPassword';
+import ManageAccount from '../pages/ManageAccount';
 import MainLayout from '../layouts/MainLayout';
 
 // Protected Route Wrapper
@@ -73,6 +75,14 @@ const AppRoutes = () => {
           </PublicRoute>
         }
       />
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicRoute useLayout={false}>
+            <ForgotPassword />
+          </PublicRoute>
+        }
+      />
 
       {/* Publicly Browseable Job Pages */}
       <Route
@@ -122,6 +132,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manage-account"
+        element={
+          <ProtectedRoute>
+            <ManageAccount />
           </ProtectedRoute>
         }
       />
