@@ -12,6 +12,7 @@ import JobDetails from '../pages/JobDetails';
 import SavedJobs from '../pages/SavedJobs';
 import ResumeBuilder from '../pages/ResumeBuilder';
 import Profile from '../pages/Profile';
+import LandingPage from '../pages/LandingPage';
 import MainLayout from '../layouts/MainLayout';
 
 // Protected Route Wrapper
@@ -45,15 +46,13 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      {/* Root Path Redirect */}
+      {/* Root Path - Custom Professional Landing Page */}
       <Route
         path="/"
         element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Navigate to="/jobs" replace />
-          )
+          <PublicRoute useLayout={false}>
+            <LandingPage />
+          </PublicRoute>
         }
       />
 
