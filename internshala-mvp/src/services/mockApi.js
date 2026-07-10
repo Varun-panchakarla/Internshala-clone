@@ -1,46 +1,21 @@
-import initialUsers from '../data/users.json';
-import initialJobs from '../data/jobs.json';
-import initialResume from '../data/resume.json';
+import axios from 'axios';
 
-// Initialize localStorage databases if empty
-const initDatabase = () => {
-  if (!localStorage.getItem('jobportal_users')) {
-    localStorage.setItem('jobportal_users', JSON.stringify(initialUsers));
-  }
-  if (!localStorage.getItem('jobportal_jobs')) {
-    localStorage.setItem('jobportal_jobs', JSON.stringify(initialJobs));
-  }
-  if (!localStorage.getItem('jobportal_resume')) {
-    localStorage.setItem('jobportal_resume', JSON.stringify(initialResume));
-  }
-  if (!localStorage.getItem('jobportal_saved_jobs')) {
-    localStorage.setItem('jobportal_saved_jobs', JSON.stringify([]));
-  }
-  if (!localStorage.getItem('jobportal_applied_jobs')) {
-    localStorage.setItem('jobportal_applied_jobs', JSON.stringify([]));
-  }
-};
+const api = axios.create({
+  baseURL: '/api',
+  timeout: 10000,
+  headers: { 'Content-Type': 'application/json' }
+});
 
-initDatabase();
-
-// Simulated network delay (ms)
-const SIMULATED_DELAY = 400;
-const delay = (ms = SIMULATED_DELAY) => new Promise(resolve => setTimeout(resolve, ms));
+// Auth remains in localStorage (not affected by backend)
+const delay = (ms = 300) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const authService = {
   login: async (email, password) => {
     await delay();
     const users = JSON.parse(localStorage.getItem('jobportal_users'));
     const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-
-    if (!user) {
-      throw new Error('User not found. Please register.');
-    }
-    if (user.password !== password) {
-      throw new Error('Incorrect password. Please try again.');
-    }
-
-    // Set active session
+    if (!user) throw new Error('User not found. Please register.');
+    if (user.password !== password) throw new Error('Incorrect password. Please try again.');
     localStorage.setItem('jobportal_session', JSON.stringify(user));
     return { data: user };
   },
@@ -49,31 +24,18 @@ export const authService = {
     await delay();
     const users = JSON.parse(localStorage.getItem('jobportal_users'));
     const exists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
-
-    if (exists) {
-      throw new Error('Email is already registered. Please login.');
-    }
-
-    const newUser = {
-      id: Date.now().toString(),
-      name,
-      email,
-      password,
-      profileCompleted: false,
-      profileData: null
-    };
-
+    if (exists) throw new Error('Email is already registered. Please login.');
+    const newUser = { id: Date.now().toString(), name, email, password, profileCompleted: false, profileData: null };
     users.push(newUser);
     localStorage.setItem('jobportal_users', JSON.stringify(users));
     localStorage.setItem('jobportal_session', JSON.stringify(newUser));
-
     return { data: newUser };
   },
 
   getCurrentUser: async () => {
     await delay(100);
     const session = localStorage.getItem('jobportal_session');
-    return session ? { data: JSON.parse(session) } : { data: null };
+    return { data: session ? JSON.parse(session) : null };
   },
 
   logout: async () => {
@@ -86,59 +48,41 @@ export const authService = {
     await delay();
     const session = JSON.parse(localStorage.getItem('jobportal_session'));
     if (!session) throw new Error('Unauthenticated user session.');
-
     const users = JSON.parse(localStorage.getItem('jobportal_users'));
-    const userIndex = users.findIndex(u => u.id === session.id);
-
-    if (userIndex === -1) throw new Error('User not found.');
-
-    const updatedUser = {
-      ...users[userIndex],
-      profileCompleted: true,
-      profileData
-    };
-
-    users[userIndex] = updatedUser;
+    const idx = users.findIndex(u => u.id === session.id);
+    if (idx === -1) throw new Error('User not found.');
+    const updatedUser = { ...users[idx], profileCompleted: true, profileData };
+    users[idx] = updatedUser;
     localStorage.setItem('jobportal_users', JSON.stringify(users));
     localStorage.setItem('jobportal_session', JSON.stringify(updatedUser));
-
     return { data: updatedUser };
   }
 };
 
 export const jobService = {
   getAllJobs: async () => {
-    await delay();
-    const jobs = JSON.parse(localStorage.getItem('jobportal_jobs'));
-    return { data: jobs };
+    const res = await api.get('/jobs');
+    return { data: res.data.data };
   },
 
   getJobById: async (id) => {
-    await delay(200);
-    const jobs = JSON.parse(localStorage.getItem('jobportal_jobs'));
-    const job = jobs.find(j => j.id === id);
-    if (!job) throw new Error('Job not found.');
-    return { data: job };
+    const res = await api.get(`/jobs/${id}`);
+    return { data: res.data.data };
   },
 
   getSavedJobIds: async () => {
-    await delay(100);
-    const saved = JSON.parse(localStorage.getItem('jobportal_saved_jobs')) || [];
-    const session = JSON.parse(localStorage.getItem('jobportal_session'));
+    const session = localStorage.getItem('jobportal_session');
     if (!session) return { data: [] };
-    const userSaved = saved.filter(s => s.userId === session.id).map(s => s.jobId);
-    return { data: userSaved };
+    const parsed = JSON.parse(session);
+    const saved = JSON.parse(localStorage.getItem('jobportal_saved_jobs')) || [];
+    return { data: saved.filter(s => s.userId === parsed.id).map(s => s.jobId) };
   },
 
   saveJob: async (jobId) => {
-    await delay(150);
     const session = JSON.parse(localStorage.getItem('jobportal_session'));
     if (!session) throw new Error('You must be logged in to save jobs.');
-
     const saved = JSON.parse(localStorage.getItem('jobportal_saved_jobs')) || [];
-    const alreadySaved = saved.some(s => s.userId === session.id && s.jobId === jobId);
-
-    if (!alreadySaved) {
+    if (!saved.some(s => s.userId === session.id && s.jobId === jobId)) {
       saved.push({ userId: session.id, jobId });
       localStorage.setItem('jobportal_saved_jobs', JSON.stringify(saved));
     }
@@ -146,10 +90,8 @@ export const jobService = {
   },
 
   unsaveJob: async (jobId) => {
-    await delay(150);
     const session = JSON.parse(localStorage.getItem('jobportal_session'));
     if (!session) throw new Error('You must be logged in to save jobs.');
-
     let saved = JSON.parse(localStorage.getItem('jobportal_saved_jobs')) || [];
     saved = saved.filter(s => !(s.userId === session.id && s.jobId === jobId));
     localStorage.setItem('jobportal_saved_jobs', JSON.stringify(saved));
@@ -157,23 +99,18 @@ export const jobService = {
   },
 
   getAppliedJobIds: async () => {
-    await delay(100);
-    const applied = JSON.parse(localStorage.getItem('jobportal_applied_jobs')) || [];
-    const session = JSON.parse(localStorage.getItem('jobportal_session'));
+    const session = localStorage.getItem('jobportal_session');
     if (!session) return { data: [] };
-    const userApplied = applied.filter(a => a.userId === session.id).map(a => a.jobId);
-    return { data: userApplied };
+    const parsed = JSON.parse(session);
+    const applied = JSON.parse(localStorage.getItem('jobportal_applied_jobs')) || [];
+    return { data: applied.filter(a => a.userId === parsed.id).map(a => a.jobId) };
   },
 
   applyToJob: async (jobId) => {
-    await delay(200);
     const session = JSON.parse(localStorage.getItem('jobportal_session'));
-    if (!session) throw new Error('You must be logged in to apply for jobs.');
-
+    if (!session) throw new Error('You must be logged in to apply.');
     const applied = JSON.parse(localStorage.getItem('jobportal_applied_jobs')) || [];
-    const alreadyApplied = applied.some(a => a.userId === session.id && a.jobId === jobId);
-
-    if (!alreadyApplied) {
+    if (!applied.some(a => a.userId === session.id && a.jobId === jobId)) {
       applied.push({ userId: session.id, jobId, appliedAt: new Date().toISOString() });
       localStorage.setItem('jobportal_applied_jobs', JSON.stringify(applied));
     }
@@ -183,7 +120,6 @@ export const jobService = {
 
 export const resumeService = {
   getResume: async () => {
-    await delay(200);
     const session = JSON.parse(localStorage.getItem('jobportal_session'));
     if (!session) throw new Error('Unauthenticated user session.');
 
@@ -191,15 +127,20 @@ export const resumeService = {
     let userResume = resumes[session.id];
 
     if (!userResume) {
-      // Return template prefilled with user name if profile completed
-      const defaultTemplate = JSON.parse(localStorage.getItem('jobportal_resume'));
+      const defaultTemplate = {
+        personalInfo: { fullName: session.name || '', email: session.email, phone: '', location: '', linkedin: '', portfolio: '', title: '', summary: '' },
+        education: [],
+        experience: [],
+        projects: [],
+        skills: []
+      };
       userResume = {
         ...defaultTemplate,
         personalInfo: {
           ...defaultTemplate.personalInfo,
           fullName: session.profileData?.fullName || session.name,
           email: session.email,
-          location: session.profileData?.preferredLocation || defaultTemplate.personalInfo.location
+          location: session.profileData?.preferredLocation || ''
         }
       };
       resumes[session.id] = userResume;
@@ -210,7 +151,6 @@ export const resumeService = {
   },
 
   saveResume: async (resumeData) => {
-    await delay();
     const session = JSON.parse(localStorage.getItem('jobportal_session'));
     if (!session) throw new Error('Unauthenticated user session.');
 
