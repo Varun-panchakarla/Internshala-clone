@@ -223,31 +223,36 @@ const Dashboard = () => {
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-black text-slate-800">Latest Job Openings</h2>
         
-        <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {jobs.slice(0, 3).map((job) => (
-            <div key={job.id} className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-200 hover:border-slate-200 hover:shadow-md">
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl shrink-0 ${job.logoColor} text-white flex items-center justify-center font-extrabold text-xl`}>
-                  {job.logoText}
-                </div>
-                <div>
-                  <h4 className="text-sm font-extrabold text-slate-800">{job.title}</h4>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-400 font-semibold mt-1">
-                    <span>{job.company}</span>
-                    <span>•</span>
-                    <span>{job.location}</span>
-                    <span>•</span>
-                    <span className="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px]">{job.employmentType}</span>
+            <div key={job.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm flex flex-col justify-between gap-4 transition-all duration-200 hover:border-slate-200 dark:hover:border-slate-700 hover:shadow-md">
+              <div className="flex flex-col gap-3.5">
+                {/* Logo & Employment Type Badge */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className={`w-10 h-10 rounded-xl shrink-0 ${job.logoColor} text-white flex items-center justify-center font-extrabold text-lg`}>
+                    {job.logoText}
                   </div>
+                  <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded text-[10px] font-bold shrink-0">
+                    {job.employmentType}
+                  </span>
+                </div>
+
+                {/* Job Title & Company */}
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 line-clamp-1">{job.title}</h4>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold mt-0.5">{job.company}</p>
+                </div>
+
+                {/* Metadata Details */}
+                <div className="flex flex-col gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
+                  <span className="truncate">📍 {job.location}</span>
+                  <span>💼 Experience: {job.experience}</span>
+                  <span className="font-extrabold text-brand-600 dark:text-brand-400">💰 {job.salary || 'Undisclosed'}</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="text-right hidden md:block">
-                  <p className="text-xs font-bold text-slate-700">{job.salary}</p>
-                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">Exp: {job.experience}</p>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => handleApplyClick(job.id)}>
+              <div className="mt-2 shrink-0">
+                <Button variant="outline" size="sm" className="w-full font-bold shadow-sm py-2 bg-white dark:bg-slate-900" onClick={() => handleApplyClick(job.id)}>
                   View Details
                 </Button>
               </div>
