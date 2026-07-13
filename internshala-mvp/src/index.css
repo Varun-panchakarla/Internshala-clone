@@ -92,3 +92,82 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Smooth theme switching transitions for background, border and text */
+.bg-slate-50,
+.bg-white,
+.border-slate-100,
+.border-slate-200,
+.text-slate-900,
+.text-slate-800,
+.text-slate-700,
+.text-slate-600,
+.text-slate-500,
+.text-slate-400 {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease;
+}
+
+/* Global Dark Mode Overrides for light-theme Tailwind classes */
+html.dark .bg-white:not(#resume-preview):not(#resume-preview *) {
+  background-color: #111827 !important; /* gray-900 */
+}
+
+html.dark .bg-slate-50:not(#resume-preview):not(#resume-preview *) {
+  background-color: #0b0f19 !important; /* dark body background */
+}
+
+html.dark .bg-slate-100:not(#resume-preview):not(#resume-preview *) {
+  background-color: #1f2937 !important; /* gray-800 */
+}
+
+html.dark .border-slate-100:not(#resume-preview):not(#resume-preview *),
+html.dark .border-slate-200:not(#resume-preview):not(#resume-preview *) {
+  border-color: #1f2937 !important; /* gray-800 border */
+}
+
+/* Sidebar and active menu elements */
+html.dark .bg-brand-50:not(#resume-preview):not(#resume-preview *) {
+  background-color: rgba(2, 132, 199, 0.15) !important;
+}
+
+html.dark .text-brand-700:not(#resume-preview):not(#resume-preview *) {
+  color: #38bdf8 !important; /* sky-400 */
+}
+
+html.dark .hover\:bg-slate-50:not(#resume-preview):not(#resume-preview *):hover {
+  background-color: #1f2937 !important;
+}
+
+html.dark .hover\:bg-brand-100:not(#resume-preview):not(#resume-preview *):hover {
+  background-color: rgba(2, 132, 199, 0.25) !important;
+}
+
+/* Global text color overrides */
+html.dark .text-slate-900:not(#resume-preview):not(#resume-preview *) {
+  color: #f9fafb !important;
+}
+
+html.dark .text-slate-800:not(#resume-preview):not(#resume-preview *) {
+  color: #f3f4f6 !important;
+}
+
+html.dark .text-slate-700:not(#resume-preview):not(#resume-preview *) {
+  color: #e5e7eb !important;
+}
+
+html.dark .text-slate-600:not(#resume-preview):not(#resume-preview *),
+html.dark .text-slate-505:not(#resume-preview):not(#resume-preview *),
+html.dark .text-slate-500:not(#resume-preview):not(#resume-preview *) {
+  color: #9ca3af !important;
+}
+
+html.dark .text-slate-400:not(#resume-preview):not(#resume-preview *) {
+  color: #6b7280 !important;
+}
+
+/* Form input options and dropdowns */
+html.dark option {
+  background-color: #111827;
+  color: #f3f4f6;
+}
+
