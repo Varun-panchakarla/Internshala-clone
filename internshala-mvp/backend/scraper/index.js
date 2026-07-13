@@ -1,9 +1,7 @@
-const { scrapeInternshala } = require('./internshala.js');
-const { scrapeNaukri } = require('./naukri.js');
-const { scrapeIndeed } = require('./indeed.js');
+const { fetchFromAdzuna } = require('./adzuna.js');
+const { fetchFromJobApi } = require('./jobApi.js');
 const fs = require('fs');
 const path = require('path');
-const { fileURLToPath } = require('url');
 
 const JOBS_FILE = path.resolve(__dirname, '..', 'jobs.json');
 
@@ -28,45 +26,38 @@ function shuffle(arr) {
 }
 
 async function scrapeAll() {
+  let jobs = [];
+
   console.log('[Scraper] Starting job collection...');
 
-  const results = await Promise.allSettled([
-    scrapeInternshala(),
-    scrapeNaukri(),
-    scrapeIndeed()
-  ]);
+  // Primary: Adzuna API
+  console.log('[Scraper] Trying Adzuna API...');
+  jobs = await fetchFromAdzuna();
 
-  let allJobs = [];
-
-  const SOURCES = ['internshala', 'naukri', 'indeed'];
-  results.forEach((res, i) => {
-    if (res.status === 'fulfilled' && Array.isArray(res.value) && res.value.length > 0) {
-      console.log(`[Scraper] ${SOURCES[i]}: ${res.value.length} jobs`);
-      allJobs = allJobs.concat(res.value);
-    } else {
-      console.log(`[Scraper] ${SOURCES[i]}: 0 jobs (failed or empty)`);
-    }
-  });
-
-  if (allJobs.length === 0) {
-    console.log('[Scraper] No jobs from any source! Writing fallback seed data.');
-    const fallbackJobs = require('./seed.js');
-    allJobs = fallbackJobs();
+  // Fallback: Indeed API if Adzuna returns nothing
+  if (jobs.length === 0) {
+    console.log('[Scraper] Adzuna returned 0 jobs. Falling back to Indeed API...');
+    jobs = await fetchFromJobApi();
   }
 
-  const deduped = deduplicate(allJobs);
+  if (jobs.length === 0) {
+    console.log('[Scraper] No jobs from any source. Writing empty array.');
+    fs.writeFileSync(JOBS_FILE, JSON.stringify([], null, 2), 'utf-8');
+    return [];
+  }
+
+  const deduped = deduplicate(jobs);
   const finalJobs = shuffle(deduped);
 
-  // Add matchScore = 0 to all
   const withScore = finalJobs.map((j, idx) => ({
     ...j,
     id: j.id || `job-${Date.now()}-${idx}`,
-    matchScore: 0
+    matchScore: 0,
   }));
 
   const json = JSON.stringify(withScore, null, 2);
   fs.writeFileSync(JOBS_FILE, json, 'utf-8');
-  console.log(`[Scraper] Saved ${withScore.length} jobs to ${JOBS_FILE}`);
+  console.log(`[Scraper] Saved ${withScore.length} real jobs to ${JOBS_FILE}`);
 
   return withScore;
 }
