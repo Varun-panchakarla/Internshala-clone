@@ -16,7 +16,7 @@ const Sidebar = () => {
     { to: '/dashboard', label: 'Dashboard', icon: FiGrid },
     { to: '/jobs', label: 'Search Jobs', icon: FiBriefcase },
     { to: '/saved-jobs', label: 'Saved Jobs', icon: FiHeart, badge: savedJobs?.length },
-    { to: '/resume', label: 'ATS Resume Builder', icon: FiFileText, scoreBadge: atsScore },
+    { to: '/resume', label: 'Resume Builder', icon: FiFileText, scoreBadge: atsScore },
     { to: '/profile', label: 'My Profile', icon: FiUser, completenessBadge: profileCompletion },
   ];
 
