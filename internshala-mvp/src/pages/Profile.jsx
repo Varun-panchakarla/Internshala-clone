@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
-import { calculateProfileCompletion } from '../utils/atsScorer';
-import { FiUser, FiBookOpen, FiBriefcase, FiCheck, FiCpu, FiAward, FiEdit3 } from 'react-icons/fi';
+import { calculateProfileCompletion, calculateTextAtsScore, calculateAtsScore } from '../utils/atsScorer';
+import { extractTextFromPdf } from '../utils/pdfParser';
+import {
+  FiUser, FiBookOpen, FiBriefcase, FiCheck, FiCpu, FiAward,
+  FiUpload, FiFileText, FiX, FiExternalLink, FiAlertTriangle
+} from 'react-icons/fi';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import ProgressBar from '../components/common/ProgressBar';
@@ -10,9 +15,21 @@ import ProgressBar from '../components/common/ProgressBar';
 const Profile = () => {
   const { currentUser, updateProfile, profileCompletion } = useAuth();
   const { addToast } = useToast();
+  const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   const [activeTab, setActiveTab] = useState('personal');
   const [loading, setLoading] = useState(false);
+
+  // Check if user has a resume in the Resume Builder
+  const builtResume = (() => {
+    try {
+      const resumes = JSON.parse(localStorage.getItem('jobportal_user_resumes')) || {};
+      return resumes[currentUser?.id] || null;
+    } catch {
+      return null;
+    }
+  })();
 
   // Form State
   const [formData, setFormData] = useState({
@@ -25,7 +42,7 @@ const Profile = () => {
     preferredRole: '',
     preferredLocation: '',
     employmentType: '',
-    resumeUrl: ''
+    resumeInfo: null // { source: 'upload'|'builder', fileName, fileData?, fileType? }
   });
 
   const [errors, setErrors] = useState({});
@@ -43,7 +60,7 @@ const Profile = () => {
         preferredRole: currentUser.profileData.preferredRole || '',
         preferredLocation: currentUser.profileData.preferredLocation || '',
         employmentType: currentUser.profileData.employmentType || '',
-        resumeUrl: currentUser.profileData.resumeUrl || ''
+        resumeInfo: currentUser.profileData.resumeInfo || null
       });
     } else {
       setFormData({
@@ -56,7 +73,7 @@ const Profile = () => {
         preferredRole: '',
         preferredLocation: '',
         employmentType: 'Full-time',
-        resumeUrl: ''
+        resumeInfo: null
       });
     }
   }, [currentUser]);
@@ -119,11 +136,78 @@ const Profile = () => {
     }
   };
 
-  const handleMockResumeUpload = () => {
-    const mockFiles = ['my_professional_resume.pdf', 'cs_grad_resume_final.pdf', 'jane_doe_engineering.pdf'];
-    const selectedFile = mockFiles[Math.floor(Math.random() * mockFiles.length)];
-    handleInputChange('resumeUrl', selectedFile);
-    addToast(`Uploaded ${selectedFile} successfully!`, 'success');
+  const handleFileSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowedTypes.includes(file.type)) {
+      addToast('Please upload a PDF or DOCX file.', 'error');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      addToast('File size must be under 5 MB.', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64Data = event.target.result;
+      let atsResult = null;
+
+      if (file.type === 'application/pdf') {
+        const text = await extractTextFromPdf(base64Data);
+        if (text) {
+          const profileSkills = formData.skills
+            ? formData.skills.split(',').map(s => s.trim()).filter(Boolean)
+            : [];
+          atsResult = calculateTextAtsScore(text, profileSkills);
+        }
+      } else {
+        addToast('ATS analysis supports PDF files. DOCX uploaded but cannot be analyzed.', 'warning');
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        resumeInfo: {
+          source: 'upload',
+          fileName: file.name,
+          fileData: base64Data,
+          fileType: file.type,
+          atsScore: atsResult?.score ?? null,
+          atsSuggestions: atsResult?.suggestions ?? []
+        }
+      }));
+
+      if (atsResult) {
+        addToast(`Uploaded ${file.name}. ATS Score: ${atsResult.score}/100`, atsResult.score >= 70 ? 'success' : 'warning');
+      } else {
+        addToast(`Uploaded ${file.name} successfully!`, 'success');
+      }
+    };
+    reader.readAsDataURL(file);
+
+    e.target.value = '';
+  };
+
+  const handleUseBuilderResume = () => {
+    const builderScore = builtResume ? calculateAtsScore(builtResume) : null;
+    setFormData(prev => ({
+      ...prev,
+      resumeInfo: {
+        source: 'builder',
+        fileName: 'IncuXAI Resume Builder',
+        builderId: currentUser?.id,
+        atsScore: builderScore?.score ?? null,
+        atsSuggestions: builderScore?.suggestions ?? []
+      }
+    }));
+    addToast(builderScore ? `Platform resume linked. ATS Score: ${builderScore.score}/100` : 'Platform resume linked to your profile.', 'success');
+  };
+
+  const handleRemoveResume = () => {
+    setFormData(prev => ({ ...prev, resumeInfo: null }));
   };
 
   const experienceOptions = ['Fresher', '1-3 years', '3+ years', '5+ years'];
@@ -233,18 +317,60 @@ const Profile = () => {
                 />
 
                 <div className="flex flex-col gap-1.5 w-full">
-                  <span className="text-xs font-semibold text-slate-600">Resume Upload</span>
-                  <div className="flex items-center gap-3">
-                    <Button variant="outline" className="w-full shrink-0 flex items-center justify-center gap-2 py-2.5 border-dashed" onClick={handleMockResumeUpload}>
-                      Simulate Resume Upload
-                    </Button>
-                  </div>
-                  {formData.resumeUrl ? (
-                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-1.5 mt-1">
-                      <FiCheck /> Attached: {formData.resumeUrl}
-                    </span>
+                  <span className="text-xs font-semibold text-slate-600">Resume</span>
+
+                  {formData.resumeInfo ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2.5 max-w-sm">
+                        <FiFileText className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-semibold text-emerald-800 flex-1 truncate">
+                          {formData.resumeInfo.fileName}
+                        </span>
+                        {formData.resumeInfo.source === 'builder' && (
+                          <Link to="/resume" className="text-emerald-600 hover:text-emerald-700">
+                            <FiExternalLink className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
+                        <button type="button" onClick={handleRemoveResume} className="text-emerald-400 hover:text-rose-500">
+                          <FiX className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      {formData.resumeInfo.atsScore !== null && formData.resumeInfo.atsScore !== undefined && (
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className={`text-xs font-bold px-2 py-1 rounded ${
+                            formData.resumeInfo.atsScore >= 70 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                          }`}>
+                            ATS Score: {formData.resumeInfo.atsScore}/100
+                          </span>
+                          {formData.resumeInfo.atsScore < 70 && (
+                            <Link to="/resume" className="text-xs font-bold text-brand-600 hover:text-brand-700 underline flex items-center gap-1">
+                              <FiAlertTriangle className="w-3 h-3" /> Improve with Resume Builder
+                            </Link>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   ) : (
-                    <span className="text-xs text-slate-400 italic">No resume uploaded yet (optional).</span>
+                    <>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Button type="button" variant="outline" className="shrink-0 flex items-center gap-2 py-2.5 border-dashed" onClick={() => fileInputRef.current?.click()}>
+                          <FiUpload className="w-4 h-4" /> Upload Resume
+                        </Button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                        {builtResume && (
+                          <Button type="button" variant="outline" className="shrink-0 flex items-center gap-2 py-2.5" onClick={handleUseBuilderResume}>
+                            <FiFileText className="w-4 h-4" /> Use Resume from Builder
+                          </Button>
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-400 italic">Upload a PDF/DOCX or use your platform-built resume.</span>
+                    </>
                   )}
                 </div>
               </div>
@@ -484,16 +610,60 @@ const Profile = () => {
                 <span className="text-[10px] -mt-2 text-slate-400 font-medium">Type your skills separated by commas (e.g. React, CSS, Node.js).</span>
                 
                 <div className="flex flex-col gap-1.5 mt-2">
-                  <span className="text-xs font-semibold text-slate-600">Attached Resume File</span>
-                  <div className="flex items-center gap-3">
-                    <Button variant="outline" className="flex items-center justify-center gap-2 py-2 border-dashed flex-1" onClick={handleMockResumeUpload}>
-                      Upload Different Resume
-                    </Button>
-                  </div>
-                  {formData.resumeUrl && (
-                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-1.5 mt-1 bg-emerald-50 p-2.5 rounded-xl border border-emerald-100 w-full max-w-sm">
-                      <FiCheck /> Attached: {formData.resumeUrl}
-                    </span>
+                  <span className="text-xs font-semibold text-slate-600">Resume</span>
+
+                  {formData.resumeInfo ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2.5 max-w-sm">
+                        <FiFileText className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="text-xs font-semibold text-emerald-800 flex-1 truncate">
+                          {formData.resumeInfo.fileName}
+                        </span>
+                        {formData.resumeInfo.source === 'builder' && (
+                          <Link to="/resume" className="text-emerald-600 hover:text-emerald-700">
+                            <FiExternalLink className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
+                        <button type="button" onClick={handleRemoveResume} className="text-emerald-400 hover:text-rose-500">
+                          <FiX className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      {formData.resumeInfo.atsScore !== null && formData.resumeInfo.atsScore !== undefined && (
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className={`text-xs font-bold px-2 py-1 rounded ${
+                            formData.resumeInfo.atsScore >= 70 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                          }`}>
+                            ATS Score: {formData.resumeInfo.atsScore}/100
+                          </span>
+                          {formData.resumeInfo.atsScore < 70 && (
+                            <Link to="/resume" className="text-xs font-bold text-brand-600 hover:text-brand-700 underline flex items-center gap-1">
+                              <FiAlertTriangle className="w-3 h-3" /> Improve with Resume Builder
+                            </Link>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Button type="button" variant="outline" className="flex items-center gap-2 py-2 border-dashed" onClick={() => fileInputRef.current?.click()}>
+                          <FiUpload className="w-4 h-4" /> Upload Resume
+                        </Button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                        {builtResume && (
+                          <Button type="button" variant="outline" className="flex items-center gap-2 py-2" onClick={handleUseBuilderResume}>
+                            <FiFileText className="w-4 h-4" /> Use Resume from Builder
+                          </Button>
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-400 italic">Upload a PDF/DOCX or use your platform-built resume.</span>
+                    </>
                   )}
                 </div>
               </div>
