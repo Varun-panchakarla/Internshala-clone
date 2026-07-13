@@ -287,7 +287,7 @@ const JobDetails = () => {
               <span className="font-extrabold text-slate-800 text-right">{currentUser?.profileData?.fullName || currentUser?.name}</span>
 
               <span className="font-bold text-slate-500">Attached Resume:</span>
-              <span className="font-extrabold text-emerald-600 text-right">{currentUser?.profileData?.resumeUrl || 'Online Profile Resume'}</span>
+              <span className="font-extrabold text-emerald-600 text-right">{currentUser?.profileData?.resumeInfo?.fileName || 'Online Profile Resume'}</span>
             </div>
           </div>
         </div>
