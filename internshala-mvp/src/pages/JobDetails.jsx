@@ -64,6 +64,10 @@ const JobDetails = () => {
       navigate('/login');
       return;
     }
+    if (job.redirect_url) {
+      window.open(job.redirect_url, '_blank', 'noopener,noreferrer');
+      return;
+    }
     setApplyModalOpen(true);
   };
 
@@ -241,7 +245,7 @@ const JobDetails = () => {
             disabled={isApplied}
             onClick={handleApplyClick}
           >
-            {isApplied ? 'Application Submitted' : 'Apply Now'}
+            {isApplied ? 'Application Submitted' : job.redirect_url ? `Apply on ${job.source === 'adzuna' ? 'Adzuna' : 'Indeed'}` : 'Apply Now'}
           </Button>
         </div>
       </div>
