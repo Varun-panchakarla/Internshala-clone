@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
-import { FiMail, FiLock, FiUser, FiChevronRight, FiCheckCircle } from 'react-icons/fi';
+import { FiMail, FiLock, FiUser, FiChevronRight, FiCheckCircle, FiArrowLeft } from 'react-icons/fi';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import GoogleSignInModal from '../components/common/GoogleSignInModal';
@@ -11,6 +11,14 @@ const Register = () => {
   const { register, googleLogin } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
+
+  const handleBackClick = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -131,6 +139,15 @@ const Register = () => {
 
       {/* Right Column: Register Form Card */}
       <div className="lg:col-span-5 flex items-center justify-center p-8 bg-white shadow-xl relative z-10">
+        
+        {/* Back Button */}
+        <button
+          onClick={handleBackClick}
+          className="absolute top-6 left-6 flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-650 transition-colors focus:outline-none cursor-pointer"
+        >
+          <FiArrowLeft className="w-4 h-4" />
+          <span>Back</span>
+        </button>
         <div className="max-w-md w-full flex flex-col gap-6">
           
           {/* Logo Title (Mobile only) */}
