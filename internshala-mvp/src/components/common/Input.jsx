@@ -15,21 +15,21 @@ const Input = ({
   options = [], // For select dropdown
   icon: Icon
 }) => {
-  const baseInputStyle = `w-full px-4 py-2.5 rounded-xl border bg-white text-slate-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 disabled:bg-slate-50 disabled:text-slate-400 text-sm ${
-    error ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500' : 'border-slate-200'
+  const baseInputStyle = `w-full px-4 py-2.5 rounded-xl border bg-white text-slate-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 disabled:bg-slate-50 disabled:text-slate-400 text-sm dark:bg-gray-800 dark:text-slate-100 dark:disabled:bg-gray-700 dark:disabled:text-slate-500 ${
+    error ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500 dark:border-rose-700' : 'border-slate-200 dark:border-slate-600'
   } ${Icon ? 'pl-10' : ''}`;
 
   return (
     <div className={`flex flex-col gap-1.5 w-full ${className}`}>
       {label && (
-        <label htmlFor={id} className="text-xs font-semibold text-slate-600 flex items-center">
+        <label htmlFor={id} className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center">
           {label}
           {required && <span className="text-rose-500 ml-0.5">*</span>}
         </label>
       )}
       <div className="relative flex items-center">
         {Icon && (
-          <div className="absolute left-3.5 text-slate-400 pointer-events-none">
+          <div className="absolute left-3.5 text-slate-400 dark:text-slate-500 pointer-events-none">
             <Icon className="w-4 h-4" />
           </div>
         )}
@@ -71,7 +71,7 @@ const Input = ({
           />
         )}
       </div>
-      {error && <span className="text-xs text-rose-500 font-medium mt-0.5">{error}</span>}
+      {error && <span className="text-xs text-rose-500 dark:text-rose-400 font-medium mt-0.5">{error}</span>}
     </div>
   );
 };
