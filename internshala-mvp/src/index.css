@@ -156,7 +156,6 @@ html.dark .text-slate-700:not(#resume-preview):not(#resume-preview *) {
 }
 
 html.dark .text-slate-600:not(#resume-preview):not(#resume-preview *),
-html.dark .text-slate-505:not(#resume-preview):not(#resume-preview *),
 html.dark .text-slate-500:not(#resume-preview):not(#resume-preview *) {
   color: #9ca3af !important;
 }
@@ -165,9 +164,96 @@ html.dark .text-slate-400:not(#resume-preview):not(#resume-preview *) {
   color: #6b7280 !important;
 }
 
+/* Toast notification backgrounds — darker variants for dark mode */
+html.dark .bg-emerald-50:not(#resume-preview):not(#resume-preview *) {
+  background-color: #022c22 !important;
+}
+html.dark .text-emerald-800:not(#resume-preview):not(#resume-preview *) {
+  color: #6ee7b7 !important;
+}
+html.dark .text-emerald-500:not(#resume-preview):not(#resume-preview *) {
+  color: #34d399 !important;
+}
+html.dark .border-emerald-100:not(#resume-preview):not(#resume-preview *) {
+  border-color: #065f46 !important;
+}
+
+html.dark .bg-rose-50:not(#resume-preview):not(#resume-preview *) {
+  background-color: #4c0519 !important;
+}
+html.dark .text-rose-800:not(#resume-preview):not(#resume-preview *) {
+  color: #fda4af !important;
+}
+html.dark .text-rose-500:not(#resume-preview):not(#resume-preview *) {
+  color: #fb7185 !important;
+}
+html.dark .border-rose-100:not(#resume-preview):not(#resume-preview *) {
+  border-color: #9f1239 !important;
+}
+
+html.dark .bg-blue-50:not(#resume-preview):not(#resume-preview *) {
+  background-color: #172554 !important;
+}
+html.dark .text-blue-800:not(#resume-preview):not(#resume-preview *) {
+  color: #93c5fd !important;
+}
+html.dark .text-blue-500:not(#resume-preview):not(#resume-preview *) {
+  color: #60a5fa !important;
+}
+html.dark .border-blue-100:not(#resume-preview):not(#resume-preview *) {
+  border-color: #1e3a5f !important;
+}
+
+/* Shadow overrides for dark mode — darker shadows */
+html.dark .shadow-sm:not(#resume-preview):not(#resume-preview *),
+html.dark .shadow:not(#resume-preview):not(#resume-preview *),
+html.dark .shadow-md:not(#resume-preview):not(#resume-preview *),
+html.dark .shadow-lg:not(#resume-preview):not(#resume-preview *),
+html.dark .shadow-xl:not(#resume-preview):not(#resume-preview *) {
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.4) !important;
+}
+
+/* Ring color overrides */
+html.dark .ring-slate-100:not(#resume-preview):not(#resume-preview *) {
+  --tw-ring-color: #1f2937 !important;
+}
+
+/* bg-slate-200 override */
+html.dark .bg-slate-200:not(#resume-preview):not(#resume-preview *) {
+  background-color: #374151 !important;
+}
+
+/* Border-rose-300 for error inputs */
+html.dark .border-rose-300:not(#resume-preview):not(#resume-preview *) {
+  border-color: #be123c !important;
+}
+
+/* Slate-950 text (very dark, needs light text) */
+html.dark .text-slate-950:not(#resume-preview):not(#resume-preview *) {
+  color: #f9fafb !important;
+}
+
+/* Disabled input state */
+html.dark .disabled\:bg-slate-50:not(#resume-preview):not(#resume-preview *):disabled,
+html.dark .disabled\:text-slate-400:not(#resume-preview):not(#resume-preview *):disabled {
+  background-color: #1f2937 !important;
+  color: #6b7280 !important;
+}
+
 /* Form input options and dropdowns */
 html.dark option {
   background-color: #111827;
   color: #f3f4f6;
+}
+
+/* Dark mode scrollbar */
+html.dark ::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
 }
 

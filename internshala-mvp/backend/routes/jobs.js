@@ -19,7 +19,7 @@ router.get('/', (req, res) => {
   const jobs = loadJobs();
 
   const {
-    search, location, experience, employmentType, role, skills
+    search, location, experience, employmentType, role, skills, company, salaryRange
   } = req.query;
 
   let filtered = [...jobs];
@@ -63,6 +63,27 @@ router.get('/', (req, res) => {
     filtered = filtered.filter(j =>
       skillList.every(s => j.skills.map(x => x.toLowerCase()).includes(s))
     );
+  }
+
+  if (company) {
+    const c = company.toLowerCase();
+    filtered = filtered.filter(j => j.company?.toLowerCase().includes(c));
+  }
+
+  if (salaryRange) {
+    filtered = filtered.filter(j => {
+      if (!j.salary || j.salary === 'Undisclosed') return false;
+      const nums = [...j.salary.matchAll(/₹?(\d+\.?\d*)L/g)].map(m => parseFloat(m[1]));
+      if (nums.length === 0) return false;
+      const avg = (nums[0] + (nums[1] || nums[0])) / 2;
+      switch (salaryRange) {
+        case 'below-3': return avg < 3;
+        case '3-6': return avg >= 3 && avg <= 6;
+        case '6-12': return avg > 6 && avg <= 12;
+        case 'above-12': return avg > 12;
+        default: return true;
+      }
+    });
   }
 
   res.json({ data: filtered, total: filtered.length });
