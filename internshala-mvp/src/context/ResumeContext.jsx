@@ -56,6 +56,12 @@ export const ResumeProvider = ({ children }) => {
       return { ...prev, experience };
     });
   };
+  const updateInternship = (internship) => {
+  setResume(prev => {
+    if (!prev) return null;
+    return { ...prev, internship };
+  });
+};
 
   const updateProjects = (projects) => {
     setResume(prev => {
@@ -63,6 +69,12 @@ export const ResumeProvider = ({ children }) => {
       return { ...prev, projects };
     });
   };
+  const updateCertifications = (certifications) => {
+  setResume(prev => {
+    if (!prev) return null;
+    return { ...prev, certifications };
+  });
+};
 
   const updateSkills = (skills) => {
     setResume(prev => {
@@ -159,7 +171,9 @@ console.log("Resume Completion:", resumeCompletion);
     updatePersonalInfo,
     updateEducation,
     updateExperience,
+    updateInternship,
     updateProjects,
+    updateCertifications,
     updateSkills,
     saveResume,
     refreshResume: fetchResume

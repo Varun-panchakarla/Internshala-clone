@@ -11,20 +11,22 @@ import Modal from '../components/common/Modal';
 
 const ResumeBuilder = () => {
   const {
-    resume,
-    loading,
-    saving,
-    resumeCompletion,
-    atsScore,
-    atsSuggestions,
-    atsBreakdown,
-    updatePersonalInfo,
-    updateEducation,
-    updateExperience,
-    updateProjects,
-    updateSkills,
-    saveResume
-  } = useResume();
+  resume,
+  loading,
+  saving,
+  resumeCompletion,
+  atsScore,
+  atsSuggestions,
+  atsBreakdown,
+  updatePersonalInfo,
+  updateEducation,
+  updateExperience,
+  updateInternship,
+  updateProjects,
+  updateCertifications,
+  updateSkills,
+  saveResume
+} = useResume();
 
   const { addToast } = useToast();
 
@@ -115,6 +117,63 @@ const ResumeBuilder = () => {
     updateProjects(updated);
     addToast('Project entry removed.', 'info');
   };
+  const handleInternshipChange = (index, field, val) => {
+  const updated = [...(resume.internship || [])];
+  updated[index][field] = val;
+  updateInternship(updated);
+};
+
+const addInternship = () => {
+  const updated = [
+    ...(resume.internship || []),
+    {
+      company: "",
+      role: "",
+      duration: "",
+      description: "",
+    },
+  ];
+
+  updateInternship(updated);
+  addToast("New internship added.", "info");
+};
+
+const removeInternship = (index) => {
+  const updated = (resume.internship || []).filter(
+    (_, i) => i !== index
+  );
+
+  updateInternship(updated);
+  addToast("Internship removed.", "info");
+};
+  const handleCertificationChange = (index, field, val) => {
+  const updated = [...(resume.certifications || [])];
+  updated[index][field] = val;
+  updateCertifications(updated);
+};
+
+const addCertification = () => {
+  const updated = [
+    ...(resume.certifications || []),
+    {
+      name: "",
+      organization: "",
+      year: "",
+    },
+  ];
+
+  updateCertifications(updated);
+  addToast("New certification added.", "info");
+};
+
+const removeCertification = (index) => {
+  const updated = (resume.certifications || []).filter(
+    (_, i) => i !== index
+  );
+
+  updateCertifications(updated);
+  addToast("Certification removed.", "info");
+};
 
   // Skills change
   const handleSkillsInputChange = (e) => {
@@ -174,13 +233,15 @@ addToast("Resume downloaded successfully!", "success");
   }
 };
 
-  const accordionHeaders = [
-    { id: 'personal', label: '1. Personal Information', icon: FiUser },
-    { id: 'education', label: '2. Education Details', icon: FiBookOpen },
-    { id: 'experience', label: '3. Professional Experience', icon: FiBriefcase },
-    { id: 'projects', label: '4. Project Experience', icon: FiCode },
-    { id: 'skills', label: '5. Skills Inventory', icon: FiAward },
-  ];
+ const accordionHeaders = [
+  { id: 'personal', label: '1. Personal Information', icon: FiUser },
+  { id: 'education', label: '2. Education Details', icon: FiBookOpen },
+  { id: 'experience', label: '3. Professional Experience', icon: FiBriefcase },
+  { id: 'skills', label: '4. Skills Inventory', icon: FiAward },
+  { id: 'internship', label: '5. Internship', icon: FiBriefcase },
+  { id: 'projects', label: '6. Project Experience', icon: FiCode },
+  { id: 'certifications', label: '7. Certifications', icon: FiAward },
+];
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start w-full animate-slide-up">
@@ -321,6 +382,21 @@ addToast("Resume downloaded successfully!", "success");
                             onChange={(e) => handlePersonalChange('website', e.target.value)}
                           />
                         </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            label="LinkedIn"
+                            id="resLinkedIn"
+                            value={resume.personalInfo.linkedin || ""}
+                            onChange={(e) => handlePersonalChange("linkedin", e.target.value)}
+                          />
+
+                          <Input
+                            label="GitHub"
+                            id="resGithub"
+                            value={resume.personalInfo.github || ""}
+                            onChange={(e) => handlePersonalChange("github", e.target.value)}
+                          />
+                       </div>
                         <Input
                           label="Professional Summary"
                           id="resSum"
@@ -534,13 +610,15 @@ addToast("Resume downloaded successfully!", "success");
               {resume.personalInfo.phone && <span>• {resume.personalInfo.phone}</span>}
               {resume.personalInfo.location && <span>• {resume.personalInfo.location}</span>}
               {resume.personalInfo.website && <span>• {resume.personalInfo.website}</span>}
+              {resume.personalInfo.linkedin && <span>• {resume.personalInfo.linkedin}</span>}
+              {resume.personalInfo.github && <span>• {resume.personalInfo.github}</span>}
             </div>
           </div>
 
           {/* Professional Summary */}
           {resume.personalInfo.summary && (
             <div className="flex flex-col gap-1">
-              <h2 className="text-[10px] font-extrabold uppercase text-slate-900 border-b border-slate-200 pb-0.5 tracking-wider">Professional Summary</h2>
+              <h2 className="text-[10px] font-extrabold uppercase text-slate-900 border-b border-slate-200 pb-0.5 tracking-wider">PROFESSIONAL SUMMARY</h2>
               <p className="text-slate-600 text-justify text-[9px] leading-relaxed font-light mt-0.5">{resume.personalInfo.summary}</p>
             </div>
           )}
@@ -548,7 +626,7 @@ addToast("Resume downloaded successfully!", "success");
           {/* Education Details list */}
           {resume.education && resume.education.length > 0 && (
             <div className="flex flex-col gap-2">
-              <h2 className="text-[10px] font-extrabold uppercase text-slate-900 border-b border-slate-200 pb-0.5 tracking-wider">Education</h2>
+              <h2 className="text-[10px] font-extrabold uppercase text-slate-900 border-b border-slate-200 pb-0.5 tracking-wider">EDUCATION</h2>
               <div className="flex flex-col gap-2">
                 {resume.education.map((edu, i) => (
                   <div key={i} className="flex justify-between items-start">
@@ -614,7 +692,7 @@ addToast("Resume downloaded successfully!", "success");
           {/* Skills details pills */}
           {resume.skills && resume.skills.length > 0 && (
             <div className="flex flex-col gap-1.5">
-              <h2 className="text-[10px] font-extrabold uppercase text-slate-900 border-b border-slate-200 pb-0.5 tracking-wider">Key Skills</h2>
+              <h2 className="text-[10px] font-extrabold uppercase text-slate-900 border-b border-slate-200 pb-0.5 tracking-wider">SKILLS</h2>
               <p className="text-slate-600 font-medium leading-relaxed leading-snug mt-0.5">
                 {resume.skills.join(' • ')}
               </p>
