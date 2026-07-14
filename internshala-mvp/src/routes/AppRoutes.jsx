@@ -15,6 +15,7 @@ import Profile from '../pages/Profile';
 import LandingPage from '../pages/LandingPage';
 import ForgotPassword from '../pages/ForgotPassword';
 import ManageAccount from '../pages/ManageAccount';
+import TermsPage from '../pages/TermsPage';
 import MainLayout from '../layouts/MainLayout';
 
 // Protected Route Wrapper
@@ -80,6 +81,14 @@ const AppRoutes = () => {
         element={
           <PublicRoute useLayout={false}>
             <ForgotPassword />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/terms"
+        element={
+          <PublicRoute useLayout={true}>
+            <TermsPage />
           </PublicRoute>
         }
       />
