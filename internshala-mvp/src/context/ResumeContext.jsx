@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { resumeService } from '../services/mockApi';
 import { useAuth } from './AuthContext';
-import { calculateAtsScore } from '../utils/atsScorer';
+import { calculateAtsScore, calculateResumeCompletion } from '../utils/atsScorer';
 
 const ResumeContext = createContext();
 
@@ -33,54 +33,37 @@ export const ResumeProvider = ({ children }) => {
     fetchResume();
   }, [isAuthenticated, currentUser?.id]);
 
+  // ─── Update Handlers ────────────────────────────────────────────────────────
+
   const updatePersonalInfo = (info) => {
     setResume(prev => {
       if (!prev) return null;
-      return {
-        ...prev,
-        personalInfo: { ...prev.personalInfo, ...info }
-      };
+      return { ...prev, personalInfo: { ...prev.personalInfo, ...info } };
     });
   };
 
   const updateEducation = (education) => {
-    setResume(prev => {
-      if (!prev) return null;
-      return { ...prev, education };
-    });
+    setResume(prev => (prev ? { ...prev, education } : null));
   };
 
   const updateExperience = (experience) => {
-    setResume(prev => {
-      if (!prev) return null;
-      return { ...prev, experience };
-    });
+    setResume(prev => (prev ? { ...prev, experience } : null));
   };
+
   const updateInternship = (internship) => {
-  setResume(prev => {
-    if (!prev) return null;
-    return { ...prev, internship };
-  });
-};
+    setResume(prev => (prev ? { ...prev, internship } : null));
+  };
 
   const updateProjects = (projects) => {
-    setResume(prev => {
-      if (!prev) return null;
-      return { ...prev, projects };
-    });
+    setResume(prev => (prev ? { ...prev, projects } : null));
   };
+
   const updateCertifications = (certifications) => {
-  setResume(prev => {
-    if (!prev) return null;
-    return { ...prev, certifications };
-  });
-};
+    setResume(prev => (prev ? { ...prev, certifications } : null));
+  };
 
   const updateSkills = (skills) => {
-    setResume(prev => {
-      if (!prev) return null;
-      return { ...prev, skills };
-    });
+    setResume(prev => (prev ? { ...prev, skills } : null));
   };
 
   const saveResume = async (customData = null) => {
@@ -98,65 +81,13 @@ export const ResumeProvider = ({ children }) => {
       setSaving(false);
     }
   };
-// Calculate Resume Completion Percentage
-const calculateResumeCompletion = (resume) => {
-  if (!resume) return 0;
 
-  let score = 0;
+  // ─── Derived Values ─────────────────────────────────────────────────────────
 
-  // Personal Information (20%)
-  const personal = resume.personalInfo || {};
-  if (
-    personal.fullName &&
-    personal.email &&
-    personal.phone &&
-    personal.location
-  ) {
-    score += 20;
-  }
+  // Profile Completion — separate from ATS Score
+  const resumeCompletion = calculateResumeCompletion(resume);
 
-  // Education (20%)
-  if (
-    resume.education?.length > 0 &&
-    resume.education[0].institution &&
-    resume.education[0].degree
-  ) {
-    score += 20;
-  }
-
-  // Experience (20%)
-  if (
-    resume.experience?.length > 0 &&
-    resume.experience[0].role &&
-    resume.experience[0].company
-  ) {
-    score += 20;
-  }
-
-  // Projects (15%)
-  if (
-    resume.projects?.length > 0 &&
-    resume.projects[0].title
-  ) {
-    score += 15;
-  }
-
-  // Skills (15%)
-  if (resume.skills?.length > 0) {
-    score += 15;
-  }
-
-  // Professional Summary (10%)
-  if (personal.summary && personal.summary.length > 30) {
-    score += 10;
-  }
-
-  return score;
-};
-
-const resumeCompletion = calculateResumeCompletion(resume);
-console.log("Resume Completion:", resumeCompletion);
-  // Derive ATS score results
+  // ATS Score — evaluates content quality for ATS parsers
   const atsResults = calculateAtsScore(resume);
 
   const value = {
@@ -176,7 +107,7 @@ console.log("Resume Completion:", resumeCompletion);
     updateCertifications,
     updateSkills,
     saveResume,
-    refreshResume: fetchResume
+    refreshResume: fetchResume,
   };
 
   return <ResumeContext.Provider value={value}>{children}</ResumeContext.Provider>;
