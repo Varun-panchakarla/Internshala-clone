@@ -1,6 +1,10 @@
 import React from 'react';
 
 const TermsPage = () => {
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="max-w-6xl mx-auto w-full animate-slide-up py-12 px-6 sm:px-8">
       {/* Title */}

@@ -16,6 +16,8 @@ import LandingPage from '../pages/LandingPage';
 import ForgotPassword from '../pages/ForgotPassword';
 import ManageAccount from '../pages/ManageAccount';
 import TermsPage from '../pages/TermsPage';
+import HelpCentre from '../pages/HelpCentre';
+import ReportIssue from '../pages/ReportIssue';
 import MainLayout from '../layouts/MainLayout';
 
 // Protected Route Wrapper
@@ -89,6 +91,22 @@ const AppRoutes = () => {
         element={
           <PublicRoute useLayout={true}>
             <TermsPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/help-center"
+        element={
+          <PublicRoute useLayout={true}>
+            <HelpCentre />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/report-issue"
+        element={
+          <PublicRoute useLayout={true}>
+            <ReportIssue />
           </PublicRoute>
         }
       />

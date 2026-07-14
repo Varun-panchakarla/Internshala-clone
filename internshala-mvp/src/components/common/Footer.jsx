@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from './Toast';
 import { FiLinkedin, FiInstagram, FiTwitter } from 'react-icons/fi';
@@ -8,6 +8,7 @@ const Footer = () => {
   const { isAuthenticated } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleProtectedClick = (e, targetPath, label) => {
     e.preventDefault();
@@ -61,9 +62,8 @@ const Footer = () => {
             <ul className="flex flex-col gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
               <li><a href="#" className="hover:text-brand-600 transition-colors">Privacy Policy</a></li>
               <li><Link to="/terms" className="hover:text-brand-600 transition-colors">Terms & Conditions</Link></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">FAQ</a></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Report an Issue</a></li>
+              <li><Link to="/help-center" onClick={() => { if (location.pathname === '/help-center') window.scrollTo(0, 0); }} className="hover:text-brand-600 transition-colors">Help Center</Link></li>
+              <li><Link to="/report-issue" onClick={() => { if (location.pathname === '/report-issue') window.scrollTo(0, 0); }} className="hover:text-brand-600 transition-colors">Report an Issue</Link></li>
             </ul>
           </div>
 
