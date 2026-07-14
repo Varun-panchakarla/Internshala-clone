@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useJobs } from '../context/JobContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
@@ -28,6 +28,18 @@ const JobsPage = () => {
   const navigate = useNavigate();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state && location.state.filterType) {
+      setFilters(prev => ({
+        ...prev,
+        employmentType: location.state.filterType
+      }));
+      // Clear location state so it doesn't persist on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, setFilters]);
 
   const handleSaveToggle = async (e, jobId) => {
     e.stopPropagation();

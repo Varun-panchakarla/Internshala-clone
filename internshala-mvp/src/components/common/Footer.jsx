@@ -1,7 +1,29 @@
 import React from 'react';
-import { FiGithub, FiLinkedin, FiInstagram, FiTwitter, FiYoutube } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from './Toast';
+import { FiLinkedin, FiInstagram, FiTwitter } from 'react-icons/fi';
 
 const Footer = () => {
+  const { isAuthenticated } = useAuth();
+  const { addToast } = useToast();
+  const navigate = useNavigate();
+
+  const handleProtectedClick = (e, targetPath, label) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      addToast(`Please login to access ${label}.`, 'info');
+      navigate('/login');
+    } else {
+      if (targetPath) {
+        navigate(targetPath);
+      } else {
+        addToast(`${label} settings are managed from your dashboard.`, 'success');
+        navigate('/dashboard');
+      }
+    }
+  };
+
   return (
     <footer className="w-full bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 pt-12 pb-8 px-6 sm:px-8 mt-auto transition-colors">
       <div className="max-w-7xl mx-auto flex flex-col gap-10">
@@ -25,11 +47,11 @@ const Footer = () => {
           <div className="flex flex-col gap-3">
             <h4 className="text-xs font-black uppercase text-slate-850 dark:text-white tracking-wider">Platform</h4>
             <ul className="flex flex-col gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Browse Jobs</a></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Browse Internships</a></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Resume Builder</a></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Dashboard</a></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Job Alerts</a></li>
+              <li><Link to="/jobs" className="hover:text-brand-600 transition-colors">Browse Jobs</Link></li>
+              <li><Link to="/jobs" state={{ filterType: 'Internship' }} className="hover:text-brand-600 transition-colors">Browse Internships</Link></li>
+              <li><a href="#" onClick={(e) => handleProtectedClick(e, '/resume', 'Resume Builder')} className="hover:text-brand-600 transition-colors">Resume Builder</a></li>
+              <li><a href="#" onClick={(e) => handleProtectedClick(e, '/dashboard', 'Dashboard')} className="hover:text-brand-600 transition-colors">Dashboard</a></li>
+              <li><a href="#" onClick={(e) => handleProtectedClick(e, null, 'Job Alerts')} className="hover:text-brand-600 transition-colors">Job Alerts</a></li>
             </ul>
           </div>
 
@@ -38,7 +60,7 @@ const Footer = () => {
             <h4 className="text-xs font-black uppercase text-slate-850 dark:text-white tracking-wider">Support</h4>
             <ul className="flex flex-col gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
               <li><a href="#" className="hover:text-brand-600 transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Terms & Conditions</a></li>
+              <li><Link to="/terms" className="hover:text-brand-600 transition-colors">Terms & Conditions</Link></li>
               <li><a href="#" className="hover:text-brand-600 transition-colors">Help Center</a></li>
               <li><a href="#" className="hover:text-brand-600 transition-colors">FAQ</a></li>
               <li><a href="#" className="hover:text-brand-600 transition-colors">Report an Issue</a></li>
@@ -64,23 +86,9 @@ const Footer = () => {
           
           {/* Left: Social media icons */}
           <div className="flex items-center gap-4 text-slate-400 dark:text-slate-500">
-            <a href="#" className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors" title="GitHub"><FiGithub className="w-5 h-5" /></a>
             <a href="#" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors" title="LinkedIn"><FiLinkedin className="w-5 h-5" /></a>
             <a href="#" className="hover:text-rose-500 transition-colors" title="Instagram"><FiInstagram className="w-5 h-5" /></a>
             <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors" title="X (Twitter)"><FiTwitter className="w-5 h-5" /></a>
-            <a href="#" className="hover:text-red-600 transition-colors" title="YouTube"><FiYoutube className="w-5 h-5" /></a>
-          </div>
-
-          {/* Center: Stay Connected Links */}
-          <div className="flex flex-col items-center gap-1.5 text-center">
-            <h4 className="text-[10px] font-black uppercase text-slate-450 dark:text-slate-500 tracking-widest">Stay Connected</h4>
-            <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 font-semibold">
-              <a href="#" className="hover:text-brand-600 transition-colors">LinkedIn</a>
-              <span className="text-slate-200 dark:text-slate-800 font-light">•</span>
-              <a href="#" className="hover:text-indigo-500 transition-colors">Discord</a>
-              <span className="text-slate-200 dark:text-slate-800 font-light">•</span>
-              <a href="#" className="hover:text-emerald-500 transition-colors">Email Newsletter</a>
-            </div>
           </div>
 
           {/* Right: Copyrights Statement */}
