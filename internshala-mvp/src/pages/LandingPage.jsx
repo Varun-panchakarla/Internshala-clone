@@ -171,16 +171,6 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-slate-950 transition-colors duration-300">
-      {/* Top black bar */}
-      <div className="bg-slate-900 text-white text-[11px] py-2 px-4 flex items-center justify-between">
-        <span className="font-semibold">India's #1 platform for internships, jobs &amp; skill development</span>
-        <span className="flex items-center gap-2">
-          <span className="text-yellow-400">4.4</span>
-          <span className="text-slate-400">42K Reviews</span>
-          <span className="ml-1 hidden sm:inline"> | 50L+ Downloads</span>
-        </span>
-      </div>
-
       <Navbar />
 
       {/* Hero Section - Matching Internshala's style */}

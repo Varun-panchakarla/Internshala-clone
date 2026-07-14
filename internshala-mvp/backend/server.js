@@ -41,12 +41,8 @@ async function initJobs() {
       await scrapeAll();
     } catch (err) {
       console.error('[Server] Initial scrape failed:', err.message);
-      // Use seed data as fallback
-      const seedJobs = require('./scraper/seed.js');
-      const jobs = seedJobs();
-      const withScore = jobs.map((j, idx) => ({ ...j, id: j.id || `job-${Date.now()}-${idx}`, matchScore: 0 }));
-      fs.writeFileSync(JOBS_FILE, JSON.stringify(withScore, null, 2), 'utf-8');
-      console.log(`[Server] Wrote ${withScore.length} seed jobs.`);
+      console.log('[Server] No seed data fallback — only real jobs will be shown.');
+      fs.writeFileSync(JOBS_FILE, JSON.stringify([], null, 2), 'utf-8');
     }
   } else {
     console.log(`[Server] jobs.json exists with ${JSON.parse(fs.readFileSync(JOBS_FILE, 'utf-8')).length} jobs.`);

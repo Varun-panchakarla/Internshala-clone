@@ -12,7 +12,7 @@ const delay = (ms = 300) => new Promise(resolve => setTimeout(resolve, ms));
 export const authService = {
   login: async (email, password) => {
     await delay();
-    const users = JSON.parse(localStorage.getItem('jobportal_users'));
+    const users = JSON.parse(localStorage.getItem('jobportal_users')) || [];
     const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (!user) throw new Error('User not found. Please register.');
     if (user.password !== password) throw new Error('Incorrect password. Please try again.');
@@ -22,7 +22,7 @@ export const authService = {
 
   register: async (name, email, password) => {
     await delay();
-    const users = JSON.parse(localStorage.getItem('jobportal_users'));
+    const users = JSON.parse(localStorage.getItem('jobportal_users')) || [];
     const exists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
     if (exists) throw new Error('Email is already registered. Please login.');
     const newUser = { id: Date.now().toString(), name, email, password, profileCompleted: false, profileData: null };
@@ -42,6 +42,30 @@ export const authService = {
     await delay(200);
     localStorage.removeItem('jobportal_session');
     return { data: { success: true } };
+  },
+
+  googleAuth: async (googleUser) => {
+    await delay();
+    const users = JSON.parse(localStorage.getItem('jobportal_users')) || [];
+    const existing = users.find(u => u.googleId === googleUser.sub);
+    if (existing) {
+      localStorage.setItem('jobportal_session', JSON.stringify(existing));
+      return { data: existing, isNew: false };
+    }
+    const newUser = {
+      id: Date.now().toString(),
+      name: googleUser.name,
+      email: googleUser.email,
+      password: '',
+      googleId: googleUser.sub,
+      picture: googleUser.picture,
+      profileCompleted: false,
+      profileData: null
+    };
+    users.push(newUser);
+    localStorage.setItem('jobportal_users', JSON.stringify(users));
+    localStorage.setItem('jobportal_session', JSON.stringify(newUser));
+    return { data: newUser, isNew: true };
   },
 
   updateProfile: async (profileData) => {

@@ -38,6 +38,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = async (googleUser) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await authService.googleAuth(googleUser);
+      setCurrentUser(res.data);
+      return res;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const register = async (name, email, password) => {
     setLoading(true);
     setError(null);
@@ -92,6 +107,7 @@ export const AuthProvider = ({ children }) => {
     profileCompletion,
     login,
     register,
+    googleLogin,
     logout,
     updateProfile
   };
