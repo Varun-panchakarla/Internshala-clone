@@ -152,21 +152,24 @@ export const resumeService = {
 
     if (!userResume) {
       const defaultTemplate = {
-        personalInfo: { fullName: session.name || '', email: session.email, phone: '', location: '', linkedin: '', portfolio: '', title: '', summary: '' },
+        personalInfo: {
+          fullName: session.name || '',
+          email: session.email,
+          phone: '',
+          location: '',
+          linkedin: '',
+          github: '',
+          website: '',
+          summary: ''
+        },
         education: [],
         experience: [],
+        internship: [],
         projects: [],
+        certifications: [],   // each cert: { name, organization, year, link }
         skills: []
       };
-      userResume = {
-        ...defaultTemplate,
-        personalInfo: {
-          ...defaultTemplate.personalInfo,
-          fullName: session.profileData?.fullName || session.name,
-          email: session.email,
-          location: session.profileData?.preferredLocation || ''
-        }
-      };
+      userResume = defaultTemplate;
       resumes[session.id] = userResume;
       localStorage.setItem('jobportal_user_resumes', JSON.stringify(resumes));
     }
