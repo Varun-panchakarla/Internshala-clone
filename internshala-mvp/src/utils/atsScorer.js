@@ -286,7 +286,6 @@ export const calculateAtsScore = (resume) => {
 };
 
 /**
-<<<<<<< HEAD
  * Calculates Profile Completion Percentage (separate from ATS Score).
  * Evaluates whether key fields are filled in the resume.
  */
@@ -329,8 +328,6 @@ export const calculateResumeCompletion = (resume) => {
 };
 
 /**
- * Calculates Profile Completion Percentage for the user profile page.
-=======
  * Analyzes raw resume text (extracted from PDF upload) and returns an ATS score.
  * Uses keyword matching, section detection, and length heuristics.
  */
@@ -426,7 +423,6 @@ export const calculateTextAtsScore = (text, profileSkills = []) => {
  * - experience (10%)
  * - preferredRole (10%)
  * - preferredLocation / employmentType (10%)
->>>>>>> 81b92a18198b4b6c5b2bea244597f7722a1d1d49
  */
 export const calculateProfileCompletion = (profileData) => {
   if (!profileData) return 0;
