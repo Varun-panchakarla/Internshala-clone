@@ -21,6 +21,7 @@ import ReportIssue from '../pages/ReportIssue';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
 import AboutUs from '../pages/AboutUs';
 import ContactUs from '../pages/ContactUs';
+import Careers from '../pages/Careers';
 import MainLayout from '../layouts/MainLayout';
 
 // Protected Route Wrapper
@@ -134,6 +135,14 @@ const AppRoutes = () => {
         element={
           <PublicRoute useLayout={true} hideSidebar={true}>
             <ContactUs />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/careers"
+        element={
+          <PublicRoute useLayout={true} hideSidebar={true}>
+            <Careers />
           </PublicRoute>
         }
       />

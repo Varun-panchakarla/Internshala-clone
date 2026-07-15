@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useJobs } from '../../context/JobContext';
 import { useResume } from '../../context/ResumeContext';
-import { FiBriefcase, FiUser, FiHeart, FiFileText, FiGrid } from 'react-icons/fi';
+import { FiBriefcase, FiUser, FiBookmark, FiFileText, FiGrid } from 'react-icons/fi';
 
 const Sidebar = () => {
   const { isAuthenticated, profileCompletion } = useAuth();
@@ -15,7 +15,7 @@ const Sidebar = () => {
   const links = [
     { to: '/dashboard', label: 'Dashboard', icon: FiGrid },
     { to: '/jobs', label: 'Search Jobs', icon: FiBriefcase },
-    { to: '/saved-jobs', label: 'Saved Jobs', icon: FiHeart, badge: savedJobs?.length },
+    { to: '/saved-jobs', label: 'Saved Jobs', icon: FiBookmark, badge: savedJobs?.length },
     { to: '/resume', label: 'Resume Builder', icon: FiFileText, scoreBadge: atsScore },
     { to: '/profile', label: 'My Profile', icon: FiUser, completenessBadge: profileCompletion },
   ];

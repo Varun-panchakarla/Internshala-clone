@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useJobs } from '../context/JobContext';
 import { useResume } from '../context/ResumeContext';
-import { FiBriefcase, FiHeart, FiCheckCircle, FiFileText, FiAward, FiArrowRight, FiUserCheck } from 'react-icons/fi';
+import { FiBriefcase, FiBookmark, FiCheckCircle, FiFileText, FiAward, FiArrowRight, FiUserCheck } from 'react-icons/fi';
 import Button from '../components/common/Button';
 import ProgressBar from '../components/common/ProgressBar';
 
@@ -25,7 +25,7 @@ const Dashboard = () => {
       label: 'Saved Jobs',
       value: savedJobs?.length || 0,
       color: 'text-rose-600 bg-rose-50 border-rose-100',
-      icon: FiHeart
+      icon: FiBookmark
     },
     {
       label: 'Recommended Jobs',
@@ -206,7 +206,7 @@ const Dashboard = () => {
                     className="p-2.5 shrink-0 bg-white"
                     onClick={() => handleSaveToggle(job.id)}
                   >
-                    <FiHeart className={isJobSaved(job.id) ? 'fill-rose-500 text-rose-500' : 'text-slate-400'} />
+                    <FiBookmark className={isJobSaved(job.id) ? 'fill-rose-500 text-rose-500' : 'text-slate-400'} />
                   </Button>
                 </div>
               </div>

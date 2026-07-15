@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useJobs } from '../context/JobContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
-import { FiSearch, FiMapPin, FiBriefcase, FiClock, FiHeart, FiSliders, FiX, FiRefreshCw, FiStar } from 'react-icons/fi';
+import { FiSearch, FiMapPin, FiBriefcase, FiClock, FiBookmark, FiSliders, FiX, FiRefreshCw, FiStar } from 'react-icons/fi';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -312,7 +312,7 @@ const JobsPage = () => {
                       className={`p-2.5 shrink-0 bg-white ${isFeatured ? 'hover:bg-slate-50 border-none' : ''}`}
                       onClick={(e) => handleSaveToggle(e, job.id)}
                     >
-                      <FiHeart className={isJobSaved(job.id) ? 'fill-rose-500 text-rose-500' : 'text-slate-400'} />
+                      <FiBookmark className={isJobSaved(job.id) ? 'fill-rose-500 text-rose-500' : 'text-slate-400'} />
                     </Button>
                   </div>
                 </div>
