@@ -16,6 +16,12 @@ import Profile from '../pages/Profile';
 import LandingPage from '../pages/LandingPage';
 import ForgotPassword from '../pages/ForgotPassword';
 import ManageAccount from '../pages/ManageAccount';
+import TermsPage from '../pages/TermsPage';
+import HelpCentre from '../pages/HelpCentre';
+import ReportIssue from '../pages/ReportIssue';
+import PrivacyPolicy from '../pages/PrivacyPolicy';
+import AboutUs from '../pages/AboutUs';
+import ContactUs from '../pages/ContactUs';
 import MainLayout from '../layouts/MainLayout';
 
 // Protected Route Wrapper
@@ -34,14 +40,14 @@ const ProtectedRoute = ({ children }) => {
 };
 
 // Public Route (with layout option)
-const PublicRoute = ({ children, useLayout = true }) => {
+const PublicRoute = ({ children, useLayout = true, hideSidebar = false }) => {
   const { loading } = useAuth();
 
   if (loading) {
     return <LoadingSpinner fullPage text="Loading portal..." />;
   }
 
-  return useLayout ? <MainLayout>{children}</MainLayout> : children;
+  return useLayout ? <MainLayout hideSidebar={hideSidebar}>{children}</MainLayout> : children;
 };
 
 const AppRoutes = () => {
@@ -81,6 +87,54 @@ const AppRoutes = () => {
         element={
           <PublicRoute useLayout={false}>
             <ForgotPassword />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/terms"
+        element={
+          <PublicRoute useLayout={true} hideSidebar={true}>
+            <TermsPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/help-center"
+        element={
+          <PublicRoute useLayout={true} hideSidebar={true}>
+            <HelpCentre />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/report-issue"
+        element={
+          <PublicRoute useLayout={true} hideSidebar={true}>
+            <ReportIssue />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/privacy-policy"
+        element={
+          <PublicRoute useLayout={true} hideSidebar={true}>
+            <PrivacyPolicy />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/about"
+        element={
+          <PublicRoute useLayout={true} hideSidebar={true}>
+            <AboutUs />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/contact"
+        element={
+          <PublicRoute useLayout={true} hideSidebar={true}>
+            <ContactUs />
           </PublicRoute>
         }
       />
