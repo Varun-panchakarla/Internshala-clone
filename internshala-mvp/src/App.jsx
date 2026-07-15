@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthContext';
 import { JobProvider } from './context/JobContext';
 import { ResumeProvider } from './context/ResumeContext';
 import AppRoutes from './routes/AppRoutes';
+import ScrollToTop from './components/common/ScrollToTop';
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
@@ -14,6 +15,7 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <BrowserRouter>
+        <ScrollToTop />
         <ToastProvider>
           <ThemeProvider>
             <AuthProvider>
