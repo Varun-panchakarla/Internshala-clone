@@ -4,7 +4,7 @@ import Sidebar from '../components/common/Sidebar';
 import Footer from '../components/common/Footer';
 import { useAuth } from '../context/AuthContext';
 
-const MainLayout = ({ children }) => {
+const MainLayout = ({ children, hideSidebar = false }) => {
   const { isAuthenticated } = useAuth();
 
   return (
@@ -13,7 +13,7 @@ const MainLayout = ({ children }) => {
       
       <div className="flex-1 flex w-full max-w-none">
         {/* Conditionally render Sidebar only when user is logged in */}
-        {isAuthenticated && <Sidebar />}
+        {isAuthenticated && !hideSidebar && <Sidebar />}
         
         {/* Content area */}
         <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 flex flex-col gap-6">

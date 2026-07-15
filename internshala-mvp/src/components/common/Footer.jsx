@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from './Toast';
-import { FiLinkedin, FiInstagram, FiTwitter } from 'react-icons/fi';
+import { FaLinkedin, FaInstagram, FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
   const { isAuthenticated } = useAuth();
@@ -36,11 +36,9 @@ const Footer = () => {
           <div className="flex flex-col gap-3">
             <h4 className="text-xs font-black uppercase text-slate-850 dark:text-white tracking-wider">Company</h4>
             <ul className="flex flex-col gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
-              <li><a href="#" className="hover:text-brand-600 transition-colors">About Us</a></li>
+              <li><Link to="/about" className="hover:text-brand-600 transition-colors">About Us</Link></li>
               <li><a href="#" className="hover:text-brand-600 transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Hire Talent</a></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Post a Job</a></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Contact Us</a></li>
+              <li><Link to="/contact" className="hover:text-brand-600 transition-colors">Contact Us</Link></li>
             </ul>
           </div>
 
@@ -60,7 +58,7 @@ const Footer = () => {
           <div className="flex flex-col gap-3">
             <h4 className="text-xs font-black uppercase text-slate-850 dark:text-white tracking-wider">Support</h4>
             <ul className="flex flex-col gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Privacy Policy</a></li>
+              <li><Link to="/privacy-policy" onClick={() => { if (location.pathname === '/privacy-policy') window.scrollTo(0, 0); }} className="hover:text-brand-600 transition-colors">Privacy Policy</Link></li>
               <li><Link to="/terms" className="hover:text-brand-600 transition-colors">Terms & Conditions</Link></li>
               <li><Link to="/help-center" onClick={() => { if (location.pathname === '/help-center') window.scrollTo(0, 0); }} className="hover:text-brand-600 transition-colors">Help Center</Link></li>
               <li><Link to="/report-issue" onClick={() => { if (location.pathname === '/report-issue') window.scrollTo(0, 0); }} className="hover:text-brand-600 transition-colors">Report an Issue</Link></li>
@@ -86,9 +84,9 @@ const Footer = () => {
           
           {/* Left: Social media icons */}
           <div className="flex items-center gap-4 text-slate-400 dark:text-slate-500">
-            <a href="#" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors" title="LinkedIn"><FiLinkedin className="w-5 h-5" /></a>
-            <a href="#" className="hover:text-rose-500 transition-colors" title="Instagram"><FiInstagram className="w-5 h-5" /></a>
-            <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors" title="X (Twitter)"><FiTwitter className="w-5 h-5" /></a>
+            <a href="#" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors" title="LinkedIn"><FaLinkedin className="w-5 h-5" /></a>
+            <a href="#" className="hover:text-rose-500 transition-colors" title="Instagram"><FaInstagram className="w-5 h-5" /></a>
+            <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors" title="X (Twitter)"><FaXTwitter className="w-5 h-5" /></a>
           </div>
 
           {/* Right: Copyrights Statement */}
