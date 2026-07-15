@@ -286,6 +286,7 @@ export const calculateAtsScore = (resume) => {
 };
 
 /**
+<<<<<<< HEAD
  * Calculates Profile Completion Percentage (separate from ATS Score).
  * Evaluates whether key fields are filled in the resume.
  */
@@ -329,6 +330,103 @@ export const calculateResumeCompletion = (resume) => {
 
 /**
  * Calculates Profile Completion Percentage for the user profile page.
+=======
+ * Analyzes raw resume text (extracted from PDF upload) and returns an ATS score.
+ * Uses keyword matching, section detection, and length heuristics.
+ */
+export const calculateTextAtsScore = (text, profileSkills = []) => {
+  if (!text || text.trim().length < 20) {
+    return { score: 0, suggestions: [{ id: 'no-text', category: 'Parsing', message: 'Could not extract enough text from the uploaded file. Try the Resume Builder instead.', impact: 'Critical' }], breakdown: {} };
+  }
+
+  const lower = text.toLowerCase();
+  const suggestions = [];
+  const breakdown = { contact: 0, sections: 0, skills: 0, experience: 0, keywords: 0 };
+  let score = 0;
+
+  // 1. Contact Info (max 20)
+  const hasEmail = /\S+@\S+\.\S+/.test(lower);
+  const hasPhone = /[\+]?[\d\s\-\(\)]{7,}/.test(text);
+  if (hasEmail) breakdown.contact += 10;
+  if (hasPhone) breakdown.contact += 10;
+  if (!hasEmail) suggestions.push({ id: 'upload-email', category: 'Contact', message: 'No email address detected in your resume.', impact: 'High' });
+  if (!hasPhone) suggestions.push({ id: 'upload-phone', category: 'Contact', message: 'No phone number detected in your resume.', impact: 'Medium' });
+  score += breakdown.contact;
+
+  // 2. Section Detection (max 15)
+  const sections = ['education', 'experience', 'skills', 'projects', 'summary'];
+  const foundSections = sections.filter(s => new RegExp(`\\b${s}\\b`, 'i').test(text));
+  breakdown.sections = Math.min(15, foundSections.length * 3);
+  if (foundSections.length < 3) {
+    suggestions.push({ id: 'upload-sections', category: 'Structure', message: 'Add clear section headings (Education, Experience, Skills, Projects) to improve ATS readability.', impact: 'High' });
+  }
+  score += breakdown.sections;
+
+  // 3. Skills Match (max 25)
+  if (profileSkills.length > 0) {
+    const matched = profileSkills.filter(s => lower.includes(s.toLowerCase()));
+    const matchRate = matched.length / profileSkills.length;
+    breakdown.skills = Math.round(Math.min(25, matchRate * 25));
+    if (matchRate < 0.5) {
+      suggestions.push({ id: 'upload-skills', category: 'Skills', message: `Only ${matched.length}/${profileSkills.length} of your listed skills were found in the resume. Add more relevant keywords.`, impact: 'High' });
+    }
+  } else {
+    const wordCount = text.split(/\s+/).length;
+    breakdown.skills = Math.min(25, Math.round(wordCount / 200) * 5);
+  }
+  score += breakdown.skills;
+
+  // 4. Experience Depth (max 20)
+  const wordCount = text.split(/\s+/).length;
+  if (wordCount > 400) {
+    breakdown.experience = 20;
+  } else if (wordCount > 200) {
+    breakdown.experience = 12;
+  } else {
+    breakdown.experience = 5;
+    suggestions.push({ id: 'upload-length', category: 'Content', message: 'Your resume seems short (' + wordCount + ' words). Aim for 300-500 words with detailed experience descriptions.', impact: 'Medium' });
+  }
+  score += breakdown.experience;
+
+  // 5. Technical Keywords & Action Verbs (max 20)
+  const actionWords = ['developed', 'built', 'implemented', 'designed', 'managed', 'led', 'created', 'optimized', 'improved', 'delivered'];
+  const actionMatches = actionWords.filter(w => lower.includes(w));
+  const techKeywords = ['react', 'javascript', 'python', 'java', 'sql', 'node', 'html', 'css', 'git', 'docker', 'aws', 'api', 'mongodb', 'typescript', 'angular'];
+  const techMatches = techKeywords.filter(w => lower.includes(w));
+  breakdown.keywords = Math.min(20, actionMatches.length * 2 + techMatches.length);
+
+  if (actionMatches.length < 2) {
+    suggestions.push({ id: 'upload-verbs', category: 'Experience', message: 'Use strong action verbs (Developed, Built, Managed, Optimized) to describe your accomplishments.', impact: 'Medium' });
+  }
+  if (techMatches.length < 4) {
+    suggestions.push({ id: 'upload-tech', category: 'Skills', message: 'Include more technical keywords relevant to your target role.', impact: 'Medium' });
+  }
+  score += breakdown.keywords;
+
+  const finalScore = Math.min(100, Math.round(score));
+
+  return {
+    score: finalScore,
+    suggestions: suggestions.sort((a, b) => {
+      const order = { Critical: 0, High: 1, Medium: 2 };
+      return (order[a.impact] || 3) - (order[b.impact] || 3);
+    }),
+    breakdown
+  };
+};
+
+/**
+ * Calculates Profile Completion Percentage.
+ * Profile items:
+ * - fullName (15%)
+ * - profilePhoto (10%)
+ * - college (15%)
+ * - degree (15%)
+ * - skills (15%)
+ * - experience (10%)
+ * - preferredRole (10%)
+ * - preferredLocation / employmentType (10%)
+>>>>>>> 81b92a18198b4b6c5b2bea244597f7722a1d1d49
  */
 export const calculateProfileCompletion = (profileData) => {
   if (!profileData) return 0;

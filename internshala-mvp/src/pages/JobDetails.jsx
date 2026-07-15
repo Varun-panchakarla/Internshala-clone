@@ -64,6 +64,10 @@ const JobDetails = () => {
       navigate('/login');
       return;
     }
+    if (job.redirect_url) {
+      window.open(job.redirect_url, '_blank', 'noopener,noreferrer');
+      return;
+    }
     setApplyModalOpen(true);
   };
 
@@ -241,7 +245,7 @@ const JobDetails = () => {
             disabled={isApplied}
             onClick={handleApplyClick}
           >
-            {isApplied ? 'Application Submitted' : 'Apply Now'}
+            {isApplied ? 'Application Submitted' : job.redirect_url ? `Apply on ${job.source === 'adzuna' ? 'Adzuna' : 'Indeed'}` : 'Apply Now'}
           </Button>
         </div>
       </div>
@@ -283,7 +287,7 @@ const JobDetails = () => {
               <span className="font-extrabold text-slate-800 text-right">{currentUser?.profileData?.fullName || currentUser?.name}</span>
 
               <span className="font-bold text-slate-500">Attached Resume:</span>
-              <span className="font-extrabold text-emerald-600 text-right">{currentUser?.profileData?.resumeUrl || 'Online Profile Resume'}</span>
+              <span className="font-extrabold text-emerald-600 text-right">{currentUser?.profileData?.resumeInfo?.fileName || 'Online Profile Resume'}</span>
             </div>
           </div>
         </div>

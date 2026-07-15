@@ -8,16 +8,18 @@ const MainLayout = ({ children }) => {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col mesh-bg transition-colors duration-300">
       <Navbar />
-      
-      <div className="flex-1 flex w-full max-w-7xl mx-auto">
-        {/* Conditionally render Sidebar only when user is logged in */}
+
+      <div className="flex-1 flex w-full max-w-none">
+        {/* Left sidebar — only for authenticated users */}
         {isAuthenticated && <Sidebar />}
-        
-        {/* Content area */}
-        <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
-          {children}
+
+        {/* Main content */}
+        <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+          <div className="max-w-screen-xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
 

@@ -1,15 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
 
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-sans:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 
-  /* Premium brand colors matching IncuXAI Careers/LinkedIn (Soft Blue theme) */
-  --color-brand-50: #f0f7ff;
+  /* Brand palette — deep sky blue professional */
+  --color-brand-50:  #f0f9ff;
   --color-brand-100: #e0f2fe;
   --color-brand-200: #bae6fd;
   --color-brand-300: #7dd3fc;
@@ -21,74 +21,208 @@
   --color-brand-900: #0c4a6e;
   --color-brand-950: #082f49;
 
-  --animate-fade-in: fade-in 0.3s ease-out;
-  --animate-slide-up: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Animations */
+  --animate-fade-in:    fade-in 0.25s ease-out;
+  --animate-slide-up:   slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-down: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-pulse-slow: pulse-slow 3s infinite;
+  --animate-scale-in:   scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* ─── Keyframes ─────────────────────────────────────────────────────────────── */
+@keyframes fade-in   { from { opacity: 0; }                              to { opacity: 1; } }
+@keyframes slide-up  { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slide-down{ from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes pulse-slow{ 0%,100% { opacity: 1; } 50% { opacity: 0.65; } }
+@keyframes scale-in  { from { transform: scale(0.95); opacity: 0; }      to { transform: scale(1); opacity: 1; } }
+
+/* ─── Base resets ────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
 }
 
-@keyframes slide-up {
-  from { transform: translateY(12px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes pulse-slow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-/* Base style resets */
 body {
   font-family: var(--font-sans);
-  background-color: #f8fafc;
-  color: #1e293b;
+  background-color: #f1f5f9;
+  color: #0f172a;
   min-height: 100vh;
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  line-height: 1.6;
 }
 
 html.dark body {
-  background-color: #0b0f19;
+  background-color: #060d1b;
   color: #f1f5f9;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.25;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* ─── Selection color ────────────────────────────────────────────────────────── */
+::selection {
+  background-color: #bae6fd;
+  color: #0369a1;
 }
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+html.dark ::selection {
+  background-color: #0369a1;
+  color: #f0f9ff;
 }
 
-/* Glassmorphism utility */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+/* ─── Custom scrollbar ───────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+html.dark ::-webkit-scrollbar-thumb       { background: #334155; }
+html.dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* ─── Utility: hide scrollbar but keep scrolling ────────────────────────────── */
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* ─── Glass utilities ────────────────────────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.35);
+}
+.glass-dark {
+  background: rgba(9,18,35,0.82);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
-.glass-panel-dark {
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* ─── Card base ─────────────────────────────────────────────────────────────── */
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 1px 3px 0 rgba(15,23,42,0.04), 0 1px 2px -1px rgba(15,23,42,0.04);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
+.card:hover {
+  box-shadow: 0 8px 24px -4px rgba(15,23,42,0.08), 0 2px 8px -2px rgba(15,23,42,0.06);
+}
+html.dark .card {
+  background: #0f1a2e;
+  border-color: #1e2d45;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.3);
+}
+
+/* ─── Gradient text utility ─────────────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #0284c7 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Subtle mesh background ────────────────────────────────────────────────── */
+.mesh-bg {
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(at 40% 20%, rgba(2,132,199,0.04) 0px, transparent 50%),
+    radial-gradient(at 80% 60%, rgba(124,58,237,0.03) 0px, transparent 50%);
+}
+html.dark .mesh-bg {
+  background-color: #060d1b;
+  background-image:
+    radial-gradient(at 40% 20%, rgba(2,132,199,0.06) 0px, transparent 50%),
+    radial-gradient(at 80% 60%, rgba(124,58,237,0.04) 0px, transparent 50%);
+}
+
+/* ─── Active nav indicator ──────────────────────────────────────────────────── */
+.nav-active {
+  position: relative;
+}
+.nav-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: #0284c7;
+  border-radius: 2px;
+}
+
+/* ─── Focus ring ────────────────────────────────────────────────────────────── */
+.focus-ring:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ─── Transition helpers ────────────────────────────────────────────────────── */
+.transition-base { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.transition-slow  { transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* ─── Dark mode overrides ─────────────────────────────────────────────────────
+   Scope all overrides away from the resume preview (#resume-preview) so
+   the PDF output always renders in light mode colors.
+─────────────────────────────────────────────────────────────────────────────── */
+html.dark .bg-white:not(#resume-preview, #resume-preview *)              { background-color: #0f1a2e !important; }
+html.dark .bg-slate-50:not(#resume-preview, #resume-preview *)           { background-color: #060d1b !important; }
+html.dark .bg-slate-100:not(#resume-preview, #resume-preview *)          { background-color: #1a2640 !important; }
+html.dark .bg-slate-200:not(#resume-preview, #resume-preview *)          { background-color: #243452 !important; }
+
+html.dark .border-slate-100:not(#resume-preview, #resume-preview *),
+html.dark .border-slate-200:not(#resume-preview, #resume-preview *)      { border-color: #1e2d45 !important; }
+
+html.dark .text-slate-900:not(#resume-preview, #resume-preview *)        { color: #f8fafc !important; }
+html.dark .text-slate-800:not(#resume-preview, #resume-preview *)        { color: #f1f5f9 !important; }
+html.dark .text-slate-700:not(#resume-preview, #resume-preview *)        { color: #e2e8f0 !important; }
+html.dark .text-slate-600:not(#resume-preview, #resume-preview *)        { color: #94a3b8 !important; }
+html.dark .text-slate-500:not(#resume-preview, #resume-preview *)        { color: #64748b !important; }
+html.dark .text-slate-400:not(#resume-preview, #resume-preview *)        { color: #475569 !important; }
+
+html.dark .bg-brand-50:not(#resume-preview, #resume-preview *)           { background-color: rgba(2,132,199,0.12) !important; }
+html.dark .text-brand-700:not(#resume-preview, #resume-preview *)        { color: #38bdf8 !important; }
+
+html.dark .hover\:bg-slate-50:not(#resume-preview, #resume-preview *):hover  { background-color: #1a2640 !important; }
+html.dark .hover\:bg-brand-100:not(#resume-preview, #resume-preview *):hover { background-color: rgba(2,132,199,0.2) !important; }
+
+/* Toast/badge dark overrides */
+html.dark .bg-emerald-50:not(#resume-preview, #resume-preview *)  { background-color: rgba(5,150,105,0.1)  !important; }
+html.dark .bg-rose-50:not(#resume-preview, #resume-preview *)     { background-color: rgba(225,29,72,0.1)  !important; }
+html.dark .bg-amber-50:not(#resume-preview, #resume-preview *)    { background-color: rgba(217,119,6,0.1)  !important; }
+html.dark .bg-blue-50:not(#resume-preview, #resume-preview *)     { background-color: rgba(37,99,235,0.1)  !important; }
+html.dark .bg-violet-50:not(#resume-preview, #resume-preview *)   { background-color: rgba(124,58,237,0.1) !important; }
+
+html.dark .text-emerald-800:not(#resume-preview, #resume-preview *) { color: #6ee7b7 !important; }
+html.dark .text-emerald-500:not(#resume-preview, #resume-preview *) { color: #34d399 !important; }
+html.dark .text-rose-500:not(#resume-preview, #resume-preview *)    { color: #fb7185 !important; }
+html.dark .text-amber-600:not(#resume-preview, #resume-preview *)   { color: #fbbf24 !important; }
+
+html.dark .border-emerald-100:not(#resume-preview, #resume-preview *) { border-color: rgba(5,150,105,0.2)  !important; }
+html.dark .border-rose-100:not(#resume-preview, #resume-preview *)    { border-color: rgba(225,29,72,0.2)  !important; }
+html.dark .border-amber-100:not(#resume-preview, #resume-preview *)   { border-color: rgba(217,119,6,0.2)  !important; }
+html.dark .border-brand-100:not(#resume-preview, #resume-preview *)   { border-color: rgba(2,132,199,0.2)  !important; }
+
+html.dark .shadow-sm:not(#resume-preview, #resume-preview *),
+html.dark .shadow:not(#resume-preview, #resume-preview *),
+html.dark .shadow-md:not(#resume-preview, #resume-preview *),
+html.dark .shadow-lg:not(#resume-preview, #resume-preview *),
+html.dark .shadow-xl:not(#resume-preview, #resume-preview *) {
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.35) !important;
+}
+
+html.dark .ring-slate-100:not(#resume-preview, #resume-preview *) { --tw-ring-color: #1e2d45 !important; }
+
+html.dark option { background-color: #0f1a2e; color: #f1f5f9; }
+
+html.dark .border-rose-300:not(#resume-preview, #resume-preview *) { border-color: #be123c !important; }
+
+html.dark .disabled\:bg-slate-50:disabled { background-color: #1a2640 !important; }
+html.dark .disabled\:text-slate-400:disabled { color: #475569 !important; }
