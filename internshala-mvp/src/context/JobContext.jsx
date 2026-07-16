@@ -22,7 +22,9 @@ export const JobProvider = ({ children }) => {
     skills: [],
     company: '',
     salaryRange: '',
-    datePosted: ''
+    datePosted: '',
+    workMode: '',
+    sortBy: 'relevance'
   });
 
   const fetchJobs = async () => {
@@ -143,8 +145,7 @@ export const JobProvider = ({ children }) => {
 
     // 3. Location Filter Check
     const matchesLocation = filters.location === '' || 
-      (filters.location.toLowerCase() === 'remote' && job.location.toLowerCase().includes('remote')) ||
-      (filters.location.toLowerCase() !== 'remote' && !job.location.toLowerCase().includes('remote') && job.location.toLowerCase().includes(filters.location.toLowerCase()));
+      job.location.toLowerCase().includes(filters.location.toLowerCase());
 
     // 4. Experience Filter Check
     const matchesExperience = filters.experience === '' || 
@@ -199,7 +200,31 @@ export const JobProvider = ({ children }) => {
       }
     }
 
-    return matchesSearch && matchesRole && matchesLocation && matchesExperience && matchesType && matchesSkills && matchesCompany && matchesSalary && matchesDate;
+    // 10. Work Mode Filter Check
+    const matchesWorkMode = filters.workMode === '' ||
+      (filters.workMode.toLowerCase() === 'remote' && job.location.toLowerCase().includes('remote')) ||
+      (filters.workMode.toLowerCase() === 'hybrid' && job.location.toLowerCase().includes('hybrid')) ||
+      (filters.workMode.toLowerCase() === 'on-site' && !job.location.toLowerCase().includes('remote') && !job.location.toLowerCase().includes('hybrid'));
+
+    return matchesSearch && matchesRole && matchesLocation && matchesExperience && matchesType && matchesSkills && matchesCompany && matchesSalary && matchesDate && matchesWorkMode;
+  });
+
+  // Sort the filtered jobs
+  const sortedFilteredJobs = [...filteredJobs].sort((a, b) => {
+    if (filters.sortBy === 'salary') {
+      const parsedA = parseSalaryLakhs(a.salary);
+      const parsedB = parseSalaryLakhs(b.salary);
+      const avgA = parsedA ? (parsedA[0] + (parsedA[1] || parsedA[0])) / 2 : 0;
+      const avgB = parsedB ? (parsedB[0] + (parsedB[1] || parsedB[0])) / 2 : 0;
+      return avgB - avgA;
+    }
+    if (filters.sortBy === 'newest') {
+      const daysA = daysAgo(a.postedAt) ?? 999;
+      const daysB = daysAgo(b.postedAt) ?? 999;
+      return daysA - daysB;
+    }
+    // Default 'relevance'
+    return b.matchScore - a.matchScore;
   });
 
   // Recommended jobs: High skill match or matches preferred role/location
@@ -229,14 +254,16 @@ export const JobProvider = ({ children }) => {
       skills: [],
       company: '',
       salaryRange: '',
-      datePosted: ''
+      datePosted: '',
+      workMode: '',
+      sortBy: 'relevance'
     });
     setSearchQuery('');
   };
 
   const value = {
     jobs: processedJobs,
-    filteredJobs,
+    filteredJobs: sortedFilteredJobs,
     recommendedJobs,
     savedJobs,
     appliedJobs,

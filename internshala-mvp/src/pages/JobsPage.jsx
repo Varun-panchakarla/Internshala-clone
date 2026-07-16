@@ -120,7 +120,20 @@ const JobsPage = () => {
     { label: 'Last 30 Days', value: 'month' }
   ];
 
-  // Render Filter Form Component (reusable)
+  const workModeOptions = [
+    { label: 'All Modes', value: '' },
+    { label: 'Remote', value: 'remote' },
+    { label: 'Hybrid', value: 'hybrid' },
+    { label: 'On-site', value: 'on-site' }
+  ];
+
+  const sortByOptions = [
+    { label: 'Most Relevant', value: 'relevance' },
+    { label: 'Newest First', value: 'newest' },
+    { label: 'Highest Salary', value: 'salary' }
+  ];
+
+  // Render Filter Form Component (reusable for mobile drawer)
   const FilterContent = () => (
     <div className="flex flex-col gap-5">
       <div className="flex justify-between items-center pb-3 border-b border-slate-100">
@@ -135,84 +148,25 @@ const JobsPage = () => {
         </button>
       </div>
 
-      <Input
-        label="Role Type"
-        id="filterRole"
-        type="select"
-        value={filters.role}
-        onChange={(e) => handleFilterChange('role', e.target.value)}
-        options={roleOptions}
-      />
-
-      <Input
-        label="Location Type"
-        id="filterLocation"
-        type="select"
-        value={filters.location}
-        onChange={(e) => handleFilterChange('location', e.target.value)}
-        options={locationOptions}
-      />
-
-      <Input
-        label="Experience Range"
-        id="filterExperience"
-        type="select"
-        value={filters.experience}
-        onChange={(e) => handleFilterChange('experience', e.target.value)}
-        options={experienceOptions}
-      />
-
-      <Input
-        label="Employment Type"
-        id="filterType"
-        type="select"
-        value={filters.employmentType}
-        onChange={(e) => handleFilterChange('employmentType', e.target.value)}
-        options={employmentTypeOptions}
-      />
-
-      <Input
-        label="Company Name"
-        id="filterCompany"
-        type="text"
-        placeholder="e.g. TCS, Accenture..."
-        value={filters.company}
-        onChange={(e) => handleFilterChange('company', e.target.value)}
-      />
-
-      <Input
-        label="Salary Range"
-        id="filterSalary"
-        type="select"
-        value={filters.salaryRange}
-        onChange={(e) => handleFilterChange('salaryRange', e.target.value)}
-        options={salaryOptions}
-      />
-
-      <Input
-        label="Date Posted"
-        id="filterDate"
-        type="select"
-        value={filters.datePosted}
-        onChange={(e) => handleFilterChange('datePosted', e.target.value)}
-        options={dateOptions}
-      />
+      <Input label="Role Type" id="filterRole" type="select" value={filters.role} onChange={(e) => handleFilterChange('role', e.target.value)} options={roleOptions} />
+      <Input label="Location Type" id="filterLocation" type="select" value={filters.location} onChange={(e) => handleFilterChange('location', e.target.value)} options={locationOptions} />
+      <Input label="Work Mode" id="filterWorkMode" type="select" value={filters.workMode} onChange={(e) => handleFilterChange('workMode', e.target.value)} options={workModeOptions} />
+      <Input label="Employment Type" id="filterType" type="select" value={filters.employmentType} onChange={(e) => handleFilterChange('employmentType', e.target.value)} options={employmentTypeOptions} />
+      <Input label="Experience Range" id="filterExperience" type="select" value={filters.experience} onChange={(e) => handleFilterChange('experience', e.target.value)} options={experienceOptions} />
+      <Input label="Salary Range" id="filterSalary" type="select" value={filters.salaryRange} onChange={(e) => handleFilterChange('salaryRange', e.target.value)} options={salaryOptions} />
+      <Input label="Company Name" id="filterCompany" type="text" placeholder="e.g. TCS..." value={filters.company} onChange={(e) => handleFilterChange('company', e.target.value)} />
+      <Input label="Sort By" id="filterSort" type="select" value={filters.sortBy} onChange={(e) => handleFilterChange('sortBy', e.target.value)} options={sortByOptions} />
     </div>
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full animate-slide-up">
+    <div className="flex flex-col gap-6 items-start w-full animate-slide-up pb-8">
       
-      {/* 1. Desktop Filter Sidebar */}
-      <div className="hidden lg:col-span-4 bg-white rounded-2xl border border-slate-100 p-6 shadow-md sticky top-20">
-        <FilterContent />
-      </div>
-
-      {/* 2. Main Browse Area */}
-      <div className="lg:col-span-8 flex flex-col gap-6">
+      {/* 1. Top Filter Panel */}
+      <div className="w-full bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col gap-5">
         
         {/* Search header panel */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           <div className="relative flex-1">
             <FiSearch className="absolute left-4 text-slate-400 w-5 h-5 top-1/2 -translate-y-1/2" />
             <input
@@ -224,6 +178,14 @@ const JobsPage = () => {
             />
           </div>
           
+          <Button
+            variant="light"
+            className="hidden lg:flex items-center gap-1.5 py-3 whitespace-nowrap"
+            onClick={resetFilters}
+          >
+            <FiRefreshCw /> Clear All Filters
+          </Button>
+
           {/* Mobile Filter Toggle */}
           <Button
             variant="outline"
@@ -233,6 +195,22 @@ const JobsPage = () => {
             <FiSliders /> Filters
           </Button>
         </div>
+
+        {/* Desktop Filter Grid */}
+        <div className="hidden lg:grid grid-cols-4 xl:grid-cols-8 gap-3 items-end">
+          <Input label="Role" type="select" value={filters.role} onChange={(e) => handleFilterChange('role', e.target.value)} options={roleOptions} />
+          <Input label="Location" type="select" value={filters.location} onChange={(e) => handleFilterChange('location', e.target.value)} options={locationOptions} />
+          <Input label="Work Mode" type="select" value={filters.workMode} onChange={(e) => handleFilterChange('workMode', e.target.value)} options={workModeOptions} />
+          <Input label="Job Type" type="select" value={filters.employmentType} onChange={(e) => handleFilterChange('employmentType', e.target.value)} options={employmentTypeOptions} />
+          <Input label="Experience" type="select" value={filters.experience} onChange={(e) => handleFilterChange('experience', e.target.value)} options={experienceOptions} />
+          <Input label="Salary" type="select" value={filters.salaryRange} onChange={(e) => handleFilterChange('salaryRange', e.target.value)} options={salaryOptions} />
+          <Input label="Company" type="text" placeholder="e.g. TCS..." value={filters.company} onChange={(e) => handleFilterChange('company', e.target.value)} />
+          <Input label="Sort By" type="select" value={filters.sortBy} onChange={(e) => handleFilterChange('sortBy', e.target.value)} options={sortByOptions} />
+        </div>
+      </div>
+
+      {/* 2. Main Browse Area */}
+      <div className="w-full flex flex-col gap-6">
 
         {/* Listing Stats */}
         <div className="flex justify-between items-center text-xs text-slate-400 font-bold px-1">

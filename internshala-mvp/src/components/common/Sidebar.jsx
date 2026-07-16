@@ -31,39 +31,7 @@ const Sidebar = () => {
   return (
     <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-slate-100 dark:border-slate-800/60 bg-white dark:bg-gray-950 min-h-[calc(100vh-4rem)] sticky top-16">
 
-      {/* User mini-card */}
-      <div className="px-4 pt-5 pb-4 border-b border-slate-100 dark:border-slate-800/60">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white text-sm font-black flex items-center justify-center shadow-md shadow-brand-500/20 shrink-0">
-            {initials}
-          </div>
-          <div className="min-w-0">
-            <p className="text-[13px] font-bold text-slate-900 dark:text-white truncate leading-tight">
-              {currentUser?.name?.split(' ')[0] || 'User'}
-            </p>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate leading-tight mt-0.5">
-              {currentUser?.email}
-            </p>
-          </div>
-        </div>
-        {/* Profile completeness */}
-        <div className="mt-3">
-          <div className="flex justify-between text-[10px] text-slate-400 font-medium mb-1">
-            <span>Profile</span>
-            <span className={`font-bold ${profileCompletion === 100 ? 'text-emerald-500' : 'text-brand-600'}`}>
-              {profileCompletion}%
-            </span>
-          </div>
-          <div className="h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-700 ${
-                profileCompletion < 50 ? 'bg-amber-400' : profileCompletion < 80 ? 'bg-brand-500' : 'bg-emerald-500'
-              }`}
-              style={{ width: `${profileCompletion}%` }}
-            />
-          </div>
-        </div>
-      </div>
+
 
       {/* Navigation links */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">

@@ -8,6 +8,7 @@ import { JobProvider } from './context/JobContext';
 import { ResumeProvider } from './context/ResumeContext';
 import AppRoutes from './routes/AppRoutes';
 import ScrollToTop from './components/common/ScrollToTop';
+import TopProgressBar from './components/common/TopProgressBar';
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
@@ -15,6 +16,7 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <BrowserRouter>
+        <TopProgressBar />
         <ScrollToTop />
         <ToastProvider>
           <ThemeProvider>

@@ -226,3 +226,12 @@ html.dark .border-rose-300:not(#resume-preview, #resume-preview *) { border-colo
 
 html.dark .disabled\:bg-slate-50:disabled { background-color: #1a2640 !important; }
 html.dark .disabled\:text-slate-400:disabled { color: #475569 !important; }
+
+/* ─── NProgress Overrides ───────────────────────────────────────────────────── */
+#nprogress .bar {
+  background: var(--color-brand-600) !important;
+  height: 3px !important;
+}
+#nprogress .peg {
+  box-shadow: 0 0 10px var(--color-brand-600), 0 0 5px var(--color-brand-600) !important;
+}
