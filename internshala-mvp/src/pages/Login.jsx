@@ -7,14 +7,6 @@ import { FiMail, FiLock, FiChevronRight, FiBriefcase, FiArrowLeft } from 'react-
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 
-function decodeJwt(token) {
-  try {
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch {
-    return null;
-  }
-}
-
 const Login = () => {
   const { login, googleLogin } = useAuth();
   const { addToast } = useToast();
@@ -55,25 +47,24 @@ const Login = () => {
       addToast('Welcome back! Login successful.', 'success');
       navigate('/dashboard');
     } catch (err) {
-      addToast(err.message || 'Login failed. Please check credentials.', 'error');
+      addToast(err.response?.data?.error || 'Login failed. Please check credentials.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    const decoded = decodeJwt(credentialResponse.credential);
-    if (!decoded) {
+    if (!credentialResponse?.credential) {
       addToast('Google authentication failed.', 'error');
       return;
     }
     setLoading(true);
     try {
-      const res = await googleLogin(decoded);
-      addToast(res.isNew ? 'Account created with Google!' : 'Signed in with Google!', 'success');
-      navigate(res.isNew ? '/profile' : '/dashboard');
+      const res = await googleLogin(credentialResponse.credential);
+      addToast('Signed in with Google!', 'success');
+      navigate('/dashboard');
     } catch (err) {
-      addToast(err.message || 'Google sign-in failed.', 'error');
+      addToast(err.response?.data?.error || 'Google sign-in failed.', 'error');
     } finally {
       setLoading(false);
     }

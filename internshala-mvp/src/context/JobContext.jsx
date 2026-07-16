@@ -29,14 +29,14 @@ export const JobProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await jobService.getAllJobs();
-      setJobs(res.data);
+      setJobs(res.data.data || res.data);
 
       if (isAuthenticated) {
         const savedRes = await jobService.getSavedJobIds();
-        setSavedJobIds(savedRes.data);
+        setSavedJobIds(savedRes.data.data || []);
 
         const appliedRes = await jobService.getAppliedJobIds();
-        setAppliedJobIds(appliedRes.data);
+        setAppliedJobIds(appliedRes.data.data || []);
       } else {
         setSavedJobIds([]);
         setAppliedJobIds([]);

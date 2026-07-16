@@ -24,14 +24,7 @@ const Profile = () => {
   const [photoError, setPhotoError] = useState(false);
 
   // Check if user has a resume in the Resume Builder
-  const builtResume = (() => {
-    try {
-      const resumes = JSON.parse(localStorage.getItem('jobportal_user_resumes')) || {};
-      return resumes[currentUser?.id] || null;
-    } catch {
-      return null;
-    }
-  })();
+  const builtResume = currentUser?.profileData?.resumeInfo || null;
 
   // Form State
   const [formData, setFormData] = useState({

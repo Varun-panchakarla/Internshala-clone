@@ -7,14 +7,6 @@ import { FiMail, FiLock, FiUser, FiChevronRight, FiCheckCircle, FiArrowLeft } fr
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 
-function decodeJwt(token) {
-  try {
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch {
-    return null;
-  }
-}
-
 const Register = () => {
   const { register, googleLogin } = useAuth();
   const { addToast } = useToast();
@@ -65,25 +57,24 @@ const Register = () => {
       addToast('Account created successfully! Welcome to the portal.', 'success');
       navigate('/profile'); // Redirect to Profile Setup wizard
     } catch (err) {
-      addToast(err.message || 'Registration failed. Email might already exist.', 'error');
+      addToast(err.response?.data?.error || 'Registration failed. Email might already exist.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    const decoded = decodeJwt(credentialResponse.credential);
-    if (!decoded) {
+    if (!credentialResponse?.credential) {
       addToast('Google authentication failed.', 'error');
       return;
     }
     setLoading(true);
     try {
-      const res = await googleLogin(decoded);
-      addToast(res.isNew ? 'Account created with Google!' : 'Signed in with Google!', 'success');
-      navigate(res.isNew ? '/profile' : '/dashboard');
+      await googleLogin(credentialResponse.credential);
+      addToast('Signed in with Google!', 'success');
+      navigate('/dashboard');
     } catch (err) {
-      addToast(err.message || 'Google sign-in failed.', 'error');
+      addToast(err.response?.data?.error || 'Google sign-in failed.', 'error');
     } finally {
       setLoading(false);
     }

@@ -21,7 +21,7 @@ export const ResumeProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await resumeService.getResume();
-      setResume(res.data);
+      setResume(res.data?.data || null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -77,8 +77,8 @@ export const ResumeProvider = ({ children }) => {
     setSaving(true);
     try {
       const res = await resumeService.saveResume(dataToSave);
-      setResume(res.data);
-      return res.data;
+      setResume(res.data?.data || dataToSave);
+      return res.data?.data;
     } catch (err) {
       console.error('Failed to save resume details', err);
       throw err;
