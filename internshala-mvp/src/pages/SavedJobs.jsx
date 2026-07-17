@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useJobs } from '../context/JobContext';
 import { useToast } from '../components/common/Toast';
-import { FiHeart, FiBriefcase, FiMapPin, FiClock, FiTrash2, FiArrowRight } from 'react-icons/fi';
+import { FiBookmark, FiBriefcase, FiMapPin, FiClock, FiTrash2, FiArrowRight } from 'react-icons/fi';
 import Button from '../components/common/Button';
 
 const SavedJobs = () => {
@@ -97,12 +97,12 @@ const SavedJobs = () => {
       ) : (
         <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center shadow-sm flex flex-col items-center justify-center gap-4">
           <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
-            <FiHeart className="w-8 h-8" />
+            <FiBookmark className="w-8 h-8" />
           </div>
           <div>
             <h3 className="font-extrabold text-slate-700 text-base">Your Saved List is Empty</h3>
             <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 leading-relaxed">
-              Explore job opportunities and click the heart icon on any card to save listings here.
+              Explore job opportunities and click the bookmark icon on any card to save listings here.
             </p>
           </div>
           <Link to="/jobs">
