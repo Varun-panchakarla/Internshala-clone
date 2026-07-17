@@ -26,9 +26,8 @@ export const calculateAtsScore = (resume) => {
   // ─── 1. Contact Details (15 pts) ────────────────────────────────────────────
   let contactScore = 0;
   if (personalInfo.fullName && personalInfo.fullName.trim().length > 2)  contactScore += 3;
-  if (personalInfo.email    && personalInfo.email.includes('@'))          contactScore += 3;
-  if (personalInfo.phone    && personalInfo.phone.trim().length > 6)      contactScore += 3;
-  if (personalInfo.location && personalInfo.location.trim().length > 2)   contactScore += 2;
+  if (personalInfo.email    && personalInfo.email.includes('@'))          contactScore += 4;
+  if (personalInfo.phone    && personalInfo.phone.trim().length > 6)      contactScore += 4;
   if (personalInfo.linkedin && personalInfo.linkedin.trim().length > 4)   contactScore += 2;
   if (personalInfo.github   && personalInfo.github.trim().length > 4)     contactScore += 2;
 
@@ -297,9 +296,8 @@ export const calculateResumeCompletion = (resume) => {
 
   // Personal Info (30 pts)
   if (personalInfo.fullName && personalInfo.fullName.trim()) total += 6;
-  if (personalInfo.email    && personalInfo.email.trim())    total += 6;
-  if (personalInfo.phone    && personalInfo.phone.trim())    total += 5;
-  if (personalInfo.location && personalInfo.location.trim()) total += 4;
+  if (personalInfo.email    && personalInfo.email.trim())    total += 8;
+  if (personalInfo.phone    && personalInfo.phone.trim())    total += 7;
   if (personalInfo.linkedin && personalInfo.linkedin.trim()) total += 5;
   if (personalInfo.github   && personalInfo.github.trim())   total += 4;
 

@@ -54,8 +54,6 @@ const Navbar = () => {
     { to: '/dashboard',        label: 'Dashboard',      icon: FiGrid,      authRequired: true },
     { to: '/jobs',             label: 'Browse Jobs',    icon: FiBriefcase, authRequired: false },
     { to: '/saved-jobs',       label: 'Saved',          icon: FiHeart,     authRequired: true,  badge: savedJobs?.length },
-    { to: '/resume',           label: 'Resume Builder', icon: FiFileText,  authRequired: true },
-    { to: '/resume-templates', label: 'Templates',      icon: FiLayout,    authRequired: true },
   ];
 
   const initials = currentUser?.name
@@ -206,6 +204,14 @@ const Navbar = () => {
 
                       {/* Menu items */}
                       <div className="py-1">
+                        <Link to="/resume" onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors">
+                          <FiFileText className="w-4 h-4 text-slate-400" /> Resume Builder
+                        </Link>
+                        <Link to="/resume-templates" onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors">
+                          <FiLayout className="w-4 h-4 text-slate-400" /> Templates
+                        </Link>
                         <Link to="/profile" onClick={() => setDropdownOpen(false)}
                           className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors">
                           <FiUser className="w-4 h-4 text-slate-400" /> My Profile
@@ -282,6 +288,14 @@ const Navbar = () => {
           {/* Mobile auth actions */}
           {isAuthenticated ? (
             <div className="border-t border-slate-100 dark:border-slate-800 pt-3 mt-2 flex flex-col gap-1">
+              <Link to="/resume"
+                className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl">
+                <FiFileText className="w-4 h-4 text-slate-400" /> Resume Builder
+              </Link>
+              <Link to="/resume-templates"
+                className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl">
+                <FiLayout className="w-4 h-4 text-slate-400" /> Templates
+              </Link>
               <Link to="/profile"
                 className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl">
                 <FiUser className="w-4 h-4 text-slate-400" /> My Profile

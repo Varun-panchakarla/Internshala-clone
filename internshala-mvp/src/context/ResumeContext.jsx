@@ -29,7 +29,7 @@ export const ResumeProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await resumeService.getResume();
-      setResume(res.data);
+      console.log('saveResume response:', res.data); setResume(res.data);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -50,12 +50,11 @@ export const ResumeProvider = ({ children }) => {
   const updateCertifications = (v) => setResume(p => p ? { ...p, certifications: v } : null);
   const updateSkills         = (v) => setResume(p => p ? { ...p, skills: v }         : null);
 
-  const saveResume = async (customData = null) => {
-    const dataToSave = customData || resume;
-    if (!dataToSave) return;
+  const saveResume = async () => {
+    if (!resume) return;
     setSaving(true);
     try {
-      const res = await resumeService.saveResume(dataToSave);
+      const res = await resumeService.saveResume(resume);
       setResume(res.data);
       return res.data;
     } catch (err) {

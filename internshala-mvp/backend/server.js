@@ -10,11 +10,14 @@ const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Routes
 const jobsRouter = require('./routes/jobs.js');
+const resumeRouter = require('./routes/resume.js');
 app.use('/api/jobs', jobsRouter);
+app.use('/api/resume', resumeRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

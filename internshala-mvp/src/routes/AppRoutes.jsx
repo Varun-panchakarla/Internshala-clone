@@ -25,7 +25,7 @@ import ContactUs from '../pages/ContactUs';
 import MainLayout from '../layouts/MainLayout';
 
 // Protected Route Wrapper
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, hideSidebar = false }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
@@ -36,7 +36,7 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  return <MainLayout>{children}</MainLayout>;
+  return <MainLayout hideSidebar={hideSidebar}>{children}</MainLayout>;
 };
 
 // Public Route (with layout option)
@@ -177,7 +177,7 @@ const AppRoutes = () => {
       <Route
         path="/resume"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute hideSidebar={true}>
             <ResumeBuilder />
           </ProtectedRoute>
         }
@@ -185,7 +185,7 @@ const AppRoutes = () => {
       <Route
         path="/resume-templates"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute hideSidebar={true}>
             <ResumeTemplates />
           </ProtectedRoute>
         }

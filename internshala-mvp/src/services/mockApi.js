@@ -147,44 +147,26 @@ export const resumeService = {
     const session = JSON.parse(localStorage.getItem('jobportal_session'));
     if (!session) throw new Error('Unauthenticated user session.');
 
-    const resumes = JSON.parse(localStorage.getItem('jobportal_user_resumes')) || {};
-    let userResume = resumes[session.id];
-
-    if (!userResume) {
-      const defaultTemplate = {
-        personalInfo: {
-          fullName: session.name || '',
-          email: session.email,
-          phone: '',
-          location: '',
-          linkedin: '',
-          github: '',
-          website: '',
-          summary: ''
-        },
-        education: [],
-        experience: [],
-        internship: [],
-        projects: [],
-        certifications: [],   // each cert: { name, organization, year, link }
-        skills: []
-      };
-      userResume = defaultTemplate;
-      resumes[session.id] = userResume;
-      localStorage.setItem('jobportal_user_resumes', JSON.stringify(resumes));
-    }
-
-    return { data: userResume };
+    const res = await api.get('/resume', {
+      params: { 
+        userId: session.id,
+        name: session.name,
+        email: session.email
+      }
+    });
+    
+    return { data: res.data.data };
   },
 
   saveResume: async (resumeData) => {
     const session = JSON.parse(localStorage.getItem('jobportal_session'));
     if (!session) throw new Error('Unauthenticated user session.');
 
-    const resumes = JSON.parse(localStorage.getItem('jobportal_user_resumes')) || {};
-    resumes[session.id] = resumeData;
-    localStorage.setItem('jobportal_user_resumes', JSON.stringify(resumes));
+    const res = await api.post('/resume', {
+      userId: session.id,
+      resumeData
+    });
 
-    return { data: resumeData };
+    return { data: res.data.data };
   }
 };
