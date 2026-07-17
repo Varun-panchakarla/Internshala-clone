@@ -3,15 +3,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useJobs } from '../context/JobContext';
 import { useResume } from '../context/ResumeContext';
-import { FiBriefcase, FiHeart, FiCheckCircle, FiFileText, FiAward, FiArrowRight, FiUserCheck } from 'react-icons/fi';
+import { FiBriefcase, FiBookmark, FiCheckCircle, FiFileText, FiAward, FiArrowRight, FiUserCheck, FiAlertTriangle, FiUpload } from 'react-icons/fi';
 import Button from '../components/common/Button';
 import ProgressBar from '../components/common/ProgressBar';
 
 const Dashboard = () => {
   const { currentUser, profileCompletion } = useAuth();
   const { jobs, recommendedJobs, savedJobs, appliedJobs, saveJob, unsaveJob, isJobSaved, isJobApplied } = useJobs();
-  const { atsScore } = useResume();
+  const { atsScore: builderScore } = useResume();
   const navigate = useNavigate();
+
+  const resumeInfo = currentUser?.profileData?.resumeInfo;
+  const hasResume = !!(resumeInfo?.fileName);
+  const effectiveAtsScore = resumeInfo?.atsScore ?? builderScore;
+  const fromUpload = resumeInfo?.source === 'upload' && resumeInfo?.atsScore != null;
 
   // Stats definition
   const stats = [
@@ -25,7 +30,7 @@ const Dashboard = () => {
       label: 'Saved Jobs',
       value: savedJobs?.length || 0,
       color: 'text-rose-600 bg-rose-50 border-rose-100',
-      icon: FiHeart
+      icon: FiBookmark
     },
     {
       label: 'Recommended Jobs',
@@ -106,22 +111,51 @@ const Dashboard = () => {
               </div>
               <div>
                 <h3 className="text-base font-extrabold text-slate-800">ATS Resume Score</h3>
-                <p className="text-xs text-slate-400">Calculated based on structure & key skills</p>
+                <p className="text-xs text-slate-400">
+                  {fromUpload ? 'From your uploaded resume' : hasResume ? 'From Resume Builder' : 'No resume linked'}
+                </p>
               </div>
             </div>
 
             <div className="flex flex-col gap-2.5 bg-slate-50 border border-slate-100 rounded-xl p-4 mb-4">
-              <div className="flex justify-between items-center text-xs font-black text-slate-700">
-                <span>ATS Quality Indicator</span>
-                <span className={atsScore >= 80 ? 'text-emerald-600' : 'text-amber-600'}>{atsScore}/100</span>
-              </div>
-              <ProgressBar value={atsScore} showPercentage={false} size="sm" colorScheme="dynamic" />
+              {hasResume ? (
+                <>
+                  <div className="flex justify-between items-center text-xs font-black text-slate-700">
+                    <span>ATS Quality Indicator</span>
+                    <span className={effectiveAtsScore >= 80 ? 'text-emerald-600' : effectiveAtsScore >= 50 ? 'text-amber-600' : 'text-rose-600'}>
+                      {effectiveAtsScore}/100
+                    </span>
+                  </div>
+                  <ProgressBar value={effectiveAtsScore} showPercentage={false} size="sm" colorScheme="dynamic" />
+                  {effectiveAtsScore < 70 && (
+                    <div className="flex items-start gap-2 mt-1 p-2.5 bg-amber-50 border border-amber-100 rounded-xl">
+                      <FiAlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                      <p className="text-[11px] font-semibold text-amber-700 leading-relaxed">
+                        Your ATS score is below the recommended threshold. Use our Resume Builder to improve it.
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex items-start gap-2 p-2.5 bg-slate-100 rounded-xl">
+                  <FiUpload className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                  <p className="text-[11px] font-semibold text-slate-500 leading-relaxed">
+                    Upload your resume in the Profile section or use our Resume Builder to get your ATS score.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
-          <Link to="/resume">
+          <Link to={hasResume && effectiveAtsScore >= 70 ? '/resume' : '/profile'}>
             <Button variant="light" size="sm" className="w-full">
-              Open ATS Resume Builder <FiArrowRight className="ml-1" />
+              {hasResume
+                ? effectiveAtsScore >= 70
+                  ? 'Open Resume Builder' 
+                  : 'Improve with Resume Builder'
+                : 'Add Resume in Profile'
+              }
+              <FiArrowRight className="ml-1" />
             </Button>
           </Link>
         </div>
@@ -206,7 +240,7 @@ const Dashboard = () => {
                     className="p-2.5 shrink-0 bg-white"
                     onClick={() => handleSaveToggle(job.id)}
                   >
-                    <FiHeart className={isJobSaved(job.id) ? 'fill-rose-500 text-rose-500' : 'text-slate-400'} />
+                    <FiBookmark className={isJobSaved(job.id) ? 'fill-rose-500 text-rose-500' : 'text-slate-400'} />
                   </Button>
                 </div>
               </div>

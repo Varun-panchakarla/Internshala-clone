@@ -12,8 +12,6 @@ export const ResumeProvider = ({ children }) => {
   const [saving, setSaving]   = useState(false);
   const [error, setError]     = useState(null);
 
-  // ── Template selection — persisted in localStorage so it survives refresh
-  // Changing template NEVER resets resume data (separate state).
   const [selectedTemplate, setSelectedTemplateState] = useState(
     () => localStorage.getItem('jobportal_selected_template') || 'professional'
   );
@@ -23,13 +21,12 @@ export const ResumeProvider = ({ children }) => {
     localStorage.setItem('jobportal_selected_template', templateId);
   };
 
-  // ── Fetch resume from storage ─────────────────────────────────────────────
   const fetchResume = async () => {
     if (!isAuthenticated) { setResume(null); setLoading(false); return; }
     setLoading(true);
     try {
       const res = await resumeService.getResume();
-      console.log('saveResume response:', res.data); setResume(res.data);
+      setResume(res.data?.data || null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -39,7 +36,6 @@ export const ResumeProvider = ({ children }) => {
 
   useEffect(() => { fetchResume(); }, [isAuthenticated, currentUser?.id]);
 
-  // ── Update handlers ───────────────────────────────────────────────────────
   const updatePersonalInfo = (info) =>
     setResume(prev => prev ? { ...prev, personalInfo: { ...prev.personalInfo, ...info } } : null);
 
@@ -50,13 +46,14 @@ export const ResumeProvider = ({ children }) => {
   const updateCertifications = (v) => setResume(p => p ? { ...p, certifications: v } : null);
   const updateSkills         = (v) => setResume(p => p ? { ...p, skills: v }         : null);
 
-  const saveResume = async () => {
-    if (!resume) return;
+  const saveResume = async (customData = null) => {
+    const dataToSave = customData || resume;
+    if (!dataToSave) return;
     setSaving(true);
     try {
-      const res = await resumeService.saveResume(resume);
-      setResume(res.data);
-      return res.data;
+      const res = await resumeService.saveResume(dataToSave);
+      setResume(res.data?.data || dataToSave);
+      return res.data?.data;
     } catch (err) {
       console.error('Failed to save resume', err);
       throw err;
@@ -65,7 +62,6 @@ export const ResumeProvider = ({ children }) => {
     }
   };
 
-  // ── Derived values ────────────────────────────────────────────────────────
   const resumeCompletion = calculateResumeCompletion(resume);
   const atsResults       = calculateAtsScore(resume);
 
@@ -78,10 +74,8 @@ export const ResumeProvider = ({ children }) => {
     atsScore:       atsResults.score,
     atsSuggestions: atsResults.suggestions,
     atsBreakdown:   atsResults.breakdown,
-    // Template
     selectedTemplate,
     setSelectedTemplate,
-    // Updaters
     updatePersonalInfo,
     updateEducation,
     updateExperience,

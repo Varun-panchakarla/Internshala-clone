@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useJobs } from '../context/JobContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
-import { FiChevronLeft, FiMapPin, FiBriefcase, FiClock, FiHeart, FiCheck, FiCpu, FiAward, FiInfo } from 'react-icons/fi';
+import { FiChevronLeft, FiMapPin, FiBriefcase, FiClock, FiBookmark, FiCheck, FiCpu, FiAward, FiInfo } from 'react-icons/fi';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -235,7 +235,7 @@ const JobDetails = () => {
             className="px-6 bg-white"
             onClick={handleSaveToggle}
           >
-            <FiHeart className={`mr-2 w-4 h-4 ${isJobSaved(job.id) ? 'fill-rose-500 text-rose-500' : 'text-slate-400'}`} />
+            <FiBookmark className={`mr-2 w-4 h-4 ${isJobSaved(job.id) ? 'fill-rose-500 text-rose-500' : 'text-slate-400'}`} />
             {isJobSaved(job.id) ? 'Saved' : 'Save Job'}
           </Button>
 

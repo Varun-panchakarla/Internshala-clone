@@ -11,9 +11,7 @@ const TermsPage = () => {
       <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">
         Terms & Conditions
       </h1>
-      <p className="text-xs font-bold text-slate-400 dark:text-slate-500 mb-10 pb-6 border-b border-slate-100 dark:border-slate-800">
-        Last Updated: July 14, 2026
-      </p>
+      <div className="mb-10 pb-6 border-b border-slate-100 dark:border-slate-800" />
 
       {/* Terms Content Wrapper */}
       <div className="flex flex-col gap-12 text-sm text-slate-650 dark:text-slate-350 leading-relaxed font-normal">

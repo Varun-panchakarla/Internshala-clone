@@ -37,7 +37,7 @@ const Footer = () => {
             <h4 className="text-xs font-black uppercase text-slate-850 dark:text-white tracking-wider">Company</h4>
             <ul className="flex flex-col gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
               <li><Link to="/about" className="hover:text-brand-600 transition-colors">About Us</Link></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Careers</a></li>
+              <li><Link to="/careers" className="hover:text-brand-600 transition-colors">Careers</Link></li>
               <li><Link to="/contact" className="hover:text-brand-600 transition-colors">Contact Us</Link></li>
             </ul>
           </div>
