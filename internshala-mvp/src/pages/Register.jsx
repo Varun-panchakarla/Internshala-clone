@@ -54,9 +54,11 @@ const Register = () => {
 
     setLoading(true);
     try {
-      await register(name.trim(), email, password);
+      const user = await register(name.trim(), email, password);
       addToast('Account created successfully! Welcome to the portal.', 'success');
-      navigate('/profile'); // Redirect to Profile Setup wizard
+      localStorage.removeItem(`onboarding_completed_${user?.id}`);
+      localStorage.removeItem(`onboarding_completed_${email}`);
+      navigate('/onboarding');
     } catch (err) {
       addToast(err.response?.data?.error || 'Registration failed. Email might already exist.', 'error');
     } finally {
@@ -71,9 +73,11 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      await googleLogin(credentialResponse.credential);
+      const user = await googleLogin(credentialResponse.credential);
       addToast('Signed in with Google!', 'success');
-      navigate('/dashboard');
+      localStorage.removeItem(`onboarding_completed_${user?.id}`);
+      localStorage.removeItem(`onboarding_completed_${user?.email}`);
+      navigate('/onboarding');
     } catch (err) {
       addToast(err.response?.data?.error || 'Google sign-in failed.', 'error');
     } finally {

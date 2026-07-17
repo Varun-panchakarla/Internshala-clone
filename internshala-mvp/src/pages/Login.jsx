@@ -44,9 +44,10 @@ const Login = () => {
 
     setLoading(true);
     try {
-      await login(email, password);
+      const user = await login(email, password);
       addToast('Welcome back! Login successful.', 'success');
-      navigate('/dashboard');
+      const onboardingCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`) === 'true';
+      navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
     } catch (err) {
       addToast(err.response?.data?.error || 'Login failed. Please check credentials.', 'error');
     } finally {
@@ -61,9 +62,10 @@ const Login = () => {
     }
     setLoading(true);
     try {
-      const res = await googleLogin(credentialResponse.credential);
+      const user = await googleLogin(credentialResponse.credential);
       addToast('Signed in with Google!', 'success');
-      navigate('/dashboard');
+      const onboardingCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`) === 'true';
+      navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
     } catch (err) {
       addToast(err.response?.data?.error || 'Google sign-in failed.', 'error');
     } finally {

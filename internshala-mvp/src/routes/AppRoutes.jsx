@@ -24,10 +24,13 @@ import AboutUs from '../pages/AboutUs';
 import ContactUs from '../pages/ContactUs';
 import Careers from '../pages/Careers';
 import MainLayout from '../layouts/MainLayout';
+import Onboarding from '../pages/Onboarding';
+import OnboardingStep2 from '../pages/OnboardingStep2';
+import OnboardingStep3 from '../pages/OnboardingStep3';
 
 // Protected Route Wrapper
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+const ProtectedRoute = ({ children, allowOnboardingIncomplete = false, hideSidebar = false }) => {
+  const { isAuthenticated, loading, currentUser } = useAuth();
 
   if (loading) {
     return <LoadingSpinner fullPage text="Securing session..." />;
@@ -37,7 +40,13 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  return <MainLayout>{children}</MainLayout>;
+  const onboardingCompleted = localStorage.getItem(`onboarding_completed_${currentUser?.id}`) === 'true';
+
+  if (!onboardingCompleted && !allowOnboardingIncomplete) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  return <MainLayout hideSidebar={hideSidebar}>{children}</MainLayout>;
 };
 
 // Public Route (with layout option)
@@ -163,6 +172,32 @@ const AppRoutes = () => {
           <PublicRoute useLayout={true}>
             <JobDetails />
           </PublicRoute>
+        }
+      />
+
+      {/* Onboarding Pages */}
+      <Route
+        path="/onboarding"
+        element={
+          <ProtectedRoute allowOnboardingIncomplete={true} hideSidebar={true}>
+            <Onboarding />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/onboarding/step2"
+        element={
+          <ProtectedRoute allowOnboardingIncomplete={true} hideSidebar={true}>
+            <OnboardingStep2 />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/onboarding/step3"
+        element={
+          <ProtectedRoute allowOnboardingIncomplete={true} hideSidebar={true}>
+            <OnboardingStep3 />
+          </ProtectedRoute>
         }
       />
 
