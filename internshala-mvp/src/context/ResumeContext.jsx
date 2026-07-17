@@ -12,8 +12,6 @@ export const ResumeProvider = ({ children }) => {
   const [saving, setSaving]   = useState(false);
   const [error, setError]     = useState(null);
 
-  // ── Template selection — persisted in localStorage so it survives refresh
-  // Changing template NEVER resets resume data (separate state).
   const [selectedTemplate, setSelectedTemplateState] = useState(
     () => localStorage.getItem('jobportal_selected_template') || 'professional'
   );
@@ -23,7 +21,6 @@ export const ResumeProvider = ({ children }) => {
     localStorage.setItem('jobportal_selected_template', templateId);
   };
 
-  // ── Fetch resume from storage ─────────────────────────────────────────────
   const fetchResume = async () => {
     if (!isAuthenticated) { setResume(null); setLoading(false); return; }
     setLoading(true);
@@ -39,7 +36,6 @@ export const ResumeProvider = ({ children }) => {
 
   useEffect(() => { fetchResume(); }, [isAuthenticated, currentUser?.id]);
 
-  // ── Update handlers ───────────────────────────────────────────────────────
   const updatePersonalInfo = (info) =>
     setResume(prev => prev ? { ...prev, personalInfo: { ...prev.personalInfo, ...info } } : null);
 
@@ -66,7 +62,6 @@ export const ResumeProvider = ({ children }) => {
     }
   };
 
-  // ── Derived values ────────────────────────────────────────────────────────
   const resumeCompletion = calculateResumeCompletion(resume);
   const atsResults       = calculateAtsScore(resume);
 
@@ -79,10 +74,8 @@ export const ResumeProvider = ({ children }) => {
     atsScore:       atsResults.score,
     atsSuggestions: atsResults.suggestions,
     atsBreakdown:   atsResults.breakdown,
-    // Template
     selectedTemplate,
     setSelectedTemplate,
-    // Updaters
     updatePersonalInfo,
     updateEducation,
     updateExperience,

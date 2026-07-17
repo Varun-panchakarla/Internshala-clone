@@ -221,7 +221,7 @@ const AppRoutes = () => {
       <Route
         path="/resume"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute hideSidebar={true}>
             <ResumeBuilder />
           </ProtectedRoute>
         }
@@ -229,7 +229,7 @@ const AppRoutes = () => {
       <Route
         path="/resume-templates"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute hideSidebar={true}>
             <ResumeTemplates />
           </ProtectedRoute>
         }

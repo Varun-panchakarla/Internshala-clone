@@ -35,8 +35,6 @@ const Sidebar = () => {
   return (
     <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-slate-100 dark:border-slate-800/60 bg-white dark:bg-gray-950 min-h-[calc(100vh-4rem)] sticky top-16">
 
-
-
       {/* Navigation links */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.12em] px-2 mb-2">Navigation</p>
@@ -115,28 +113,7 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Bottom promo card */}
-      <div className="px-3 pb-4">
-        <Link to="/resume" className="block">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 via-brand-700 to-indigo-800 p-4 text-white hover:shadow-xl hover:shadow-brand-600/20 transition-all duration-300 group">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-xl translate-x-6 -translate-y-6" />
-            <div className="absolute bottom-0 left-0 w-16 h-16 bg-indigo-500/20 rounded-full blur-lg -translate-x-4 translate-y-4" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-1.5 mb-2">
-                <FiZap className="w-3 h-3 text-amber-300" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-amber-300">AI Powered</span>
-              </div>
-              <h4 className="text-xs font-bold mb-1.5 leading-snug">Build a Job-Ready Resume</h4>
-              <p className="text-[10px] text-white/70 leading-relaxed mb-3">
-                8 pro templates. ATS optimized. Auto-scored. Download as PDF.
-              </p>
-              <div className="flex items-center gap-1 text-[10px] font-bold text-amber-300 group-hover:gap-2 transition-all">
-                <FiTrendingUp className="w-3 h-3" /> Open Builder →
-              </div>
-            </div>
-          </div>
-        </Link>
-      </div>
+      {/* Bottom promo card removed */}
     </aside>
   );
 };

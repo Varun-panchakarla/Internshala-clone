@@ -1,0 +1,145 @@
+{
+  "1": {
+    "personalInfo": {
+      "fullName": "Jane Doe",
+      "email": "jane@example.com",
+      "phone": "1234567890",
+      "location": "hyderabad",
+      "linkedin": "linkedin.com",
+      "github": "github.com",
+      "website": "",
+      "summary": "Frontend Developer with hands-on experience in building responsive and user-friendly web applications using React.js, JavaScript, HTML, CSS, and Tailwind CSS. Passionate about creating clean, scalable UI components and delivering seamless user experiences with modern web technologies.",
+      "gender": "",
+      "photo": "",
+      "dob": "",
+      "portfolio": ""
+    },
+    "education": [
+      {
+        "type": "12th",
+        "institution": "narayana",
+        "board": "",
+        "degree": "mpc",
+        "cgpa": "9.0",
+        "startYear": "2020",
+        "endYear": "2022",
+        "branch": "state"
+      },
+      {
+        "type": "graduation",
+        "institution": "vignan",
+        "degree": "btech",
+        "branch": "cse",
+        "cgpa": "9.6",
+        "startYear": "2022",
+        "endYear": "2026"
+      },
+      {
+        "type": "10th",
+        "institution": "montessori",
+        "board": "",
+        "cgpa": "9.5",
+        "startYear": "2019",
+        "endYear": "2020",
+        "branch": "state"
+      }
+    ],
+    "experience": [
+      {
+        "role": "frontend developer",
+        "company": "infosys",
+        "duration": "2yrs",
+        "description": "kytresdfghbvb hgfdfghj iuytrf uyty ytfder367uokj"
+      }
+    ],
+    "internship": [
+      {
+        "company": "infosys",
+        "role": "frontend developer",
+        "duration": "2024-2025",
+        "description": "Frontend Developer with hands-on experience in building responsive and user-friendly web applications using React.js, JavaScript, HTML, CSS, and Tailwind CSS. Passionate about creating clean, scalable UI components and delivering seamless user experiences with modern web technologies."
+      }
+    ],
+    "projects": [
+      {
+        "title": "brain tumour prediction using ML ,Dl Frameworks.",
+        "technologies": "react,MERN,constraint satisfied algorithm.",
+        "description": "it modifies tumoured and untumored images.",
+        "githubLink": "github.com",
+        "liveDemo": "jggfgnj"
+      }
+    ],
+    "certifications": [
+      {
+        "name": "aws",
+        "organization": "google",
+        "year": "2024",
+        "link": "aws@123"
+      }
+    ],
+    "skills": [
+      "react",
+      "java",
+      "python",
+      "sql"
+    ],
+    "languages": [
+      {
+        "text": "[object Object]telugu"
+      }
+    ],
+    "achievements": [],
+    "interests": []
+  },
+  "123": {
+    "personalInfo": {
+      "fullName": "Test"
+    }
+  },
+  "1784279909459": {
+    "personalInfo": {
+      "fullName": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "",
+      "location": "",
+      "linkedin": "",
+      "github": "",
+      "website": "",
+      "summary": ""
+    },
+    "education": [],
+    "experience": [],
+    "internship": [],
+    "projects": [],
+    "certifications": [],
+    "skills": []
+  },
+  "testuser": {
+    "test": "data"
+  },
+  "testuser2": {
+    "personalInfo": {
+      "fullName": "",
+      "email": "",
+      "phone": "",
+      "location": "",
+      "linkedin": "",
+      "github": "",
+      "portfolio": "",
+      "dob": "",
+      "gender": "",
+      "website": "",
+      "summary": "",
+      "photo": ""
+    },
+    "education": [],
+    "experience": [],
+    "internship": [],
+    "projects": [],
+    "certifications": [],
+    "skills": [],
+    "achievements": [],
+    "languages": [],
+    "interests": []
+  }
+}

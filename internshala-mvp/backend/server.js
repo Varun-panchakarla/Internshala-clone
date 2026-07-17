@@ -59,7 +59,6 @@ async function initDb() {
     const schemaSql = fs.readFileSync(path.resolve(__dirname, 'db', 'init.sql'), 'utf-8');
     await pool.query(schemaSql);
     console.log('[DB] Schema initialized.');
-
     await seedJobs();
   } catch (err) {
     console.error('[DB] Init error:', err.message);
