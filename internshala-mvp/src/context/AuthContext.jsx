@@ -4,6 +4,18 @@ import { calculateProfileCompletion } from '../utils/atsScorer';
 
 const AuthContext = createContext();
 
+function normalizeUser(apiData) {
+  if (!apiData) return null;
+  const { user, profile } = apiData;
+  return {
+    id: user?.id,
+    email: user?.email,
+    name: user?.name,
+    profileCompleted: !!(profile && (profile.fullName || profile.skills?.length > 0)),
+    profileData: profile || {},
+  };
+}
+
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,9 +25,9 @@ export const AuthProvider = ({ children }) => {
     const loadSession = async () => {
       try {
         const res = await authService.getCurrentUser();
-        setCurrentUser(res.data);
-      } catch (err) {
-        console.error('Failed to load user session', err);
+        setCurrentUser(normalizeUser(res.data));
+      } catch {
+        setCurrentUser(null);
       } finally {
         setLoading(false);
       }
@@ -28,25 +40,27 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const res = await authService.login(email, password);
-      setCurrentUser(res.data);
-      return res.data;
+      const user = normalizeUser(res.data);
+      setCurrentUser(user);
+      return user;
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message);
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  const googleLogin = async (googleUser) => {
+  const googleLogin = async (credential) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await authService.googleAuth(googleUser);
-      setCurrentUser(res.data);
-      return res;
+      const res = await authService.googleAuth(credential);
+      const user = normalizeUser(res.data);
+      setCurrentUser(user);
+      return user;
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message);
       throw err;
     } finally {
       setLoading(false);
@@ -58,10 +72,11 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const res = await authService.register(name, email, password);
-      setCurrentUser(res.data);
-      return res.data;
+      const user = normalizeUser(res.data);
+      setCurrentUser(user);
+      return user;
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message);
       throw err;
     } finally {
       setLoading(false);
@@ -84,8 +99,13 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await authService.updateProfile(profileData);
-      setCurrentUser(res.data);
-      return res.data;
+      const profile = res.data.profile;
+      setCurrentUser(prev => ({
+        ...prev,
+        profileCompleted: true,
+        profileData: profile,
+      }));
+      return { profile };
     } catch (err) {
       console.error('Profile update failed', err);
       throw err;
@@ -94,9 +114,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Derive profile completion
-  const profileCompletion = currentUser?.profileCompleted 
-    ? calculateProfileCompletion(currentUser.profileData) 
+  const profileCompletion = currentUser?.profileData
+    ? calculateProfileCompletion(currentUser.profileData)
     : 0;
 
   const value = {
@@ -109,7 +128,7 @@ export const AuthProvider = ({ children }) => {
     register,
     googleLogin,
     logout,
-    updateProfile
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

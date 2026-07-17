@@ -1,15 +1,12 @@
 const { fetchFromAdzuna } = require('./adzuna.js');
 const { fetchMNCJobs } = require('./mncJobs.js');
 const { fetchFromJobApi } = require('./jobApi.js');
-const fs = require('fs');
-const path = require('path');
-
-const JOBS_FILE = path.resolve(__dirname, '..', 'jobs.json');
+const pool = require('../db/pool');
 
 function deduplicate(jobs) {
   const seen = new Map();
   for (const job of jobs) {
-    const key = `${job.title.toLowerCase()}|${job.company.toLowerCase()}|${job.location.toLowerCase()}`;
+    const key = `${job.title.toLowerCase()}|${job.company.toLowerCase()}|${(job.location || '').toLowerCase()}`;
     if (!seen.has(key)) {
       seen.set(key, job);
     }
@@ -26,29 +23,78 @@ function shuffle(arr) {
   return a;
 }
 
+async function insertJobs(jobs) {
+  let inserted = 0;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (const job of jobs) {
+      try {
+        await client.query(
+          `INSERT INTO jobs (
+            id, title, company, company_logo, logo_color, logo_text,
+            location, salary, experience, employment_type, skills,
+            description, responsibilities, benefits, posted_at,
+            duration, match_score, source, redirect_url, created_at
+          ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+          ON CONFLICT (id) DO UPDATE SET
+            title = EXCLUDED.title,
+            company = EXCLUDED.company,
+            location = EXCLUDED.location,
+            salary = EXCLUDED.salary,
+            experience = EXCLUDED.experience,
+            employment_type = EXCLUDED.employment_type,
+            skills = EXCLUDED.skills,
+            description = EXCLUDED.description,
+            posted_at = EXCLUDED.posted_at,
+            redirect_url = EXCLUDED.redirect_url`,
+          [
+            job.id, job.title, job.company, job.companyLogo || '',
+            job.logoColor || null, job.logoText || null,
+            job.location || null, job.salary || null,
+            job.experience || null, job.employmentType || null,
+            job.skills || [],
+            job.description || null,
+            JSON.stringify(job.responsibilities || []),
+            JSON.stringify(job.benefits || []),
+            job.postedAt || null, job.duration || null,
+            job.matchScore || 0, job.source || null,
+            job.redirect_url || null, new Date(),
+          ]
+        );
+        inserted++;
+      } catch (err) {
+        console.error(`[Scraper] DB insert error for ${job.id}: ${err.message}`);
+      }
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('[Scraper] Transaction error:', err.message);
+  } finally {
+    client.release();
+  }
+  return inserted;
+}
+
 async function scrapeAll() {
   console.log('[Scraper] Starting job collection...');
 
-  // Primary: Adzuna API — general broad searches
   console.log('[Scraper] Running Adzuna API...');
   const adzunaJobs = await fetchFromAdzuna();
 
-  // MNC scraper — company-specific searches via Indeed + Adzuna
   console.log('[Scraper] Running MNC company scraper...');
   const mncJobs = await fetchMNCJobs();
 
-  // Merge all sources
   let jobs = [...adzunaJobs, ...mncJobs];
 
-  // Fallback: Indeed API if everything above returned nothing
   if (jobs.length === 0) {
     console.log('[Scraper] Primary sources returned 0 jobs. Falling back to Indeed API...');
     jobs = await fetchFromJobApi();
   }
 
   if (jobs.length === 0) {
-    console.log('[Scraper] No jobs from any source. Writing empty array.');
-    fs.writeFileSync(JOBS_FILE, JSON.stringify([], null, 2), 'utf-8');
+    console.log('[Scraper] No jobs from any source.');
     return [];
   }
 
@@ -61,9 +107,8 @@ async function scrapeAll() {
     matchScore: 0,
   }));
 
-  const json = JSON.stringify(withScore, null, 2);
-  fs.writeFileSync(JOBS_FILE, json, 'utf-8');
-  console.log(`[Scraper] Saved ${withScore.length} real jobs to ${JOBS_FILE}`);
+  const inserted = await insertJobs(withScore);
+  console.log(`[Scraper] Inserted/updated ${inserted} jobs to PostgreSQL.`);
 
   return withScore;
 }
