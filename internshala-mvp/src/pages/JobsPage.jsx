@@ -105,6 +105,21 @@ const JobsPage = () => {
     { label: 'Contract', value: 'Contract' }
   ];
 
+  const salaryOptions = [
+    { label: 'All Salaries', value: '' },
+    { label: 'Below ₹3 LPA', value: 'below-3' },
+    { label: '₹3 - ₹6 LPA', value: '3-6' },
+    { label: '₹6 - ₹12 LPA', value: '6-12' },
+    { label: 'Above ₹12 LPA', value: 'above-12' }
+  ];
+
+  const dateOptions = [
+    { label: 'Any Time', value: '' },
+    { label: 'Today', value: 'today' },
+    { label: 'Last 7 Days', value: 'week' },
+    { label: 'Last 30 Days', value: 'month' }
+  ];
+
   // Render Filter Form Component (reusable)
   const FilterContent = () => (
     <div className="flex flex-col gap-5">
@@ -154,6 +169,33 @@ const JobsPage = () => {
         value={filters.employmentType}
         onChange={(e) => handleFilterChange('employmentType', e.target.value)}
         options={employmentTypeOptions}
+      />
+
+      <Input
+        label="Company Name"
+        id="filterCompany"
+        type="text"
+        placeholder="e.g. TCS, Accenture..."
+        value={filters.company}
+        onChange={(e) => handleFilterChange('company', e.target.value)}
+      />
+
+      <Input
+        label="Salary Range"
+        id="filterSalary"
+        type="select"
+        value={filters.salaryRange}
+        onChange={(e) => handleFilterChange('salaryRange', e.target.value)}
+        options={salaryOptions}
+      />
+
+      <Input
+        label="Date Posted"
+        id="filterDate"
+        type="select"
+        value={filters.datePosted}
+        onChange={(e) => handleFilterChange('datePosted', e.target.value)}
+        options={dateOptions}
       />
     </div>
   );

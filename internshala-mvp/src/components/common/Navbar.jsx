@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useJobs } from '../../context/JobContext';
@@ -25,6 +25,8 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [navPhotoError, setNavPhotoError] = useState(false);
+  useEffect(() => { setNavPhotoError(false); }, [currentUser?.profileData?.profilePhoto]);
 
   const handleLogout = async () => {
     await logout();
@@ -77,10 +79,11 @@ const Navbar = () => {
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className="flex items-center gap-2.5 p-1 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors focus:outline-none cursor-pointer"
                 >
-                  {currentUser.profileData?.profilePhoto ? (
+                  {currentUser.profileData?.profilePhoto && !navPhotoError ? (
                     <img
                       src={currentUser.profileData.profilePhoto}
                       alt={currentUser.name}
+                      onError={() => setNavPhotoError(true)}
                       className="w-8 h-8 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-800"
                     />
                   ) : (

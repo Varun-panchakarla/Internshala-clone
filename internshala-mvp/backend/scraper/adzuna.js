@@ -4,11 +4,9 @@ const APP_ID = 'bc23f928';
 const APP_KEY = '9e0a97eba76a5d610c3a5995b40cfe15';
 
 const SEARCH_TERMS = [
-  'software engineer', 'internship', 'developer',
-  'marketing', 'sales', 'data analyst', 'design',
-  'business development', 'human resources', 'finance',
-  'content writing', 'product manager', 'mechanical engineer',
-  'civil engineer', 'electrical engineer',
+  'software engineer', 'internship',
+  'marketing', 'data analyst',
+  'finance', 'mechanical engineer',
 ];
 
 const LOGO_COLORS = [

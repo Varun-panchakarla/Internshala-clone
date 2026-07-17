@@ -1,4 +1,5 @@
 const { fetchFromAdzuna } = require('./adzuna.js');
+const { fetchMNCJobs } = require('./mncJobs.js');
 const { fetchFromJobApi } = require('./jobApi.js');
 const fs = require('fs');
 const path = require('path');
@@ -26,17 +27,22 @@ function shuffle(arr) {
 }
 
 async function scrapeAll() {
-  let jobs = [];
-
   console.log('[Scraper] Starting job collection...');
 
-  // Primary: Adzuna API
-  console.log('[Scraper] Trying Adzuna API...');
-  jobs = await fetchFromAdzuna();
+  // Primary: Adzuna API — general broad searches
+  console.log('[Scraper] Running Adzuna API...');
+  const adzunaJobs = await fetchFromAdzuna();
 
-  // Fallback: Indeed API if Adzuna returns nothing
+  // MNC scraper — company-specific searches via Indeed + Adzuna
+  console.log('[Scraper] Running MNC company scraper...');
+  const mncJobs = await fetchMNCJobs();
+
+  // Merge all sources
+  let jobs = [...adzunaJobs, ...mncJobs];
+
+  // Fallback: Indeed API if everything above returned nothing
   if (jobs.length === 0) {
-    console.log('[Scraper] Adzuna returned 0 jobs. Falling back to Indeed API...');
+    console.log('[Scraper] Primary sources returned 0 jobs. Falling back to Indeed API...');
     jobs = await fetchFromJobApi();
   }
 

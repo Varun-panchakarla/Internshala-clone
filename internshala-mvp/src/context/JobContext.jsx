@@ -19,7 +19,10 @@ export const JobProvider = ({ children }) => {
     location: '',
     experience: '',
     employmentType: '',
-    skills: []
+    skills: [],
+    company: '',
+    salaryRange: '',
+    datePosted: ''
   });
 
   const fetchJobs = async () => {
@@ -99,6 +102,33 @@ export const JobProvider = ({ children }) => {
     };
   });
 
+  // Parse salary string like "₹10.0L - ₹12.0L / year" to numeric Lakhs
+  const parseSalaryLakhs = (salaryStr) => {
+    if (!salaryStr || salaryStr === 'Undisclosed') return null;
+    const nums = [...salaryStr.matchAll(/₹?(\d+\.?\d*)L/g)].map(m => parseFloat(m[1]));
+    return nums.length > 0 ? nums : null;
+  };
+
+  // Parse formatted date back to approximate days ago
+  const daysAgo = (postedAt) => {
+    if (!postedAt) return null;
+    const lower = postedAt.toLowerCase();
+    if (lower === 'today' || lower === 'just now') return 0;
+    if (lower === 'yesterday') return 1;
+    const match = postedAt.match(/^(\w{3})\s+(\d{1,2})$/);
+    if (match) {
+      const months = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+      const month = months[match[1].toLowerCase()];
+      const day = parseInt(match[2]);
+      if (month !== undefined) {
+        const then = new Date(new Date().getFullYear(), month, day);
+        const now = new Date();
+        return Math.floor((now - then) / (1000 * 60 * 60 * 24));
+      }
+    }
+    return null;
+  };
+
   // Filter jobs based on search query and filters
   const filteredJobs = processedJobs.filter(job => {
     // 1. Search Query Check (title, company, skills)
@@ -133,7 +163,43 @@ export const JobProvider = ({ children }) => {
         job.skills.map(s => s.toLowerCase()).includes(skill.toLowerCase())
       );
 
-    return matchesSearch && matchesRole && matchesLocation && matchesExperience && matchesType && matchesSkills;
+    // 7. Company Filter Check
+    const matchesCompany = filters.company === '' || 
+      job.company.toLowerCase().includes(filters.company.toLowerCase());
+
+    // 8. Salary Range Filter Check
+    let matchesSalary = true;
+    if (filters.salaryRange) {
+      const parsed = parseSalaryLakhs(job.salary);
+      if (parsed) {
+        const avg = (parsed[0] + (parsed[1] || parsed[0])) / 2;
+        switch (filters.salaryRange) {
+          case 'below-3': matchesSalary = avg < 3; break;
+          case '3-6': matchesSalary = avg >= 3 && avg <= 6; break;
+          case '6-12': matchesSalary = avg > 6 && avg <= 12; break;
+          case 'above-12': matchesSalary = avg > 12; break;
+          default: matchesSalary = true;
+        }
+      } else {
+        matchesSalary = false;
+      }
+    }
+
+    // 9. Date Posted Filter Check
+    let matchesDate = true;
+    if (filters.datePosted) {
+      const days = daysAgo(job.postedAt);
+      if (days !== null) {
+        switch (filters.datePosted) {
+          case 'today': matchesDate = days <= 0; break;
+          case 'week': matchesDate = days <= 7; break;
+          case 'month': matchesDate = days <= 30; break;
+          default: matchesDate = true;
+        }
+      }
+    }
+
+    return matchesSearch && matchesRole && matchesLocation && matchesExperience && matchesType && matchesSkills && matchesCompany && matchesSalary && matchesDate;
   });
 
   // Recommended jobs: High skill match or matches preferred role/location
@@ -160,7 +226,10 @@ export const JobProvider = ({ children }) => {
       location: '',
       experience: '',
       employmentType: '',
-      skills: []
+      skills: [],
+      company: '',
+      salaryRange: '',
+      datePosted: ''
     });
     setSearchQuery('');
   };

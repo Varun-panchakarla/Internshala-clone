@@ -17,9 +17,11 @@ const Profile = () => {
   const { addToast } = useToast();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const photoInputRef = useRef(null);
 
   const [activeTab, setActiveTab] = useState('personal');
   const [loading, setLoading] = useState(false);
+  const [photoError, setPhotoError] = useState(false);
 
   // Check if user has a resume in the Resume Builder
   const builtResume = (() => {
@@ -46,6 +48,11 @@ const Profile = () => {
   });
 
   const [errors, setErrors] = useState({});
+
+  // Reset photo error when profile photo URL changes
+  useEffect(() => {
+    setPhotoError(false);
+  }, [currentUser?.profileData?.profilePhoto]);
 
   // Sync state with user profile data on load
   useEffect(() => {
@@ -134,6 +141,27 @@ const Profile = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      addToast('Please select an image file.', 'error');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      addToast('Image must be under 2 MB.', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setFormData(prev => ({ ...prev, profilePhoto: event.target.result }));
+      setPhotoError(false);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleFileSelect = async (e) => {
@@ -254,13 +282,37 @@ const Profile = () => {
                   required
                 />
                 
-                <Input
-                  label="Profile Photo URL"
-                  id="profilePhoto"
-                  placeholder="e.g. https://images.unsplash.com/photo-..."
-                  value={formData.profilePhoto}
-                  onChange={(e) => handleInputChange('profilePhoto', e.target.value)}
-                />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Profile Photo</label>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => photoInputRef.current?.click()}
+                      className="px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-sm font-bold text-slate-600 transition-colors cursor-pointer"
+                    >
+                      {formData.profilePhoto ? 'Change Photo' : 'Upload Photo'}
+                    </button>
+                    {formData.profilePhoto && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, profilePhoto: '' }));
+                          setPhotoError(false);
+                        }}
+                        className="text-xs font-bold text-rose-500 hover:text-rose-600 cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                  />
+                </div>
               </div>
 
               <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2 mt-4">
@@ -431,10 +483,11 @@ const Profile = () => {
         {/* Profile Card Summary */}
         <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-md flex flex-col items-center text-center">
           <div className="relative mb-4">
-            {currentUser.profileData?.profilePhoto ? (
+            {formData.profilePhoto && !photoError ? (
               <img
-                src={currentUser.profileData.profilePhoto}
+                src={formData.profilePhoto}
                 alt={currentUser.name}
+                onError={() => setPhotoError(true)}
                 className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg ring-2 ring-slate-100"
               />
             ) : (
@@ -528,12 +581,37 @@ const Profile = () => {
                     error={errors.fullName}
                     required
                   />
-                  <Input
-                    label="Profile Photo URL"
-                    id="profilePhoto"
-                    value={formData.profilePhoto}
-                    onChange={(e) => handleInputChange('profilePhoto', e.target.value)}
-                  />
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Profile Photo</label>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => photoInputRef.current?.click()}
+                        className="px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-sm font-bold text-slate-600 transition-colors cursor-pointer"
+                      >
+                        {formData.profilePhoto ? 'Change Photo' : 'Upload Photo'}
+                      </button>
+                      {formData.profilePhoto && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, profilePhoto: '' }));
+                            setPhotoError(false);
+                          }}
+                          className="text-xs font-bold text-rose-500 hover:text-rose-600 cursor-pointer"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handlePhotoUpload}
+                    />
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
