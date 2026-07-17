@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useJobs } from '../context/JobContext';
 import { useResume } from '../context/ResumeContext';
-import { FiBriefcase, FiBookmark, FiCheckCircle, FiFileText, FiAward, FiArrowRight, FiUserCheck } from 'react-icons/fi';
+import { FiBriefcase, FiBookmark, FiCheckCircle, FiFileText, FiAward, FiArrowRight, FiUserCheck, FiAlertTriangle, FiUpload } from 'react-icons/fi';
 import Button from '../components/common/Button';
 import ProgressBar from '../components/common/ProgressBar';
 
