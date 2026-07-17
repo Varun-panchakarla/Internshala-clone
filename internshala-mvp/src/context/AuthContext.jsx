@@ -1,8 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { authService } from '../services/mockApi';
 import { calculateProfileCompletion } from '../utils/atsScorer';
 
 const AuthContext = createContext();
+
+const IDLE_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
 function normalizeUser(apiData) {
   if (!apiData) return null;
@@ -20,6 +22,48 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const idleTimer = useRef(null);
+
+  const isAuthenticated = !!currentUser;
+
+  const logout = useCallback(async () => {
+    setLoading(true);
+    try {
+      await authService.logout();
+      setCurrentUser(null);
+    } catch (err) {
+      console.error('Logout failed', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // ── Idle timeout ────────────────────────────────────────────────────────────
+  const resetIdleTimer = useCallback(() => {
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    if (!isAuthenticated) return;
+    idleTimer.current = setTimeout(() => {
+      logout();
+    }, IDLE_TIMEOUT);
+  }, [isAuthenticated, logout]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      return;
+    }
+
+    const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+    const onActivity = () => resetIdleTimer();
+    events.forEach(e => window.addEventListener(e, onActivity, { passive: true }));
+
+    resetIdleTimer();
+
+    return () => {
+      events.forEach(e => window.removeEventListener(e, onActivity));
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
+  }, [isAuthenticated, resetIdleTimer]);
 
   useEffect(() => {
     const loadSession = async () => {
@@ -83,18 +127,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
-    setLoading(true);
-    try {
-      await authService.logout();
-      setCurrentUser(null);
-    } catch (err) {
-      console.error('Logout failed', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const updateProfile = async (profileData) => {
     setLoading(true);
     try {
@@ -122,7 +154,7 @@ export const AuthProvider = ({ children }) => {
     currentUser,
     loading,
     error,
-    isAuthenticated: !!currentUser,
+    isAuthenticated,
     profileCompletion,
     login,
     register,
