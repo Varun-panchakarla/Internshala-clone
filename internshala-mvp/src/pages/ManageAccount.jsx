@@ -72,6 +72,10 @@ const ManageAccount = () => {
       setLoading(false);
       setDeleteModalOpen(false);
       
+      // Clear onboarding completed flags for the deleted account
+      localStorage.removeItem(`onboarding_completed_${currentUser?.id}`);
+      localStorage.removeItem(`onboarding_completed_${currentUser?.email}`);
+      
       // Wipe session and log out
       await logout();
       addToast('Your account and all associated data have been permanently deleted.', 'success');
