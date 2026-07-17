@@ -8,6 +8,11 @@
     "checkJs": false,
     "allowJs": true,
     "noEmit": true,
+<<<<<<< HEAD
+=======
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+>>>>>>> main
     "paths": {
       "@/*": ["./src/*"]
     }
