@@ -1,104 +1,179 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
+const pool = require('../db/pool');
 
 const router = express.Router();
-const JOBS_FILE = path.resolve(__dirname, '..', 'jobs.json');
 
-function loadJobs() {
+// GET /api/jobs — filtered + paginated
+router.get('/', async (req, res) => {
   try {
-    const raw = fs.readFileSync(JOBS_FILE, 'utf-8');
-    return JSON.parse(raw);
-  } catch (e) {
-    return [];
-  }
-}
+    const {
+      search, location, experience, employmentType,
+      role, skills, company, salaryRange, datePosted,
+      page = '1', limit = '50',
+    } = req.query;
 
-// GET /api/jobs
-router.get('/', (req, res) => {
-  const jobs = loadJobs();
+    const conditions = [];
+    const params = [];
+    let idx = 1;
 
-  const {
-    search, location, experience, employmentType, role, skills, company, salaryRange
-  } = req.query;
+    if (search) {
+      const q = `%${search.toLowerCase()}%`;
+      conditions.push(`(
+        LOWER(title) LIKE $${idx} OR
+        LOWER(company) LIKE $${idx} OR
+        EXISTS (SELECT 1 FROM unnest(skills) s WHERE LOWER(s) LIKE $${idx})
+      )`);
+      params.push(q);
+      idx++;
+    }
 
-  let filtered = [...jobs];
-
-  if (search) {
-    const q = search.toLowerCase();
-    filtered = filtered.filter(j =>
-      j.title.toLowerCase().includes(q) ||
-      j.company.toLowerCase().includes(q) ||
-      j.skills.some(s => s.toLowerCase().includes(q))
-    );
-  }
-
-  if (location) {
-    const l = location.toLowerCase();
-    filtered = filtered.filter(j =>
-      l === 'remote'
-        ? j.location.toLowerCase().includes('remote')
-        : j.location.toLowerCase().includes(l) && !j.location.toLowerCase().includes('remote')
-    );
-  }
-
-  if (experience) {
-    const e = experience.toLowerCase();
-    filtered = filtered.filter(j => j.experience?.toLowerCase().includes(e));
-  }
-
-  if (employmentType) {
-    filtered = filtered.filter(j =>
-      j.employmentType?.toLowerCase() === employmentType.toLowerCase()
-    );
-  }
-
-  if (role) {
-    const r = role.toLowerCase();
-    filtered = filtered.filter(j => j.title.toLowerCase().includes(r));
-  }
-
-  if (skills) {
-    const skillList = skills.split(',').map(s => s.trim().toLowerCase());
-    filtered = filtered.filter(j =>
-      skillList.every(s => j.skills.map(x => x.toLowerCase()).includes(s))
-    );
-  }
-
-  if (company) {
-    const c = company.toLowerCase();
-    filtered = filtered.filter(j => j.company?.toLowerCase().includes(c));
-  }
-
-  if (salaryRange) {
-    filtered = filtered.filter(j => {
-      if (!j.salary || j.salary === 'Undisclosed') return false;
-      const nums = [...j.salary.matchAll(/₹?(\d+\.?\d*)L/g)].map(m => parseFloat(m[1]));
-      if (nums.length === 0) return false;
-      const avg = (nums[0] + (nums[1] || nums[0])) / 2;
-      switch (salaryRange) {
-        case 'below-3': return avg < 3;
-        case '3-6': return avg >= 3 && avg <= 6;
-        case '6-12': return avg > 6 && avg <= 12;
-        case 'above-12': return avg > 12;
-        default: return true;
+    if (location) {
+      const l = location.toLowerCase();
+      if (l === 'remote') {
+        conditions.push(`LOWER(location) LIKE '%remote%'`);
+      } else {
+        conditions.push(`LOWER(location) LIKE $${idx} AND LOWER(location) NOT LIKE '%remote%'`);
+        params.push(`%${l}%`);
+        idx++;
       }
-    });
-  }
+    }
 
-  res.json({ data: filtered, total: filtered.length });
+    if (experience) {
+      conditions.push(`LOWER(experience) LIKE $${idx}`);
+      params.push(`%${experience.toLowerCase()}%`);
+      idx++;
+    }
+
+    if (employmentType) {
+      conditions.push(`LOWER(employment_type) = $${idx}`);
+      params.push(employmentType.toLowerCase());
+      idx++;
+    }
+
+    if (role) {
+      conditions.push(`LOWER(title) LIKE $${idx}`);
+      params.push(`%${role.toLowerCase()}%`);
+      idx++;
+    }
+
+    if (skills) {
+      const skillList = skills.split(',').map(s => s.trim().toLowerCase());
+      for (const skill of skillList) {
+        conditions.push(`$${idx} = ANY(skills)`);
+        params.push(skill);
+        idx++;
+      }
+    }
+
+    if (company) {
+      conditions.push(`LOWER(company) LIKE $${idx}`);
+      params.push(`%${company.toLowerCase()}%`);
+      idx++;
+    }
+
+    if (salaryRange) {
+      conditions.push(`salary IS NOT NULL AND salary != 'Undisclosed'`);
+      switch (salaryRange) {
+        case 'below-3':
+          conditions.push(`CAST(SPLIT_PART(REGEXP_REPLACE(salary, '.*₹(\\d+\\.?\\d*)L.*', '\\1'), ' ', 1) AS NUMERIC) < 3`);
+          break;
+        case '3-6':
+          conditions.push(`CAST(SPLIT_PART(REGEXP_REPLACE(salary, '.*₹(\\d+\\.?\\d*)L.*', '\\1'), ' ', 1) AS NUMERIC) >= 3`);
+          conditions.push(`CAST(SPLIT_PART(REGEXP_REPLACE(salary, '.*₹(\\d+\\.?\\d*)L.*', '\\1'), ' ', 1) AS NUMERIC) <= 6`);
+          break;
+        case '6-12':
+          conditions.push(`CAST(SPLIT_PART(REGEXP_REPLACE(salary, '.*₹(\\d+\\.?\\d*)L.*', '\\1'), ' ', 1) AS NUMERIC) > 6`);
+          conditions.push(`CAST(SPLIT_PART(REGEXP_REPLACE(salary, '.*₹(\\d+\\.?\\d*)L.*', '\\1'), ' ', 1) AS NUMERIC) <= 12`);
+          break;
+        case 'above-12':
+          conditions.push(`CAST(SPLIT_PART(REGEXP_REPLACE(salary, '.*₹(\\d+\\.?\\d*)L.*', '\\1'), ' ', 1) AS NUMERIC) > 12`);
+          break;
+      }
+    }
+
+    if (datePosted) {
+      const dateConds = [];
+      if (datePosted === 'today') {
+        dateConds.push(`posted_at ILIKE 'Today' OR posted_at ILIKE 'Just now'`);
+      } else if (datePosted === 'week') {
+        dateConds.push(`(
+          posted_at ILIKE 'Today' OR posted_at ILIKE 'Just now' OR
+          posted_at ILIKE 'Yesterday' OR
+          posted_at ~ '^[A-Z][a-z]{2}\\s+\\d{1,2}$'
+        )`);
+      } else if (datePosted === 'month') {
+        dateConds.push(`(
+          posted_at ILIKE 'Today' OR posted_at ILIKE 'Just now' OR
+          posted_at ILIKE 'Yesterday' OR
+          posted_at ~ '^[A-Z][a-z]{2}\\s+\\d{1,2}$' OR
+          posted_at ~ '^[A-Z][a-z]{2}\\s+\\d{1,2}$'
+        )`);
+      }
+      if (dateConds.length > 0) {
+        conditions.push(`(${dateConds.join(' OR ')})`);
+      }
+    }
+
+    const whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 50));
+    const offset = (pageNum - 1) * limitNum;
+
+    const countResult = await pool.query(`SELECT COUNT(*) FROM jobs ${whereClause}`, params);
+    const total = parseInt(countResult.rows[0].count);
+
+    const dataResult = await pool.query(
+      `SELECT * FROM jobs ${whereClause} ORDER BY created_at DESC LIMIT $${idx} OFFSET $${idx + 1}`,
+      [...params, limitNum, offset]
+    );
+
+    const jobs = dataResult.rows.map(mapJob);
+
+    res.json({ data: jobs, total, page: pageNum, limit: limitNum });
+  } catch (err) {
+    console.error('[Jobs] List error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch jobs.' });
+  }
 });
 
 // GET /api/jobs/:id
-router.get('/:id', (req, res) => {
-  const jobs = loadJobs();
-  const job = jobs.find(j => j.id === req.params.id);
+router.get('/:id', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM jobs WHERE id = $1', [req.params.id]);
 
-  if (!job) {
-    return res.status(404).json({ error: 'Job not found' });
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Job not found.' });
+    }
+
+    res.json({ data: mapJob(result.rows[0]) });
+  } catch (err) {
+    console.error('[Jobs] Get error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch job.' });
   }
-
-  res.json({ data: job });
 });
+
+function mapJob(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    company: row.company,
+    companyLogo: row.company_logo || '',
+    logoColor: row.logo_color,
+    logoText: row.logo_text,
+    location: row.location,
+    salary: row.salary,
+    experience: row.experience,
+    employmentType: row.employment_type,
+    skills: row.skills || [],
+    description: row.description,
+    responsibilities: row.responsibilities || [],
+    benefits: row.benefits || [],
+    postedAt: row.posted_at,
+    duration: row.duration,
+    matchScore: row.match_score || 0,
+    source: row.source,
+    redirect_url: row.redirect_url,
+  };
+}
 
 module.exports = router;

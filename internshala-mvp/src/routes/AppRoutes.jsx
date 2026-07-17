@@ -11,6 +11,7 @@ import JobsPage from '../pages/JobsPage';
 import JobDetails from '../pages/JobDetails';
 import SavedJobs from '../pages/SavedJobs';
 import ResumeBuilder from '../pages/ResumeBuilder';
+import ResumeTemplates from '../pages/ResumeTemplates';
 import Profile from '../pages/Profile';
 import LandingPage from '../pages/LandingPage';
 import ForgotPassword from '../pages/ForgotPassword';
@@ -187,6 +188,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ResumeBuilder />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/resume-templates"
+        element={
+          <ProtectedRoute>
+            <ResumeTemplates />
           </ProtectedRoute>
         }
       />

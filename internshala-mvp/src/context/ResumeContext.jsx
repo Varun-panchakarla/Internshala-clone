@@ -7,21 +7,29 @@ const ResumeContext = createContext();
 
 export const ResumeProvider = ({ children }) => {
   const { currentUser, isAuthenticated } = useAuth();
-  const [resume, setResume] = useState(null);
+  const [resume, setResume]   = useState(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
+  const [saving, setSaving]   = useState(false);
+  const [error, setError]     = useState(null);
 
+  // ── Template selection — persisted in localStorage so it survives refresh
+  // Changing template NEVER resets resume data (separate state).
+  const [selectedTemplate, setSelectedTemplateState] = useState(
+    () => localStorage.getItem('jobportal_selected_template') || 'professional'
+  );
+
+  const setSelectedTemplate = (templateId) => {
+    setSelectedTemplateState(templateId);
+    localStorage.setItem('jobportal_selected_template', templateId);
+  };
+
+  // ── Fetch resume from storage ─────────────────────────────────────────────
   const fetchResume = async () => {
-    if (!isAuthenticated) {
-      setResume(null);
-      setLoading(false);
-      return;
-    }
+    if (!isAuthenticated) { setResume(null); setLoading(false); return; }
     setLoading(true);
     try {
       const res = await resumeService.getResume();
-      setResume(res.data);
+      setResume(res.data?.data || null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -29,42 +37,18 @@ export const ResumeProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    fetchResume();
-  }, [isAuthenticated, currentUser?.id]);
+  useEffect(() => { fetchResume(); }, [isAuthenticated, currentUser?.id]);
 
-  // ─── Update Handlers ────────────────────────────────────────────────────────
+  // ── Update handlers ───────────────────────────────────────────────────────
+  const updatePersonalInfo = (info) =>
+    setResume(prev => prev ? { ...prev, personalInfo: { ...prev.personalInfo, ...info } } : null);
 
-  const updatePersonalInfo = (info) => {
-    setResume(prev => {
-      if (!prev) return null;
-      return { ...prev, personalInfo: { ...prev.personalInfo, ...info } };
-    });
-  };
-
-  const updateEducation = (education) => {
-    setResume(prev => (prev ? { ...prev, education } : null));
-  };
-
-  const updateExperience = (experience) => {
-    setResume(prev => (prev ? { ...prev, experience } : null));
-  };
-
-  const updateInternship = (internship) => {
-    setResume(prev => (prev ? { ...prev, internship } : null));
-  };
-
-  const updateProjects = (projects) => {
-    setResume(prev => (prev ? { ...prev, projects } : null));
-  };
-
-  const updateCertifications = (certifications) => {
-    setResume(prev => (prev ? { ...prev, certifications } : null));
-  };
-
-  const updateSkills = (skills) => {
-    setResume(prev => (prev ? { ...prev, skills } : null));
-  };
+  const updateEducation      = (v) => setResume(p => p ? { ...p, education: v }      : null);
+  const updateExperience     = (v) => setResume(p => p ? { ...p, experience: v }     : null);
+  const updateInternship     = (v) => setResume(p => p ? { ...p, internship: v }     : null);
+  const updateProjects       = (v) => setResume(p => p ? { ...p, projects: v }       : null);
+  const updateCertifications = (v) => setResume(p => p ? { ...p, certifications: v } : null);
+  const updateSkills         = (v) => setResume(p => p ? { ...p, skills: v }         : null);
 
   const saveResume = async (customData = null) => {
     const dataToSave = customData || resume;
@@ -72,23 +56,19 @@ export const ResumeProvider = ({ children }) => {
     setSaving(true);
     try {
       const res = await resumeService.saveResume(dataToSave);
-      setResume(res.data);
-      return res.data;
+      setResume(res.data?.data || dataToSave);
+      return res.data?.data;
     } catch (err) {
-      console.error('Failed to save resume details', err);
+      console.error('Failed to save resume', err);
       throw err;
     } finally {
       setSaving(false);
     }
   };
 
-  // ─── Derived Values ─────────────────────────────────────────────────────────
-
-  // Profile Completion — separate from ATS Score
+  // ── Derived values ────────────────────────────────────────────────────────
   const resumeCompletion = calculateResumeCompletion(resume);
-
-  // ATS Score — evaluates content quality for ATS parsers
-  const atsResults = calculateAtsScore(resume);
+  const atsResults       = calculateAtsScore(resume);
 
   const value = {
     resume,
@@ -96,9 +76,13 @@ export const ResumeProvider = ({ children }) => {
     saving,
     error,
     resumeCompletion,
-    atsScore: atsResults.score,
+    atsScore:       atsResults.score,
     atsSuggestions: atsResults.suggestions,
-    atsBreakdown: atsResults.breakdown,
+    atsBreakdown:   atsResults.breakdown,
+    // Template
+    selectedTemplate,
+    setSelectedTemplate,
+    // Updaters
     updatePersonalInfo,
     updateEducation,
     updateExperience,
@@ -114,9 +98,7 @@ export const ResumeProvider = ({ children }) => {
 };
 
 export const useResume = () => {
-  const context = useContext(ResumeContext);
-  if (!context) {
-    throw new Error('useResume must be used within a ResumeProvider');
-  }
-  return context;
+  const ctx = useContext(ResumeContext);
+  if (!ctx) throw new Error('useResume must be used within a ResumeProvider');
+  return ctx;
 };
