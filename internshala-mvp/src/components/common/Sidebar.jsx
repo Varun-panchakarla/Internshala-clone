@@ -3,14 +3,10 @@ import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useJobs } from '../../context/JobContext';
 import { useResume } from '../../context/ResumeContext';
-<<<<<<< HEAD
-import { FiBriefcase, FiUser, FiBookmark, FiFileText, FiGrid } from 'react-icons/fi';
-=======
 import {
   FiBriefcase, FiUser, FiHeart, FiFileText,
   FiGrid, FiLayout, FiTrendingUp, FiZap,
 } from 'react-icons/fi';
->>>>>>> 4a0b2bba4a751b9069725bf7cac47e07095ef145
 
 const Sidebar = () => {
   const { isAuthenticated, profileCompletion, currentUser } = useAuth();
@@ -20,20 +16,12 @@ const Sidebar = () => {
   if (!isAuthenticated) return null;
 
   const links = [
-<<<<<<< HEAD
-    { to: '/dashboard', label: 'Dashboard', icon: FiGrid },
-    { to: '/jobs', label: 'Search Jobs', icon: FiBriefcase },
-    { to: '/saved-jobs', label: 'Saved Jobs', icon: FiBookmark, badge: savedJobs?.length },
-    { to: '/resume', label: 'Resume Builder', icon: FiFileText, scoreBadge: atsScore },
-    { to: '/profile', label: 'My Profile', icon: FiUser, completenessBadge: profileCompletion },
-=======
     { to: '/dashboard',        label: 'Dashboard',      icon: FiGrid,     description: 'Your overview' },
     { to: '/jobs',             label: 'Search Jobs',    icon: FiBriefcase, description: 'Find opportunities' },
     { to: '/saved-jobs',       label: 'Saved Jobs',     icon: FiHeart,    description: 'Your shortlist', badge: savedJobs?.length },
     { to: '/resume',           label: 'Resume Builder', icon: FiFileText, description: 'Build & export', scoreBadge: atsScore },
     { to: '/resume-templates', label: 'Templates',      icon: FiLayout,   description: '8 pro designs' },
     { to: '/profile',          label: 'My Profile',     icon: FiUser,     description: 'Edit your info', completenessBadge: profileCompletion },
->>>>>>> 4a0b2bba4a751b9069725bf7cac47e07095ef145
   ];
 
   const initials = currentUser?.name
