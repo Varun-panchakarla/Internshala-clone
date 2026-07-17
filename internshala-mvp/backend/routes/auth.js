@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
+const { sendWelcomeEmail } = require('../utils/email');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-dev-secret';
@@ -12,7 +13,6 @@ const COOKIE_OPTIONS = {
   sameSite: 'lax',
   secure: process.env.NODE_ENV === 'production',
   path: '/',
-  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
 const MAX_NAME_LENGTH = 255;
@@ -92,6 +92,8 @@ router.post('/register', async (req, res) => {
 
     const token = signToken(user.id, user.email);
     setCookie(res, token);
+
+    sendWelcomeEmail({ email: cleanEmail, name: cleanName });
 
     res.status(201).json({
       user: { id: user.id, email: user.email, name: user.name },
