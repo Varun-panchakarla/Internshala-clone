@@ -6,6 +6,7 @@ import { useToast } from '../components/common/Toast';
 import { FiMail, FiLock, FiChevronRight, FiBriefcase, FiArrowLeft } from 'react-icons/fi';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import Logo from '../components/common/Logo';
 
 const Login = () => {
   const { login, googleLogin } = useAuth();
@@ -87,13 +88,8 @@ const Login = () => {
         <div className="max-w-md w-full flex flex-col gap-8">
           
           {/* Logo Heading */}
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-brand-500/20">
-              i
-            </div>
-            <span className="text-2xl font-black text-slate-800 tracking-tight">
-              IncuXAI Careers<span className="text-brand-600">.</span>
-            </span>
+          <div className="flex items-center">
+            <Logo className="h-12 w-auto" mode="light" />
           </div>
 
           <div>

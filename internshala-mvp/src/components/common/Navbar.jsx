@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useJobs } from '../../context/JobContext';
 import { useTheme } from '../../context/ThemeContext';
+import Logo from './Logo';
 import {
   FiBriefcase, FiUser, FiHeart, FiFileText, FiLogOut,
   FiMenu, FiX, FiGrid, FiSun, FiMoon, FiSettings,
@@ -73,18 +74,8 @@ const Navbar = () => {
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
 
-          {/* ── Logo ─────────────────────────────────────────────────────── */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-md shadow-brand-500/25 group-hover:shadow-lg group-hover:shadow-brand-500/30 transition-all duration-300">
-              <span className="text-white font-black text-sm">i</span>
-              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white dark:border-gray-950" />
-            </div>
-            <div className="hidden sm:block">
-              <span className="font-extrabold text-slate-900 dark:text-white text-[15px] tracking-tight leading-none">
-                IncuXAI<span className="text-brand-600">.</span>
-              </span>
-              <div className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 tracking-widest uppercase leading-none">Careers</div>
-            </div>
+            <Logo className="h-12 w-auto" mode="auto" />
           </Link>
 
           {/* ── Desktop Nav Links ─────────────────────────────────────────── */}

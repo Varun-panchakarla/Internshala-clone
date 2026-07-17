@@ -6,6 +6,7 @@ import { useToast } from '../components/common/Toast';
 import { FiMail, FiLock, FiUser, FiChevronRight, FiCheckCircle, FiArrowLeft } from 'react-icons/fi';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import Logo from '../components/common/Logo';
 
 const Register = () => {
   const { register, googleLogin } = useAuth();
@@ -88,14 +89,8 @@ const Register = () => {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3"></div>
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-3xl -translate-x-1/4 translate-x-1/4"></div>
 
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-brand-500/20">
-            i
-          </div>
-          <span className="text-2xl font-black tracking-tight">
-            IncuXAI Careers<span className="text-brand-600">.</span>
-          </span>
-        </div>
+        {/* Empty placeholder to match layout header alignment */}
+        <div />
 
         <div className="max-w-xl">
           <h2 className="text-4xl font-extrabold tracking-tight leading-tight mb-8">
@@ -153,14 +148,9 @@ const Register = () => {
         </button>
         <div className="max-w-md w-full flex flex-col gap-6">
           
-          {/* Logo Title (Mobile only) */}
-          <div className="flex items-center gap-2 lg:hidden">
-            <div className="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center text-white font-black text-lg">
-              i
-            </div>
-            <span className="text-xl font-black text-slate-800 tracking-tight">
-              IncuXAI Careers<span className="text-brand-600">.</span>
-            </span>
+          {/* Logo Title */}
+          <div className="flex items-center">
+            <Logo className="h-12 w-auto" mode="light" />
           </div>
 
           <div>
