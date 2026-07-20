@@ -5,7 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import Logo from './Logo';
 import {
   FiUser, FiLogOut, FiMenu, FiX, FiSun, FiMoon, FiSettings,
-  FiChevronDown, FiBell, FiFileText, FiLayout,
+  FiChevronDown, FiBell, FiFileText, FiLayout, FiZap,
 } from 'react-icons/fi';
 import Button from './Button';
 
@@ -85,6 +85,13 @@ const Navbar = () => {
 
             {isAuthenticated ? (
               <>
+                {/* Admin Portal Header Link */}
+                {['admin', 'super_admin'].includes(currentUser?.role) && (
+                  <Link to="/admin" className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-500/10 hover:bg-brand-500/20 text-brand-700 dark:text-brand-400 font-bold text-xs transition-all shadow-sm">
+                    <FiZap className="w-3.5 h-3.5 text-brand-500" /> Admin Portal
+                  </Link>
+                )}
+
                 {/* Notification bell (decorative) */}
                 <button className="hidden sm:flex relative items-center justify-center w-8 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/8 hover:text-slate-800 dark:hover:text-white transition-all duration-150 focus:outline-none">
                   <FiBell className="w-4 h-4" />
@@ -172,6 +179,12 @@ const Navbar = () => {
                           className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors">
                           <FiSettings className="w-4 h-4 text-slate-400" /> Account Settings
                         </Link>
+                        {['admin', 'super_admin'].includes(currentUser?.role) && (
+                          <Link to="/admin" onClick={() => setDropdownOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-brand-650 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/20 font-bold transition-colors">
+                            <FiZap className="w-4 h-4 text-brand-500" /> Admin Portal
+                          </Link>
+                        )}
                       </div>
 
                       <div className="border-t border-slate-100 dark:border-slate-800 pt-1">
@@ -234,6 +247,12 @@ const Navbar = () => {
                 className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl">
                 <FiSettings className="w-4 h-4 text-slate-400" /> Account Settings
               </Link>
+              {['admin', 'super_admin'].includes(currentUser?.role) && (
+                <Link to="/admin"
+                  className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-bold text-brand-650 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/20 rounded-xl">
+                  <FiZap className="w-4 h-4 text-brand-500" /> Admin Portal
+                </Link>
+              )}
               <button onClick={handleLogout}
                 className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/15 rounded-xl">
                 <FiLogOut className="w-4 h-4" /> Sign Out

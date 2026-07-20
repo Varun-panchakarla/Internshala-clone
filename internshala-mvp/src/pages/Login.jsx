@@ -46,8 +46,12 @@ const Login = () => {
     try {
       const user = await login(email, password);
       addToast('Welcome back! Login successful.', 'success');
-      const onboardingCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`) === 'true';
-      navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
+      if (['admin', 'super_admin'].includes(user?.role)) {
+        navigate('/admin');
+      } else {
+        const onboardingCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`) === 'true';
+        navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
+      }
     } catch (err) {
       addToast(err.response?.data?.error || 'Login failed. Please check credentials.', 'error');
     } finally {
@@ -64,8 +68,12 @@ const Login = () => {
     try {
       const user = await googleLogin(credentialResponse.credential);
       addToast('Signed in with Google!', 'success');
-      const onboardingCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`) === 'true';
-      navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
+      if (['admin', 'super_admin'].includes(user?.role)) {
+        navigate('/admin');
+      } else {
+        const onboardingCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`) === 'true';
+        navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
+      }
     } catch (err) {
       addToast(err.response?.data?.error || 'Google sign-in failed.', 'error');
     } finally {
