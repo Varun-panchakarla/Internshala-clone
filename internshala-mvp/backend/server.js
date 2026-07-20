@@ -1,3 +1,9 @@
+<<<<<<< Updated upstream
+=======
+const envResult = require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+console.log('dotenv result:', envResult);
+
+>>>>>>> Stashed changes
 const express = require('express');
 const cors = require('cors');
 const cron = require('node-cron');

@@ -49,29 +49,19 @@ const TemplateSection = ({ title, SH, children }) => (
 );
 
 const EduRow = ({ edu, dark, mid, light }) => {
-  let title = edu.institution;
-  let subtitle = [edu.degree, edu.branch].filter(Boolean).join(', ');
-  if (edu.type === '10th') {
-    title = edu.institution || 'High School (10th)';
-    subtitle = edu.board || 'Board of Education';
-  } else if (edu.type === '12th') {
-    title = edu.institution || 'Senior Secondary (12th / Diploma)';
-    subtitle = [edu.board, edu.degree].filter(Boolean).join(', ');
-  }
+  const typeLabel = edu.type === '10th' ? '10th / Secondary' : edu.type === '12th' ? '12th / Intermediate (or Diploma)' : 'Graduation';
+  const schoolLabel = edu.type === 'graduation' ? 'College' : 'School';
+  const streamLabel = edu.type === 'graduation' ? 'Degree' : 'Stream';
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '7px' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
       <div>
-        <div style={{ fontWeight: 700, fontSize: '11.5px', color: dark }}>{title}</div>
-        <div style={{ fontSize: '10.5px', color: mid, marginTop: '1px' }}>
-          {subtitle}
-          {edu.cgpa && <span style={{ color: light, marginLeft: '10px' }}>{edu.cgpa.includes('%') ? 'Score' : 'CGPA'}: {edu.cgpa}</span>}
-        </div>
+        <div style={{ fontWeight: 700, fontSize: '12px', color: dark, marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{typeLabel}</div>
+        {edu.institution && <div style={{ fontSize: '10.5px', color: mid, marginTop: '1px' }}><strong>{schoolLabel}:</strong> {edu.institution}</div>}
+        {edu.board && <div style={{ fontSize: '10.5px', color: mid, marginTop: '1px' }}><strong>Board/University:</strong> {edu.board}</div>}
+        {edu.degree && <div style={{ fontSize: '10.5px', color: mid, marginTop: '1px' }}><strong>{streamLabel}:</strong> {edu.degree}</div>}
+        {edu.cgpa && <div style={{ fontSize: '10.5px', color: mid, marginTop: '1px' }}><strong>Score:</strong> {edu.cgpa}</div>}
+        {(edu.startYear || edu.endYear) && <div style={{ fontSize: '10.5px', color: mid, marginTop: '1px' }}><strong>Year:</strong> {[edu.startYear, edu.endYear].filter(Boolean).join(' - ')}</div>}
       </div>
-      {(edu.startYear || edu.endYear) && (
-        <span style={{ fontSize: '10.5px', fontWeight: 600, color: mid, flexShrink: 0, marginLeft: '20px' }}>
-          {[edu.startYear, edu.endYear].filter(Boolean).join(' – ')}
-        </span>
-      )}
     </div>
   );
 };
@@ -230,7 +220,7 @@ const ModernTemplate = ({ resume, tpl }) => {
   
   return (
     <div style={{ fontFamily: '"Arial", sans-serif', fontSize: '11px', color: '#1e293b', lineHeight: 1.55 }}>
-      <div style={{ backgroundColor: '#1e40af', padding: '24px 30px', margin: '-52px -58px 18px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ backgroundColor: BLUE, padding: '24px 30px', margin: '-52px -58px 18px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <div style={{ fontSize: '26px', fontWeight: 900, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '6px' }}>
             {pi.fullName || 'YOUR FULL NAME'}

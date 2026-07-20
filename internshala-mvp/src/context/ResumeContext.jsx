@@ -66,7 +66,7 @@ export const ResumeProvider = ({ children }) => {
   };
 
   // ── Derived values ────────────────────────────────────────────────────────
-  const resumeCompletion = calculateResumeCompletion(resume);
+  const resumeCompletion = resume ? calculateResumeCompletion(resume) : 0;
   const atsResults       = calculateAtsScore(resume);
 
   const value = {
