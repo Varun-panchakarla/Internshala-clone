@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash VARCHAR(255),
   name VARCHAR(255) NOT NULL,
   google_id VARCHAR(255) UNIQUE,
+  role VARCHAR(50) DEFAULT 'candidate',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -65,6 +66,7 @@ CREATE TABLE IF NOT EXISTS applied_jobs (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   job_id VARCHAR(100) REFERENCES jobs(id) ON DELETE CASCADE,
+  status VARCHAR(50) DEFAULT 'Pending',
   applied_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, job_id)
 );

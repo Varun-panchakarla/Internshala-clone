@@ -27,6 +27,26 @@ import MainLayout from '../layouts/MainLayout';
 import Onboarding from '../pages/Onboarding';
 import OnboardingStep2 from '../pages/OnboardingStep2';
 import OnboardingStep3 from '../pages/OnboardingStep3';
+import AdminPortal from '../pages/admin/AdminPortal';
+
+// Admin Route Wrapper
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, loading, currentUser } = useAuth();
+
+  if (loading) {
+    return <LoadingSpinner fullPage text="Securing administrator session..." />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!['admin', 'super_admin'].includes(currentUser?.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children, allowOnboardingIncomplete = false, hideSidebar = false }) => {
@@ -248,6 +268,14 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <ManageAccount />
           </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminPortal />
+          </AdminRoute>
         }
       />
 

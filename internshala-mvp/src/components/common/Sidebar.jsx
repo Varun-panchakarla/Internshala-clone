@@ -21,12 +21,19 @@ const Sidebar = () => {
 
   const links = [
     { to: '/dashboard',        label: 'Dashboard',      icon: FiGrid,     description: 'Your overview' },
+  ];
+
+  if (['admin', 'super_admin'].includes(currentUser?.role)) {
+    links.push({ to: '/admin', label: 'Admin Portal', icon: FiZap, description: 'Manage platform' });
+  }
+
+  links.push(
     { to: '/jobs',             label: 'Search Jobs',    icon: FiBriefcase, description: 'Find opportunities' },
     { to: '/saved-jobs',       label: 'Saved Jobs',     icon: FiBookmark, description: 'Your shortlist', badge: savedJobs?.length },
     { to: '/resume',           label: 'Resume Builder', icon: FiFileText, description: 'Build & export', scoreBadge: effectiveAtsScore },
     { to: '/resume-templates', label: 'Templates',      icon: FiLayout,   description: '8 pro designs' },
-    { to: '/profile',          label: 'My Profile',     icon: FiUser,     description: 'Edit your info', completenessBadge: profileCompletion },
-  ];
+    { to: '/profile',          label: 'My Profile',     icon: FiUser,     description: 'Edit your info', completenessBadge: profileCompletion }
+  );
 
   const initials = currentUser?.name
     ? currentUser.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()

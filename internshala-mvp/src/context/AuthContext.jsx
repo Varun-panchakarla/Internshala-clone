@@ -13,6 +13,7 @@ function normalizeUser(apiData) {
     id: user?.id,
     email: user?.email,
     name: user?.name,
+    role: user?.role || 'candidate',
     profileCompleted: !!(profile && (profile.fullName || profile.skills?.length > 0)),
     profileData: profile || {},
   };

@@ -30,6 +30,7 @@ const jobsRouter = require('./routes/jobs.js');
 const savedRouter = require('./routes/saved.js');
 const appliedRouter = require('./routes/applied.js');
 const resumeRouter = require('./routes/resume.js');
+const adminRouter = require('./routes/admin.js');
 
 app.use('/api/auth', authRouter);
 app.use('/api/profile', profileRouter);
@@ -37,6 +38,7 @@ app.use('/api/jobs', jobsRouter);
 app.use('/api/saved', savedRouter);
 app.use('/api/applied', appliedRouter);
 app.use('/api/resume', resumeRouter);
+app.use('/api/admin', adminRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -64,6 +66,7 @@ async function initDb() {
   }
   // Run migrations separately (ignore errors for existing columns)
   const migrations = [
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'candidate'",
     'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS user_id INTEGER',
     'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS full_name VARCHAR(255)',
     'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS profile_photo TEXT',
@@ -75,6 +78,7 @@ async function initDb() {
     'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS resume_info JSONB',
     'ALTER TABLE profiles ADD CONSTRAINT IF NOT EXISTS fk_profiles_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE',
     'ALTER TABLE profiles ADD CONSTRAINT IF NOT EXISTS uq_profiles_user UNIQUE (user_id)',
+    "ALTER TABLE applied_jobs ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Pending'",
   ];
   for (const sql of migrations) {
     try { await pool.query(sql); } catch { /* column may already exist */ }
