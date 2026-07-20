@@ -16,8 +16,8 @@ import {
   FiSave, FiDownload, FiPlus, FiTrash, FiAward,
   FiAlertCircle, FiChevronRight, FiBriefcase, FiBookOpen,
   FiUser, FiCode, FiFileText, FiCheckSquare, FiLink,
-  FiLayout, FiZap, FiShield, FiEye, FiMenu, FiGrid,
-  FiMapPin, FiCalendar, FiGlobe, FiImage, FiList, FiMessageCircle, FiHeart
+  FiLayout, FiZap, FiShield, FiEye, FiGlobe, FiHeart,
+  FiImage, FiMenu, FiGrid,
 } from 'react-icons/fi';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
@@ -518,9 +518,18 @@ const ResumeBuilder = () => {
       id: 'certifications', label: 'Certifications', icon: FiShield,
       isDone: resume?.certifications?.length > 0,
     },
-
-
-
+    {
+      id: 'achievements', label: 'Achievements', icon: FiAward,
+      isDone: resume?.achievements?.length > 0,
+    },
+    {
+      id: 'languages', label: 'Languages', icon: FiGlobe,
+      isDone: resume?.languages?.length > 0,
+    },
+    {
+      id: 'interests', label: 'Interests', icon: FiHeart,
+      isDone: resume?.interests?.length > 0,
+    },
   ];
 
   return (
@@ -821,12 +830,43 @@ const ResumeBuilder = () => {
               </SectionCard>
 
               {/* Achievements */}
-              
+              <SectionCard id="achievements" label="Achievements" icon={FiAward} isOpen={activeSection === 'achievements'} isDone={sections[8].isDone} onToggle={() => setActiveSection(activeSection === 'achievements' ? '' : 'achievements')}>
+                <div className="flex flex-col gap-4">
+                  {(resume.achievements || []).map((ach, i) => (
+                    <div key={i} className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 relative">
+                      <button onClick={() => removeArrayItem('achievements', i, updateAchievements)} className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-md transition-colors"><FiTrash className="w-4 h-4" /></button>
+                      <textarea rows="2" placeholder="Describe your achievement (e.g. Won 1st place in XYZ hackathon)" className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all resize-none text-slate-900 dark:text-white" value={ach} onChange={e => { const arr = [...(resume.achievements || [])]; arr[i] = e.target.value; updateAchievements(arr); }} />
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full border-dashed" onClick={() => updateAchievements([...(resume.achievements || []), ''])}>
+                    <FiPlus className="w-4 h-4 mr-2" /> Add Achievement
+                  </Button>
+                </div>
+              </SectionCard>
 
               {/* Languages */}
-              
+              <SectionCard id="languages" label="Languages" icon={FiGlobe} isOpen={activeSection === 'languages'} isDone={sections[9].isDone} onToggle={() => setActiveSection(activeSection === 'languages' ? '' : 'languages')}>
+                <div className="flex flex-col gap-2">
+                  <Input label="Enter languages (comma separated)" placeholder="English, Hindi, French..." value={(resume.languages || []).join(', ')} onChange={e => updateLanguages(e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {(resume.languages || []).map((lang, i) => (
+                      <span key={i} className="px-3 py-1 bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 text-xs font-semibold rounded-full border border-sky-100 dark:border-sky-800/30">{lang}</span>
+                    ))}
+                  </div>
+                </div>
+              </SectionCard>
 
               {/* Interests */}
+              <SectionCard id="interests" label="Interests / Hobbies" icon={FiHeart} isOpen={activeSection === 'interests'} isDone={sections[10].isDone} onToggle={() => setActiveSection(activeSection === 'interests' ? '' : 'interests')}>
+                <div className="flex flex-col gap-2">
+                  <Input label="Enter interests (comma separated)" placeholder="Reading, Travel, Chess, Photography..." value={(resume.interests || []).join(', ')} onChange={e => updateInterests(e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {(resume.interests || []).map((interest, i) => (
+                      <span key={i} className="px-3 py-1 bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 text-xs font-semibold rounded-full border border-pink-100 dark:border-pink-800/30">{interest}</span>
+                    ))}
+                  </div>
+                </div>
+              </SectionCard>
               
 
             </div>

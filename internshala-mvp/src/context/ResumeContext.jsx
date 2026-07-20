@@ -45,6 +45,9 @@ export const ResumeProvider = ({ children }) => {
   const updateProjects       = (v) => setResume(p => p ? { ...p, projects: v }       : null);
   const updateCertifications = (v) => setResume(p => p ? { ...p, certifications: v } : null);
   const updateSkills         = (v) => setResume(p => p ? { ...p, skills: v }         : null);
+  const updateAchievements   = (v) => setResume(p => p ? { ...p, achievements: v }   : null);
+  const updateLanguages      = (v) => setResume(p => p ? { ...p, languages: v }      : null);
+  const updateInterests      = (v) => setResume(p => p ? { ...p, interests: v }      : null);
 
   const saveResume = async (customData = null) => {
     const dataToSave = customData || resume;
@@ -84,6 +87,9 @@ export const ResumeProvider = ({ children }) => {
     updateProjects,
     updateCertifications,
     updateSkills,
+    updateAchievements,
+    updateLanguages,
+    updateInterests,
     saveResume,
     refreshResume: fetchResume,
   };

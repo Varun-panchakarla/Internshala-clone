@@ -19,9 +19,12 @@ export const calculateAtsScore = (resume) => {
     internship: 0,
     projects: 0,
     certifications: 0,
+    achievements: 0,
+    languages: 0,
+    interests: 0,
   };
 
-  const { personalInfo = {}, education = [], experience = [], internship = [], projects = [], certifications = [], skills = [] } = resume;
+  const { personalInfo = {}, education = [], experience = [], internship = [], projects = [], certifications = [], skills = [], achievements = [], languages = [], interests = [] } = resume;
 
   // ─── 1. Contact Details (15 pts) ────────────────────────────────────────────
   let contactScore = 0;
@@ -245,6 +248,59 @@ export const calculateAtsScore = (resume) => {
   }
   score += breakdown.certifications;
 
+  // ─── 9. Achievements (5 pts) ────────────────────────────────────────────
+  if (achievements.length > 0) {
+    const detailed = achievements.filter(a => a.trim().length > 20);
+    breakdown.achievements = Math.min(5, detailed.length * 1.5);
+    if (!detailed.length) {
+      suggestions.push({
+        id: 'achievements-detail',
+        category: 'Achievements',
+        message: 'Add details to your achievements (at least 20 characters each) to stand out.',
+        impact: 'Medium',
+      });
+    }
+  } else {
+    breakdown.achievements = 0;
+    suggestions.push({
+      id: 'achievements-missing',
+      category: 'Achievements',
+      message: 'Add notable achievements to highlight your impact and results.',
+      impact: 'Medium',
+    });
+  }
+  score += breakdown.achievements;
+
+  // ─── 10. Languages (3 pts) ────────────────────────────────────────────
+  if (languages.length > 0) {
+    breakdown.languages = Math.min(3, languages.length);
+    if (languages.length < 2) {
+      suggestions.push({
+        id: 'languages-more',
+        category: 'Languages',
+        message: 'Adding a second language can broaden your opportunities.',
+        impact: 'Low',
+      });
+    }
+  } else {
+    breakdown.languages = 0;
+    suggestions.push({
+      id: 'languages-missing',
+      category: 'Languages',
+      message: 'Consider adding languages you speak. Bilingual candidates are in high demand.',
+      impact: 'Low',
+    });
+  }
+  score += breakdown.languages;
+
+  // ─── 11. Interests (2 pts) ────────────────────────────────────────────
+  if (interests.length > 0) {
+    breakdown.interests = 2;
+  } else {
+    breakdown.interests = 0;
+  }
+  score += breakdown.interests;
+
   // ─── Bonus: Action Verbs in Experience/Internship (3 pts) ─────────────────
   const actionWords = ['developed', 'built', 'implemented', 'optimized', 'designed', 'created', 'managed', 'led', 'improved', 'collaborated', 'delivered', 'architected', 'automated'];
   const expText = [...(experience || []), ...(internship || [])].map(e => e.description || '').join(' ').toLowerCase();
@@ -292,35 +348,31 @@ export const calculateResumeCompletion = (resume) => {
   if (!resume) return 0;
 
   let total = 0;
-  const { personalInfo = {}, education = [], experience = [], internship = [], projects = [], certifications = [], skills = [] } = resume;
+  const { personalInfo = {}, education = [], experience = [], internship = [], projects = [], certifications = [], skills = [], achievements = [], languages = [], interests = [] } = resume;
 
-  // Personal Info (30 pts)
   if (personalInfo.fullName && personalInfo.fullName.trim()) total += 6;
   if (personalInfo.email    && personalInfo.email.trim())    total += 8;
   if (personalInfo.phone    && personalInfo.phone.trim())    total += 7;
   if (personalInfo.linkedin && personalInfo.linkedin.trim()) total += 5;
   if (personalInfo.github   && personalInfo.github.trim())   total += 4;
 
-  // Professional Summary (10 pts)
   if (personalInfo.summary && personalInfo.summary.trim().length > 30) total += 10;
 
-  // Education (15 pts)
   if (education.length > 0 && education[0].institution && education[0].degree) total += 15;
 
-  // Skills (10 pts)
   if (skills.length >= 3) total += 10;
 
-  // Experience (10 pts)
   if (experience.length > 0 && experience[0].role && experience[0].company) total += 10;
 
-  // Internship (5 pts)
   if (internship.length > 0 && internship[0].company && internship[0].role) total += 5;
 
-  // Projects (10 pts)
   if (projects.length > 0 && projects[0].title) total += 10;
 
-  // Certifications (5 pts)
   if (certifications.length > 0 && certifications[0].name) total += 5;
+
+  if (achievements.length > 0) total += 5;
+  if (languages.length > 0)    total += 3;
+  if (interests.length > 0)    total += 2;
 
   return Math.min(100, total);
 };
