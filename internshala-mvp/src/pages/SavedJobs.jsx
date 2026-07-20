@@ -27,8 +27,8 @@ const SavedJobs = () => {
   return (
     <div className="flex flex-col gap-6 w-full animate-slide-up">
       <div>
-        <h1 className="text-2xl font-black text-slate-800">Saved Jobs</h1>
-        <p className="text-xs text-slate-400 font-medium mt-1">Review and manage positions you have saved for later.</p>
+        <h1 className="text-2xl font-black text-slate-800 dark:text-white">Saved Jobs</h1>
+        <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Review and manage positions you have saved for later.</p>
       </div>
 
       {savedJobs.length > 0 ? (
@@ -39,7 +39,7 @@ const SavedJobs = () => {
               <div
                 key={job.id}
                 onClick={() => navigate(`/jobs/${job.id}`)}
-                className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:border-slate-200 transition-all duration-200 cursor-pointer flex flex-col justify-between gap-4"
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-700 transition-all duration-200 cursor-pointer flex flex-col justify-between gap-4"
               >
                 <div>
                   <div className="flex items-start justify-between gap-4 mb-3">
@@ -48,26 +48,26 @@ const SavedJobs = () => {
                         {job.logoText}
                       </div>
                       <div>
-                        <h4 className="text-sm font-extrabold text-slate-800 leading-snug">{job.title}</h4>
-                        <p className="text-xs font-bold text-slate-400">{job.company} • {job.location}</p>
+                        <h4 className="text-sm font-extrabold text-slate-800 dark:text-white leading-snug">{job.title}</h4>
+                        <p className="text-xs font-bold text-slate-400 dark:text-slate-500">{job.company} • {job.location}</p>
                       </div>
                     </div>
                     
-                    <span className="bg-brand-50 border border-brand-100 text-brand-700 font-black text-[10px] px-2 py-0.5 rounded-md shrink-0">
+                    <span className="bg-brand-50 dark:bg-brand-950/40 border border-brand-100 dark:border-brand-900/50 text-brand-700 dark:text-brand-400 font-black text-[10px] px-2 py-0.5 rounded-md shrink-0">
                       {job.matchScore}% Match
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold text-slate-400 mt-2">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold text-slate-400 dark:text-slate-500 mt-2">
                     <span className="flex items-center gap-1"><FiBriefcase className="opacity-60" /> {job.experience}</span>
                     <span>•</span>
                     <span className="flex items-center gap-1"><FiClock className="opacity-60" /> {job.employmentType}</span>
                   </div>
 
-                  <p className="text-xs font-extrabold text-brand-600 mt-3">{job.salary}</p>
+                  <p className="text-xs font-extrabold text-brand-600 dark:text-brand-400 mt-3">{job.salary}</p>
                 </div>
 
-                <div className="flex items-center gap-2 mt-2 border-t border-slate-50 pt-4">
+                <div className="flex items-center gap-2 mt-2 border-t border-slate-50 dark:border-slate-800 pt-4">
                   <Button
                     variant={isApplied ? 'outline' : 'primary'}
                     size="sm"
@@ -84,10 +84,10 @@ const SavedJobs = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="p-2.5 hover:text-rose-600 hover:border-rose-200 bg-white"
+                    className="p-2.5 hover:text-rose-600 hover:border-rose-200 bg-white dark:bg-slate-800 dark:border-slate-700"
                     onClick={(e) => handleRemove(e, job.id)}
                   >
-                    <FiTrash2 className="w-4 h-4" />
+                    <FiTrash2 className="w-4 h-4 text-slate-400 dark:text-slate-400" />
                   </Button>
                 </div>
               </div>
@@ -95,19 +95,17 @@ const SavedJobs = () => {
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center shadow-sm flex flex-col items-center justify-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-12 text-center shadow-sm flex flex-col items-center justify-center gap-4">
+          <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 border border-slate-100 dark:border-slate-700">
             <FiBookmark className="w-8 h-8" />
           </div>
           <div>
-            <h3 className="font-extrabold text-slate-700 text-base">Your Saved List is Empty</h3>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 leading-relaxed">
-              Explore job opportunities and click the bookmark icon on any card to save listings here.
-            </p>
+            <h3 className="text-base font-extrabold text-slate-800 dark:text-white">No Saved Jobs Yet</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Bookmark jobs while browsing to review and apply to them later.</p>
           </div>
           <Link to="/jobs">
-            <Button variant="primary" size="sm">
-              Browse Available Jobs <FiArrowRight className="ml-1" />
+            <Button variant="primary" size="sm" className="mt-2">
+              Browse All Jobs <FiArrowRight className="ml-1" />
             </Button>
           </Link>
         </div>

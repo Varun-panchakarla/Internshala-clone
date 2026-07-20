@@ -11,7 +11,7 @@ const MainLayout = ({ children, hideSidebar = false }) => {
     <div className="min-h-screen flex flex-col mesh-bg transition-colors duration-300">
       <Navbar />
 
-      <div className="flex-1 flex w-full max-w-none">
+      <div className="flex-1 flex w-full max-w-none items-start">
         {/* Left sidebar — only for authenticated users and when not hidden */}
         {isAuthenticated && !hideSidebar && <Sidebar />}
 
