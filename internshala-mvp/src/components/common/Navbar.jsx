@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useJobs } from '../../context/JobContext';
 import { useTheme } from '../../context/ThemeContext';
+import Logo from './Logo';
 import {
-  FiBriefcase, FiUser, FiHeart, FiFileText, FiLogOut,
-  FiMenu, FiX, FiGrid, FiSun, FiMoon, FiSettings,
-  FiLayout, FiChevronDown, FiBell,
+  FiUser, FiLogOut, FiMenu, FiX, FiSun, FiMoon, FiSettings,
+  FiChevronDown, FiBell,
 } from 'react-icons/fi';
 import Button from './Button';
 
 const Navbar = () => {
   const { currentUser, logout, isAuthenticated, profileCompletion } = useAuth();
-  const { savedJobs } = useJobs();
   const { isDark, toggleTheme } = useTheme();
   const navigate    = useNavigate();
   const location    = useLocation();
@@ -54,6 +52,8 @@ const Navbar = () => {
     { to: '/dashboard',        label: 'Dashboard',      icon: FiGrid,      authRequired: true },
     { to: '/jobs',             label: 'Browse Jobs',    icon: FiBriefcase, authRequired: false },
     { to: '/saved-jobs',       label: 'Saved',          icon: FiHeart,     authRequired: true,  badge: savedJobs?.length },
+    { to: '/resume',           label: 'Resume Builder', icon: FiFileText,  authRequired: true },
+    { to: '/resume-templates', label: 'Templates',      icon: FiLayout,    authRequired: true },
   ];
 
   const initials = currentUser?.name
@@ -71,50 +71,10 @@ const Navbar = () => {
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
 
-          {/* ── Logo ─────────────────────────────────────────────────────── */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-md shadow-brand-500/25 group-hover:shadow-lg group-hover:shadow-brand-500/30 transition-all duration-300">
-              <span className="text-white font-black text-sm">i</span>
-              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white dark:border-gray-950" />
-            </div>
-            <div className="hidden sm:block">
-              <span className="font-extrabold text-slate-900 dark:text-white text-[15px] tracking-tight leading-none">
-                IncuXAI<span className="text-brand-600">.</span>
-              </span>
-              <div className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 tracking-widest uppercase leading-none">Careers</div>
-            </div>
+            <Logo className="h-12 w-auto" mode="auto" />
           </Link>
 
-          {/* ── Desktop Nav Links ─────────────────────────────────────────── */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => {
-              if (link.authRequired && !isAuthenticated) return null;
-              const Icon     = link.icon;
-              const isActive = location.pathname === link.to || location.pathname.startsWith(link.to + '/');
-              return (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 ${
-                    isActive
-                      ? 'text-brand-700 dark:text-brand-400 bg-brand-50/80 dark:bg-brand-900/20'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-slate-500'}`} />
-                  {link.label}
-                  {link.badge > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-rose-500 text-white text-[9px] font-black px-1 rounded-full flex items-center justify-center">
-                      {link.badge}
-                    </span>
-                  )}
-                  {isActive && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-brand-500 rounded-full" />
-                  )}
-                </NavLink>
-              );
-            })}
-          </nav>
 
           {/* ── Right Actions ─────────────────────────────────────────────── */}
           <div className="flex items-center gap-2">
@@ -253,28 +213,6 @@ const Navbar = () => {
       {/* ── Mobile Drawer ──────────────────────────────────────────────────── */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-gray-950 px-4 py-4 space-y-1 animate-slide-down shadow-lg">
-          {navLinks.map((link) => {
-            if (link.authRequired && !isAuthenticated) return null;
-            const Icon     = link.icon;
-            const isActive = location.pathname === link.to;
-            return (
-              <NavLink key={link.to} to={link.to}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Icon className="w-4 h-4" />
-                  {link.label}
-                </div>
-                {link.badge > 0 && (
-                  <span className="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">{link.badge}</span>
-                )}
-              </NavLink>
-            );
-          })}
 
           {/* Mobile theme toggle */}
           <div className="flex items-center justify-between px-3 py-2.5 border-t border-slate-100 dark:border-slate-800 mt-2 pt-3">

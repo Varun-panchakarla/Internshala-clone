@@ -11,7 +11,11 @@ import {
 const Sidebar = () => {
   const { isAuthenticated, profileCompletion, currentUser } = useAuth();
   const { savedJobs } = useJobs();
-  const { atsScore, resumeCompletion } = useResume();
+  const { atsScore: builderScore, resumeCompletion } = useResume();
+
+  const resumeInfo = currentUser?.profileData?.resumeInfo;
+  const hasResume = !!(resumeInfo?.fileName);
+  const effectiveAtsScore = resumeInfo?.atsScore ?? builderScore;
 
   if (!isAuthenticated) return null;
 
@@ -19,6 +23,8 @@ const Sidebar = () => {
     { to: '/dashboard',        label: 'Dashboard',      icon: FiGrid,     description: 'Your overview' },
     { to: '/jobs',             label: 'Search Jobs',    icon: FiBriefcase, description: 'Find opportunities' },
     { to: '/saved-jobs',       label: 'Saved Jobs',     icon: FiHeart,    description: 'Your shortlist', badge: savedJobs?.length },
+    { to: '/resume',           label: 'Resume Builder', icon: FiFileText, description: 'Build & export', scoreBadge: effectiveAtsScore },
+    { to: '/resume-templates', label: 'Templates',      icon: FiLayout,   description: '8 pro designs' },
     { to: '/profile',          label: 'My Profile',     icon: FiUser,     description: 'Edit your info', completenessBadge: profileCompletion },
   ];
 
@@ -28,8 +34,6 @@ const Sidebar = () => {
 
   return (
     <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-slate-100 dark:border-slate-800/60 bg-white dark:bg-gray-950 min-h-[calc(100vh-4rem)] sticky top-16">
-
-
 
       {/* Navigation links */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
@@ -95,10 +99,12 @@ const Sidebar = () => {
         <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.12em] px-2 mb-2">Resume Stats</p>
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-2.5 text-center">
-            <p className={`text-base font-black leading-none ${atsScore >= 80 ? 'text-emerald-600' : atsScore >= 55 ? 'text-amber-500' : 'text-rose-500'}`}>
-              {atsScore}
+            <p className={`text-base font-black leading-none ${effectiveAtsScore >= 80 ? 'text-emerald-600' : effectiveAtsScore >= 50 ? 'text-amber-500' : 'text-rose-500'}`}>
+              {hasResume ? effectiveAtsScore : '--'}
             </p>
-            <p className="text-[9px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5 uppercase tracking-wide">ATS Score</p>
+            <p className="text-[9px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5 uppercase tracking-wide">
+              {hasResume ? (resumeInfo?.source === 'upload' ? 'Upload Score' : 'ATS Score') : 'No Resume'}
+            </p>
           </div>
           <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-2.5 text-center">
             <p className="text-base font-black text-brand-600 dark:text-brand-400 leading-none">{resumeCompletion}%</p>
