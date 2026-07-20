@@ -12,6 +12,7 @@ export const authService = {
   googleAuth: (credential) => api.post('/auth/google', { credential }),
   logout: () => api.post('/auth/logout'),
   getCurrentUser: () => api.get('/auth/me'),
+  getProfile: () => api.get('/profile'),
   updateProfile: (profileData) => api.put('/profile', profileData),
 };
 

@@ -13,7 +13,7 @@ const CAREER_GOALS = [
 ];
 
 const OnboardingStep3 = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, updateProfile } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -51,7 +51,7 @@ const OnboardingStep3 = () => {
   };
 
   // Onboarding Submit
-  const handleFinish = (e) => {
+  const handleFinish = async (e) => {
     e.preventDefault();
 
     if (lookingFor.length === 0) {
@@ -64,13 +64,79 @@ const OnboardingStep3 = () => {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const step1Key = currentUser?.id ? `onboarding_step1_${currentUser.id}` : 'onboarding_step1_guest';
+      const step2Key = currentUser?.id ? `onboarding_step2_${currentUser.id}` : 'onboarding_step2_guest';
+
+      const step1 = JSON.parse(localStorage.getItem(step1Key) || '{}');
+      const step2 = JSON.parse(localStorage.getItem(step2Key) || '{}');
+
+      const firstName = step1.firstName || (currentUser?.name ? currentUser.name.split(' ')[0] : '');
+      const lastName = step1.lastName || (currentUser?.name && currentUser.name.split(' ').length > 1 ? currentUser.name.split(' ').slice(1).join(' ') : '');
+      const fullName = `${firstName} ${lastName}`.trim() || currentUser?.name || '';
+      const college = step1.collegeName || step1.schoolName || '';
+      const degree = step1.course || step1.schoolStandard || '';
+      const interests = step2.selectedInterests || [];
+      const experience = step1.experienceYears === '0' || !step1.experienceYears ? 'Fresher' : (step1.experienceYears === '1' ? '1-3 years' : '3+ years');
+      const preferredRole = (interests && interests[0]) || '';
+      const preferredLocation = step1.currentCity || '';
+      const employmentType = (lookingFor.includes('Internships') && !lookingFor.includes('Jobs')) ? 'Internship' : 'Full-time';
+
+      const onboardingData = {
+        firstName,
+        lastName,
+        email: currentUser?.email || '',
+        contactNumber: step1.contactNumber || '',
+        currentCity: step1.currentCity || '',
+        gender: step1.gender || '',
+        languages: step1.selectedLanguages || ['English'],
+        currentStatus: step1.currentStatus || 'College Student',
+        course: step1.course || '',
+        collegeName: step1.collegeName || step1.schoolName || '',
+        stream: step1.stream || '',
+        startYear: step1.startYear || '',
+        endYear: step1.endYear || '',
+        experienceYears: step1.experienceYears || '0',
+        interests: interests,
+        lookingFor: lookingFor,
+        workModes: workModes,
+        careerGoals: selectedGoals.map(id => CAREER_GOALS.find(g => g.id === id)?.label || id),
+        currentCompany: step1.currentCompany || '',
+        currentJobTitle: step1.currentJobTitle || '',
+        careerBreak: step1.careerBreak || '',
+        schoolStandard: step1.schoolStandard || ''
+      };
+
+      const profilePayload = {
+        fullName,
+        college,
+        degree,
+        skills: interests,
+        experience,
+        preferredRole,
+        preferredLocation,
+        employmentType,
+        resumeInfo: {
+          ...(currentUser?.profileData?.resumeInfo || {}),
+          onboardingData
+        }
+      };
+
+      await updateProfile(profilePayload);
+
       const key = currentUser?.id ? `onboarding_completed_${currentUser.id}` : 'onboarding_completed_guest';
       localStorage.setItem(key, 'true');
+
       addToast('Welcome to your career portal! Onboarding complete.', 'success');
       navigate('/dashboard');
-    }, 1200);
+    } catch (err) {
+      console.error('Failed to update profile from onboarding:', err);
+      const key = currentUser?.id ? `onboarding_completed_${currentUser.id}` : 'onboarding_completed_guest';
+      localStorage.setItem(key, 'true');
+      navigate('/dashboard');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Button disabled state

@@ -15,37 +15,107 @@ const FilterDropdown = ({
   searchPlaceholder = 'Search...'
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
 
-  // Reset search filter when dropdown closes
+  // Sync search input with value state
   useEffect(() => {
-    if (!isOpen) {
-      setSearchTerm('');
+    if (value !== undefined && value !== null) {
+      const opt = options.find(o => (typeof o === 'object' ? o.value : o) === value);
+      if (opt && typeof opt === 'object' && opt.value !== '') {
+        setSearchTerm(opt.label);
+      } else if (typeof value === 'string' && value.trim() !== '') {
+        setSearchTerm(value);
+      } else {
+        setSearchTerm('');
+      }
     }
-  }, [isOpen]);
+  }, [value, isOpen, options]);
+
+  // Set highlight index to 0 when dropdown opens or search term changes
+  useEffect(() => {
+    if (isOpen) {
+      setHighlightedIndex(0);
+    } else {
+      setHighlightedIndex(0);
+    }
+  }, [isOpen, searchTerm]);
 
   const selectedOption = options.find(opt => (typeof opt === 'object' ? opt.value : opt) === value) || options[0];
 
   const handleSelect = (optValue) => {
     onChange(optValue);
-    setSearchTerm('');
     onClose();
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Escape') {
-      onClose();
-    }
+  const handleSearchInputChange = (e) => {
+    const val = e.target.value;
+    setSearchTerm(val);
+    onChange(val);
   };
 
   const filteredOptions = searchable && searchTerm.trim()
     ? options.filter(opt => {
-        const optLabel = typeof opt === 'object' ? opt.label : opt;
-        return optLabel.toLowerCase().includes(searchTerm.toLowerCase().trim());
+        const optLabel = typeof opt === 'object' ? opt.label : String(opt);
+        const optVal = typeof opt === 'object' ? opt.value : String(opt);
+        const query = searchTerm.toLowerCase().trim();
+        return (
+          optLabel.toLowerCase().includes(query) ||
+          optVal.toLowerCase().includes(query)
+        );
       })
     : options;
 
+  const handleKeyDown = (e) => {
+    if (!isOpen) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+        e.preventDefault();
+        onToggle();
+      }
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      onClose();
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (filteredOptions.length === 0) return;
+      setHighlightedIndex(prev => {
+        if (prev < 0) return 0;
+        return prev < filteredOptions.length - 1 ? prev + 1 : prev;
+      });
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (filteredOptions.length === 0) return;
+      setHighlightedIndex(prev => {
+        if (prev <= 0) return 0;
+        return prev - 1;
+      });
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (filteredOptions.length === 0) return;
+
+      const validIndex = highlightedIndex >= 0 && highlightedIndex < filteredOptions.length ? highlightedIndex : 0;
+      const targetOpt = filteredOptions[validIndex];
+
+      if (targetOpt) {
+        const optVal = typeof targetOpt === 'object' ? targetOpt.value : targetOpt;
+        handleSelect(optVal);
+      }
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-1.5 w-full relative">
+    <div className="flex flex-col gap-1.5 w-full relative" onKeyDown={handleKeyDown}>
       {label && (
         <label htmlFor={id} className="text-xs font-semibold text-slate-600 dark:text-slate-400">
           {label}
@@ -61,7 +131,6 @@ const FilterDropdown = ({
             e.stopPropagation();
             onToggle();
           }}
-          onKeyDown={handleKeyDown}
           className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all duration-200 flex items-center justify-between gap-2 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 cursor-pointer ${
             isOpen
               ? 'bg-brand-50/50 dark:bg-brand-950/30 border-brand-500 text-brand-700 dark:text-brand-400 ring-2 ring-brand-500/20'
@@ -71,7 +140,7 @@ const FilterDropdown = ({
           }`}
         >
           <span className="truncate">
-            {selectedOption ? (typeof selectedOption === 'object' ? selectedOption.label : selectedOption) : placeholder}
+            {value ? (selectedOption ? (typeof selectedOption === 'object' ? selectedOption.label : selectedOption) : value) : placeholder}
           </span>
           <FiChevronDown
             className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
@@ -94,7 +163,7 @@ const FilterDropdown = ({
                     type="text"
                     placeholder={searchPlaceholder}
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={handleSearchInputChange}
                     onClick={(e) => e.stopPropagation()}
                     className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500"
                     autoFocus
@@ -104,10 +173,11 @@ const FilterDropdown = ({
             )}
 
             {filteredOptions.length > 0 ? (
-              filteredOptions.map((opt) => {
+              filteredOptions.map((opt, index) => {
                 const optVal = typeof opt === 'object' ? opt.value : opt;
                 const optLabel = typeof opt === 'object' ? opt.label : opt;
-                const isSelected = optVal === value;
+                const isSelected = optVal === value || (value && optVal && String(value).toLowerCase() === String(optVal).toLowerCase());
+                const isHighlighted = index === highlightedIndex;
 
                 return (
                   <button
@@ -115,14 +185,22 @@ const FilterDropdown = ({
                     type="button"
                     role="option"
                     aria-selected={isSelected}
+                    ref={(el) => {
+                      if (isHighlighted && el) {
+                        el.scrollIntoView({ block: 'nearest' });
+                      }
+                    }}
+                    onMouseEnter={() => setHighlightedIndex(index)}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleSelect(optVal);
                     }}
                     className={`w-full px-3 py-2 text-xs font-semibold flex items-center justify-between transition-colors text-left cursor-pointer ${
-                      isSelected
+                      isHighlighted
                         ? 'bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-400 font-bold'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
+                        : isSelected
+                          ? 'bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white font-bold'
+                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     <span className="truncate">{optLabel}</span>
@@ -132,7 +210,7 @@ const FilterDropdown = ({
               })
             ) : (
               <div className="px-3 py-3 text-xs text-slate-400 dark:text-slate-500 text-center font-medium">
-                No roles found.
+                No matching roles found.
               </div>
             )}
           </div>

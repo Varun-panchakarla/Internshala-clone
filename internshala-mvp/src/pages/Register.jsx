@@ -140,17 +140,17 @@ const Register = () => {
       </div>
 
       {/* Right Column: Register Form Card */}
-      <div className="lg:col-span-5 flex items-center justify-center p-8 bg-white shadow-xl relative z-10">
+      <div className="lg:col-span-5 flex flex-col justify-center items-center p-6 sm:p-10 bg-white shadow-xl relative z-10">
         
         {/* Back Button */}
         <button
           onClick={handleBackClick}
-          className="absolute top-6 left-6 flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-650 transition-colors focus:outline-none cursor-pointer"
+          className="absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-650 transition-colors focus:outline-none cursor-pointer z-20"
         >
           <FiArrowLeft className="w-4 h-4" />
           <span>Back</span>
         </button>
-        <div className="max-w-md w-full flex flex-col gap-6">
+        <div className="max-w-md w-full flex flex-col gap-6 pt-10 sm:pt-14 my-auto">
           
           {/* Logo Title */}
           <div className="flex items-center">
