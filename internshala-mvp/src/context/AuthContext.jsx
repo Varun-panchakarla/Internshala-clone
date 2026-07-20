@@ -128,7 +128,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateProfile = async (profileData) => {
-    setLoading(true);
     try {
       const res = await authService.updateProfile(profileData);
       const profile = res.data.profile;
@@ -141,8 +140,6 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Profile update failed', err);
       throw err;
-    } finally {
-      setLoading(false);
     }
   };
 
