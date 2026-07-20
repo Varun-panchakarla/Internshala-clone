@@ -35,15 +35,23 @@ function setCookie(res, token) {
 }
 
 // Auth middleware — attaches req.user if valid token
-function authMiddleware(req, res, next) {
+async function authMiddleware(req, res, next) {
   const token = req.cookies?.token;
   if (!token) return res.status(401).json({ error: 'Authentication required.' });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+    
+    // Verify user actually exists in the database (e.g. in case of DB resets)
+    const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [decoded.userId]);
+    if (userCheck.rows.length === 0) {
+      res.clearCookie('token', { path: '/' });
+      return res.status(401).json({ error: 'User session is invalid or user was deleted.' });
+    }
+
     req.user = decoded;
     next();
-  } catch {
+  } catch (err) {
     res.clearCookie('token', { path: '/' });
     return res.status(401).json({ error: 'Invalid or expired token.' });
   }

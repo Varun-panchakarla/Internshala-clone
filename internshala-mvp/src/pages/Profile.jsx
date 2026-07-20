@@ -120,12 +120,33 @@ const Profile = () => {
 
   const validate = () => {
     const tempErrors = {};
-    if (!formData.fullName.trim()) tempErrors.fullName = 'Full Name is required.';
-    if (!formData.college.trim()) tempErrors.college = 'College/School name is required.';
-    if (!formData.degree.trim() && !formData.course.trim()) tempErrors.degree = 'Degree/Course is required.';
-    if (!formData.skills.trim()) tempErrors.skills = 'Please enter at least one skill or interest.';
-    if (!formData.preferredRole.trim()) tempErrors.preferredRole = 'Preferred job role is required.';
-    
+
+    const isWizard = !currentUser?.profileCompleted;
+
+    if (isWizard || activeTab === 'personal') {
+      if (!formData.fullName || !formData.fullName.trim()) {
+        tempErrors.fullName = 'Full Name is required.';
+      }
+      if (!formData.preferredRole || !formData.preferredRole.trim()) {
+        tempErrors.preferredRole = 'Preferred job role is required.';
+      }
+    }
+
+    if (isWizard || activeTab === 'academic') {
+      if (!formData.college || !formData.college.trim()) {
+        tempErrors.college = 'College name is required.';
+      }
+      if (!formData.degree || !formData.degree.trim()) {
+        tempErrors.degree = 'Degree name is required.';
+      }
+    }
+
+    if (isWizard || activeTab === 'skills') {
+      if (!formData.skills || !formData.skills.trim()) {
+        tempErrors.skills = 'Please enter at least one skill.';
+      }
+    }
+
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
   };
