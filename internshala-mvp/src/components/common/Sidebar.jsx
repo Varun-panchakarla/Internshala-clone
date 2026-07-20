@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useJobs } from '../../context/JobContext';
 import { useResume } from '../../context/ResumeContext';
 import {
-  FiBriefcase, FiUser, FiHeart, FiFileText,
+  FiBriefcase, FiUser, FiBookmark, FiFileText,
   FiGrid, FiLayout, FiTrendingUp, FiZap,
 } from 'react-icons/fi';
 
@@ -22,7 +22,7 @@ const Sidebar = () => {
   const links = [
     { to: '/dashboard',        label: 'Dashboard',      icon: FiGrid,     description: 'Your overview' },
     { to: '/jobs',             label: 'Search Jobs',    icon: FiBriefcase, description: 'Find opportunities' },
-    { to: '/saved-jobs',       label: 'Saved Jobs',     icon: FiHeart,    description: 'Your shortlist', badge: savedJobs?.length },
+    { to: '/saved-jobs',       label: 'Saved Jobs',     icon: FiBookmark, description: 'Your shortlist', badge: savedJobs?.length },
     { to: '/resume',           label: 'Resume Builder', icon: FiFileText, description: 'Build & export', scoreBadge: effectiveAtsScore },
     { to: '/resume-templates', label: 'Templates',      icon: FiLayout,   description: '8 pro designs' },
     { to: '/profile',          label: 'My Profile',     icon: FiUser,     description: 'Edit your info', completenessBadge: profileCompletion },
@@ -33,10 +33,10 @@ const Sidebar = () => {
     : '?';
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-slate-100 dark:border-slate-800/60 bg-white dark:bg-gray-950 min-h-[calc(100vh-4rem)] sticky top-16">
+    <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-slate-100 dark:border-slate-800/60 bg-white dark:bg-gray-950 h-[calc(100vh-4rem)] sticky top-16 z-30 overflow-y-auto custom-scrollbar">
 
       {/* Navigation links */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-0.5">
         <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.12em] px-2 mb-2">Navigation</p>
         {links.map((link) => {
           const Icon = link.icon;

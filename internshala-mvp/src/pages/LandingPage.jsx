@@ -75,18 +75,23 @@ const LandingPage = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Handle scroll position tracking
+  // Handle scroll position tracking in real-time
   const handleScrollUpdate = (container, setThumb) => {
     if (!container.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = container.current;
-    const scrollable = scrollWidth - clientWidth;
-    if (scrollable <= 0) {
-      setThumb({ width: '100%', left: '0%' });
-      return;
-    }
-    const thumbWidth = Math.max(30, (clientWidth / scrollWidth) * 100);
-    const thumbLeft = (scrollLeft / scrollable) * (100 - thumbWidth);
-    setThumb({ width: thumbWidth + '%', left: thumbLeft + '%' });
+    window.requestAnimationFrame(() => {
+      if (!container.current) return;
+      const { scrollLeft, scrollWidth, clientWidth } = container.current;
+      const maxScrollLeft = scrollWidth - clientWidth;
+      if (maxScrollLeft <= 0) {
+        setThumb({ width: '100%', left: '0%' });
+        return;
+      }
+      const isAtEnd = scrollLeft + clientWidth >= scrollWidth - 2;
+      const ratio = isAtEnd ? 1 : Math.min(1, Math.max(0, scrollLeft / maxScrollLeft));
+      const thumbWidth = Math.max(25, Math.min(45, (clientWidth / scrollWidth) * 100));
+      const thumbLeft = ratio * (100 - thumbWidth);
+      setThumb({ width: `${thumbWidth}%`, left: `${thumbLeft}%` });
+    });
   };
 
   const scrollTo = (ref, direction) => {
@@ -97,8 +102,14 @@ const LandingPage = () => {
   };
 
   useEffect(() => {
-    handleScrollUpdate(jobScrollRef, setJobScrollThumbStyle);
-  }, [jobs]);
+    const updateThumbs = () => {
+      handleScrollUpdate(jobScrollRef, setJobScrollThumbStyle);
+      handleScrollUpdate(intScrollRef, setIntScrollThumbStyle);
+    };
+    updateThumbs();
+    window.addEventListener('resize', updateThumbs);
+    return () => window.removeEventListener('resize', updateThumbs);
+  }, [jobs, activeJobFilter, activeIntFilter]);
 
   const handleHeroSearch = (e) => {
     e.preventDefault();
@@ -353,8 +364,8 @@ const LandingPage = () => {
               <button onClick={() => scrollTo(jobScrollRef, 'left')} className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
                 <FiChevronLeft className="w-4 h-4" />
               </button>
-              <div className="w-32 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-sky-500 rounded-full transition-all" style={jobScrollThumbStyle} />
+              <div className="w-32 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden relative">
+                <div className="absolute top-0 bottom-0 bg-sky-500 rounded-full will-change-[left]" style={jobScrollThumbStyle} />
               </div>
               <button onClick={() => scrollTo(jobScrollRef, 'right')} className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
                 <FiChevronRight className="w-4 h-4" />
@@ -464,8 +475,8 @@ const LandingPage = () => {
               <button onClick={() => scrollTo(intScrollRef, 'left')} className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
                 <FiChevronLeft className="w-4 h-4" />
               </button>
-              <div className="w-32 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-sky-500 rounded-full transition-all" style={intScrollThumbStyle} />
+              <div className="w-32 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden relative">
+                <div className="absolute top-0 bottom-0 bg-sky-500 rounded-full will-change-[left]" style={intScrollThumbStyle} />
               </div>
               <button onClick={() => scrollTo(intScrollRef, 'right')} className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
                 <FiChevronRight className="w-4 h-4" />

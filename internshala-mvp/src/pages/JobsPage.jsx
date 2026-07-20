@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useJobs } from '../context/JobContext';
 import { useAuth } from '../context/AuthContext';
@@ -6,6 +6,7 @@ import { useToast } from '../components/common/Toast';
 import { FiSearch, FiMapPin, FiBriefcase, FiClock, FiBookmark, FiSliders, FiX, FiRefreshCw, FiStar } from 'react-icons/fi';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
+import FilterDropdown from '../components/common/FilterDropdown';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const JobsPage = () => {
@@ -28,7 +29,23 @@ const JobsPage = () => {
   const navigate = useNavigate();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const filterPanelRef = useRef(null);
   const location = useLocation();
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterPanelRef.current && !filterPanelRef.current.contains(e.target)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const toggleDropdown = (key) => {
+    setOpenDropdown(prev => (prev === key ? null : key));
+  };
 
   useEffect(() => {
     if (location.state && location.state.filterType) {
@@ -113,13 +130,6 @@ const JobsPage = () => {
     { label: 'Above ₹12 LPA', value: 'above-12' }
   ];
 
-  const dateOptions = [
-    { label: 'Any Time', value: '' },
-    { label: 'Today', value: 'today' },
-    { label: 'Last 7 Days', value: 'week' },
-    { label: 'Last 30 Days', value: 'month' }
-  ];
-
   const workModeOptions = [
     { label: 'All Modes', value: '' },
     { label: 'Remote', value: 'remote' },
@@ -136,26 +146,25 @@ const JobsPage = () => {
   // Render Filter Form Component (reusable for mobile drawer)
   const FilterContent = () => (
     <div className="flex flex-col gap-5">
-      <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-        <h3 className="font-extrabold text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2">
+      <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
+        <h3 className="font-extrabold text-slate-800 dark:text-white text-sm uppercase tracking-wider flex items-center gap-2">
           <FiSliders /> Filter Criteria
         </h3>
         <button
           onClick={resetFilters}
-          className="text-xs font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1 transition-colors focus:outline-none"
+          className="text-xs font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 flex items-center gap-1 transition-colors focus:outline-none"
         >
           <FiRefreshCw className="w-3 h-3" /> Clear All
         </button>
       </div>
 
-      <Input label="Role Type" id="filterRole" type="select" value={filters.role} onChange={(e) => handleFilterChange('role', e.target.value)} options={roleOptions} />
-      <Input label="Location Type" id="filterLocation" type="select" value={filters.location} onChange={(e) => handleFilterChange('location', e.target.value)} options={locationOptions} />
-      <Input label="Work Mode" id="filterWorkMode" type="select" value={filters.workMode} onChange={(e) => handleFilterChange('workMode', e.target.value)} options={workModeOptions} />
-      <Input label="Employment Type" id="filterType" type="select" value={filters.employmentType} onChange={(e) => handleFilterChange('employmentType', e.target.value)} options={employmentTypeOptions} />
-      <Input label="Experience Range" id="filterExperience" type="select" value={filters.experience} onChange={(e) => handleFilterChange('experience', e.target.value)} options={experienceOptions} />
-      <Input label="Salary Range" id="filterSalary" type="select" value={filters.salaryRange} onChange={(e) => handleFilterChange('salaryRange', e.target.value)} options={salaryOptions} />
-      <Input label="Company Name" id="filterCompany" type="text" placeholder="e.g. TCS..." value={filters.company} onChange={(e) => handleFilterChange('company', e.target.value)} />
-      <Input label="Sort By" id="filterSort" type="select" value={filters.sortBy} onChange={(e) => handleFilterChange('sortBy', e.target.value)} options={sortByOptions} />
+      <FilterDropdown label="Role Type" id="mFilterRole" value={filters.role} onChange={(val) => handleFilterChange('role', val)} options={roleOptions} isOpen={openDropdown === 'mRole'} onToggle={() => toggleDropdown('mRole')} onClose={() => setOpenDropdown(null)} searchable={true} searchPlaceholder="Search roles..." />
+      <FilterDropdown label="Location Type" id="mFilterLocation" value={filters.location} onChange={(val) => handleFilterChange('location', val)} options={locationOptions} isOpen={openDropdown === 'mLocation'} onToggle={() => toggleDropdown('mLocation')} onClose={() => setOpenDropdown(null)} />
+      <FilterDropdown label="Work Mode" id="mFilterWorkMode" value={filters.workMode} onChange={(val) => handleFilterChange('workMode', val)} options={workModeOptions} isOpen={openDropdown === 'mWorkMode'} onToggle={() => toggleDropdown('mWorkMode')} onClose={() => setOpenDropdown(null)} />
+      <FilterDropdown label="Employment Type" id="mFilterType" value={filters.employmentType} onChange={(val) => handleFilterChange('employmentType', val)} options={employmentTypeOptions} isOpen={openDropdown === 'mType'} onToggle={() => toggleDropdown('mType')} onClose={() => setOpenDropdown(null)} />
+      <FilterDropdown label="Experience Range" id="mFilterExperience" value={filters.experience} onChange={(val) => handleFilterChange('experience', val)} options={experienceOptions} isOpen={openDropdown === 'mExperience'} onToggle={() => toggleDropdown('mExperience')} onClose={() => setOpenDropdown(null)} />
+      <Input label="Company Name" id="mFilterCompany" type="text" placeholder="e.g. TCS..." value={filters.company} onChange={(e) => handleFilterChange('company', e.target.value)} onFocus={() => setOpenDropdown(null)} />
+      <FilterDropdown label="Sort By" id="mFilterSort" value={filters.sortBy} onChange={(val) => handleFilterChange('sortBy', val)} options={sortByOptions} isOpen={openDropdown === 'mSort'} onToggle={() => toggleDropdown('mSort')} onClose={() => setOpenDropdown(null)} />
     </div>
   );
 
@@ -163,18 +172,19 @@ const JobsPage = () => {
     <div className="flex flex-col gap-6 items-start w-full animate-slide-up pb-8">
       
       {/* 1. Top Filter Panel */}
-      <div className="w-full bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col gap-5">
+      <div className="w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm flex flex-col gap-5" ref={filterPanelRef}>
         
         {/* Search header panel */}
         <div className="flex items-center justify-between gap-4">
           <div className="relative flex-1">
-            <FiSearch className="absolute left-4 text-slate-400 w-5 h-5 top-1/2 -translate-y-1/2" />
+            <FiSearch className="absolute left-4 text-slate-400 dark:text-slate-500 w-5 h-5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search by job title, company, or skills (e.g. React)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 text-sm font-medium"
+              onFocus={() => setOpenDropdown(null)}
+              className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-800 dark:text-slate-100 text-sm font-medium"
             />
           </div>
           
@@ -197,15 +207,14 @@ const JobsPage = () => {
         </div>
 
         {/* Desktop Filter Grid */}
-        <div className="hidden lg:grid grid-cols-4 xl:grid-cols-8 gap-3 items-end">
-          <Input label="Role" type="select" value={filters.role} onChange={(e) => handleFilterChange('role', e.target.value)} options={roleOptions} />
-          <Input label="Location" type="select" value={filters.location} onChange={(e) => handleFilterChange('location', e.target.value)} options={locationOptions} />
-          <Input label="Work Mode" type="select" value={filters.workMode} onChange={(e) => handleFilterChange('workMode', e.target.value)} options={workModeOptions} />
-          <Input label="Job Type" type="select" value={filters.employmentType} onChange={(e) => handleFilterChange('employmentType', e.target.value)} options={employmentTypeOptions} />
-          <Input label="Experience" type="select" value={filters.experience} onChange={(e) => handleFilterChange('experience', e.target.value)} options={experienceOptions} />
-          <Input label="Salary" type="select" value={filters.salaryRange} onChange={(e) => handleFilterChange('salaryRange', e.target.value)} options={salaryOptions} />
-          <Input label="Company" type="text" placeholder="e.g. TCS..." value={filters.company} onChange={(e) => handleFilterChange('company', e.target.value)} />
-          <Input label="Sort By" type="select" value={filters.sortBy} onChange={(e) => handleFilterChange('sortBy', e.target.value)} options={sortByOptions} />
+        <div className="hidden lg:grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 items-end">
+          <FilterDropdown label="Role" id="filterRole" value={filters.role} onChange={(val) => handleFilterChange('role', val)} options={roleOptions} isOpen={openDropdown === 'role'} onToggle={() => toggleDropdown('role')} onClose={() => setOpenDropdown(null)} searchable={true} searchPlaceholder="Search roles..." />
+          <FilterDropdown label="Location" id="filterLocation" value={filters.location} onChange={(val) => handleFilterChange('location', val)} options={locationOptions} isOpen={openDropdown === 'location'} onToggle={() => toggleDropdown('location')} onClose={() => setOpenDropdown(null)} />
+          <FilterDropdown label="Work Mode" id="filterWorkMode" value={filters.workMode} onChange={(val) => handleFilterChange('workMode', val)} options={workModeOptions} isOpen={openDropdown === 'workMode'} onToggle={() => toggleDropdown('workMode')} onClose={() => setOpenDropdown(null)} />
+          <FilterDropdown label="Job Type" id="filterType" value={filters.employmentType} onChange={(val) => handleFilterChange('employmentType', val)} options={employmentTypeOptions} isOpen={openDropdown === 'employmentType'} onToggle={() => toggleDropdown('employmentType')} onClose={() => setOpenDropdown(null)} />
+          <FilterDropdown label="Experience" id="filterExperience" value={filters.experience} onChange={(val) => handleFilterChange('experience', val)} options={experienceOptions} isOpen={openDropdown === 'experience'} onToggle={() => toggleDropdown('experience')} onClose={() => setOpenDropdown(null)} />
+          <Input label="Company" type="text" placeholder="e.g. TCS..." value={filters.company} onChange={(e) => handleFilterChange('company', e.target.value)} onFocus={() => setOpenDropdown(null)} />
+          <FilterDropdown label="Sort By" id="filterSort" value={filters.sortBy} onChange={(val) => handleFilterChange('sortBy', val)} options={sortByOptions} isOpen={openDropdown === 'sortBy'} onToggle={() => toggleDropdown('sortBy')} onClose={() => setOpenDropdown(null)} />
         </div>
       </div>
 
@@ -233,7 +242,7 @@ const JobsPage = () => {
                   className={`relative overflow-hidden rounded-2xl p-6 border shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer flex flex-col justify-between gap-4 ${
                     isFeatured
                       ? 'bg-gradient-to-br from-brand-600 via-indigo-600 to-slate-900 border-indigo-200 text-white hover:scale-[1.01]'
-                      : 'bg-white border-slate-100 hover:border-slate-200'
+                      : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700'
                   }`}
                 >
                   {isFeatured && (
@@ -256,10 +265,10 @@ const JobsPage = () => {
                           {job.logoText}
                         </div>
                         <div>
-                          <h3 className={`text-base font-extrabold leading-tight ${isFeatured ? 'text-white' : 'text-slate-800'}`}>
+                          <h3 className={`text-base font-extrabold leading-tight ${isFeatured ? 'text-white' : 'text-slate-800 dark:text-slate-100'}`}>
                             {job.title}
                           </h3>
-                          <p className={`text-xs font-bold mt-0.5 ${isFeatured ? 'text-slate-200/80' : 'text-slate-400'}`}>
+                          <p className={`text-xs font-bold mt-0.5 ${isFeatured ? 'text-slate-200/80' : 'text-slate-400 dark:text-slate-500'}`}>
                             {job.company} • {job.location}
                           </p>
                         </div>
@@ -270,7 +279,7 @@ const JobsPage = () => {
                         <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black shrink-0 ${
                           isFeatured 
                             ? 'bg-emerald-400 text-slate-950 shadow-sm'
-                            : 'bg-brand-50 text-brand-700 border border-brand-100'
+                            : 'bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-400 border border-brand-100 dark:border-brand-900/50'
                         }`}>
                           {job.matchScore}% Match
                         </div>
@@ -279,7 +288,7 @@ const JobsPage = () => {
 
                     {/* Description excerpt */}
                     <p className={`text-xs leading-relaxed line-clamp-2 mb-4 font-light ${
-                      isFeatured ? 'text-slate-100/80' : 'text-slate-500'
+                      isFeatured ? 'text-slate-100/80' : 'text-slate-500 dark:text-slate-400'
                     }`}>
                       {job.description}
                     </p>
@@ -292,7 +301,7 @@ const JobsPage = () => {
                           className={`text-[10px] font-bold px-2 py-1 rounded-md ${
                             isFeatured
                               ? 'bg-white/10 text-white border border-white/10'
-                              : 'bg-slate-50 border border-slate-100 text-slate-600'
+                              : 'bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300'
                           }`}
                         >
                           {skill}
@@ -302,7 +311,7 @@ const JobsPage = () => {
 
                     {/* Metadata Footer Row */}
                     <div className={`flex flex-wrap items-center gap-y-2 gap-x-4 border-t pt-4 text-xs font-bold ${
-                      isFeatured ? 'border-white/10 text-slate-200' : 'border-slate-50 text-slate-400'
+                      isFeatured ? 'border-white/10 text-slate-200' : 'border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400'
                     }`}>
                       <span className="flex items-center gap-1">
                         <FiBriefcase className="opacity-60" /> {job.experience}
@@ -310,8 +319,8 @@ const JobsPage = () => {
                       <span className="flex items-center gap-1">
                         <FiClock className="opacity-60" /> {job.employmentType}
                       </span>
-                      <span className="ml-auto font-black text-slate-800">
-                        <span className={isFeatured ? 'text-emerald-400' : 'text-brand-600'}>{job.salary}</span>
+                      <span className="ml-auto font-black text-slate-800 dark:text-white">
+                        <span className={isFeatured ? 'text-emerald-400' : 'text-brand-600 dark:text-brand-400'}>{job.salary}</span>
                       </span>
                     </div>
                   </div>
@@ -326,14 +335,14 @@ const JobsPage = () => {
                     >
                       {isJobApplied(job.id) ? 'Applied' : 'Apply Details'}
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className={`p-2.5 shrink-0 bg-white ${isFeatured ? 'hover:bg-slate-50 border-none' : ''}`}
+                    <button
+                      type="button"
                       onClick={(e) => handleSaveToggle(e, job.id)}
+                      className="p-2 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer shrink-0"
+                      title={isJobSaved(job.id) ? 'Remove from saved' : 'Save job'}
                     >
-                      <FiBookmark className={isJobSaved(job.id) ? 'fill-rose-500 text-rose-500' : 'text-slate-400'} />
-                    </Button>
+                      <FiBookmark className={`w-4 h-4 ${isJobSaved(job.id) ? 'fill-rose-500 text-rose-500' : 'text-slate-400 dark:text-slate-400'}`} />
+                    </button>
                   </div>
                 </div>
               );
