@@ -25,31 +25,46 @@ export const jobService = {
   applyToJob: (jobId) => api.post(`/applied/${jobId}`),
 };
 
+const getDefaultResumeTemplate = (session) => ({
+  personalInfo: {
+    fullName: session?.name || '',
+    email: session?.email || '',
+    phone: '',
+    location: '',
+    linkedin: '',
+    github: '',
+    website: '',
+    summary: '',
+    dob: '',
+    gender: '',
+    photo: '',
+  },
+  education: [],
+  experience: [],
+  internship: [],
+  projects: [],
+  certifications: [],
+  skills: [],
+  achievements: [],
+  languages: [],
+  interests: [],
+});
+
 export const resumeService = {
   getResume: async () => {
-    const session = JSON.parse(localStorage.getItem('jobportal_session'));
-    if (!session) throw new Error('Unauthenticated user session.');
-
-    const res = await api.get('/resume', {
-      params: { 
-        userId: session.id,
-        name: session.name,
-        email: session.email
+    try {
+      const res = await api.get('/resume');
+      if (res.data?.data) {
+        return res;
       }
-    });
-    
-    return { data: res.data.data };
+    } catch {
+      // fall through to default
+    }
+    const session = JSON.parse(localStorage.getItem('jobportal_session'));
+    return { data: { data: getDefaultResumeTemplate(session) } };
   },
 
   saveResume: async (resumeData) => {
-    const session = JSON.parse(localStorage.getItem('jobportal_session'));
-    if (!session) throw new Error('Unauthenticated user session.');
-
-    const res = await api.post('/resume', {
-      userId: session.id,
-      resumeData
-    });
-
-    return { data: res.data.data };
+    return api.put('/resume', { resumeData });
   }
 };

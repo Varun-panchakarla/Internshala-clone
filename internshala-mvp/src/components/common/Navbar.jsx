@@ -5,7 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import Logo from './Logo';
 import {
   FiUser, FiLogOut, FiMenu, FiX, FiSun, FiMoon, FiSettings,
-  FiChevronDown, FiBell,
+  FiChevronDown, FiBell, FiFileText, FiLayout,
 } from 'react-icons/fi';
 import Button from './Button';
 
@@ -47,14 +47,6 @@ const Navbar = () => {
     await logout();
     navigate('/login');
   };
-
-  const navLinks = [
-    { to: '/dashboard',        label: 'Dashboard',      icon: FiGrid,      authRequired: true },
-    { to: '/jobs',             label: 'Browse Jobs',    icon: FiBriefcase, authRequired: false },
-    { to: '/saved-jobs',       label: 'Saved',          icon: FiHeart,     authRequired: true,  badge: savedJobs?.length },
-    { to: '/resume',           label: 'Resume Builder', icon: FiFileText,  authRequired: true },
-    { to: '/resume-templates', label: 'Templates',      icon: FiLayout,    authRequired: true },
-  ];
 
   const initials = currentUser?.name
     ? currentUser.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
