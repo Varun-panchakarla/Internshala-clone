@@ -147,6 +147,8 @@ router.post('/login', async (req, res) => {
     const token = signToken(user.id, user.email);
     setCookie(res, token);
 
+    sendWelcomeEmail({ email: user.email, name: user.name });
+
     res.json({
       user: { id: user.id, email: user.email, name: user.name },
       profile: mapProfile(profile),
@@ -209,6 +211,8 @@ router.post('/google', async (req, res) => {
 
     const profileResult = await pool.query('SELECT * FROM profiles WHERE user_id = $1', [user.id]);
     const profile = profileResult.rows[0] || {};
+
+    sendWelcomeEmail({ email: user.email, name: user.name });
 
     const token = signToken(user.id, user.email);
     setCookie(res, token);
