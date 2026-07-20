@@ -1,10 +1,11 @@
-require('dotenv').config();
+const path = require('path');
+const dotenv = require('dotenv');
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const cron = require('node-cron');
-const path = require('path');
 const fs = require('fs');
 const { scrapeAll } = require('./scraper/index.js');
 const pool = require('./db/pool');
@@ -59,10 +60,27 @@ async function initDb() {
     const schemaSql = fs.readFileSync(path.resolve(__dirname, 'db', 'init.sql'), 'utf-8');
     await pool.query(schemaSql);
     console.log('[DB] Schema initialized.');
-    await seedJobs();
   } catch (err) {
-    console.error('[DB] Init error:', err.message);
+    console.error('[DB] Schema init error:', err.message);
   }
+  // Run migrations separately (ignore errors for existing columns)
+  const migrations = [
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS user_id INTEGER',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS full_name VARCHAR(255)',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS profile_photo TEXT',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS college VARCHAR(255)',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS degree VARCHAR(255)',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS preferred_role VARCHAR(255)',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS preferred_location VARCHAR(255)',
+    "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS employment_type VARCHAR(50) DEFAULT 'Full-time'",
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS resume_info JSONB',
+    'ALTER TABLE profiles ADD CONSTRAINT IF NOT EXISTS fk_profiles_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE',
+    'ALTER TABLE profiles ADD CONSTRAINT IF NOT EXISTS uq_profiles_user UNIQUE (user_id)',
+  ];
+  for (const sql of migrations) {
+    try { await pool.query(sql); } catch { /* column may already exist */ }
+  }
+  try { await seedJobs(); } catch (err) { console.error('[DB] Seed error:', err.message); }
 }
 
 // Check if jobs table is empty -> trigger scrape

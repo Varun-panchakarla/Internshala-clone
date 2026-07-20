@@ -1,6 +1,13 @@
 const { Resend } = require('resend');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const RESEND_KEY = process.env.RESEND_API_KEY;
+let _resend = null;
+function getResend() {
+  if (!_resend && RESEND_KEY) {
+    _resend = new Resend(RESEND_KEY);
+  }
+  return _resend;
+}
 const FROM = process.env.FROM_EMAIL || 'onboarding@resend.dev';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
@@ -24,8 +31,13 @@ If you no longer wish to receive these emails, <a href="${FRONTEND_URL}/profile"
 </html>`;
 
 async function send({ to, subject, html }) {
+  const r = getResend();
+  if (!r) {
+    console.warn(`[Email] Skipping "${subject}" to ${to} — no RESEND_API_KEY configured`);
+    return false;
+  }
   try {
-    await resend.emails.send({ from: `IncuXAI Careers <${FROM}>`, to, subject, html });
+    await r.emails.send({ from: `IncuXAI Careers <${FROM}>`, to, subject, html });
     console.log(`[Email] Sent "${subject}" to ${to}`);
     return true;
   } catch (err) {
