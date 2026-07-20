@@ -7,7 +7,38 @@ const router = express.Router();
 const VALID_EXPERIENCE = ['Fresher', '1-3 years', '3+ years', '5+ years'];
 const VALID_EMPLOYMENT = ['Full-time', 'Part-time', 'Internship', 'Contract'];
 
-// PUT /api/profile
+// GET /api/profile — fetch authenticated user profile from profiles table
+router.get('/', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const result = await pool.query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
+
+    if (result.rows.length === 0) {
+      return res.json({ profile: null });
+    }
+
+    const profile = result.rows[0];
+    res.json({
+      profile: {
+        fullName: profile.full_name,
+        profilePhoto: profile.profile_photo || '',
+        college: profile.college || '',
+        degree: profile.degree || '',
+        skills: profile.skills || [],
+        experience: profile.experience || 'Fresher',
+        preferredRole: profile.preferred_role || '',
+        preferredLocation: profile.preferred_location || '',
+        employmentType: profile.employment_type || 'Full-time',
+        resumeInfo: profile.resume_info || null,
+      },
+    });
+  } catch (err) {
+    console.error('[Profile] Fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch profile.' });
+  }
+});
+
+// PUT /api/profile — create or update profile record in profiles table
 router.put('/', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -38,7 +69,7 @@ router.put('/', authMiddleware, async (req, res) => {
       ON CONFLICT (user_id)
       DO UPDATE SET
         full_name = EXCLUDED.full_name,
-        profile_photo = EXCLUDED.profile_photo,
+        profile_photo = COALESCE(EXCLUDED.profile_photo, profiles.profile_photo),
         college = EXCLUDED.college,
         degree = EXCLUDED.degree,
         skills = EXCLUDED.skills,
@@ -50,7 +81,7 @@ router.put('/', authMiddleware, async (req, res) => {
         updated_at = NOW()
       RETURNING *`,
       [
-        userId, cleanName, profilePhoto || null, college?.trim() || null,
+        userId, cleanName, profilePhoto !== undefined ? profilePhoto : null, college?.trim() || null,
         degree?.trim() || null, skillsArray, cleanExperience,
         preferredRole?.trim() || null, preferredLocation?.trim() || null,
         cleanEmployment, resumeInfo ? JSON.stringify(resumeInfo) : null,

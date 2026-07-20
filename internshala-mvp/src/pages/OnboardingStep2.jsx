@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
 import Button from '../components/common/Button';
 import { FiPlus, FiCheck, FiArrowRight, FiArrowLeft, FiSearch, FiX } from 'react-icons/fi';
@@ -14,6 +15,7 @@ const PREDEFINED_INTERESTS = [
 ];
 
 const OnboardingStep2 = () => {
+  const { currentUser } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -26,6 +28,22 @@ const OnboardingStep2 = () => {
   const [suggestions, setSuggestions] = useState([]);
   
   const containerRef = useRef(null);
+
+  // Restore saved step 2 data
+  useEffect(() => {
+    const dataKey = currentUser?.id ? `onboarding_step2_${currentUser.id}` : 'onboarding_step2_guest';
+    const saved = localStorage.getItem(dataKey);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed.selectedInterests) && parsed.selectedInterests.length > 0) {
+          setSelectedInterests(parsed.selectedInterests);
+        }
+      } catch (err) {
+        console.error('Failed to parse saved step 2 interests', err);
+      }
+    }
+  }, [currentUser?.id]);
 
   // Filter suggestions when search query changes
   useEffect(() => {
@@ -99,6 +117,9 @@ const OnboardingStep2 = () => {
       addToast('Please select at least one interest to proceed.', 'error');
       return;
     }
+    const dataKey = currentUser?.id ? `onboarding_step2_${currentUser.id}` : 'onboarding_step2_guest';
+    localStorage.setItem(dataKey, JSON.stringify({ selectedInterests }));
+
     addToast('Preferences saved successfully!', 'success');
     navigate('/onboarding/step3');
   };

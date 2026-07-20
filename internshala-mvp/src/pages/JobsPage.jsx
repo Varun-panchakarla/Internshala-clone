@@ -11,6 +11,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const JobsPage = () => {
   const {
+    jobs = [],
     filteredJobs,
     loading,
     searchQuery,
@@ -90,13 +91,38 @@ const JobsPage = () => {
     }));
   };
 
+  const standardRoles = [
+    'Frontend Developer',
+    'React Developer',
+    'Full Stack Developer',
+    'Backend Engineer',
+    'Data Analyst',
+    'Data Scientist',
+    'Data Engineer',
+    'Data Entry Operator',
+    'Software Engineer',
+    'Software Engineering Intern',
+    'DevOps Engineer',
+    'UI/UX & Design',
+    'UI/UX Developer',
+    'Product Manager',
+    'QA Engineer',
+    'Business Analyst',
+    'Mobile Developer',
+    'Graphic Designer',
+    'Content Writer',
+    'Marketing Manager',
+    'Sales Executive',
+    'Cloud Architect',
+    'Cybersecurity Specialist'
+  ];
+
+  const datasetJobTitles = Array.isArray(jobs) ? jobs.map(j => j.title).filter(Boolean) : [];
+  const allRoleLabels = Array.from(new Set([...standardRoles, ...datasetJobTitles]));
+
   const roleOptions = [
     { label: 'All Roles', value: '' },
-    { label: 'Frontend Developer', value: 'frontend' },
-    { label: 'React Developer', value: 'react' },
-    { label: 'Full Stack Developer', value: 'full stack' },
-    { label: 'Backend Engineer', value: 'backend' },
-    { label: 'UI/UX & Design', value: 'ui' }
+    ...allRoleLabels.map(r => ({ label: r, value: r.toLowerCase() }))
   ];
 
   const locationOptions = [
@@ -349,10 +375,13 @@ const JobsPage = () => {
             })}
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center shadow-sm flex flex-col items-center justify-center gap-4">
-            <p className="text-sm font-medium text-slate-400 italic">No job listings matched your filters.</p>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-12 text-center shadow-sm flex flex-col items-center justify-center gap-4">
+            <p className="text-base font-bold text-slate-700 dark:text-slate-200">No jobs found matching your criteria.</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 max-w-sm font-medium">
+              Try adjusting your role search query or clear filters to view all available opportunities.
+            </p>
             <Button variant="light" size="sm" onClick={resetFilters}>
-              Reset Search Filters
+              Clear All Filters
             </Button>
           </div>
         )}

@@ -61,9 +61,30 @@ const Onboarding = () => {
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 25 }, (_, i) => String(currentYear - 10 + i));
 
-  // Populate first/last name from currentUser.name if available
+  // Populate saved step 1 data or fallback to currentUser.name
   useEffect(() => {
-    if (currentUser?.name) {
+    const dataKey = currentUser?.id ? `onboarding_step1_${currentUser.id}` : 'onboarding_step1_guest';
+    const saved = localStorage.getItem(dataKey);
+    if (saved) {
+      try {
+        const d = JSON.parse(saved);
+        if (d.firstName) setFirstName(d.firstName);
+        if (d.lastName) setLastName(d.lastName);
+        if (d.contactNumber) setContactNumber(d.contactNumber);
+        if (d.currentCity) setCurrentCity(d.currentCity);
+        if (d.gender) setGender(d.gender);
+        if (Array.isArray(d.selectedLanguages)) setSelectedLanguages(d.selectedLanguages);
+        if (d.currentStatus) setCurrentStatus(d.currentStatus);
+        if (d.course) setCourse(d.course);
+        if (d.collegeName) setCollegeName(d.collegeName);
+        if (d.stream) setStream(d.stream);
+        if (d.startYear) setStartYear(d.startYear);
+        if (d.endYear) setEndYear(d.endYear);
+        if (d.experienceYears) setExperienceYears(d.experienceYears);
+      } catch (e) {
+        console.error('Failed to parse saved step 1 data', e);
+      }
+    } else if (currentUser?.name) {
       const parts = currentUser.name.trim().split(/\s+/);
       if (parts.length > 0) {
         setFirstName(parts[0]);
@@ -180,14 +201,33 @@ const Onboarding = () => {
     }
 
     setLoading(true);
-    // Simulate API Saving
     setTimeout(() => {
       setLoading(false);
-      const key = currentUser?.id ? `onboarding_completed_${currentUser.id}` : 'onboarding_completed_guest';
-      localStorage.setItem(key, 'true');
+      const step1Data = {
+        firstName,
+        lastName,
+        contactNumber,
+        currentCity,
+        gender,
+        selectedLanguages,
+        currentStatus,
+        course: customCourseActive ? customCourse : course,
+        collegeName: currentStatus === 'School Student' ? schoolName : collegeName,
+        stream,
+        startYear,
+        endYear,
+        experienceYears,
+        currentCompany,
+        currentJobTitle,
+        careerBreak,
+        schoolStandard
+      };
+      const dataKey = currentUser?.id ? `onboarding_step1_${currentUser.id}` : 'onboarding_step1_guest';
+      localStorage.setItem(dataKey, JSON.stringify(step1Data));
+
       addToast('Step 1 Saved successfully!', 'success');
       navigate('/onboarding/step2');
-    }, 1200);
+    }, 600);
   };
 
   // Form validity check for disabled state of button
