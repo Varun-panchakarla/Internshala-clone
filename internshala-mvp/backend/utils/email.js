@@ -1,14 +1,9 @@
-const { Resend } = require('resend');
+const sgMail = require('@sendgrid/mail');
 
-const RESEND_KEY = process.env.RESEND_API_KEY;
-let _resend = null;
-function getResend() {
-  if (!_resend && RESEND_KEY) {
-    _resend = new Resend(RESEND_KEY);
-  }
-  return _resend;
-}
-const FROM = process.env.FROM_EMAIL || 'onboarding@resend.dev';
+const SENDGRID_KEY = process.env.SENDGRID_API_KEY;
+if (SENDGRID_KEY) sgMail.setApiKey(SENDGRID_KEY);
+
+const FROM = process.env.FROM_EMAIL || 'noreply@incuxai.careers';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const BASE_HTML = (content) => `
@@ -31,17 +26,16 @@ If you no longer wish to receive these emails, <a href="${FRONTEND_URL}/profile"
 </html>`;
 
 async function send({ to, subject, html }) {
-  const r = getResend();
-  if (!r) {
-    console.warn(`[Email] Skipping "${subject}" to ${to} — no RESEND_API_KEY configured`);
+  if (!SENDGRID_KEY) {
+    console.warn(`[Email] Skipping "${subject}" to ${to} — no SENDGRID_API_KEY configured`);
     return false;
   }
   try {
-    await r.emails.send({ from: `IncuXAI Careers <${FROM}>`, to, subject, html });
+    await sgMail.send({ from: FROM, to, subject, html });
     console.log(`[Email] Sent "${subject}" to ${to}`);
     return true;
   } catch (err) {
-    console.error(`[Email] Failed to send "${subject}" to ${to}:`, err.message);
+    console.error(`[Email] Failed to send "${subject}" to ${to}:`, err.response?.body?.errors?.[0]?.message || err.message);
     return false;
   }
 }
