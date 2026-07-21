@@ -6,6 +6,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { JobProvider } from './context/JobContext';
 import { ResumeProvider } from './context/ResumeContext';
+import { SidebarProvider } from './context/SidebarContext';
 import AppRoutes from './routes/AppRoutes';
 import ScrollToTop from './components/common/ScrollToTop';
 import TopProgressBar from './components/common/TopProgressBar';
@@ -21,11 +22,13 @@ function App() {
         <ToastProvider>
           <ThemeProvider>
             <AuthProvider>
-              <JobProvider>
-                <ResumeProvider>
-                  <AppRoutes />
-                </ResumeProvider>
-              </JobProvider>
+              <SidebarProvider>
+                <JobProvider>
+                  <ResumeProvider>
+                    <AppRoutes />
+                  </ResumeProvider>
+                </JobProvider>
+              </SidebarProvider>
             </AuthProvider>
           </ThemeProvider>
         </ToastProvider>
