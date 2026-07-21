@@ -33,17 +33,39 @@ const ForgotPassword = () => {
     return Object.keys(tempErrors).length === 0;
   };
 
+  const [devResetUrl, setDevResetUrl] = useState(null);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     setLoading(true);
-    // Simulate API request delay
-    setTimeout(() => {
+    setErrors({});
+
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
       setLoading(false);
+
+      if (!res.ok) {
+        setErrors({ email: data.error || 'Failed to send password reset email.' });
+        return;
+      }
+
       setSubmitted(true);
-      addToast('Reset instructions sent to your email address.', 'success');
-    }, 800);
+      if (data.devResetUrl) {
+        setDevResetUrl(data.devResetUrl);
+      }
+      addToast(data.message || 'If an account exists with this email, we\'ve sent a password reset link.', 'success');
+    } catch (err) {
+      setLoading(false);
+      setErrors({ email: 'Network error. Please try again later.' });
+    }
   };
 
   return (
@@ -54,7 +76,7 @@ const ForgotPassword = () => {
         {/* Back Button */}
         <button
           onClick={handleBackClick}
-          className="absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-655 transition-colors focus:outline-none cursor-pointer z-20"
+          className="absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors focus:outline-none cursor-pointer z-20"
         >
           <FiArrowLeft className="w-4 h-4" />
           <span>Back</span>
@@ -103,12 +125,24 @@ const ForgotPassword = () => {
               <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 flex gap-3 text-emerald-800">
                 <FiCheckCircle className="w-5 h-5 shrink-0 text-emerald-500 mt-0.5" />
                 <div className="text-xs leading-relaxed font-semibold">
-                  If an account with this email exists, a password reset link has been sent.
+                  If an account exists with this email, we've sent a password reset link.
                 </div>
               </div>
               <p className="text-sm text-slate-500 leading-relaxed font-medium">
                 Please check your inbox (and spam folder) for instructions to change your password.
               </p>
+
+              {devResetUrl && (
+                <div className="p-4 rounded-xl bg-brand-50 border border-brand-100 flex flex-col gap-2">
+                  <div className="text-xs font-bold text-brand-900">⚡ Dev Mode Testing Link:</div>
+                  <a
+                    href={devResetUrl}
+                    className="text-xs font-bold text-brand-600 hover:text-brand-700 underline break-all"
+                  >
+                    Click to Open Reset Password Page →
+                  </a>
+                </div>
+              )}
             </div>
           )}
 

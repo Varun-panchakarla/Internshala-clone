@@ -107,3 +107,16 @@ CREATE TABLE IF NOT EXISTS issue_reports (
 
 -- Index for issue reports user lookup
 CREATE INDEX IF NOT EXISTS idx_issue_reports_user ON issue_reports(user_id);
+
+-- Password resets table
+CREATE TABLE IF NOT EXISTS password_resets (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  token VARCHAR(255) UNIQUE NOT NULL,
+  used BOOLEAN DEFAULT FALSE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_password_resets_token ON password_resets(token);
+CREATE INDEX IF NOT EXISTS idx_password_resets_user ON password_resets(user_id);

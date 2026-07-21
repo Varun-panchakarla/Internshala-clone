@@ -15,6 +15,7 @@ import ResumeTemplates from '../pages/ResumeTemplates';
 import Profile from '../pages/Profile';
 import LandingPage from '../pages/LandingPage';
 import ForgotPassword from '../pages/ForgotPassword';
+import ResetPassword from '../pages/ResetPassword';
 import ManageAccount from '../pages/ManageAccount';
 import TermsPage from '../pages/TermsPage';
 import HelpCentre from '../pages/HelpCentre';
@@ -117,6 +118,14 @@ const AppRoutes = () => {
         element={
           <PublicRoute useLayout={false}>
             <ForgotPassword />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <PublicRoute useLayout={false}>
+            <ResetPassword />
           </PublicRoute>
         }
       />

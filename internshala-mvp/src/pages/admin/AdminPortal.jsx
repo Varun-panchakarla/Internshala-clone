@@ -1,18 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../components/common/Toast';
 import axios from 'axios';
+
+axios.defaults.withCredentials = true;
 import {
   FiUsers, FiBriefcase, FiFolder, FiFileText, FiTrendingUp, FiActivity,
   FiBell, FiSettings, FiLogOut, FiPlus, FiTrash2, FiEdit, FiSearch,
   FiSliders, FiCheck, FiX, FiCheckCircle, FiInfo, FiChevronRight,
-  FiChevronLeft, FiExternalLink, FiUpload, FiMenu, FiCpu, FiGrid, FiUser, FiMapPin, FiClock
+  FiChevronLeft, FiExternalLink, FiUpload, FiMenu, FiCpu, FiGrid, FiUser, FiMapPin, FiClock,
+  FiSun, FiMoon, FiLock, FiHelpCircle, FiChevronDown
 } from 'react-icons/fi';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import Logo from '../../components/common/Logo';
 
 const AdminPortal = () => {
   const { currentUser, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -27,6 +33,30 @@ const AdminPortal = () => {
   const [recentJobs, setRecentJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    try {
+      const saved = localStorage.getItem("admin_sidebar_collapsed");
+      return saved !== null ? JSON.parse(saved) : false;
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("admin_sidebar_collapsed", JSON.stringify(isSidebarCollapsed));
+    } catch (e) {
+      console.error("Failed to save admin sidebar preference", e);
+    }
+  }, [isSidebarCollapsed]);
+
+  const handleToggleSidebar = () => {
+    if (window.innerWidth < 1024) {
+      setMobileSidebarOpen(prev => !prev);
+    } else {
+      setIsSidebarCollapsed(prev => !prev);
+    }
+  };
 
   // CRUD specific states
   const [users, setUsers] = useState([]);
@@ -94,6 +124,33 @@ const AdminPortal = () => {
 
   const [confirmModal, setConfirmModal] = useState({ open: false, type: '', id: null, message: '' });
 
+
+  // Admin Profile Dropdown state & outside click handler
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleKeyDown);
+    const handleEscapeMobile = (e) => {
+      if (e.key === "Escape") setMobileSidebarOpen(false);
+    };
+    document.addEventListener("keydown", handleEscapeMobile);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
   // Load Dashboard Stats
   const fetchStats = async () => {
     try {
@@ -373,14 +430,15 @@ const AdminPortal = () => {
     return (
       <button
         onClick={() => setView(view)}
-        className={`w-full group flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-205 ${
+        title={isSidebarCollapsed ? name : ""}
+        className={`w-full group flex items-center ${isSidebarCollapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-2.5"} rounded-xl text-[13px] font-medium transition-all duration-200 ease-in-out cursor-pointer active:scale-[0.98] ${
           isActive
-            ? 'bg-brand-650/10 text-brand-400 border-l-2 border-brand-500 font-semibold'
-            : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'
+            ? "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 font-semibold border-l-2 border-brand-600 dark:border-brand-500 shadow-2xs"
+            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-200 hover:translate-x-0.5"
         }`}
       >
-        <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-brand-400' : 'text-slate-500 group-hover:text-slate-400 transition-colors duration-200'}`} />
-        <span>{name}</span>
+        <Icon className={`w-4.5 h-4.5 shrink-0 transition-colors duration-200 ${isActive ? "text-brand-600 dark:text-brand-400" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200"}`} />
+        {!isSidebarCollapsed && <span className="truncate transition-opacity duration-200">{name}</span>}
       </button>
     );
   };
@@ -391,8 +449,8 @@ const AdminPortal = () => {
     return (
       <button
         onClick={() => setView(view)}
-        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-205 ${
-          isActive ? 'bg-brand-500/10 text-brand-400' : 'text-slate-400 hover:bg-slate-800/30'
+        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ease-in-out active:scale-[0.98] ${
+          isActive ? "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 font-semibold" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/40"
         }`}
       >
         <Icon className="w-4.5 h-4.5" />
@@ -406,21 +464,40 @@ const AdminPortal = () => {
     const isExpanded = expandedSection === sectionKey;
     const hasActiveChild = items.some(item => currentView === item.view);
     
+    if (isSidebarCollapsed) {
+      return (
+        <button
+          onClick={() => {
+            const firstChildView = items[0]?.view;
+            if (firstChildView) setView(firstChildView);
+          }}
+          title={name}
+          className={`w-full group flex items-center justify-center py-3 rounded-xl text-[13px] font-medium transition-all duration-200 cursor-pointer active:scale-[0.98] ${
+            hasActiveChild
+              ? "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 border-l-2 border-brand-600 dark:border-brand-500 font-semibold shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-200"
+          }`}
+        >
+          <Icon className={`w-4.5 h-4.5 shrink-0 transition-colors duration-200 ${hasActiveChild ? "text-brand-600 dark:text-brand-400" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200"}`} />
+        </button>
+      );
+    }
+
     return (
       <div className="space-y-1">
         <button
           onClick={() => setExpandedSection(isExpanded ? null : sectionKey)}
-          className={`w-full group flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-205 ${
+          className={`w-full group flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ease-in-out cursor-pointer active:scale-[0.98] ${
             hasActiveChild
-              ? 'text-slate-200 bg-slate-800/20'
-              : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'
+              ? "text-slate-900 dark:text-slate-200 font-semibold bg-slate-100/80 dark:bg-slate-800/20"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-slate-200 hover:translate-x-0.5"
           }`}
         >
-          <Icon className={`w-4.5 h-4.5 ${hasActiveChild ? 'text-brand-400' : 'text-slate-500 group-hover:text-slate-400 transition-colors duration-200'}`} />
-          <span>{name}</span>
+          <Icon className={`w-4.5 h-4.5 shrink-0 transition-colors duration-200 ${hasActiveChild ? "text-brand-600 dark:text-brand-400" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200"}`} />
+          <span className="truncate">{name}</span>
           <FiChevronRight 
-            className={`w-4 h-4 ml-auto text-slate-500 transition-transform duration-250 ${
-              isExpanded ? 'rotate-90 text-brand-400' : 'group-hover:text-slate-400 transition-colors'
+            className={`w-4 h-4 ml-auto text-slate-400 dark:text-slate-500 transition-transform duration-300 ease-in-out ${
+              isExpanded ? "rotate-90 text-brand-600 dark:text-brand-400" : "group-hover:text-slate-700 dark:group-hover:text-slate-300"
             }`} 
           />
         </button>
@@ -428,7 +505,7 @@ const AdminPortal = () => {
         <div
           className="transition-all duration-300 ease-in-out overflow-hidden"
           style={{
-            maxHeight: isExpanded ? `${items.length * 40 + 8}px` : '0px',
+            maxHeight: isExpanded ? `${items.length * 40 + 8}px` : "0px",
             opacity: isExpanded ? 1 : 0,
           }}
         >
@@ -440,16 +517,16 @@ const AdminPortal = () => {
                 <button
                   key={item.view}
                   onClick={() => setView(item.view)}
-                  className={`w-full group flex items-center gap-3 pl-10 pr-4 py-2 rounded-lg text-[12px] font-medium transition-all duration-250 transform ${
-                    isExpanded ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0 pointer-events-none'
+                  className={`w-full group flex items-center gap-3 pl-10 pr-4 py-2 rounded-lg text-[12px] font-medium transition-all duration-200 ease-in-out cursor-pointer active:scale-[0.98] transform ${
+                    isExpanded ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0 pointer-events-none"
                   } ${
                     isChildActive
-                      ? 'bg-brand-650/10 text-brand-400 border-l-2 border-brand-500 font-semibold'
-                      : 'text-slate-555 hover:bg-slate-800/20 hover:text-slate-300'
+                      ? "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 border-l-2 border-brand-600 dark:border-brand-500 font-semibold shadow-2xs"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/20 hover:text-slate-900 dark:hover:text-slate-200 hover:translate-x-0.5"
                   }`}
                 >
-                  <ChildIcon className={`w-3.5 h-3.5 ${isChildActive ? 'text-brand-400' : 'text-slate-600 group-hover:text-slate-400 transition-colors duration-200'}`} />
-                  <span>{item.name}</span>
+                  <ChildIcon className={`w-3.5 h-3.5 shrink-0 transition-colors duration-200 ${isChildActive ? "text-brand-600 dark:text-brand-400" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300"}`} />
+                  <span className="truncate">{item.name}</span>
                 </button>
               );
             })}
@@ -468,15 +545,15 @@ const AdminPortal = () => {
       <div className="space-y-1">
         <button
           onClick={() => setExpandedSection(isExpanded ? null : sectionKey)}
-          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium ${
-            hasActiveChild ? 'text-brand-400 bg-brand-500/5' : 'text-slate-400 hover:bg-slate-800/30'
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ease-in-out active:scale-[0.98] ${
+            hasActiveChild ? "text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/5 font-semibold" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/30"
           }`}
         >
           <Icon className="w-4.5 h-4.5" />
           <span>{name}</span>
           <FiChevronRight 
-            className={`w-4 h-4 ml-auto text-slate-500 transition-transform duration-250 ${
-              isExpanded ? 'rotate-90 text-brand-400' : ''
+            className={`w-4 h-4 ml-auto text-slate-400 dark:text-slate-500 transition-transform duration-300 ease-in-out ${
+              isExpanded ? "rotate-90 text-brand-600 dark:text-brand-400" : ""
             }`} 
           />
         </button>
@@ -484,7 +561,7 @@ const AdminPortal = () => {
         <div
           className="transition-all duration-300 ease-in-out overflow-hidden"
           style={{
-            maxHeight: isExpanded ? `${items.length * 40 + 8}px` : '0px',
+            maxHeight: isExpanded ? `${items.length * 40 + 8}px` : "0px",
             opacity: isExpanded ? 1 : 0,
           }}
         >
@@ -496,10 +573,10 @@ const AdminPortal = () => {
                 <button
                   key={item.view}
                   onClick={() => setView(item.view)}
-                  className={`w-full flex items-center gap-3 pl-10 pr-4 py-2 rounded-lg text-[12px] font-medium transition-all duration-250 transform ${
-                    isExpanded ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0 pointer-events-none'
+                  className={`w-full flex items-center gap-3 pl-10 pr-4 py-2 rounded-lg text-[12px] font-medium transition-all duration-200 ease-in-out active:scale-[0.98] transform ${
+                    isExpanded ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0 pointer-events-none"
                   } ${
-                    isChildActive ? 'bg-brand-500/10 text-brand-400' : 'text-slate-555 hover:bg-slate-800/30'
+                    isChildActive ? "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 font-semibold" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/30"
                   }`}
                 >
                   <ChildIcon className="w-3.5 h-3.5 mr-2" />
@@ -514,26 +591,25 @@ const AdminPortal = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100/90 dark:bg-[#060d1b] text-slate-900 dark:text-slate-100 flex font-sans transition-colors duration-200">
+    <div className="min-h-screen bg-[#F5F7FB] dark:bg-[#060d1b] text-slate-900 dark:text-slate-100 flex font-sans transition-colors duration-200">
       
       {/* ─── DESKTOP SIDEBAR ─────────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex flex-col w-64 bg-white dark:bg-[#0a1222] border-r border-slate-200 dark:border-slate-800/80 shrink-0 sticky top-0 h-screen transition-all shadow-xs dark:shadow-none">
-        <div className="h-16 px-6 border-b border-slate-200 dark:border-slate-800/85 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center font-black text-white text-base">
-              I
-            </div>
-            <div>
-              <p className="font-extrabold text-sm tracking-tight leading-none text-slate-900 dark:text-white">IncuXAI Careers</p>
-              <p className="text-[10px] text-brand-600 dark:text-brand-400 font-bold uppercase tracking-wider mt-0.5">Admin Portal</p>
-            </div>
-          </div>
+      <aside className={`hidden lg:flex flex-col ${isSidebarCollapsed ? "w-20" : "w-64"} bg-white dark:bg-[#0a1222] border-r border-slate-200/80 dark:border-slate-800/80 shrink-0 sticky top-0 h-screen transition-all duration-300 ease-in-out shadow-[1px_0_10px_rgba(0,0,0,0.03)] dark:shadow-none z-20`}>
+        <div className={`h-12 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center shrink-0 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? "justify-center" : "justify-end px-3.5"}`}>
+          <button
+            onClick={handleToggleSidebar}
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white transition-all duration-300 ease-in-out cursor-pointer focus:outline-none shrink-0"
+            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label="Toggle Sidebar"
+          >
+            <FiMenu className={`w-4 h-4 transition-transform duration-300 ease-in-out ${isSidebarCollapsed ? "rotate-180 text-brand-600 dark:text-brand-400" : "rotate-0"}`} />
+          </button>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-3 overflow-y-auto custom-scrollbar">
           {renderStandaloneLink('Dashboard', FiGrid, 'dashboard')}
 
-          <hr className="border-slate-800/25 my-1.5 mx-2" />
+          <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
 
           {renderAccordionSection('management', 'Management', FiSliders, [
             { name: 'Users', icon: FiUser, view: 'users' },
@@ -543,18 +619,18 @@ const AdminPortal = () => {
             { name: 'Applications', icon: FiFolder, view: 'applications' }
           ])}
 
-          <hr className="border-slate-800/25 my-1.5 mx-2" />
+          <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
 
           {renderStandaloneLink('Resume Templates', FiFileText, 'templates')}
 
-          <hr className="border-slate-800/25 my-1.5 mx-2" />
+          <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
 
           {renderAccordionSection('insights', 'Insights', FiTrendingUp, [
             { name: 'Analytics', icon: FiTrendingUp, view: 'analytics' },
             { name: 'Reports', icon: FiActivity, view: 'reports' }
           ])}
 
-          <hr className="border-slate-800/25 my-1.5 mx-2" />
+          <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
 
           {renderAccordionSection('system', 'System', FiSettings, [
             { name: 'Notifications', icon: FiBell, view: 'notifications' },
@@ -562,34 +638,25 @@ const AdminPortal = () => {
           ])}
         </nav>
 
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800/85">
-          <button
-            onClick={handleLogoutClick}
-            className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all cursor-pointer"
-          >
-            <FiLogOut className="w-4.5 h-4.5" />
-            <span>Sign Out</span>
-          </button>
-        </div>
+
       </aside>
 
       {/* ─── MOBILE DRAWER SIDEBAR ───────────────────────────────────────────── */}
       {mobileSidebarOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden bg-slate-950/80 backdrop-blur-sm animate-fade-in" onClick={() => setMobileSidebarOpen(false)}>
           <aside className="w-64 bg-white dark:bg-[#0a1222] border-r border-slate-200 dark:border-slate-800 flex flex-col h-full animate-slide-up" onClick={(e) => e.stopPropagation()}>
-            <div className="h-16 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center font-black text-white text-base">I</div>
-                <span className="font-extrabold text-sm text-slate-900 dark:text-white">IncuXAI Admin</span>
-              </div>
-              <button onClick={() => setMobileSidebarOpen(false)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <div className="h-16 px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+                <Logo className="h-10 w-auto" mode="auto" />
+              </Link>
+              <button onClick={() => setMobileSidebarOpen(false)} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
                 <FiX className="w-5 h-5" />
               </button>
             </div>
             <nav className="flex-1 px-3 py-4 space-y-3 overflow-y-auto">
               {renderMobileStandaloneLink('Dashboard', FiGrid, 'dashboard')}
 
-              <hr className="border-slate-800/25 my-1.5 mx-2" />
+              <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
 
               {renderMobileAccordionSection('management', 'Management', FiSliders, [
                 { name: 'Users', icon: FiUser, view: 'users' },
@@ -599,30 +666,25 @@ const AdminPortal = () => {
                 { name: 'Applications', icon: FiFolder, view: 'applications' }
               ])}
 
-              <hr className="border-slate-800/25 my-1.5 mx-2" />
+              <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
 
               {renderMobileStandaloneLink('Resume Templates', FiFileText, 'templates')}
 
-              <hr className="border-slate-800/25 my-1.5 mx-2" />
+              <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
 
               {renderMobileAccordionSection('insights', 'Insights', FiTrendingUp, [
                 { name: 'Analytics', icon: FiTrendingUp, view: 'analytics' },
                 { name: 'Reports', icon: FiActivity, view: 'reports' }
               ])}
 
-              <hr className="border-slate-800/25 my-1.5 mx-2" />
+              <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
 
               {renderMobileAccordionSection('system', 'System', FiSettings, [
                 { name: 'Notifications', icon: FiBell, view: 'notifications' },
                 { name: 'Settings', icon: FiSettings, view: 'settings' }
               ])}
             </nav>
-            <div className="p-4 border-t border-slate-800">
-              <button onClick={handleLogoutClick} className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold text-rose-455 hover:bg-rose-500/10 cursor-pointer">
-                <FiLogOut className="w-4.5 h-4.5" />
-                <span>Sign Out</span>
-              </button>
-            </div>
+
           </aside>
         </div>
       )}
@@ -630,29 +692,138 @@ const AdminPortal = () => {
       {/* ─── MAIN APP CONTENT AREA ───────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         
-        {/* Top navigation control bar */}
-        <header className="h-16 border-b border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0a1222] px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 shadow-2xs dark:shadow-none">
-          <div className="flex items-center gap-3">
+        {/* Top navigation header — matching User Portal header styling & branding */}
+        <header className="h-16 border-b border-slate-200/80 dark:border-slate-900 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 transition-all duration-200 shadow-[0_2px_15px_-3px_rgba(15,23,42,0.05)] dark:shadow-none">
+          <div className="flex items-center gap-4">
+            {/* Mobile Hamburger Drawer Toggle */}
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="lg:hidden p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
+              className="lg:hidden p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-200 cursor-pointer focus:outline-none shrink-0"
+              aria-label="Open Mobile Menu"
             >
               <FiMenu className="w-5 h-5" />
             </button>
-            <h1 className="text-base sm:text-lg font-extrabold capitalize tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-              <span>Admin</span>
-              <FiChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-              <span className="text-brand-600 dark:text-brand-400">{currentView}</span>
+            
+            {/* Desktop & Mobile IncuXAI Careers Logo in Top Header */}
+            <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+              <Logo className="h-10 w-auto" mode="auto" />
+            </Link>
+
+            <span className="hidden sm:inline-block w-px h-5 bg-slate-200 dark:bg-slate-800"></span>
+
+            {/* Current Page Title */}
+            <h1 className="text-base sm:text-lg font-extrabold capitalize tracking-tight text-slate-900 dark:text-white">
+              {currentView === 'templates' ? 'Resume Templates' : currentView === 'change-password' ? 'Change Password' : currentView === 'profile' ? 'Admin Profile' : currentView}
             </h1>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{currentUser?.name}</p>
-              <p className="text-[9px] text-slate-500 uppercase tracking-widest font-black mt-0.5">{currentUser?.role || 'Admin'}</p>
-            </div>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-brand-850 flex items-center justify-center font-black text-white text-sm shadow-md ring-1 ring-slate-200 dark:ring-slate-700/60">
-              {currentUser?.name?.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-3">
+            {/* Theme toggle — matching User Portal Navbar */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/8 hover:text-slate-800 dark:hover:text-white transition-all duration-150 focus:outline-none cursor-pointer"
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDark
+                ? <FiSun className="w-4 h-4 text-amber-400" />
+                : <FiMoon className="w-4 h-4" />
+              }
+            </button>
+
+            {/* Admin Profile Dropdown Trigger */}
+            <div className="relative" ref={profileDropdownRef}>
+              <button
+                onClick={() => setProfileDropdownOpen(prev => !prev)}
+                className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all cursor-pointer focus:outline-none group"
+                aria-expanded={profileDropdownOpen}
+                aria-label="Admin Profile Menu"
+              >
+                <div className="text-right hidden sm:block">
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">{currentUser?.name}</p>
+                  <p className="text-[9px] text-brand-600 dark:text-brand-400 uppercase tracking-widest font-black mt-0.5">{currentUser?.role || "Admin"}</p>
+                </div>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-indigo-600 flex items-center justify-center font-black text-white text-sm shadow-md ring-1 ring-slate-200 dark:ring-slate-700/60 group-hover:scale-105 transition-transform duration-200">
+                  {currentUser?.name?.charAt(0).toUpperCase()}
+                </div>
+                <FiChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${profileDropdownOpen ? "rotate-180 text-brand-500" : "group-hover:text-slate-600 dark:group-hover:text-slate-300"}`} />
+              </button>
+
+              {/* Admin Profile Dropdown Menu */}
+              {profileDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-900/10 dark:shadow-black/50 py-2 animate-scale-in z-50">
+                  
+                  {/* Header Info */}
+                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-indigo-600 text-white font-black text-base flex items-center justify-center shadow-md shrink-0">
+                        {currentUser?.name?.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate leading-tight">{currentUser?.name}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">{currentUser?.email}</p>
+                        <span className="inline-block mt-1 text-[9px] font-extrabold uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 px-2 py-0.5 rounded-md">
+                          {currentUser?.role || "ADMIN"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Menu Options */}
+                  <div className="py-1">
+                    <button
+                      onClick={() => { setProfileDropdownOpen(false); setView("profile"); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors cursor-pointer"
+                    >
+                      <FiUser className="w-4 h-4 text-slate-400" />
+                      <span>My Profile</span>
+                    </button>
+
+                    <button
+                      onClick={() => { setProfileDropdownOpen(false); setView("settings"); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors cursor-pointer"
+                    >
+                      <FiSettings className="w-4 h-4 text-slate-400" />
+                      <span>Account Settings</span>
+                    </button>
+
+                    <button
+                      onClick={() => { setProfileDropdownOpen(false); setView("change-password"); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors cursor-pointer"
+                    >
+                      <FiLock className="w-4 h-4 text-slate-400" />
+                      <span>Change Password</span>
+                    </button>
+
+                    <button
+                      onClick={() => { setProfileDropdownOpen(false); setView("analytics"); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors cursor-pointer"
+                    >
+                      <FiActivity className="w-4 h-4 text-slate-400" />
+                      <span>Activity Log</span>
+                    </button>
+
+                    <button
+                      onClick={() => { setProfileDropdownOpen(false); setView("reports"); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors cursor-pointer"
+                    >
+                      <FiHelpCircle className="w-4 h-4 text-slate-400" />
+                      <span>Help & Support</span>
+                    </button>
+                  </div>
+
+                  {/* Sign Out Footer */}
+                  <div className="border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
+                    <button
+                      onClick={() => { setProfileDropdownOpen(false); handleLogoutClick(); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-medium transition-colors cursor-pointer"
+                    >
+                      <FiLogOut className="w-4 h-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -681,16 +852,16 @@ const AdminPortal = () => {
                     ].map((card, i) => {
                       const Icon = card.icon;
                       return (
-                        <div key={i} className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
-                          <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-br ${card.color} opacity-[0.03] rounded-bl-full group-hover:scale-110 transition-transform duration-300`}></div>
+                        <div key={i} className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg">
+                          <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-br ${card.color} opacity-[0.05] rounded-bl-full group-hover:scale-110 transition-transform duration-300`}></div>
                           <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{card.name}</span>
-                            <div className="p-2 rounded-xl bg-slate-800/60 border border-slate-700/50">
-                              <Icon className="w-4 h-4 text-slate-400" />
+                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{card.name}</span>
+                            <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/50">
+                              <Icon className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                             </div>
                           </div>
-                          <p className="text-2xl font-black text-white leading-none mb-2">{card.value}</p>
-                          <p className="text-[10px] text-slate-555 font-medium leading-none truncate">{card.trend}</p>
+                          <p className="text-2xl font-black text-slate-900 dark:text-white leading-none mb-2">{card.value}</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-none truncate">{card.trend}</p>
                         </div>
                       );
                     })}
@@ -698,7 +869,7 @@ const AdminPortal = () => {
 
                   {/* Visual Growth SVG Charts */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col">
+                    <div className="lg:col-span-2 bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col">
                       <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-6">User & Application Growth Trend</h3>
                       <div className="relative w-full h-48 flex items-end">
                         <svg className="w-full h-full" viewBox="0 0 500 200" preserveAspectRatio="none">
@@ -737,31 +908,31 @@ const AdminPortal = () => {
                       </div>
                     </div>
 
-                    <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col justify-between">
+                    <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col justify-between">
                       <div>
-                        <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-6">Quick Shortcuts</h3>
+                        <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-6">Quick Shortcuts</h3>
                         <div className="grid grid-cols-1 gap-2.5">
-                          <button onClick={() => { setEditingUser(null); setUserForm({ name: '', email: '', password: '', role: 'candidate' }); setUserModalOpen(true); }} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800/80 text-xs font-semibold text-slate-200 transition-colors text-left cursor-pointer">
-                            <span className="flex items-center gap-2"><FiPlus className="text-brand-400" /> Register User Account</span>
-                            <FiChevronRight className="text-slate-500" />
+                          <button onClick={() => { setEditingUser(null); setUserForm({ name: '', email: '', password: '', role: 'candidate' }); setUserModalOpen(true); }} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/50 hover:border-brand-300 dark:hover:border-brand-500/50 hover:bg-white dark:hover:bg-slate-800/80 hover:-translate-y-0.5 hover:shadow-xs text-xs font-semibold text-slate-800 dark:text-slate-200 transition-all duration-200 text-left cursor-pointer group">
+                            <span className="flex items-center gap-2"><FiPlus className="text-brand-600 dark:text-brand-400" /> Register User Account</span>
+                            <FiChevronRight className="text-slate-400 dark:text-slate-500" />
                           </button>
-                          <button onClick={() => { setEditingJob(null); setJobForm({ title: '', company: '', location: '', salary: '', experience: '', employmentType: 'Full-time', skills: '', description: '' }); setJobModalOpen(true); }} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800/80 text-xs font-semibold text-slate-200 transition-colors text-left cursor-pointer">
-                            <span className="flex items-center gap-2"><FiPlus className="text-emerald-400" /> Post New Job Opportunity</span>
-                            <FiChevronRight className="text-slate-500" />
+                          <button onClick={() => { setEditingJob(null); setJobForm({ title: '', company: '', location: '', salary: '', experience: '', employmentType: 'Full-time', skills: '', description: '' }); setJobModalOpen(true); }} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 text-xs font-semibold text-slate-800 dark:text-slate-200 transition-colors text-left cursor-pointer">
+                            <span className="flex items-center gap-2"><FiPlus className="text-emerald-600 dark:text-emerald-400" /> Post New Job Opportunity</span>
+                            <FiChevronRight className="text-slate-400 dark:text-slate-500" />
                           </button>
-                          <button onClick={() => setView('notifications')} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800/80 text-xs font-semibold text-slate-200 transition-colors text-left cursor-pointer">
-                            <span className="flex items-center gap-2"><FiBell className="text-violet-400" /> Broadcast System Alert</span>
-                            <FiChevronRight className="text-slate-500" />
+                          <button onClick={() => setView('notifications')} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 text-xs font-semibold text-slate-800 dark:text-slate-200 transition-colors text-left cursor-pointer">
+                            <span className="flex items-center gap-2"><FiBell className="text-violet-600 dark:text-violet-400" /> Broadcast System Alert</span>
+                            <FiChevronRight className="text-slate-400 dark:text-slate-500" />
                           </button>
-                          <button onClick={() => setView('reports')} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800/80 text-xs font-semibold text-slate-200 transition-colors text-left cursor-pointer">
-                            <span className="flex items-center gap-2"><FiFileText className="text-amber-400" /> Print Summary Report</span>
-                            <FiChevronRight className="text-slate-500" />
+                          <button onClick={() => setView('reports')} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 text-xs font-semibold text-slate-800 dark:text-slate-200 transition-colors text-left cursor-pointer">
+                            <span className="flex items-center gap-2"><FiFileText className="text-amber-600 dark:text-amber-400" /> Print Summary Report</span>
+                            <FiChevronRight className="text-slate-400 dark:text-slate-500" />
                           </button>
                         </div>
                       </div>
-                      <div className="p-4 rounded-xl bg-brand-500/5 border border-brand-500/10 text-xs text-brand-400 leading-normal flex items-start gap-2.5 mt-4">
+                      <div className="p-4 rounded-xl bg-brand-500/5 border border-brand-500/10 text-xs text-brand-600 dark:text-brand-400 leading-normal flex items-start gap-2.5 mt-4">
                         <FiInfo className="w-4 h-4 shrink-0 mt-0.5" />
-                        <span>System metrics synced. Local server and Supabase Postgres database links are fully operational.</span>
+                        <span>System metrics synced. Local server and PostgreSQL database links are fully operational.</span>
                       </div>
                     </div>
                   </div>
@@ -769,29 +940,29 @@ const AdminPortal = () => {
                   {/* Recent Activity Grid */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Recent Registrations */}
-                    <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg">
-                      <div className="flex items-center justify-between mb-4 border-b border-slate-800/80 pb-3">
-                        <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400">Recent Registrations</h3>
-                        <button onClick={() => setView('users')} className="text-xs font-bold text-brand-450 hover:underline">View All</button>
+                    <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg">
+                      <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                        <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Recent Registrations</h3>
+                        <button onClick={() => setView('users')} className="text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline cursor-pointer">View All</button>
                       </div>
-                      <div className="divide-y divide-slate-800/80">
+                      <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
                         {recentRegs.map((user) => (
                           <div key={user.id} className="py-3 flex items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-300">
+                              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-300">
                                 {user.name.charAt(0).toUpperCase()}
                               </div>
                               <div>
-                                <p className="text-xs font-bold text-white">{user.name}</p>
-                                <p className="text-[10px] text-slate-500 mt-0.5">{user.email}</p>
+                                <p className="text-xs font-bold text-slate-900 dark:text-white">{user.name}</p>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{user.email}</p>
                               </div>
                             </div>
                             <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
                               user.role === 'admin' || user.role === 'super_admin'
-                                ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                                ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20'
                                 : user.role === 'recruiter'
-                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                                : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20'
+                                : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
                             }`}>
                               {user.role}
                             </span>
@@ -801,24 +972,24 @@ const AdminPortal = () => {
                     </div>
 
                     {/* Recent Job Postings */}
-                    <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg">
-                      <div className="flex items-center justify-between mb-4 border-b border-slate-800/80 pb-3">
-                        <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400">Recent Job Postings</h3>
-                        <button onClick={() => setView('jobs')} className="text-xs font-bold text-brand-450 hover:underline">View All</button>
+                    <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg transition-colors duration-200">
+                      <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                        <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Recent Job Postings</h3>
+                        <button onClick={() => setView("jobs")} className="text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline cursor-pointer">View All</button>
                       </div>
-                      <div className="divide-y divide-slate-800/80">
+                      <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
                         {recentJobs.map((job) => (
-                          <div key={job.id} className="py-3 flex items-center justify-between gap-4">
+                          <div key={job.id} className="py-3 flex items-center justify-between gap-4 hover:bg-slate-50/60 dark:hover:bg-slate-800/20 px-2 rounded-xl transition-colors">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-300">
+                              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-300">
                                 {job.company.charAt(0).toUpperCase()}
                               </div>
                               <div>
-                                <p className="text-xs font-bold text-white leading-none">{job.title}</p>
-                                <p className="text-[10px] text-slate-500 mt-1">{job.company} • {job.location}</p>
+                                <p className="text-xs font-bold text-slate-900 dark:text-white leading-none">{job.title}</p>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{job.company} • {job.location}</p>
                               </div>
                             </div>
-                            <span className="text-[10px] text-slate-550 font-bold whitespace-nowrap">{job.employment_type}</span>
+                            <span className="text-[10px] text-slate-600 dark:text-slate-400 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/50 px-2 py-0.5 rounded-md">{job.employment_type}</span>
                           </div>
                         ))}
                       </div>
@@ -988,23 +1159,23 @@ const AdminPortal = () => {
                  VIEW: COMPANIES
               ────────────────────────────────────────────────────────────── */}
               {currentView === 'companies' && (
-                <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col gap-6">
-                  <div className="border-b border-slate-800/80 pb-3 flex items-center justify-between">
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400">Registered Companies</h3>
-                    <span className="text-[10px] font-black text-brand-400 bg-brand-500/10 border border-brand-500/20 px-2.5 py-1 rounded-full uppercase">{companies.length} Total</span>
+                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
+                  <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3 flex items-center justify-between">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Registered Companies</h3>
+                    <span className="text-[10px] font-black text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 px-2.5 py-1 rounded-full uppercase">{companies.length} Total</span>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {companies.map((comp, i) => (
-                      <div key={i} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 flex flex-col items-center text-center hover:border-slate-700 transition-all shadow-md">
+                      <div key={i} className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800 rounded-2xl p-5 flex flex-col items-center text-center hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-xs">
                         <div
-                          className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg text-white mb-3 shadow-inner border border-slate-800"
+                          className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg text-white mb-3 shadow-inner border border-slate-200 dark:border-slate-800"
                           style={{ backgroundColor: comp.logo_color || '#1e293b' }}
                         >
                           {comp.company.charAt(0).toUpperCase()}
                         </div>
-                        <h4 className="text-xs font-bold text-white leading-tight mb-1">{comp.company}</h4>
-                        <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Active Recruiter Profile</span>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight mb-1">{comp.company}</h4>
+                        <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Active Recruiter Profile</span>
                       </div>
                     ))}
                   </div>
@@ -1022,7 +1193,7 @@ const AdminPortal = () => {
                  VIEW: JOBS
               ────────────────────────────────────────────────────────────── */}
               {currentView === 'jobs' && (
-                <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col gap-6">
+                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
                   {/* List Controls */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
                     <div className="relative flex-1 max-w-md flex items-center">
@@ -1154,24 +1325,24 @@ const AdminPortal = () => {
                  VIEW: APPLICATIONS
               ────────────────────────────────────────────────────────────── */}
               {currentView === 'applications' && (
-                <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col gap-6">
+                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
                   {/* List Controls */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/80 pb-4">
                     <div className="flex items-center gap-3 flex-1 max-w-md">
                       <div className="relative flex-1 flex items-center">
-                        <FiSearch className="absolute left-3.5 text-slate-500" />
+                        <FiSearch className="absolute left-3.5 text-slate-400 dark:text-slate-500" />
                         <input
                           type="text"
                           placeholder="Search candidates, roles, companies..."
                           value={appsSearch}
                           onChange={(e) => { setAppsSearch(e.target.value); setAppsPage(1); }}
-                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-xs font-semibold placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-slate-200"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-brand-500 text-slate-900 dark:text-slate-200"
                         />
                       </div>
                       <select
                         value={appsStatusFilter}
                         onChange={(e) => { setAppsStatusFilter(e.target.value); setAppsPage(1); }}
-                        className="px-3 py-2.5 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-300 focus:outline-none focus:border-brand-500 cursor-pointer"
+                        className="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs font-bold text-slate-800 dark:text-slate-300 focus:outline-none focus:border-brand-500 cursor-pointer"
                       >
                         <option value="">All Statuses</option>
                         <option value="Pending">Pending</option>
@@ -1188,7 +1359,7 @@ const AdminPortal = () => {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="border-b border-slate-800/80 text-[10px] uppercase tracking-wider text-slate-550 font-bold">
+                        <tr className="border-b border-slate-200/90 dark:border-slate-800/80 text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">
                           <th className="py-3 px-4">Candidate</th>
                           <th className="py-3 px-4">Job Opportunity</th>
                           <th className="py-3 px-4">Applied Date</th>
@@ -1196,18 +1367,18 @@ const AdminPortal = () => {
                           <th className="py-3 px-4 text-right">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/60">
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                         {applications.map((app) => (
-                          <tr key={app.id} className="text-xs hover:bg-slate-800/10 transition-colors">
-                            <td className="py-3.5 px-4 font-bold text-white">
-                              <p className="font-bold text-white">{app.candidate_name}</p>
-                              <p className="text-[10px] text-slate-500 mt-0.5">{app.candidate_email}</p>
+                          <tr key={app.id} className="text-xs hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                            <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
+                              <p className="font-bold text-slate-900 dark:text-white">{app.candidate_name}</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{app.candidate_email}</p>
                             </td>
-                            <td className="py-3.5 px-4 text-slate-300 font-semibold">
-                              <p className="text-white">{app.job_title}</p>
-                              <p className="text-[10px] text-brand-400 mt-0.5">{app.job_company}</p>
+                            <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300 font-semibold">
+                              <p className="text-slate-900 dark:text-white">{app.job_title}</p>
+                              <p className="text-[10px] text-brand-600 dark:text-brand-400 mt-0.5">{app.job_company}</p>
                             </td>
-                            <td className="py-3.5 px-4 text-slate-500 font-medium">
+                            <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 font-medium">
                               {new Date(app.applied_at).toLocaleDateString()}
                             </td>
                             <td className="py-3.5 px-4">
@@ -1216,12 +1387,12 @@ const AdminPortal = () => {
                                 onChange={(e) => handleAppStatusChange(app.id, e.target.value)}
                                 className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider focus:outline-none border cursor-pointer ${
                                   app.status === 'Accepted'
-                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                    ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20'
                                     : app.status === 'Rejected'
-                                    ? 'bg-rose-500/10 text-rose-450 border-rose-500/20'
+                                    ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-500/20'
                                     : app.status === 'Shortlisted' || app.status === 'Interviewing'
-                                    ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                                    : 'bg-slate-800 text-slate-400 border-slate-700/50'
+                                    ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-700/50'
                                 }`}
                               >
                                 <option value="Pending">Pending</option>
@@ -1240,7 +1411,7 @@ const AdminPortal = () => {
                                   id: app.id,
                                   message: `Are you sure you want to delete application logs for candidate "${app.candidate_name}" applying to "${app.job_title}"?`
                                 })}
-                                className="p-1.5 rounded-lg border border-rose-900/40 bg-rose-950/15 text-rose-450 hover:bg-rose-900/35 hover:text-white"
+                                className="p-1.5 rounded-lg border border-rose-200 dark:border-rose-900/40 bg-rose-50 dark:bg-rose-950/15 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/35 transition-colors cursor-pointer"
                                 title="Delete Log"
                               >
                                 <FiTrash2 className="w-3.5 h-3.5" />
@@ -1261,20 +1432,20 @@ const AdminPortal = () => {
 
                   {/* Pagination footer controls */}
                   {appsTotal > 8 && (
-                    <div className="flex items-center justify-between border-t border-slate-800/80 pt-4 mt-2">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase">Showing {(appsPage - 1) * 8 + 1} - {Math.min(appsPage * 8, appsTotal)} of {appsTotal} Apps</span>
+                    <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-2">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Showing {(appsPage - 1) * 8 + 1} - {Math.min(appsPage * 8, appsTotal)} of {appsTotal} Apps</span>
                       <div className="flex gap-2">
                         <button
                           onClick={() => setAppsPage(prev => Math.max(1, prev - 1))}
                           disabled={appsPage === 1}
-                          className="p-2 border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300 disabled:opacity-30 disabled:pointer-events-none rounded-xl"
+                          className="p-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:pointer-events-none rounded-xl"
                         >
                           <FiChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setAppsPage(prev => Math.min(Math.ceil(appsTotal / 8), prev + 1))}
                           disabled={appsPage * 8 >= appsTotal}
-                          className="p-2 border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300 disabled:opacity-30 disabled:pointer-events-none rounded-xl"
+                          className="p-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:pointer-events-none rounded-xl"
                         >
                           <FiChevronRight className="w-4 h-4" />
                         </button>
@@ -1288,10 +1459,10 @@ const AdminPortal = () => {
                  VIEW: RESUME TEMPLATES
               ────────────────────────────────────────────────────────────── */}
               {currentView === 'templates' && (
-                <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col gap-6">
-                  <div className="border-b border-slate-800/80 pb-3 flex items-center justify-between">
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400">System Resume Templates</h3>
-                    <span className="text-[10px] font-black text-brand-400 bg-brand-500/10 border border-brand-500/20 px-2.5 py-1 rounded-full uppercase">8 Templates</span>
+                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
+                  <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3 flex items-center justify-between">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">System Resume Templates</h3>
+                    <span className="text-[10px] font-black text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 px-2.5 py-1 rounded-full uppercase">8 Templates</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -1301,15 +1472,15 @@ const AdminPortal = () => {
                       { id: 'creative', name: 'Creative Designer', category: 'Creative', description: 'Split background grid sidebar layout suitable for portfolio designs.' },
                       { id: 'executive', name: 'Executive Corporate', category: 'Executive', description: 'Double border structured template suited for management roles.' }
                     ].map((temp, i) => (
-                      <div key={i} className="bg-slate-900/40 border border-slate-800/90 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-700 transition-all shadow-md">
+                      <div key={i} className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/90 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-xs">
                         <div>
-                          <span className="text-[9px] font-black text-brand-400 bg-brand-500/15 border border-brand-500/25 px-2 py-0.5 rounded uppercase tracking-wider">{temp.category}</span>
-                          <h4 className="text-xs font-bold text-white leading-tight mt-2.5 mb-1.5">{temp.name}</h4>
-                          <p className="text-[10px] text-slate-500 leading-normal">{temp.description}</p>
+                          <span className="text-[9px] font-black text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/15 border border-brand-200 dark:border-brand-500/25 px-2 py-0.5 rounded uppercase tracking-wider">{temp.category}</span>
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight mt-2.5 mb-1.5">{temp.name}</h4>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal">{temp.description}</p>
                         </div>
-                        <div className="flex gap-2 border-t border-slate-800/80 pt-3 mt-4 text-[10px] font-bold text-slate-400">
-                          <span className="bg-emerald-500/10 text-emerald-450 border border-emerald-500/20 px-2 py-0.5 rounded">ATS Friendly</span>
-                          <span className="bg-slate-800 px-2 py-0.5 rounded">Free</span>
+                        <div className="flex gap-2 border-t border-slate-200/80 dark:border-slate-800/80 pt-3 mt-4 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                          <span className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 px-2 py-0.5 rounded">ATS Friendly</span>
+                          <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">Free</span>
                         </div>
                       </div>
                     ))}
@@ -1321,10 +1492,10 @@ const AdminPortal = () => {
                  VIEW: ANALYTICS
               ────────────────────────────────────────────────────────────── */}
               {currentView === 'analytics' && (
-                <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col gap-6">
-                  <div className="border-b border-slate-800/80 pb-3 flex items-center justify-between">
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400">Platform Analytics</h3>
-                    <span className="text-[10px] font-black text-brand-450 bg-brand-500/10 border border-brand-500/20 px-2.5 py-1 rounded-full uppercase">Real-Time Student Metrics</span>
+                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
+                  <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3 flex items-center justify-between">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Platform Analytics</h3>
+                    <span className="text-[10px] font-black text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 px-2.5 py-1 rounded-full uppercase">Real-Time Student Metrics</span>
                   </div>
 
                   {analyticsLoading ? (
@@ -1332,36 +1503,36 @@ const AdminPortal = () => {
                       <LoadingSpinner text="Analyzing student sign-up metrics..." />
                     </div>
                   ) : analyticsData.length === 0 ? (
-                    <div className="text-center py-20 text-slate-500 border border-dashed border-slate-800/60 rounded-2xl">
-                      <FiUsers className="w-12 h-12 mx-auto mb-4 opacity-25 text-slate-600" />
+                    <div className="text-center py-20 text-slate-500 border border-dashed border-slate-200 dark:border-slate-800/60 rounded-2xl">
+                      <FiUsers className="w-12 h-12 mx-auto mb-4 opacity-25 text-slate-400 dark:text-slate-600" />
                       <p className="font-bold text-sm">No student registrations exist in the database.</p>
                     </div>
                   ) : (
-                    <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl flex flex-col gap-6">
+                    <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800 p-6 rounded-2xl flex flex-col gap-6">
                       <div>
-                        <h4 className="text-xs font-bold text-slate-350 uppercase tracking-wider">Student Sign-up Growth</h4>
-                        <p className="text-[10px] text-slate-550 font-semibold mt-1">Monthly registration volume of candidate accounts</p>
+                        <h4 className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">Student Sign-up Growth</h4>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1">Monthly registration volume of candidate accounts</p>
                       </div>
                       
-                      <div className="h-64 flex items-end justify-center gap-8 px-4 border-b border-slate-800 pb-3">
+                      <div className="h-64 flex items-end justify-center gap-8 px-4 border-b border-slate-200 dark:border-slate-800 pb-3">
                         {(() => {
                           const maxCount = Math.max(...analyticsData.map(d => d.count), 1);
                           return analyticsData.map((data) => (
                             <div key={data.monthKey} className="w-16 flex flex-col items-center gap-2 group relative">
-                              <div className="absolute bottom-[calc(100%-8px)] mb-2 bg-slate-950 border border-slate-850 text-[10px] font-black text-brand-400 px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-xl z-10 whitespace-nowrap">
+                              <div className="absolute bottom-[calc(100%-8px)] mb-2 bg-slate-900 dark:bg-slate-950 border border-slate-700 dark:border-slate-800 text-[10px] font-black text-white dark:text-brand-400 px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-xl z-10 whitespace-nowrap">
                                 {data.count} {data.count === 1 ? 'student' : 'students'}
                               </div>
-                              <span className="text-[10px] text-slate-400 font-bold group-hover:text-slate-200 transition-colors">{data.count}</span>
+                              <span className="text-[10px] text-slate-600 dark:text-slate-400 font-bold group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">{data.count}</span>
                               <div
                                 style={{ height: `${(data.count / maxCount) * 160}px` }}
-                                className="w-full min-h-[6px] bg-gradient-to-t from-brand-650 via-brand-500 to-brand-400 rounded-t-xl shadow-lg group-hover:from-brand-500 group-hover:to-brand-350 transition-all duration-200"
+                                className="w-full min-h-[6px] bg-gradient-to-t from-brand-600 via-brand-500 to-indigo-500 rounded-t-xl shadow-md group-hover:from-brand-500 group-hover:to-brand-400 transition-all duration-200"
                               ></div>
                             </div>
                           ));
                         })()}
                       </div>
                       
-                      <div className="flex justify-center gap-8 text-[10px] text-slate-550 font-bold px-4">
+                      <div className="flex justify-center gap-8 text-[10px] text-slate-500 dark:text-slate-400 font-bold px-4">
                         {analyticsData.map(d => (
                           <span key={d.monthKey} className="w-16 text-center">{d.month}</span>
                         ))}
@@ -1374,11 +1545,32 @@ const AdminPortal = () => {
               {/* ──────────────────────────────────────────────────────────────
                  VIEW: REPORTS
               ────────────────────────────────────────────────────────────── */}
-              {/* ──────────────────────────────────────────────────────────────
-                 VIEW: REPORTS
-              ────────────────────────────────────────────────────────────── */}
               {currentView === 'reports' && (
-                <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col gap-6 animate-fade-in">
+                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6 animate-fade-in">
+                  <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3 flex items-center justify-between">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">User Complaints & Bug Reports</h3>
+                    <span className="text-[10px] font-black text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 px-2.5 py-1 rounded-full uppercase">Manage Support Tickets</span>
+                  </div>
+
+                  {/* Status metrics grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-slide-up">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800/80 rounded-2xl flex flex-col gap-1 shadow-xs">
+                      <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Open Reports</span>
+                      <span className="text-2xl font-extrabold text-blue-600 dark:text-blue-400">{reportsCounts.open || 0}</span>
+                    </div>
+                    <div className="p-4 bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800/80 rounded-2xl flex flex-col gap-1 shadow-xs">
+                      <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">In Progress</span>
+                      <span className="text-2xl font-extrabold text-amber-600 dark:text-amber-500">{reportsCounts.inProgress || 0}</span>
+                    </div>
+                    <div className="p-4 bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800/80 rounded-2xl flex flex-col gap-1 shadow-xs">
+                      <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Resolved</span>
+                      <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{reportsCounts.resolved || 0}</span>
+                    </div>
+                    <div className="p-4 bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800/80 rounded-2xl flex flex-col gap-1 shadow-xs">
+                      <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Closed</span>
+                      <span className="text-2xl font-extrabold text-slate-500 dark:text-slate-400">{reportsCounts.closed || 0}</span>
+                    </div>
+                  </div>
                   <div className="border-b border-slate-800/80 pb-3 flex items-center justify-between">
                     <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400">User Complaints & Bug Reports</h3>
                     <span className="text-[10px] font-black text-brand-450 bg-brand-500/10 border border-brand-500/20 px-2.5 py-1 rounded-full uppercase">Manage Support Tickets</span>
@@ -1591,9 +1783,9 @@ const AdminPortal = () => {
                  VIEW: NOTIFICATIONS
               ────────────────────────────────────────────────────────────── */}
               {currentView === 'notifications' && (
-                <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col gap-6">
-                  <div className="border-b border-slate-800/80 pb-3">
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400">Notifications Broadcast Center</h3>
+                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
+                  <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Notifications Broadcast Center</h3>
                   </div>
 
                   <form
@@ -1602,15 +1794,15 @@ const AdminPortal = () => {
                       addToast('Global push alert broadcasted to all active platform clients!', 'success');
                       e.target.reset();
                     }}
-                    className="flex flex-col gap-4 max-w-xl w-full mx-auto p-6 rounded-2xl bg-slate-900/40 border border-slate-800"
+                    className="flex flex-col gap-4 max-w-xl w-full mx-auto p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800"
                   >
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Alert Title</label>
-                      <input type="text" required placeholder="e.g. Scheduled Maintenance Notice" className="w-full px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-200" />
+                      <label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Alert Title</label>
+                      <input type="text" required placeholder="e.g. Scheduled Maintenance Notice" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-900 dark:text-slate-200" />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Message Content</label>
-                      <textarea rows="4" required placeholder="Alert description message text..." className="w-full px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-200 resize-none"></textarea>
+                      <label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Message Content</label>
+                      <textarea rows="4" required placeholder="Alert description message text..." className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-xs font-semibold focus:outline-none focus:border-brand-500 text-slate-900 dark:text-slate-200 resize-none"></textarea>
                     </div>
                     <button type="submit" className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-xs font-extrabold text-white rounded-xl shadow cursor-pointer transition-all">
                       Broadcast Global Notification
@@ -1619,16 +1811,119 @@ const AdminPortal = () => {
                 </div>
               )}
 
+{/* ──────────────────────────────────────────────────────────────
+                 VIEW: ADMIN PROFILE
+              ────────────────────────────────────────────────────────────── */}
+              {currentView === "profile" && (
+                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6 max-w-3xl">
+                  <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Admin Profile</h3>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Administrator account credentials and access details.</p>
+                    </div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 px-2.5 py-1 rounded-lg">
+                      {currentUser?.role || "ADMIN"}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800/60">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-600 to-indigo-600 text-white font-black text-2xl flex items-center justify-center shadow-lg shrink-0">
+                      {currentUser?.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="text-center sm:text-left">
+                      <h4 className="text-base font-extrabold text-slate-900 dark:text-white">{currentUser?.name}</h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{currentUser?.email}</p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2 font-medium">Administrator Access Granted • Full Portal Rights</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
+                      <input
+                        type="text"
+                        value={currentUser?.name || ""}
+                        readOnly
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300 cursor-not-allowed"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
+                      <input
+                        type="email"
+                        value={currentUser?.email || ""}
+                        readOnly
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* ──────────────────────────────────────────────────────────────
+                 VIEW: ADMIN CHANGE PASSWORD
+              ────────────────────────────────────────────────────────────── */}
+              {currentView === "change-password" && (
+                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6 max-w-xl">
+                  <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Change Admin Password</h3>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Update your administrator portal security password.</p>
+                  </div>
+
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      addToast("Admin password updated successfully.", "success");
+                    }}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Current Password</label>
+                      <input
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-brand-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">New Password</label>
+                      <input
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-brand-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Confirm New Password</label>
+                      <input
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-brand-500"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition-colors shadow-md cursor-pointer mt-2"
+                    >
+                      Update Password
+                    </button>
+                  </form>
+                </div>
+              )}
+
+                            {/* ──────────────────────────────────────────────────────────────
                  VIEW: SETTINGS
               ────────────────────────────────────────────────────────────── */}
               {currentView === 'settings' && (
-                <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col gap-6">
-                  <div className="border-b border-slate-800/80 pb-3">
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400">Portal Settings</h3>
+                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
+                  <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Portal Settings</h3>
                   </div>
 
-                  <div className="divide-y divide-slate-800/85">
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800/85">
                     {[
                       { title: 'Enable Candidate Sign-ups', desc: 'Allows new candidates to register via email or Google auth.' },
                       { title: 'Maintenance Mode Toggle', desc: 'Puts the public job portal into read-only maintenance mode.' },
@@ -1637,12 +1932,12 @@ const AdminPortal = () => {
                     ].map((set, i) => (
                       <div key={i} className="py-4 flex items-center justify-between gap-6">
                         <div className="max-w-md">
-                          <p className="text-xs font-bold text-white">{set.title}</p>
-                          <p className="text-[10px] text-slate-500 mt-1 leading-normal">{set.desc}</p>
+                          <p className="text-xs font-bold text-slate-900 dark:text-white">{set.title}</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-normal">{set.desc}</p>
                         </div>
                         <button
                           onClick={() => addToast('Setting configuration saved.', 'success')}
-                          className="w-12 h-6 rounded-full bg-slate-800 border border-slate-700/50 p-1 flex items-center justify-start cursor-pointer relative"
+                          className="w-12 h-6 rounded-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700/50 p-1 flex items-center justify-start cursor-pointer relative"
                         >
                           <span className="w-4 h-4 rounded-full bg-brand-500 shadow-md"></span>
                         </button>
@@ -1662,8 +1957,8 @@ const AdminPortal = () => {
       ─────────────────────────────────────────────────────────────────────── */}
       {userModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in" onClick={() => setUserModalOpen(false)}>
-          <div className="bg-[#0a1222] border border-slate-800 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
-            <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
+          <div className="bg-white dark:bg-[#0a1222] border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl text-slate-900 dark:text-white max-w-md w-full overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40">
               <h2 className="font-extrabold text-sm text-white uppercase tracking-wider">
                 {editingUser ? 'Edit User details' : 'Register New User Account'}
               </h2>
@@ -1749,8 +2044,8 @@ const AdminPortal = () => {
       ─────────────────────────────────────────────────────────────────────── */}
       {jobModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in" onClick={() => setJobModalOpen(false)}>
-          <div className="bg-[#0a1222] border border-slate-800 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
-            <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
+          <div className="bg-white dark:bg-[#0a1222] border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl text-slate-900 dark:text-white max-w-lg w-full overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40">
               <h2 className="font-extrabold text-sm text-white uppercase tracking-wider">
                 {editingJob ? 'Edit Job Posting Details' : 'Post New Job Opportunity'}
               </h2>
@@ -1880,7 +2175,7 @@ const AdminPortal = () => {
       ─────────────────────────────────────────────────────────────────────── */}
       {confirmModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in" onClick={() => setConfirmModal(prev => ({ ...prev, open: false }))}>
-          <div className="bg-[#0a1222] border border-slate-800 rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-[#0a1222] border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl text-slate-900 dark:text-white max-w-sm w-full overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
             <div className="p-6">
               <div className="flex items-center gap-3 text-rose-450 mb-3">
                 <FiInfo className="w-5 h-5" />
@@ -1911,8 +2206,8 @@ const AdminPortal = () => {
       ─────────────────────────────────────────────────────────────────────── */}
       {reportModalOpen && selectedReport && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in" onClick={() => setReportModalOpen(false)}>
-          <div className="bg-[#0a1222] border border-slate-800 rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
-            <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
+          <div className="bg-white dark:bg-[#0a1222] border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl text-slate-900 dark:text-white max-w-3xl w-full overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40">
               <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
                 <FiFileText className="text-brand-400" /> Report Details #{selectedReport.id}
               </h2>

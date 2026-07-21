@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
-const { sendWelcomeEmail } = require('../utils/email');
+const { sendWelcomeEmail, sendPasswordResetEmail } = require('../utils/email');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-dev-secret';
@@ -265,6 +265,202 @@ router.get('/me', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('[Auth] Me error:', err.message);
     res.status(500).json({ error: 'Failed to restore session.' });
+  }
+});
+
+const crypto = require('crypto');
+
+const memoryResetTokens = new Map();
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const cleanEmail = typeof email === 'string' ? email.trim().toLowerCase().slice(0, MAX_EMAIL_LENGTH) : '';
+
+    if (!cleanEmail || !validateEmail(cleanEmail)) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+
+    const genericResponse = {
+      message: "If an account exists with this email, we've sent a password reset link."
+    };
+
+    let user = null;
+    try {
+      const result = await pool.query('SELECT id, email, name FROM users WHERE email = $1', [cleanEmail]);
+      if (result.rows.length > 0) {
+        user = result.rows[0];
+      }
+    } catch (err) {
+      console.warn('[Auth] Database lookup error on forgot-password:', err.message);
+    }
+
+    if (user) {
+      const token = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+
+      try {
+        await pool.query('UPDATE password_resets SET used = true WHERE user_id = $1 AND used = false', [user.id]);
+        await pool.query(
+          'INSERT INTO password_resets (user_id, token, expires_at) VALUES ($1, $2, $3)',
+          [user.id, token, expiresAt]
+        );
+      } catch (dbErr) {
+        console.warn('[Auth] Could not store reset token in DB table:', dbErr.message);
+      }
+
+      memoryResetTokens.set(token, {
+        userId: user.id,
+        email: user.email,
+        expiresAt,
+        used: false
+      });
+
+      console.log(`\n======================================================`);
+      console.log(`[Auth] Password Reset Token Generated for ${user.email}`);
+      console.log(`[Auth] Reset Link: ${resetUrl}`);
+      console.log(`======================================================\n`);
+
+      await sendPasswordResetEmail(user, resetUrl);
+
+      return res.json({
+        ...genericResponse,
+        devResetUrl: process.env.NODE_ENV !== 'production' ? resetUrl : undefined
+      });
+    }
+
+    return res.json(genericResponse);
+  } catch (err) {
+    console.error('[Auth] forgot-password error:', err);
+    return res.status(500).json({ error: 'Server error processing password reset request.' });
+  }
+});
+
+// GET /api/auth/verify-reset-token
+router.get('/verify-reset-token', async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ error: 'Password reset token is required.' });
+    }
+
+    let tokenData = null;
+
+    try {
+      const dbResult = await pool.query(
+        `SELECT pr.id, pr.user_id, pr.used, pr.expires_at, u.email 
+         FROM password_resets pr 
+         JOIN users u ON pr.user_id = u.id 
+         WHERE pr.token = $1`,
+        [token]
+      );
+      if (dbResult.rows.length > 0) {
+        const row = dbResult.rows[0];
+        tokenData = {
+          userId: row.user_id,
+          email: row.email,
+          used: row.used,
+          expiresAt: new Date(row.expires_at)
+        };
+      }
+    } catch (err) {
+      console.warn('[Auth] DB lookup error on verify-reset-token:', err.message);
+    }
+
+    if (!tokenData && memoryResetTokens.has(token)) {
+      tokenData = memoryResetTokens.get(token);
+    }
+
+    if (!tokenData) {
+      return res.status(400).json({ error: 'This password reset link is invalid or does not exist.' });
+    }
+
+    if (tokenData.used) {
+      return res.status(400).json({ error: 'This password reset link has already been used.' });
+    }
+
+    if (new Date() > new Date(tokenData.expiresAt)) {
+      return res.status(400).json({ error: 'This password reset link has expired. Please request a new one.' });
+    }
+
+    return res.json({ valid: true, email: tokenData.email });
+  } catch (err) {
+    console.error('[Auth] verify-reset-token error:', err);
+    return res.status(500).json({ error: 'Server error verifying token.' });
+  }
+});
+
+// POST /api/auth/reset-password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ error: 'Password reset token is required.' });
+    }
+
+    if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+    }
+
+    let tokenData = null;
+
+    try {
+      const dbResult = await pool.query(
+        `SELECT pr.id, pr.user_id, pr.used, pr.expires_at, u.email 
+         FROM password_resets pr 
+         JOIN users u ON pr.user_id = u.id 
+         WHERE pr.token = $1`,
+        [token]
+      );
+      if (dbResult.rows.length > 0) {
+        const row = dbResult.rows[0];
+        tokenData = {
+          id: row.id,
+          userId: row.user_id,
+          email: row.email,
+          used: row.used,
+          expiresAt: new Date(row.expires_at)
+        };
+      }
+    } catch (err) {
+      console.warn('[Auth] DB lookup error on reset-password:', err.message);
+    }
+
+    if (!tokenData && memoryResetTokens.has(token)) {
+      tokenData = memoryResetTokens.get(token);
+    }
+
+    if (!tokenData) {
+      return res.status(400).json({ error: 'This password reset link is invalid or does not exist.' });
+    }
+
+    if (tokenData.used) {
+      return res.status(400).json({ error: 'This password reset link has already been used.' });
+    }
+
+    if (new Date() > new Date(tokenData.expiresAt)) {
+      return res.status(400).json({ error: 'This password reset link has expired. Please request a new one.' });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    try {
+      await pool.query('UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2', [passwordHash, tokenData.userId]);
+      await pool.query('UPDATE password_resets SET used = true WHERE user_id = $1', [tokenData.userId]);
+    } catch (dbErr) {
+      console.warn('[Auth] DB update error on reset-password:', dbErr.message);
+    }
+
+    memoryResetTokens.set(token, { ...tokenData, used: true });
+
+    return res.json({ message: 'Password updated successfully!' });
+  } catch (err) {
+    console.error('[Auth] reset-password error:', err);
+    return res.status(500).json({ error: 'Server error updating password.' });
   }
 });
 
