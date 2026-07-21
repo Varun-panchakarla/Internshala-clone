@@ -32,6 +32,7 @@ const savedRouter = require('./routes/saved.js');
 const appliedRouter = require('./routes/applied.js');
 const resumeRouter = require('./routes/resume.js');
 const adminRouter = require('./routes/admin.js');
+const issuesRouter = require('./routes/issues.js');
 
 app.use('/api/auth', authRouter);
 app.use('/api/profile', profileRouter);
@@ -40,6 +41,7 @@ app.use('/api/saved', savedRouter);
 app.use('/api/applied', appliedRouter);
 app.use('/api/resume', resumeRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/issues', issuesRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

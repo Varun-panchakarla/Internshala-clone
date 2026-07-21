@@ -86,3 +86,24 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
 CREATE INDEX IF NOT EXISTS idx_saved_jobs_user ON saved_jobs(user_id);
 CREATE INDEX IF NOT EXISTS idx_applied_jobs_user ON applied_jobs(user_id);
+
+-- Issue reports table
+CREATE TABLE IF NOT EXISTS issue_reports (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  full_name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  contact_number VARCHAR(100),
+  category VARCHAR(255) NOT NULL,
+  subject VARCHAR(500) NOT NULL,
+  description TEXT NOT NULL,
+  screenshot TEXT,
+  status VARCHAR(50) DEFAULT 'Open',
+  priority VARCHAR(50) DEFAULT 'Normal',
+  admin_notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Index for issue reports user lookup
+CREATE INDEX IF NOT EXISTS idx_issue_reports_user ON issue_reports(user_id);

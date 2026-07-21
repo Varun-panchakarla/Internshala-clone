@@ -48,6 +48,39 @@ const AdminPortal = () => {
 
   const [companies, setCompanies] = useState([]);
   
+  // Accordion & Analytics states
+  const [expandedSection, setExpandedSection] = useState(null);
+  const [analyticsData, setAnalyticsData] = useState([]);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+
+  // Reports states
+  const [reports, setReports] = useState([]);
+  const [reportsTotal, setReportsTotal] = useState(0);
+  const [reportsPage, setReportsPage] = useState(1);
+  const [reportsSearch, setReportsSearch] = useState('');
+  const [reportsStatusFilter, setReportsStatusFilter] = useState('');
+  const [reportsPriorityFilter, setReportsPriorityFilter] = useState('');
+  const [reportsCategoryFilter, setReportsCategoryFilter] = useState('');
+  const [reportsSort, setReportsSort] = useState('newest');
+  const [reportsCounts, setReportsCounts] = useState({ open: 0, inProgress: 0, resolved: 0, closed: 0, totalReports: 0 });
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [adminNotesText, setAdminNotesText] = useState('');
+  const [reportStatusUpdate, setReportStatusUpdate] = useState('');
+  const [reportPriorityUpdate, setReportPriorityUpdate] = useState('');
+
+  // Accordion auto-expansion on view change
+  useEffect(() => {
+    if (['users', 'recruiters', 'companies', 'jobs', 'applications'].includes(currentView)) {
+      setExpandedSection('management');
+    } else if (['analytics', 'reports'].includes(currentView)) {
+      setExpandedSection('insights');
+    } else if (['notifications', 'settings'].includes(currentView)) {
+      setExpandedSection('system');
+    }
+  }, [currentView]);
+  
   // Modal states
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -123,6 +156,77 @@ const AdminPortal = () => {
     }
   };
 
+  // Load Analytics Data
+  const fetchAnalytics = async () => {
+    setAnalyticsLoading(true);
+    try {
+      const res = await axios.get('/api/admin/analytics');
+      setAnalyticsData(res.data.signups || []);
+    } catch (err) {
+      addToast('Failed to load platform analytics.', 'error');
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
+  // Load Reports list
+  const fetchReports = async () => {
+    setReportsLoading(true);
+    try {
+      const res = await axios.get('/api/admin/reports', {
+        params: {
+          search: reportsSearch,
+          status: reportsStatusFilter,
+          priority: reportsPriorityFilter,
+          category: reportsCategoryFilter,
+          sort: reportsSort,
+          page: reportsPage,
+          limit: 8
+        }
+      });
+      setReports(res.data.reports);
+      setReportsTotal(res.data.total);
+      setReportsCounts(res.data.counts);
+    } catch (err) {
+      addToast('Failed to load issue reports.', 'error');
+    } finally {
+      setReportsLoading(false);
+    }
+  };
+
+  // Update Report (status, priority, admin notes)
+  const handleReportSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedReport) return;
+    try {
+      await axios.put(`/api/admin/reports/${selectedReport.id}`, {
+        status: reportStatusUpdate,
+        priority: reportPriorityUpdate,
+        adminNotes: adminNotesText
+      });
+      addToast('Report updated successfully.', 'success');
+      setReportModalOpen(false);
+      await fetchReports();
+    } catch (err) {
+      addToast('Failed to update report details.', 'error');
+    }
+  };
+
+  // Delete Report
+  const handleReportDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to permanently delete this report? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      await axios.delete(`/api/admin/reports/${id}`);
+      addToast('Report deleted successfully.', 'success');
+      setReportModalOpen(false);
+      await fetchReports();
+    } catch (err) {
+      addToast('Failed to delete report.', 'error');
+    }
+  };
+
   // Effect to load data based on selected view
   useEffect(() => {
     const loadData = async () => {
@@ -141,6 +245,11 @@ const AdminPortal = () => {
         await fetchApplications();
       } else if (currentView === 'companies') {
         await fetchCompanies();
+      } else if (currentView === 'analytics') {
+        await fetchAnalytics();
+      } else if (currentView === 'reports') {
+        setReportsPage(1);
+        await fetchReports();
       }
       setLoading(false);
     };
@@ -165,6 +274,12 @@ const AdminPortal = () => {
       fetchApplications();
     }
   }, [appsPage, appsSearch, appsStatusFilter]);
+
+  useEffect(() => {
+    if (currentView === 'reports') {
+      fetchReports();
+    }
+  }, [reportsPage, reportsSearch, reportsStatusFilter, reportsPriorityFilter, reportsCategoryFilter, reportsSort]);
 
   // CRUD - User save (Create / Update)
   const handleUserSubmit = async (e) => {
@@ -251,20 +366,152 @@ const AdminPortal = () => {
     navigate('/login');
   };
 
-  // Sidebar Links config
-  const navLinks = [
-    { name: 'Dashboard', icon: FiGrid, view: 'dashboard' },
-    { name: 'Users', icon: FiUser, view: 'users' },
-    { name: 'Recruiters', icon: FiUsers, view: 'recruiters' },
-    { name: 'Companies', icon: FiBriefcase, view: 'companies' },
-    { name: 'Jobs', icon: FiCpu, view: 'jobs' },
-    { name: 'Applications', icon: FiFolder, view: 'applications' },
-    { name: 'Resume Templates', icon: FiFileText, view: 'templates' },
-    { name: 'Analytics', icon: FiTrendingUp, view: 'analytics' },
-    { name: 'Reports', icon: FiActivity, view: 'reports' },
-    { name: 'Notifications', icon: FiBell, view: 'notifications' },
-    { name: 'Settings', icon: FiSettings, view: 'settings' }
-  ];
+  // Helper rendering functions for Sidebar Accordion sections
+  const renderStandaloneLink = (name, icon, view) => {
+    const Icon = icon;
+    const isActive = currentView === view;
+    return (
+      <button
+        onClick={() => setView(view)}
+        className={`w-full group flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-205 ${
+          isActive
+            ? 'bg-brand-650/10 text-brand-400 border-l-2 border-brand-500 font-semibold'
+            : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'
+        }`}
+      >
+        <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-brand-400' : 'text-slate-500 group-hover:text-slate-400 transition-colors duration-200'}`} />
+        <span>{name}</span>
+      </button>
+    );
+  };
+
+  const renderMobileStandaloneLink = (name, icon, view) => {
+    const Icon = icon;
+    const isActive = currentView === view;
+    return (
+      <button
+        onClick={() => setView(view)}
+        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-205 ${
+          isActive ? 'bg-brand-500/10 text-brand-400' : 'text-slate-400 hover:bg-slate-800/30'
+        }`}
+      >
+        <Icon className="w-4.5 h-4.5" />
+        <span>{name}</span>
+      </button>
+    );
+  };
+
+  const renderAccordionSection = (sectionKey, name, icon, items) => {
+    const Icon = icon;
+    const isExpanded = expandedSection === sectionKey;
+    const hasActiveChild = items.some(item => currentView === item.view);
+    
+    return (
+      <div className="space-y-1">
+        <button
+          onClick={() => setExpandedSection(isExpanded ? null : sectionKey)}
+          className={`w-full group flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-205 ${
+            hasActiveChild
+              ? 'text-slate-200 bg-slate-800/20'
+              : 'text-slate-400 hover:bg-slate-800/30 hover:text-slate-200'
+          }`}
+        >
+          <Icon className={`w-4.5 h-4.5 ${hasActiveChild ? 'text-brand-400' : 'text-slate-500 group-hover:text-slate-400 transition-colors duration-200'}`} />
+          <span>{name}</span>
+          <FiChevronRight 
+            className={`w-4 h-4 ml-auto text-slate-500 transition-transform duration-250 ${
+              isExpanded ? 'rotate-90 text-brand-400' : 'group-hover:text-slate-400 transition-colors'
+            }`} 
+          />
+        </button>
+        
+        <div
+          className="transition-all duration-300 ease-in-out overflow-hidden"
+          style={{
+            maxHeight: isExpanded ? `${items.length * 40 + 8}px` : '0px',
+            opacity: isExpanded ? 1 : 0,
+          }}
+        >
+          <div className="py-1 space-y-1">
+            {items.map((item) => {
+              const ChildIcon = item.icon;
+              const isChildActive = currentView === item.view;
+              return (
+                <button
+                  key={item.view}
+                  onClick={() => setView(item.view)}
+                  className={`w-full group flex items-center gap-3 pl-10 pr-4 py-2 rounded-lg text-[12px] font-medium transition-all duration-250 transform ${
+                    isExpanded ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0 pointer-events-none'
+                  } ${
+                    isChildActive
+                      ? 'bg-brand-650/10 text-brand-400 border-l-2 border-brand-500 font-semibold'
+                      : 'text-slate-555 hover:bg-slate-800/20 hover:text-slate-300'
+                  }`}
+                >
+                  <ChildIcon className={`w-3.5 h-3.5 ${isChildActive ? 'text-brand-400' : 'text-slate-600 group-hover:text-slate-400 transition-colors duration-200'}`} />
+                  <span>{item.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderMobileAccordionSection = (sectionKey, name, icon, items) => {
+    const Icon = icon;
+    const isExpanded = expandedSection === sectionKey;
+    const hasActiveChild = items.some(item => currentView === item.view);
+    
+    return (
+      <div className="space-y-1">
+        <button
+          onClick={() => setExpandedSection(isExpanded ? null : sectionKey)}
+          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium ${
+            hasActiveChild ? 'text-brand-400 bg-brand-500/5' : 'text-slate-400 hover:bg-slate-800/30'
+          }`}
+        >
+          <Icon className="w-4.5 h-4.5" />
+          <span>{name}</span>
+          <FiChevronRight 
+            className={`w-4 h-4 ml-auto text-slate-500 transition-transform duration-250 ${
+              isExpanded ? 'rotate-90 text-brand-400' : ''
+            }`} 
+          />
+        </button>
+        
+        <div
+          className="transition-all duration-300 ease-in-out overflow-hidden"
+          style={{
+            maxHeight: isExpanded ? `${items.length * 40 + 8}px` : '0px',
+            opacity: isExpanded ? 1 : 0,
+          }}
+        >
+          <div className="py-1 space-y-1">
+            {items.map((item) => {
+              const ChildIcon = item.icon;
+              const isChildActive = currentView === item.view;
+              return (
+                <button
+                  key={item.view}
+                  onClick={() => setView(item.view)}
+                  className={`w-full flex items-center gap-3 pl-10 pr-4 py-2 rounded-lg text-[12px] font-medium transition-all duration-250 transform ${
+                    isExpanded ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0 pointer-events-none'
+                  } ${
+                    isChildActive ? 'bg-brand-500/10 text-brand-400' : 'text-slate-555 hover:bg-slate-800/30'
+                  }`}
+                >
+                  <ChildIcon className="w-3.5 h-3.5 mr-2" />
+                  <span>{item.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-slate-100/90 dark:bg-[#060d1b] text-slate-900 dark:text-slate-100 flex font-sans transition-colors duration-200">
@@ -283,25 +530,36 @@ const AdminPortal = () => {
           </div>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const isActive = currentView === link.view;
-            return (
-              <button
-                key={link.view}
-                onClick={() => setView(link.view)}
-                className={`w-full group flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold transition-all duration-200 cursor-pointer ${
-                  isActive
-                    ? 'bg-brand-50 dark:bg-brand-650/15 text-brand-600 dark:text-brand-400 border-l-4 border-brand-500'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/70 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-200'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-400'}`} />
-                <span>{link.name}</span>
-              </button>
-            );
-          })}
+        <nav className="flex-1 px-4 py-6 space-y-3 overflow-y-auto custom-scrollbar">
+          {renderStandaloneLink('Dashboard', FiGrid, 'dashboard')}
+
+          <hr className="border-slate-800/25 my-1.5 mx-2" />
+
+          {renderAccordionSection('management', 'Management', FiSliders, [
+            { name: 'Users', icon: FiUser, view: 'users' },
+            { name: 'Recruiters', icon: FiUsers, view: 'recruiters' },
+            { name: 'Companies', icon: FiBriefcase, view: 'companies' },
+            { name: 'Jobs', icon: FiCpu, view: 'jobs' },
+            { name: 'Applications', icon: FiFolder, view: 'applications' }
+          ])}
+
+          <hr className="border-slate-800/25 my-1.5 mx-2" />
+
+          {renderStandaloneLink('Resume Templates', FiFileText, 'templates')}
+
+          <hr className="border-slate-800/25 my-1.5 mx-2" />
+
+          {renderAccordionSection('insights', 'Insights', FiTrendingUp, [
+            { name: 'Analytics', icon: FiTrendingUp, view: 'analytics' },
+            { name: 'Reports', icon: FiActivity, view: 'reports' }
+          ])}
+
+          <hr className="border-slate-800/25 my-1.5 mx-2" />
+
+          {renderAccordionSection('system', 'System', FiSettings, [
+            { name: 'Notifications', icon: FiBell, view: 'notifications' },
+            { name: 'Settings', icon: FiSettings, view: 'settings' }
+          ])}
         </nav>
 
         <div className="p-4 border-t border-slate-200 dark:border-slate-800/85">
@@ -309,7 +567,7 @@ const AdminPortal = () => {
             onClick={handleLogoutClick}
             className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all cursor-pointer"
           >
-            <FiLogOut className="w-4 h-4" />
+            <FiLogOut className="w-4.5 h-4.5" />
             <span>Sign Out</span>
           </button>
         </div>
@@ -328,27 +586,40 @@ const AdminPortal = () => {
                 <FiX className="w-5 h-5" />
               </button>
             </div>
-            <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-              {navLinks.map((link) => {
-                const Icon = link.icon;
-                const isActive = currentView === link.view;
-                return (
-                  <button
-                    key={link.view}
-                    onClick={() => setView(link.view)}
-                    className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold cursor-pointer ${
-                      isActive ? 'bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/40'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{link.name}</span>
-                  </button>
-                );
-              })}
+            <nav className="flex-1 px-3 py-4 space-y-3 overflow-y-auto">
+              {renderMobileStandaloneLink('Dashboard', FiGrid, 'dashboard')}
+
+              <hr className="border-slate-800/25 my-1.5 mx-2" />
+
+              {renderMobileAccordionSection('management', 'Management', FiSliders, [
+                { name: 'Users', icon: FiUser, view: 'users' },
+                { name: 'Recruiters', icon: FiUsers, view: 'recruiters' },
+                { name: 'Companies', icon: FiBriefcase, view: 'companies' },
+                { name: 'Jobs', icon: FiCpu, view: 'jobs' },
+                { name: 'Applications', icon: FiFolder, view: 'applications' }
+              ])}
+
+              <hr className="border-slate-800/25 my-1.5 mx-2" />
+
+              {renderMobileStandaloneLink('Resume Templates', FiFileText, 'templates')}
+
+              <hr className="border-slate-800/25 my-1.5 mx-2" />
+
+              {renderMobileAccordionSection('insights', 'Insights', FiTrendingUp, [
+                { name: 'Analytics', icon: FiTrendingUp, view: 'analytics' },
+                { name: 'Reports', icon: FiActivity, view: 'reports' }
+              ])}
+
+              <hr className="border-slate-800/25 my-1.5 mx-2" />
+
+              {renderMobileAccordionSection('system', 'System', FiSettings, [
+                { name: 'Notifications', icon: FiBell, view: 'notifications' },
+                { name: 'Settings', icon: FiSettings, view: 'settings' }
+              ])}
             </nav>
-            <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-              <button onClick={handleLogoutClick} className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold text-rose-600 dark:text-rose-450 hover:bg-rose-50 dark:hover:bg-rose-500/10 cursor-pointer">
-                <FiLogOut className="w-4 h-4" />
+            <div className="p-4 border-t border-slate-800">
+              <button onClick={handleLogoutClick} className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold text-rose-455 hover:bg-rose-500/10 cursor-pointer">
+                <FiLogOut className="w-4.5 h-4.5" />
                 <span>Sign Out</span>
               </button>
             </div>
@@ -1051,72 +1322,268 @@ const AdminPortal = () => {
               ────────────────────────────────────────────────────────────── */}
               {currentView === 'analytics' && (
                 <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col gap-6">
-                  <div className="border-b border-slate-800/80 pb-3">
+                  <div className="border-b border-slate-800/80 pb-3 flex items-center justify-between">
                     <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400">Platform Analytics</h3>
+                    <span className="text-[10px] font-black text-brand-450 bg-brand-500/10 border border-brand-500/20 px-2.5 py-1 rounded-full uppercase">Real-Time Student Metrics</span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Growth Chart */}
-                    <div className="bg-slate-900/40 border border-slate-800 p-5 rounded-2xl">
-                      <h4 className="text-xs font-bold text-slate-300 mb-4 uppercase tracking-wider">Candidate Sign-ups Growth</h4>
-                      <div className="h-44 flex items-end gap-2 px-2 border-b border-slate-800 pb-2">
-                        {[15, 32, 58, 89, 124, 185].map((val, idx) => (
-                          <div key={idx} className="flex-1 flex flex-col items-center gap-1.5">
-                            <div
-                              style={{ height: `${(val / 185) * 120}px` }}
-                              className="w-full bg-gradient-to-t from-brand-600 to-brand-400 rounded-t-lg shadow-lg"
-                            ></div>
-                            <span className="text-[9px] text-slate-500 font-bold">{val}</span>
-                          </div>
+                  {analyticsLoading ? (
+                    <div className="flex items-center justify-center h-64">
+                      <LoadingSpinner text="Analyzing student sign-up metrics..." />
+                    </div>
+                  ) : analyticsData.length === 0 ? (
+                    <div className="text-center py-20 text-slate-500 border border-dashed border-slate-800/60 rounded-2xl">
+                      <FiUsers className="w-12 h-12 mx-auto mb-4 opacity-25 text-slate-600" />
+                      <p className="font-bold text-sm">No student registrations exist in the database.</p>
+                    </div>
+                  ) : (
+                    <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl flex flex-col gap-6">
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-350 uppercase tracking-wider">Student Sign-up Growth</h4>
+                        <p className="text-[10px] text-slate-550 font-semibold mt-1">Monthly registration volume of candidate accounts</p>
+                      </div>
+                      
+                      <div className="h-64 flex items-end justify-center gap-8 px-4 border-b border-slate-800 pb-3">
+                        {(() => {
+                          const maxCount = Math.max(...analyticsData.map(d => d.count), 1);
+                          return analyticsData.map((data) => (
+                            <div key={data.monthKey} className="w-16 flex flex-col items-center gap-2 group relative">
+                              <div className="absolute bottom-[calc(100%-8px)] mb-2 bg-slate-950 border border-slate-850 text-[10px] font-black text-brand-400 px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-xl z-10 whitespace-nowrap">
+                                {data.count} {data.count === 1 ? 'student' : 'students'}
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-bold group-hover:text-slate-200 transition-colors">{data.count}</span>
+                              <div
+                                style={{ height: `${(data.count / maxCount) * 160}px` }}
+                                className="w-full min-h-[6px] bg-gradient-to-t from-brand-650 via-brand-500 to-brand-400 rounded-t-xl shadow-lg group-hover:from-brand-500 group-hover:to-brand-350 transition-all duration-200"
+                              ></div>
+                            </div>
+                          ));
+                        })()}
+                      </div>
+                      
+                      <div className="flex justify-center gap-8 text-[10px] text-slate-550 font-bold px-4">
+                        {analyticsData.map(d => (
+                          <span key={d.monthKey} className="w-16 text-center">{d.month}</span>
                         ))}
                       </div>
-                      <div className="flex justify-between text-[10px] text-slate-500 font-bold px-2 mt-2">
-                        <span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span>
-                      </div>
                     </div>
-
-                    {/* Applications Rate */}
-                    <div className="bg-slate-900/40 border border-slate-800 p-5 rounded-2xl">
-                      <h4 className="text-xs font-bold text-slate-300 mb-4 uppercase tracking-wider">Job Application Trends</h4>
-                      <div className="h-44 flex items-end gap-2 px-2 border-b border-slate-800 pb-2">
-                        {[45, 98, 180, 310, 450, 672].map((val, idx) => (
-                          <div key={idx} className="flex-1 flex flex-col items-center gap-1.5">
-                            <div
-                              style={{ height: `${(val / 672) * 120}px` }}
-                              className="w-full bg-gradient-to-t from-violet-600 to-violet-400 rounded-t-lg shadow-lg"
-                            ></div>
-                            <span className="text-[9px] text-slate-500 font-bold">{val}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="flex justify-between text-[10px] text-slate-500 font-bold px-2 mt-2">
-                        <span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
               )}
 
               {/* ──────────────────────────────────────────────────────────────
                  VIEW: REPORTS
               ────────────────────────────────────────────────────────────── */}
+              {/* ──────────────────────────────────────────────────────────────
+                 VIEW: REPORTS
+              ────────────────────────────────────────────────────────────── */}
               {currentView === 'reports' && (
-                <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col gap-6">
-                  <div className="border-b border-slate-800/80 pb-3">
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400">Reports Generation</h3>
+                <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col gap-6 animate-fade-in">
+                  <div className="border-b border-slate-800/80 pb-3 flex items-center justify-between">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400">User Complaints & Bug Reports</h3>
+                    <span className="text-[10px] font-black text-brand-450 bg-brand-500/10 border border-brand-500/20 px-2.5 py-1 rounded-full uppercase">Manage Support Tickets</span>
                   </div>
 
-                  <div className="p-10 rounded-2xl bg-slate-900/40 border border-slate-800 flex flex-col items-center justify-center text-center max-w-lg mx-auto w-full">
-                    <FiFileText className="w-16 h-16 text-slate-600 mb-4" />
-                    <h4 className="text-sm font-bold text-white mb-2">Generate Platform Analytics Summary</h4>
-                    <p className="text-xs text-slate-450 leading-relaxed mb-6">Click compile to generate a summary PDF containing users registrations growth, active companies lists, active recruiters profiles, and recent jobs metrics.</p>
-                    <button
-                      onClick={() => addToast('PDF report compiled and sent to printer queue!', 'success')}
-                      className="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-xs font-bold text-white rounded-xl shadow transition-all cursor-pointer"
-                    >
-                      Compile Report PDF
-                    </button>
+                  {/* Status metrics grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-slide-up">
+                    <div className="p-4 bg-slate-900/40 border border-slate-800/80 rounded-2xl flex flex-col gap-1 shadow">
+                      <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider">Open Reports</span>
+                      <span className="text-2xl font-extrabold text-blue-450">{reportsCounts.open || 0}</span>
+                    </div>
+                    <div className="p-4 bg-slate-900/40 border border-slate-800/80 rounded-2xl flex flex-col gap-1 shadow">
+                      <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider">In Progress</span>
+                      <span className="text-2xl font-extrabold text-amber-500">{reportsCounts.inProgress || 0}</span>
+                    </div>
+                    <div className="p-4 bg-slate-900/40 border border-slate-800/80 rounded-2xl flex flex-col gap-1 shadow">
+                      <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider">Resolved</span>
+                      <span className="text-2xl font-extrabold text-emerald-450">{reportsCounts.resolved || 0}</span>
+                    </div>
+                    <div className="p-4 bg-slate-900/40 border border-slate-800/80 rounded-2xl flex flex-col gap-1 shadow">
+                      <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider">Closed</span>
+                      <span className="text-2xl font-extrabold text-slate-400">{reportsCounts.closed || 0}</span>
+                    </div>
                   </div>
+
+                  {/* Filters and search block */}
+                  <div className="flex flex-col xl:flex-row gap-4 justify-between items-stretch xl:items-center">
+                    <div className="flex-1 flex flex-col sm:flex-row gap-3">
+                      {/* Search Input */}
+                      <div className="flex-1 relative">
+                        <input
+                          type="text"
+                          value={reportsSearch}
+                          onChange={(e) => {
+                            setReportsSearch(e.target.value);
+                            setReportsPage(1);
+                          }}
+                          placeholder="Search reports by ID, Name, Email, Subject..."
+                          className="w-full px-4 py-2.5 pl-10 rounded-xl border border-slate-800 bg-slate-900/50 text-xs font-semibold text-slate-200 focus:outline-none focus:border-brand-500"
+                        />
+                        <FiSearch className="absolute left-3.5 top-3.5 text-slate-500 w-4 h-4" />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3">
+                      {/* Status filter */}
+                      <select
+                        value={reportsStatusFilter}
+                        onChange={(e) => {
+                          setReportsStatusFilter(e.target.value);
+                          setReportsPage(1);
+                        }}
+                        className="px-3 py-2 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-350 focus:outline-none focus:border-brand-500 cursor-pointer"
+                      >
+                        <option value="">All Statuses</option>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                        <option value="Closed">Closed</option>
+                      </select>
+
+                      {/* Priority filter */}
+                      <select
+                        value={reportsPriorityFilter}
+                        onChange={(e) => {
+                          setReportsPriorityFilter(e.target.value);
+                          setReportsPage(1);
+                        }}
+                        className="px-3 py-2 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-350 focus:outline-none focus:border-brand-500 cursor-pointer"
+                      >
+                        <option value="">All Priorities</option>
+                        <option value="Low">Low</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Critical</option>
+                      </select>
+
+                      {/* Sort option */}
+                      <select
+                        value={reportsSort}
+                        onChange={(e) => {
+                          setReportsSort(e.target.value);
+                          setReportsPage(1);
+                        }}
+                        className="px-3 py-2 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-350 focus:outline-none focus:border-brand-500 cursor-pointer"
+                      >
+                        <option value="newest">Sort: Newest</option>
+                        <option value="oldest">Sort: Oldest</option>
+                        <option value="priority">Sort: Priority</option>
+                        <option value="status">Sort: Status</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Main reports grid/table view */}
+                  {reportsLoading ? (
+                    <div className="flex justify-center items-center py-20">
+                      <LoadingSpinner text="Querying platform issues database..." />
+                    </div>
+                  ) : reports.length === 0 ? (
+                    <div className="text-center py-20 text-slate-500 border border-dashed border-slate-800/80 rounded-2xl">
+                      <FiFileText className="w-12 h-12 mx-auto mb-4 opacity-25" />
+                      <p className="font-bold text-sm">No matching issue reports found.</p>
+                      <p className="text-xs text-slate-600 mt-1">Try relaxing filters or changing your search criteria.</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-4">
+                      <div className="overflow-x-auto rounded-2xl border border-slate-800/80">
+                        <table className="w-full border-collapse text-left text-slate-300">
+                          <thead className="bg-[#0e1626]/80 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-800/80">
+                            <tr>
+                              <th className="px-5 py-3.5">ID</th>
+                              <th className="px-5 py-3.5">User Details</th>
+                              <th className="px-5 py-3.5">Issue Category</th>
+                              <th className="px-5 py-3.5">Subject</th>
+                              <th className="px-5 py-3.5">Priority</th>
+                              <th className="px-5 py-3.5">Status</th>
+                              <th className="px-5 py-3.5">Date Submitted</th>
+                              <th className="px-5 py-3.5 text-center">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-800/60 bg-slate-900/10 text-xs font-semibold">
+                            {reports.map((report) => (
+                              <tr key={report.id} className="hover:bg-slate-800/20 transition-colors">
+                                <td className="px-5 py-4 text-slate-500 font-bold">#{report.id}</td>
+                                <td className="px-5 py-4">
+                                  <div className="font-bold text-slate-200">{report.full_name}</div>
+                                  <div className="text-[10px] text-slate-500 font-medium">{report.email}</div>
+                                </td>
+                                <td className="px-5 py-4 text-brand-400 font-bold">{report.category}</td>
+                                <td className="px-5 py-4 max-w-[200px] truncate text-slate-250 font-bold">{report.subject}</td>
+                                <td className="px-5 py-4">
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase border ${
+                                    report.priority === 'Critical' ? 'bg-rose-500/10 text-rose-450 border-rose-500/25' :
+                                    report.priority === 'High' ? 'bg-orange-500/10 text-orange-450 border-orange-500/25' :
+                                    report.priority === 'Normal' || report.priority === 'Medium' ? 'bg-blue-500/10 text-blue-400 border-blue-500/25' :
+                                    'bg-slate-800 text-slate-400 border-slate-750'
+                                  }`}>
+                                    {report.priority}
+                                  </span>
+                                </td>
+                                <td className="px-5 py-4">
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                                    report.status === 'Open' ? 'bg-blue-500/15 text-blue-400 border border-blue-500/20' :
+                                    report.status === 'In Progress' ? 'bg-amber-500/15 text-amber-450 border border-amber-500/20' :
+                                    report.status === 'Resolved' ? 'bg-emerald-500/15 text-emerald-450 border border-emerald-500/20' :
+                                    'bg-slate-800/80 text-slate-500 border border-slate-750'
+                                  }`}>
+                                    {report.status}
+                                  </span>
+                                </td>
+                                <td className="px-5 py-4 text-slate-450">
+                                  {new Date(report.created_at).toLocaleDateString('default', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  })}
+                                </td>
+                                <td className="px-5 py-4 text-center">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedReport(report);
+                                      setReportStatusUpdate(report.status);
+                                      setReportPriorityUpdate(report.priority);
+                                      setAdminNotesText(report.admin_notes || '');
+                                      setReportModalOpen(true);
+                                    }}
+                                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 hover:text-white text-slate-300 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer border border-slate-750"
+                                  >
+                                    View Details
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Pagination Controls */}
+                      {reportsTotal > 8 && (
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 mt-2">
+                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                            Showing {(reportsPage - 1) * 8 + 1} - {Math.min(reportsPage * 8, reportsTotal)} of {reportsTotal} Reports
+                          </span>
+                          <div className="flex gap-2">
+                            <button
+                              disabled={reportsPage === 1}
+                              onClick={() => setReportsPage(prev => Math.max(prev - 1, 1))}
+                              className="p-2 border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-350 disabled:opacity-30 disabled:pointer-events-none rounded-xl"
+                            >
+                              <FiChevronLeft className="w-4 h-4" />
+                            </button>
+                            <button
+                              disabled={reportsPage * 8 >= reportsTotal}
+                              onClick={() => setReportsPage(prev => prev + 1)}
+                              className="p-2 border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-350 disabled:opacity-30 disabled:pointer-events-none rounded-xl"
+                            >
+                              <FiChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1435,6 +1902,147 @@ const AdminPortal = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────────────────
+         MODAL: REPORT DETAIL & UPDATE
+      ─────────────────────────────────────────────────────────────────────── */}
+      {reportModalOpen && selectedReport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in" onClick={() => setReportModalOpen(false)}>
+          <div className="bg-[#0a1222] border border-slate-800 rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
+              <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
+                <FiFileText className="text-brand-400" /> Report Details #{selectedReport.id}
+              </h2>
+              <button onClick={() => setReportModalOpen(false)} className="text-slate-400 hover:text-white">
+                <FiX className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleReportSubmit} className="p-6 flex flex-col md:flex-row gap-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
+              {/* Left Column: Complaint info */}
+              <div className="flex-1 flex flex-col gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Submitted By</label>
+                    <p className="text-xs font-bold text-slate-200 mt-0.5">{selectedReport.full_name}</p>
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Email Address</label>
+                    <p className="text-xs font-bold text-slate-200 mt-0.5">{selectedReport.email}</p>
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Contact Number</label>
+                    <p className="text-xs font-bold text-slate-300 mt-0.5">{selectedReport.contact_number || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Date Submitted</label>
+                    <p className="text-xs font-bold text-slate-300 mt-0.5">
+                      {new Date(selectedReport.created_at).toLocaleString('default', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                <hr className="border-slate-800/60" />
+
+                <div>
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Category Area</label>
+                  <p className="text-xs font-bold text-brand-400 mt-0.5">{selectedReport.category}</p>
+                </div>
+
+                <div>
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Subject</label>
+                  <p className="text-xs font-bold text-slate-100 mt-0.5">{selectedReport.subject}</p>
+                </div>
+
+                <div>
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Detailed Description</label>
+                  <p className="text-xs font-medium text-slate-300 bg-slate-900/40 border border-slate-800/80 p-3 rounded-xl whitespace-pre-wrap leading-relaxed mt-1">
+                    {selectedReport.description}
+                  </p>
+                </div>
+
+                {selectedReport.screenshot && (
+                  <div>
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Attached Screenshot</label>
+                    <div className="mt-1 bg-slate-950 p-2 rounded-xl border border-slate-800 flex justify-center">
+                      <img 
+                        src={selectedReport.screenshot} 
+                        alt="User reported screenshot" 
+                        className="max-h-60 object-contain rounded-lg"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Admin Actions */}
+              <div className="w-full md:w-64 flex flex-col gap-4 border-t md:border-t-0 md:border-l border-slate-800/60 pt-4 md:pt-0 md:pl-6 shrink-0">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Status</label>
+                  <select
+                    value={reportStatusUpdate}
+                    onChange={(e) => setReportStatusUpdate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-350 focus:outline-none focus:border-brand-500 cursor-pointer"
+                  >
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Closed">Closed</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Priority Level</label>
+                  <select
+                    value={reportPriorityUpdate}
+                    onChange={(e) => setReportPriorityUpdate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-350 focus:outline-none focus:border-brand-500 cursor-pointer"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-1 flex-1">
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Internal Admin Notes</label>
+                  <textarea
+                    rows={5}
+                    value={adminNotesText}
+                    onChange={(e) => setAdminNotesText(e.target.value)}
+                    placeholder="Add private developer/admin notes here..."
+                    className="w-full flex-1 px-3 py-2 rounded-xl border border-slate-800 bg-slate-900 text-xs font-medium text-slate-300 focus:outline-none focus:border-brand-500 resize-none min-h-[100px]"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2 border-t border-slate-800/80 pt-4 mt-2">
+                  <button
+                    type="submit"
+                    className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-xs font-extrabold text-white rounded-xl shadow-md cursor-pointer transition-all"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleReportDelete(selectedReport.id)}
+                    className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-455 hover:text-white text-xs font-bold rounded-xl cursor-pointer transition-all border border-rose-500/20"
+                  >
+                    Delete Report
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       )}
