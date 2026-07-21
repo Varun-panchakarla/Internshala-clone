@@ -125,6 +125,64 @@ function urgencyHTML(name, jobs) {
 
 // ── Public API ─────────────────────────────────────────────────────────────────
 
+function resumeReminderHTML(name) {
+  return BASE_HTML(`
+<tr><td style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:36px 32px 28px;text-align:center">
+<h1 style="color:#fff;font-size:20px;margin:0 0 4px">Build Your ATS Resume</h1>
+<p style="color:#fde68a;font-size:13px;margin:0;font-weight:500">Stand out from the competition</p>
+</td></tr>
+<tr><td style="padding:32px 32px 24px">
+<p style="color:#1e293b;font-size:15px;margin:0 0 6px;font-weight:600">Hi ${name || 'there'},</p>
+<p style="color:#475569;font-size:13px;line-height:1.7;margin:0 0 18px">Your resume is the first thing recruiters see. Make it count with our free AI Resume Builder:</p>
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr><td style="padding:8px 0">
+<table width="100%" cellpadding="12" cellspacing="0" style="background:#f8fafc;border-radius:10px">
+<tr><td width="32" style="vertical-align:top;padding:12px 0 12px 14px;font-size:18px">⭐</td>
+<td style="font-size:13px;color:#334155;padding:12px 14px;line-height:1.5"><strong style="color:#0f172a">ATS Score</strong> — Get a real-time score and optimize for applicant tracking systems</td></tr>
+<tr><td width="32" style="vertical-align:top;padding:4px 0 12px 14px;font-size:18px">🎨</td>
+<td style="font-size:13px;color:#334155;padding:4px 14px 12px;line-height:1.5"><strong style="color:#0f172a">8 Pro Templates</strong> — Choose from modern, professional designs that recruiters love</td></tr>
+<tr><td width="32" style="vertical-align:top;padding:4px 0 12px 14px;font-size:18px">📝</td>
+<td style="font-size:13px;color:#334155;padding:4px 14px 12px;line-height:1.5"><strong style="color:#0f172a">AI Suggestions</strong> — Smart content recommendations tailored to your target role</td></tr>
+</table>
+</td></tr></table>
+<p style="color:#475569;font-size:13px;line-height:1.7;margin:18px 0 0">
+Employers spend an average of <strong>7 seconds</strong> scanning a resume. Make yours unforgettable.
+</p>
+<p style="margin:20px 0 0;text-align:center">
+<a href="${FRONTEND_URL}/resume" style="background:#d97706;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;display:inline-block">Build Your Resume →</a>
+</p>
+</td></tr>`);
+}
+
+function dailyReminderHTML(name, jobs) {
+  const jobRows = jobs.slice(0, 5).map(j => `
+<tr><td style="padding:10px 0;border-bottom:1px solid #e2e8f0">
+<table width="100%"><tr>
+<td style="font-size:13px;color:#1e293b;font-weight:600">${j.title}</td>
+<td align="right" style="font-size:12px;color:#64748b">${j.company}</td>
+</tr>
+<tr><td colspan="2" style="font-size:12px;color:#94a3b8;padding-top:2px">📍 ${j.location || 'Remote'} ${j.salary ? '💰 '+j.salary : ''}</td></tr>
+</table>
+</td></tr>`).join('');
+
+  return BASE_HTML(`
+<tr><td style="background:linear-gradient(135deg,#059669,#047857);padding:36px 32px 28px;text-align:center">
+<h1 style="color:#fff;font-size:20px;margin:0 0 4px">Don't Miss Out — Apply Today!</h1>
+<p style="color:#a7f3d0;font-size:13px;margin:0;font-weight:500">New opportunities waiting for you</p>
+</td></tr>
+<tr><td style="padding:32px 32px 24px">
+<p style="color:#1e293b;font-size:15px;margin:0 0 6px;font-weight:600">Hi ${name || 'there'},</p>
+<p style="color:#475569;font-size:13px;line-height:1.7;margin:0 0 14px">Here are ${jobs.length} job${jobs.length > 1 ? 's' : ''} you can apply to right now:</p>
+<table width="100%" cellpadding="0" cellspacing="0">${jobRows}</table>
+<p style="margin:20px 0 0;text-align:center">
+<a href="${FRONTEND_URL}/jobs" style="background:#047857;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;display:inline-block">Browse All Jobs →</a>
+</p>
+<p style="color:#64748b;font-size:12px;line-height:1.6;margin:16px 0 0;text-align:center">
+Consistency is key — apply to a few jobs every day to maximize your chances.
+</p>
+</td></tr>`);
+}
+
 async function sendWelcomeEmail(user) {
   return send({ to: user.email, subject: 'Welcome to IncuXAI Careers — Your Job Search Starts Now!', html: welcomeHTML(user.name) });
 }
@@ -137,4 +195,12 @@ async function sendUrgencyAlert(user, jobs) {
   return send({ to: user.email, subject: `⏳ ${jobs.length} Jobs Closing Soon — Don't Miss Out!`, html: urgencyHTML(user.name, jobs) });
 }
 
-module.exports = { sendWelcomeEmail, sendJobAlert, sendUrgencyAlert };
+async function sendResumeReminder(user) {
+  return send({ to: user.email, subject: 'Build Your ATS Resume — Get Hired Faster!', html: resumeReminderHTML(user.name) });
+}
+
+async function sendDailyReminder(user, jobs) {
+  return send({ to: user.email, subject: `☀️ ${jobs.length} Jobs Ready — Apply Today!`, html: dailyReminderHTML(user.name, jobs) });
+}
+
+module.exports = { sendWelcomeEmail, sendJobAlert, sendUrgencyAlert, sendResumeReminder, sendDailyReminder };

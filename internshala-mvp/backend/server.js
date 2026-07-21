@@ -9,6 +9,7 @@ const fs = require('fs');
 const { scrapeAll } = require('./scraper/index.js');
 const pool = require('./db/pool');
 const { seedJobs } = require('./db/seed');
+const { notifyNewJobs, sendDailyJobReminders, sendResumeReminders } = require('./utils/notifications');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -104,9 +105,22 @@ cron.schedule('0 */12 * * *', async () => {
   try {
     const jobs = await scrapeAll();
     console.log(`[Cron] Scrape complete: ${jobs.length} jobs`);
+    await notifyNewJobs(jobs);
   } catch (err) {
     console.error('[Cron] Scrape failed:', err.message);
   }
+});
+
+// Schedule: daily job reminder at 9:00 AM
+cron.schedule('0 9 * * *', async () => {
+  console.log('[Cron] Running daily job reminders...');
+  await sendDailyJobReminders();
+});
+
+// Schedule: weekly resume builder reminder every Monday at 10:00 AM
+cron.schedule('0 10 * * 1', async () => {
+  console.log('[Cron] Running weekly resume reminders...');
+  await sendResumeReminders();
 });
 
 app.listen(PORT, async () => {
