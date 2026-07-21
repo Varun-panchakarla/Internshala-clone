@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useSidebar } from '../../context/SidebarContext';
 import Logo from './Logo';
 import {
   FiUser, FiLogOut, FiMenu, FiX, FiSun, FiMoon, FiSettings,
@@ -12,6 +13,7 @@ import Button from './Button';
 const Navbar = () => {
   const { currentUser, logout, isAuthenticated, profileCompletion } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { collapsed, toggleSidebar } = useSidebar();
   const navigate    = useNavigate();
   const location    = useLocation();
   const [dropdownOpen, setDropdownOpen]   = useState(false);

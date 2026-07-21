@@ -267,18 +267,18 @@ const AdminPortal = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#060d1b] text-slate-100 flex font-sans">
+    <div className="min-h-screen bg-slate-100/90 dark:bg-[#060d1b] text-slate-900 dark:text-slate-100 flex font-sans transition-colors duration-200">
       
       {/* ─── DESKTOP SIDEBAR ─────────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex flex-col w-64 bg-[#0a1222] border-r border-slate-800/80 shrink-0 sticky top-0 h-screen transition-all">
-        <div className="h-16 px-6 border-b border-slate-800/85 flex items-center justify-between">
+      <aside className="hidden lg:flex flex-col w-64 bg-white dark:bg-[#0a1222] border-r border-slate-200 dark:border-slate-800/80 shrink-0 sticky top-0 h-screen transition-all shadow-xs dark:shadow-none">
+        <div className="h-16 px-6 border-b border-slate-200 dark:border-slate-800/85 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center font-black text-white text-base">
               I
             </div>
             <div>
-              <p className="font-extrabold text-sm tracking-tight leading-none">IncuXAI Careers</p>
-              <p className="text-[10px] text-brand-400 font-bold uppercase tracking-wider mt-0.5">Admin Portal</p>
+              <p className="font-extrabold text-sm tracking-tight leading-none text-slate-900 dark:text-white">IncuXAI Careers</p>
+              <p className="text-[10px] text-brand-600 dark:text-brand-400 font-bold uppercase tracking-wider mt-0.5">Admin Portal</p>
             </div>
           </div>
         </div>
@@ -291,23 +291,23 @@ const AdminPortal = () => {
               <button
                 key={link.view}
                 onClick={() => setView(link.view)}
-                className={`w-full group flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold transition-all duration-200 ${
+                className={`w-full group flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? 'bg-brand-650/15 text-brand-400 border-l-4 border-brand-500'
-                    : 'text-slate-400 hover:bg-slate-800/40 hover:text-slate-200'
+                    ? 'bg-brand-50 dark:bg-brand-650/15 text-brand-600 dark:text-brand-400 border-l-4 border-brand-500'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/70 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-brand-400' : 'text-slate-500 group-hover:text-slate-400'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-400'}`} />
                 <span>{link.name}</span>
               </button>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-slate-800/85">
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800/85">
           <button
             onClick={handleLogoutClick}
-            className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold text-rose-400 hover:bg-rose-500/10 transition-all cursor-pointer"
+            className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all cursor-pointer"
           >
             <FiLogOut className="w-4 h-4" />
             <span>Sign Out</span>
@@ -318,13 +318,13 @@ const AdminPortal = () => {
       {/* ─── MOBILE DRAWER SIDEBAR ───────────────────────────────────────────── */}
       {mobileSidebarOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden bg-slate-950/80 backdrop-blur-sm animate-fade-in" onClick={() => setMobileSidebarOpen(false)}>
-          <aside className="w-64 bg-[#0a1222] border-r border-slate-800 flex flex-col h-full animate-slide-up" onClick={(e) => e.stopPropagation()}>
-            <div className="h-16 px-6 border-b border-slate-800 flex items-center justify-between">
+          <aside className="w-64 bg-white dark:bg-[#0a1222] border-r border-slate-200 dark:border-slate-800 flex flex-col h-full animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="h-16 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center font-black text-white text-base">I</div>
-                <span className="font-extrabold text-sm">IncuXAI Admin</span>
+                <span className="font-extrabold text-sm text-slate-900 dark:text-white">IncuXAI Admin</span>
               </div>
-              <button onClick={() => setMobileSidebarOpen(false)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-800">
+              <button onClick={() => setMobileSidebarOpen(false)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
                 <FiX className="w-5 h-5" />
               </button>
             </div>
@@ -336,8 +336,8 @@ const AdminPortal = () => {
                   <button
                     key={link.view}
                     onClick={() => setView(link.view)}
-                    className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold ${
-                      isActive ? 'bg-brand-500/10 text-brand-400' : 'text-slate-400 hover:bg-slate-800/40'
+                    className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold cursor-pointer ${
+                      isActive ? 'bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/40'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -346,8 +346,8 @@ const AdminPortal = () => {
                 );
               })}
             </nav>
-            <div className="p-4 border-t border-slate-800">
-              <button onClick={handleLogoutClick} className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold text-rose-450 hover:bg-rose-500/10 cursor-pointer">
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800">
+              <button onClick={handleLogoutClick} className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-semibold text-rose-600 dark:text-rose-450 hover:bg-rose-50 dark:hover:bg-rose-500/10 cursor-pointer">
                 <FiLogOut className="w-4 h-4" />
                 <span>Sign Out</span>
               </button>
@@ -360,27 +360,27 @@ const AdminPortal = () => {
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         
         {/* Top navigation control bar */}
-        <header className="h-16 border-b border-slate-800/80 bg-[#0a1222] px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30">
+        <header className="h-16 border-b border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0a1222] px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 shadow-2xs dark:shadow-none">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="lg:hidden p-2 text-slate-400 hover:bg-slate-800 rounded-xl"
+              className="lg:hidden p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
             >
               <FiMenu className="w-5 h-5" />
             </button>
-            <h1 className="text-base sm:text-lg font-extrabold capitalize tracking-tight text-white flex items-center gap-2">
+            <h1 className="text-base sm:text-lg font-extrabold capitalize tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
               <span>Admin</span>
-              <FiChevronRight className="w-4 h-4 text-slate-500" />
-              <span className="text-brand-400">{currentView}</span>
+              <FiChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+              <span className="text-brand-600 dark:text-brand-400">{currentView}</span>
             </h1>
           </div>
 
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-slate-200">{currentUser?.name}</p>
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{currentUser?.name}</p>
               <p className="text-[9px] text-slate-500 uppercase tracking-widest font-black mt-0.5">{currentUser?.role || 'Admin'}</p>
             </div>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-brand-850 flex items-center justify-center font-black text-white text-sm shadow-md ring-1 ring-slate-700/60">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-brand-850 flex items-center justify-center font-black text-white text-sm shadow-md ring-1 ring-slate-200 dark:ring-slate-700/60">
               {currentUser?.name?.charAt(0).toUpperCase()}
             </div>
           </div>
@@ -559,26 +559,29 @@ const AdminPortal = () => {
               {/* ──────────────────────────────────────────────────────────────
                  VIEW: USERS & RECRUITERS
               ────────────────────────────────────────────────────────────── */}
+              {/* ──────────────────────────────────────────────────────────────
+                 VIEW: USERS & RECRUITERS
+              ────────────────────────────────────────────────────────────── */}
               {(currentView === 'users' || currentView === 'recruiters') && (
-                <div className="bg-[#0a1222] border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col gap-6">
+                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-sm dark:shadow-lg flex flex-col gap-6">
                   {/* List Controls */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/90 dark:border-slate-800/80 pb-4">
                     <div className="flex items-center gap-3 flex-1 max-w-md">
                       <div className="relative flex-1 flex items-center">
-                        <FiSearch className="absolute left-3.5 text-slate-500" />
+                        <FiSearch className="absolute left-3.5 text-slate-400 dark:text-slate-500" />
                         <input
                           type="text"
                           placeholder="Search users by name or email..."
                           value={usersSearch}
                           onChange={(e) => { setUsersSearch(e.target.value); setUsersPage(1); }}
-                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-xs font-semibold placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-slate-200"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 text-xs font-semibold placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-slate-800 dark:text-slate-200 shadow-2xs"
                         />
                       </div>
                       {currentView === 'users' && (
                         <select
                           value={usersRoleFilter}
                           onChange={(e) => { setUsersRoleFilter(e.target.value); setUsersPage(1); }}
-                          className="px-3 py-2.5 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-300 focus:outline-none focus:border-brand-500 cursor-pointer"
+                          className="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-brand-500 cursor-pointer shadow-2xs"
                         >
                           <option value="">All Roles</option>
                           <option value="candidate">Candidate</option>
@@ -605,7 +608,7 @@ const AdminPortal = () => {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="border-b border-slate-800/80 text-[10px] uppercase tracking-wider text-slate-550 font-bold">
+                        <tr className="border-b border-slate-200/90 dark:border-slate-800/80 text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-550 font-bold">
                           <th className="py-3 px-4">Name</th>
                           <th className="py-3 px-4">Email</th>
                           <th className="py-3 px-4">Role</th>
@@ -614,35 +617,35 @@ const AdminPortal = () => {
                           <th className="py-3 px-4 text-right">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/60">
+                      <tbody className="divide-y divide-slate-200/80 dark:divide-slate-800/60">
                         {users.map((user) => (
-                          <tr key={user.id} className="text-xs hover:bg-slate-800/10 transition-colors">
-                            <td className="py-3.5 px-4 font-bold text-white flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-300 shrink-0">
+                          <tr key={user.id} className="text-xs hover:bg-slate-50/90 dark:hover:bg-slate-800/10 transition-colors">
+                            <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-300 shrink-0 shadow-2xs">
                                 {user.name.charAt(0).toUpperCase()}
                               </div>
                               <span>{user.name}</span>
                             </td>
-                            <td className="py-3.5 px-4 text-slate-400 font-semibold">{user.email}</td>
+                            <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400 font-semibold">{user.email}</td>
                             <td className="py-3.5 px-4">
-                              <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                              <span className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
                                 user.role === 'admin' || user.role === 'super_admin'
-                                  ? 'bg-rose-500/10 text-rose-450 border border-rose-500/20'
+                                  ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-450 border border-rose-200/90 dark:border-rose-500/20'
                                   : user.role === 'recruiter'
-                                  ? 'bg-amber-500/10 text-amber-450 border border-amber-500/20'
-                                  : 'bg-emerald-500/10 text-emerald-450 border border-emerald-500/20'
+                                  ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-450 border border-amber-200/90 dark:border-amber-500/20'
+                                  : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-450 border border-emerald-200/90 dark:border-emerald-500/20'
                               }`}>
                                 {user.role}
                               </span>
                             </td>
-                            <td className="py-3.5 px-4 text-slate-400">
+                            <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400">
                               {user.college ? (
                                 <p className="truncate max-w-xs">{user.college} ({user.degree || 'N/A'})</p>
                               ) : (
-                                <span className="text-slate-600 italic">No academic data</span>
+                                <span className="text-slate-400 dark:text-slate-600 italic">No academic data</span>
                               )}
                             </td>
-                            <td className="py-3.5 px-4 text-slate-500 font-medium">
+                            <td className="py-3.5 px-4 text-slate-500 dark:text-slate-500 font-medium">
                               {new Date(user.created_at).toLocaleDateString()}
                             </td>
                             <td className="py-3.5 px-4 text-right">
@@ -653,7 +656,7 @@ const AdminPortal = () => {
                                     setUserForm({ name: user.name, email: user.email, password: '', role: user.role });
                                     setUserModalOpen(true);
                                   }}
-                                  className="p-1.5 rounded-lg border border-slate-700/50 bg-slate-800 text-slate-350 hover:bg-slate-700 hover:text-white"
+                                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-200/80 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
                                   title="Edit User"
                                 >
                                   <FiEdit className="w-3.5 h-3.5" />
@@ -665,7 +668,7 @@ const AdminPortal = () => {
                                     id: user.id,
                                     message: `Are you sure you want to delete user "${user.name}"? This action will permanently remove their profile, applications, and credentials.`
                                   })}
-                                  className="p-1.5 rounded-lg border border-rose-900/40 bg-rose-950/15 text-rose-400 hover:bg-rose-900/35 hover:text-white"
+                                  className="p-1.5 rounded-lg border border-rose-200 dark:border-rose-900/40 bg-rose-50 dark:bg-rose-950/15 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/35 hover:text-rose-700 dark:hover:text-white transition-colors"
                                   title="Delete User"
                                 >
                                   <FiTrash2 className="w-3.5 h-3.5" />
@@ -679,7 +682,7 @@ const AdminPortal = () => {
                   </div>
 
                   {users.length === 0 && (
-                    <div className="text-center py-16 text-slate-500">
+                    <div className="text-center py-16 text-slate-400 dark:text-slate-500">
                       <FiUsers className="w-12 h-12 mx-auto mb-4 opacity-25" />
                       <p className="font-bold text-sm">No user accounts found matching query parameters.</p>
                     </div>
@@ -687,20 +690,20 @@ const AdminPortal = () => {
 
                   {/* Pagination footer controls */}
                   {usersTotal > 8 && (
-                    <div className="flex items-center justify-between border-t border-slate-800/80 pt-4 mt-2">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase">Showing {(usersPage - 1) * 8 + 1} - {Math.min(usersPage * 8, usersTotal)} of {usersTotal} Users</span>
+                    <div className="flex items-center justify-between border-t border-slate-200/90 dark:border-slate-800/80 pt-4 mt-2">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase">Showing {(usersPage - 1) * 8 + 1} - {Math.min(usersPage * 8, usersTotal)} of {usersTotal} Users</span>
                       <div className="flex gap-2">
                         <button
                           onClick={() => setUsersPage(prev => Math.max(1, prev - 1))}
                           disabled={usersPage === 1}
-                          className="p-2 border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300 disabled:opacity-30 disabled:pointer-events-none rounded-xl"
+                          className="p-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:pointer-events-none rounded-xl transition-colors"
                         >
                           <FiChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setUsersPage(prev => Math.min(Math.ceil(usersTotal / 8), prev + 1))}
                           disabled={usersPage * 8 >= usersTotal}
-                          className="p-2 border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300 disabled:opacity-30 disabled:pointer-events-none rounded-xl"
+                          className="p-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:pointer-events-none rounded-xl transition-colors"
                         >
                           <FiChevronRight className="w-4 h-4" />
                         </button>

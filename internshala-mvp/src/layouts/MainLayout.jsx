@@ -16,7 +16,7 @@ const MainLayout = ({ children, hideSidebar = false }) => {
         {isAuthenticated && !hideSidebar && <Sidebar />}
 
         {/* Main content */}
-        <main className={`flex-1 min-w-0 ${hideSidebar ? '' : 'px-4 sm:px-6 lg:px-8 py-6 lg:py-8'}`}>
+        <main className={`flex-1 min-w-0 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${hideSidebar ? '' : 'px-4 sm:px-6 lg:px-8 py-6 lg:py-8'}`}>
           <div className={hideSidebar ? 'h-full' : 'max-w-screen-xl mx-auto'}>
             {children}
           </div>
