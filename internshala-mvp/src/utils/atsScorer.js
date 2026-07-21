@@ -410,16 +410,30 @@ export const calculateTextAtsScore = (text, profileSkills = []) => {
   score += breakdown.sections;
 
   // 3. Skills Match (max 25)
+  const COMMON_SKILLS = [
+    'javascript', 'typescript', 'python', 'java', 'c++', 'c#', 'ruby', 'php', 'go', 'rust', 'swift', 'kotlin',
+    'react', 'angular', 'vue', 'node', 'express', 'django', 'flask', 'spring', 'rails', 'asp.net',
+    'html', 'css', 'sass', 'tailwind', 'bootstrap', 'material ui', 'redux', 'graphql', 'rest api',
+    'sql', 'mongodb', 'postgresql', 'mysql', 'redis', 'firebase', 'supabase', 'prisma', 'typeorm',
+    'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'terraform', 'jenkins', 'github actions', 'ci/cd',
+    'git', 'linux', 'bash', 'nginx', 'webpack', 'vite', 'jest', 'cypress', 'playwright',
+    'machine learning', 'deep learning', 'data science', 'tensorflow', 'pytorch', 'nlp',
+    'agile', 'scrum', 'jira', 'figma', 'photoshop', 'ui/ux', 'prototyping',
+  ];
+  let matchedSkills;
   if (profileSkills.length > 0) {
-    const matched = profileSkills.filter(s => lower.includes(s.toLowerCase()));
-    const matchRate = matched.length / profileSkills.length;
+    matchedSkills = profileSkills.filter(s => lower.includes(s.toLowerCase()));
+    const matchRate = matchedSkills.length / profileSkills.length;
     breakdown.skills = Math.round(Math.min(25, matchRate * 25));
     if (matchRate < 0.5) {
-      suggestions.push({ id: 'upload-skills', category: 'Skills', message: `Only ${matched.length}/${profileSkills.length} of your listed skills were found in the resume. Add more relevant keywords.`, impact: 'High' });
+      suggestions.push({ id: 'upload-skills', category: 'Skills', message: `Only ${matchedSkills.length}/${profileSkills.length} of your listed skills were found in the resume. Add more relevant keywords.`, impact: 'High' });
     }
   } else {
-    const wordCount = text.split(/\s+/).length;
-    breakdown.skills = Math.min(25, Math.round(wordCount / 200) * 5);
+    matchedSkills = COMMON_SKILLS.filter(s => lower.includes(s));
+    breakdown.skills = Math.min(25, matchedSkills.length * 3);
+  }
+  if (matchedSkills.length < 2) {
+    suggestions.push({ id: 'upload-skills-text', category: 'Skills', message: 'Add recognizable technical skills to your resume. ATS systems filter by keyword matches.', impact: 'High' });
   }
   score += breakdown.skills;
 

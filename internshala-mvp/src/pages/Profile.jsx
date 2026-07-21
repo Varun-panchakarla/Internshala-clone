@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
 import { calculateProfileCompletion, calculateTextAtsScore, calculateAtsScore } from '../utils/atsScorer';
 import { extractTextFromPdf } from '../utils/pdfParser';
+import { resumeService } from '../services/mockApi';
 import {
   FiUser, FiBookOpen, FiBriefcase, FiCheck, FiCpu, FiAward,
   FiUpload, FiFileText, FiX, FiExternalLink, FiAlertTriangle,
@@ -360,7 +361,14 @@ const Profile = () => {
   };
 
   const handleUseBuilderResume = async () => {
-    const builderScore = builtResume ? calculateAtsScore(builtResume) : null;
+    let builderScore = null;
+    try {
+      const res = await resumeService.getResume();
+      const resumeData = res.data?.data;
+      if (resumeData) {
+        builderScore = calculateAtsScore(resumeData);
+      }
+    } catch {}
     const updatedResumeInfo = {
       ...(formData.resumeInfo || {}),
       source: 'builder',
