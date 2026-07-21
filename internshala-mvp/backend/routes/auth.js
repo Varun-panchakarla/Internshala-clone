@@ -93,8 +93,8 @@ router.post('/register', async (req, res) => {
     );
     const user = userResult.rows[0];
 
-    await pool.query(
-      `INSERT INTO profiles (user_id, full_name, experience, employment_type) VALUES ($1, $2, $3, $4)`,
+    const profileResult = await pool.query(
+      `INSERT INTO profiles (user_id, full_name, experience, employment_type) VALUES ($1, $2, $3, $4) RETURNING *`,
       [user.id, cleanName, 'Fresher', 'Full-time']
     );
 
@@ -105,12 +105,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
-      profile: {
-        fullName: cleanName,
-        skills: [],
-        experience: 'Fresher',
-        employmentType: 'Full-time',
-      },
+      profile: mapProfile(profileResult.rows[0]),
     });
   } catch (err) {
     console.error('[Auth] Register error:', err.message);
@@ -281,6 +276,18 @@ function mapProfile(row) {
     preferredLocation: row.preferred_location || '',
     employmentType: row.employment_type || 'Full-time',
     resumeInfo: row.resume_info || null,
+    contactNumber: row.contact_number || '',
+    currentCity: row.current_city || '',
+    gender: row.gender || '',
+    languages: row.languages || [],
+    currentStatus: row.current_status || '',
+    course: row.course || '',
+    stream: row.stream || '',
+    startYear: row.start_year || '',
+    endYear: row.end_year || '',
+    interests: row.interests || [],
+    lookingFor: row.looking_for || [],
+    workModes: row.work_modes || [],
   };
 }
 
