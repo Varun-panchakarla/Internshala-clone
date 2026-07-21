@@ -2,9 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from '../components/common/Toast';
 import { FiAlertCircle, FiCheckCircle, FiUploadCloud, FiX, FiChevronDown } from 'react-icons/fi';
 import Button from '../components/common/Button';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const ReportIssue = () => {
   const { addToast } = useToast();
+  const { currentUser } = useAuth();
   const fileInputRef = useRef(null);
 
   // Scroll to top on load
@@ -20,10 +23,20 @@ const ReportIssue = () => {
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [screenshot, setScreenshot] = useState(null);
+  const [screenshotBase64, setScreenshotBase64] = useState('');
 
   // Validation/Alert states
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Auto-fill logged in user details
+  useEffect(() => {
+    if (currentUser) {
+      setFullName(currentUser.name || '');
+      setEmail(currentUser.email || '');
+    }
+  }, [currentUser]);
 
   const concernOptions = [
     'Account & Login',
@@ -41,7 +54,7 @@ const ReportIssue = () => {
     'Other'
   ];
 
-  // Handle file validation
+  // Handle file validation and base64 conversion
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -53,6 +66,7 @@ const ReportIssue = () => {
         screenshot: 'Supported file formats are PNG, JPG, and JPEG only.'
       }));
       setScreenshot(null);
+      setScreenshotBase64('');
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
@@ -64,9 +78,17 @@ const ReportIssue = () => {
         screenshot: 'File size exceeds the 150 KB limit.'
       }));
       setScreenshot(null);
+      setScreenshotBase64('');
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
+
+    // Convert file to Base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setScreenshotBase64(reader.result);
+    };
+    reader.readAsDataURL(file);
 
     // Clear file error if valid
     setErrors(prev => {
@@ -79,6 +101,7 @@ const ReportIssue = () => {
 
   const removeFile = () => {
     setScreenshot(null);
+    setScreenshotBase64('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -87,6 +110,8 @@ const ReportIssue = () => {
   // Submit Handler
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     setSuccessMessage('');
     const newErrors = {};
 
@@ -128,24 +153,43 @@ const ReportIssue = () => {
 
     // Clear errors
     setErrors({});
+    setIsSubmitting(true);
 
-    // Success Actions
-    setSuccessMessage(
-      'Thank you for contacting IncuXAI Careers. Your issue has been recorded successfully. Our support team will review your request and respond as soon as possible.'
-    );
-    addToast('Issue report recorded successfully!', 'success');
-
-    // Reset Form Fields
-    setFullName('');
-    setEmail('');
-    setContactNumber('');
-    setAreaOfConcern('');
-    setSubject('');
-    setDescription('');
-    setScreenshot(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    axios.post('/api/issues', {
+      fullName,
+      email,
+      contactNumber,
+      category: areaOfConcern,
+      subject,
+      description,
+      screenshot: screenshotBase64
+    })
+    .then((res) => {
+      setSuccessMessage(
+        'Thank you for contacting IncuXAI Careers. Your issue has been recorded successfully. Our support team will review your request and respond as soon as possible.'
+      );
+      addToast('Issue report recorded successfully!', 'success');
+      
+      // Reset Form Fields (preserving user details if logged in)
+      setFullName(currentUser?.name || '');
+      setEmail(currentUser?.email || '');
+      setContactNumber('');
+      setAreaOfConcern('');
+      setSubject('');
+      setDescription('');
+      setScreenshot(null);
+      setScreenshotBase64('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    })
+    .catch((err) => {
+      const errMsg = err.response?.data?.error || 'Failed to submit issue report. Please try again.';
+      addToast(errMsg, 'error');
+    })
+    .finally(() => {
+      setIsSubmitting(false);
+    });
   };
 
   return (
@@ -376,9 +420,10 @@ const ReportIssue = () => {
             <Button
               type="submit"
               variant="primary"
-              className="w-full sm:w-auto px-8 py-3 text-xs font-extrabold tracking-wider uppercase"
+              disabled={isSubmitting}
+              className="w-full sm:w-auto px-8 py-3 text-xs font-extrabold tracking-wider uppercase disabled:opacity-50"
             >
-              Submit Report
+              {isSubmitting ? 'Submitting Report...' : 'Submit Report'}
             </Button>
           </div>
         </form>
