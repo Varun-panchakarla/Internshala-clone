@@ -82,6 +82,58 @@ router.get('/stats', async (req, res) => {
   }
 });
 
+// GET /api/admin/analytics - Real-time candidate sign-ups growth grouped by month
+router.get('/analytics', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        TO_CHAR(created_at, 'YYYY-MM') AS month_key,
+        TO_CHAR(created_at, 'Mon') AS month_label,
+        COUNT(*)::int AS count
+      FROM users
+      WHERE role = 'candidate'
+      GROUP BY TO_CHAR(created_at, 'YYYY-MM'), TO_CHAR(created_at, 'Mon')
+      ORDER BY month_key ASC
+    `);
+    
+    if (result.rows.length === 0) {
+      return res.json({ signups: [] });
+    }
+
+    const rows = result.rows;
+    const signups = [];
+    
+    const minDateStr = rows[0].month_key + '-01';
+    const maxDateStr = rows[rows.length - 1].month_key + '-01';
+    
+    let currentDate = new Date(minDateStr);
+    const maxDate = new Date(maxDateStr);
+    
+    while (currentDate <= maxDate) {
+      const year = currentDate.getFullYear();
+      const monthNum = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const key = `${year}-${monthNum}`;
+      
+      const label = currentDate.toLocaleString('default', { month: 'short' });
+      const existingRow = rows.find(r => r.month_key === key);
+      
+      signups.push({
+        monthKey: key,
+        month: label,
+        count: existingRow ? existingRow.count : 0
+      });
+      
+      // Safe increment to avoid timezone overflow issues
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+    
+    res.json({ signups });
+  } catch (err) {
+    console.error('[Admin Analytics Route] Error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch analytics data.' });
+  }
+});
+
 // ── 2. USERS & RECRUITERS CRUD ──────────────────────────────────────────────
 router.get('/users', async (req, res) => {
   try {
@@ -432,6 +484,157 @@ router.get('/companies', async (req, res) => {
   } catch (err) {
     console.error('[Admin Companies] Error:', err.message);
     res.status(500).json({ error: 'Failed to fetch companies.' });
+  }
+});
+
+// ── 6. ISSUE REPORTS MANAGEMENT ─────────────────────────────────────────────
+router.get('/reports', async (req, res) => {
+  try {
+    const { search, status, priority, category, sort = 'newest', page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+
+    const conditions = [];
+    const params = [];
+    let paramIndex = 1;
+
+    if (search) {
+      const searchLower = `%${search.toLowerCase()}%`;
+      let idSearchCond = '';
+      if (/^\d+$/.test(search)) {
+        idSearchCond = `OR id = $${paramIndex}`;
+      }
+      conditions.push(`(LOWER(full_name) LIKE $${paramIndex} OR LOWER(email) LIKE $${paramIndex} OR LOWER(subject) LIKE $${paramIndex} ${idSearchCond})`);
+      params.push(searchLower);
+      paramIndex++;
+    }
+
+    if (status) {
+      conditions.push(`status = $${paramIndex}`);
+      params.push(status);
+      paramIndex++;
+    }
+
+    if (priority) {
+      conditions.push(`priority = $${paramIndex}`);
+      params.push(priority);
+      paramIndex++;
+    }
+
+    if (category) {
+      conditions.push(`category = $${paramIndex}`);
+      params.push(category);
+      paramIndex++;
+    }
+
+    const whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+
+    let orderBy = 'created_at DESC';
+    if (sort === 'oldest') {
+      orderBy = 'created_at ASC';
+    } else if (sort === 'priority') {
+      orderBy = `
+        CASE priority 
+          WHEN 'Critical' THEN 1
+          WHEN 'High' THEN 2
+          WHEN 'Normal' THEN 3
+          WHEN 'Medium' THEN 4
+          WHEN 'Low' THEN 5
+          ELSE 6
+        END ASC, created_at DESC
+      `;
+    } else if (sort === 'status') {
+      orderBy = `
+        CASE status 
+          WHEN 'Open' THEN 1
+          WHEN 'In Progress' THEN 2
+          WHEN 'Resolved' THEN 3
+          WHEN 'Closed' THEN 4
+          ELSE 5
+        END ASC, created_at DESC
+      `;
+    }
+
+    const openCount = await pool.query("SELECT COUNT(*)::int FROM issue_reports WHERE status = 'Open'");
+    const progressCount = await pool.query("SELECT COUNT(*)::int FROM issue_reports WHERE status = 'In Progress'");
+    const resolvedCount = await pool.query("SELECT COUNT(*)::int FROM issue_reports WHERE status = 'Resolved'");
+    const closedCount = await pool.query("SELECT COUNT(*)::int FROM issue_reports WHERE status = 'Closed'");
+
+    const countRes = await pool.query(`SELECT COUNT(*) FROM issue_reports ${whereClause}`, params);
+    const total = parseInt(countRes.rows[0].count);
+
+    const reportsQuery = `
+      SELECT * FROM issue_reports
+      ${whereClause}
+      ORDER BY ${orderBy}
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+    `;
+
+    const dataRes = await pool.query(reportsQuery, [...params, parseInt(limit), offset]);
+
+    res.json({
+      reports: dataRes.rows,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      counts: {
+        open: openCount.rows[0].count,
+        inProgress: progressCount.rows[0].count,
+        resolved: resolvedCount.rows[0].count,
+        closed: closedCount.rows[0].count,
+        totalReports: openCount.rows[0].count + progressCount.rows[0].count + resolvedCount.rows[0].count + closedCount.rows[0].count
+      }
+    });
+  } catch (err) {
+    console.error('[Admin Reports List] Error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch issue reports.' });
+  }
+});
+
+router.put('/reports/:id', async (req, res) => {
+  try {
+    const reportId = parseInt(req.params.id);
+    const { status, priority, adminNotes } = req.body;
+
+    if (status && !['Open', 'In Progress', 'Resolved', 'Closed'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid report status.' });
+    }
+    if (priority && !['Low', 'Normal', 'Medium', 'High', 'Critical'].includes(priority)) {
+      return res.status(400).json({ error: 'Invalid report priority.' });
+    }
+
+    const result = await pool.query(
+      `UPDATE issue_reports SET
+        status = COALESCE($1, status),
+        priority = COALESCE($2, priority),
+        admin_notes = COALESCE($3, admin_notes),
+        updated_at = NOW()
+       WHERE id = $4
+       RETURNING *`,
+      [status || null, priority || null, adminNotes !== undefined ? adminNotes : null, reportId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Report not found.' });
+    }
+
+    res.json({ message: 'Report updated successfully.', report: result.rows[0] });
+  } catch (err) {
+    console.error('[Admin Report Update] Error:', err.message);
+    res.status(500).json({ error: 'Failed to update report.' });
+  }
+});
+
+router.delete('/reports/:id', async (req, res) => {
+  try {
+    const reportId = parseInt(req.params.id);
+    const result = await pool.query('DELETE FROM issue_reports WHERE id = $1 RETURNING id', [reportId]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Report not found.' });
+    }
+    res.json({ message: 'Report deleted successfully.' });
+  } catch (err) {
+    console.error('[Admin Report Delete] Error:', err.message);
+    res.status(500).json({ error: 'Failed to delete report.' });
   }
 });
 
