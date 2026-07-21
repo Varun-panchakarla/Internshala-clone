@@ -17,6 +17,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [googleUserError, setGoogleUserError] = useState(false);
 
   const handleBackClick = () => {
     if (window.history.state && window.history.state.idx > 0) {
@@ -53,7 +54,13 @@ const Login = () => {
         navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
       }
     } catch (err) {
-      addToast(err.response?.data?.error || 'Login failed. Please check credentials.', 'error');
+      const errMsg = err.response?.data?.error;
+      if (errMsg === 'This account uses Google sign-in.') {
+        setGoogleUserError(true);
+        addToast(errMsg, 'warning');
+      } else {
+        addToast(errMsg || 'Login failed. Please check credentials.', 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -108,6 +115,25 @@ const Login = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {googleUserError && (
+              <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-xl flex flex-col gap-3 animate-fade-in">
+                <p className="text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed">
+                  This account is configured to use Google Sign-in. Please use the button below to log in.
+                </p>
+                <div className="w-full overflow-hidden rounded-lg [&>div]:w-full">
+                  <GoogleLogin
+                    theme="filled_blue"
+                    size="large"
+                    width="100%"
+                    text="continue_with"
+                    shape="rectangular"
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => addToast('Google sign-in failed.', 'error')}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="w-full overflow-hidden rounded-lg [&>div]:w-full">
               <GoogleLogin
                 theme="outline"
@@ -132,7 +158,7 @@ const Login = () => {
               type="email"
               placeholder="name@company.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); setGoogleUserError(false); }}
               error={errors.email}
               icon={FiMail}
               required
