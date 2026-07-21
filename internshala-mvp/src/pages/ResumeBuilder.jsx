@@ -246,13 +246,313 @@ const ModernTemplate = ({ resume, tpl }) => {
   );
 };
 
-/* Provide fallbacks for minimal templates (they will ignore extra fields for simplicity unless added later) */
-const MinimalTemplate = ({resume, tpl}) => <ModernTemplate resume={resume} tpl={tpl}/>;
-const ExecutiveTemplate = ({resume, tpl}) => <ProfessionalTemplate resume={resume} tpl={tpl}/>;
-const CreativeTemplate = ({resume, tpl}) => <ModernTemplate resume={resume} tpl={tpl}/>;
-const FresherTemplate = ({resume, tpl}) => <ProfessionalTemplate resume={resume} tpl={tpl}/>;
-const SimpleATSTemplate = ({resume, tpl}) => <ProfessionalTemplate resume={resume} tpl={tpl}/>;
-const CorporateTemplate = ({resume, tpl}) => <ProfessionalTemplate resume={resume} tpl={tpl}/>;
+/* ── Minimal Template ── */
+const MinimalTemplate = ({ resume, tpl }) => {
+  const pi = resume.personalInfo || {};
+  const accent = tpl?.preview?.accentBar || '#64748b';
+  const SH = {
+    fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: accent, letterSpacing: '0.1em',
+    borderBottom: `1px solid ${accent}40`, paddingBottom: '3px', marginBottom: '8px',
+  };
+  const contacts = [pi.email, pi.phone, pi.linkedin, pi.github, pi.portfolio, pi.website].filter(Boolean);
+
+  return (
+    <div style={{ fontFamily: '"Inter", "Arial", sans-serif', fontSize: '11px', color: '#334155', lineHeight: 1.55 }}>
+      <div style={{ marginBottom: '16px' }}>
+        <div style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', textTransform: 'uppercase' }}>
+          {pi.fullName || 'YOUR FULL NAME'}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 12px', fontSize: '10px', color: '#64748b', marginTop: '4px' }}>
+          {contacts.map((c, i) => <span key={i}>{c}</span>)}
+        </div>
+      </div>
+
+      {pi.summary && <TemplateSection title="Summary" SH={SH}><p style={{ fontSize: '11px', color: '#334155', lineHeight: 1.7, margin: 0 }}>{pi.summary}</p></TemplateSection>}
+      {resume.education?.length > 0 && <TemplateSection title="Education" SH={SH}>{resume.education.map((edu, i) => <EduRow key={i} edu={edu} dark="#0f172a" mid="#334155" light="#64748b" />)}</TemplateSection>}
+      {resume.skills?.length > 0 && (
+        <TemplateSection title="Skills" SH={SH}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 6px' }}>
+            {resume.skills.map((sk, i) => (
+              <span key={i} style={{ backgroundColor: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '4px', padding: '2px 8px', fontSize: '10px', fontWeight: 600 }}>{sk}</span>
+            ))}
+          </div>
+        </TemplateSection>
+      )}
+      {resume.experience?.length > 0 && <TemplateSection title="Experience" SH={SH}>{resume.experience.map((exp, i, arr) => <ExpRow key={i} item={exp} dark="#0f172a" mid="#334155" accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.internship?.length > 0 && <TemplateSection title="Internship" SH={SH}>{resume.internship.map((exp, i, arr) => <ExpRow key={i} item={exp} dark="#0f172a" mid="#334155" accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.projects?.length > 0 && <TemplateSection title="Projects" SH={SH}>{resume.projects.map((proj, i, arr) => <ProjectRow key={i} proj={proj} accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.certifications?.length > 0 && <TemplateSection title="Certifications" SH={SH}>{resume.certifications.map((cert, i, arr) => <CertRow key={i} cert={cert} accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.achievements?.length > 0 && (
+        <TemplateSection title="Achievements" SH={SH}>
+          <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '11px', color: '#334155', lineHeight: 1.6 }}>
+            {resume.achievements.map((ach, i) => <li key={i}>{ach.text || ach}</li>)}
+          </ul>
+        </TemplateSection>
+      )}
+    </div>
+  );
+};
+
+/* ── Executive Template ── */
+const ExecutiveTemplate = ({ resume, tpl }) => {
+  const pi = resume.personalInfo || {};
+  const accent = tpl?.preview?.accentBar || '#f59e0b';
+  const SH = {
+    fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#0f172a', letterSpacing: '0.12em',
+    borderBottom: `2px solid ${accent}`, paddingBottom: '3px', marginBottom: '8px',
+  };
+  const contacts = [pi.email, pi.phone, pi.linkedin, pi.github, pi.portfolio, pi.website].filter(Boolean);
+
+  return (
+    <div style={{ fontFamily: '"Georgia", serif', fontSize: '11px', color: '#0f172a', lineHeight: 1.55 }}>
+      <div style={{ backgroundColor: '#0f172a', padding: '24px 30px', margin: '-52px -58px 18px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <div style={{ fontSize: '26px', fontWeight: 950, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '6px', color: '#ffffff' }}>
+            {pi.fullName || 'YOUR FULL NAME'}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 14px', fontSize: '10px', opacity: 0.85, color: '#f8fafc' }}>
+            {contacts.map((c, i) => <span key={i}>{c}</span>)}
+          </div>
+        </div>
+        {pi.photo && (
+          <img src={pi.photo} alt="Profile" style={{ width: '65px', height: '65px', objectFit: 'cover', borderRadius: '4px', border: `2px solid ${accent}` }} />
+        )}
+      </div>
+
+      {pi.summary && <TemplateSection title="Executive Summary" SH={SH}><p style={{ fontSize: '11px', color: '#334155', lineHeight: 1.7, margin: 0, textAlign: 'justify' }}>{pi.summary}</p></TemplateSection>}
+      {resume.education?.length > 0 && <TemplateSection title="Education" SH={SH}>{resume.education.map((edu, i) => <EduRow key={i} edu={edu} dark="#0f172a" mid="#334155" light="#64748b" />)}</TemplateSection>}
+      {resume.skills?.length > 0 && (
+        <TemplateSection title="Expertise & Skills" SH={SH}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px 6px' }}>
+            {resume.skills.map((sk, i) => (
+              <span key={i} style={{ backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d', borderRadius: '4px', padding: '2px 9px', fontSize: '10px', fontWeight: 700 }}>{sk}</span>
+            ))}
+          </div>
+        </TemplateSection>
+      )}
+      {resume.experience?.length > 0 && <TemplateSection title="Professional Experience" SH={SH}>{resume.experience.map((exp, i, arr) => <ExpRow key={i} item={exp} dark="#0f172a" mid="#334155" accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.internship?.length > 0 && <TemplateSection title="Internships" SH={SH}>{resume.internship.map((exp, i, arr) => <ExpRow key={i} item={exp} dark="#0f172a" mid="#334155" accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.projects?.length > 0 && <TemplateSection title="Key Projects" SH={SH}>{resume.projects.map((proj, i, arr) => <ProjectRow key={i} proj={proj} accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.certifications?.length > 0 && <TemplateSection title="Certifications" SH={SH}>{resume.certifications.map((cert, i, arr) => <CertRow key={i} cert={cert} accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.achievements?.length > 0 && (
+        <TemplateSection title="Achievements" SH={SH}>
+          <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '11px', color: '#334155', lineHeight: 1.6 }}>
+            {resume.achievements.map((ach, i) => <li key={i}>{ach.text || ach}</li>)}
+          </ul>
+        </TemplateSection>
+      )}
+    </div>
+  );
+};
+
+/* ── Creative Template (2-column layout) ── */
+const CreativeTemplate = ({ resume, tpl }) => {
+  const pi = resume.personalInfo || {};
+  const accent = tpl?.preview?.accentBar || '#7c3aed';
+  const SH = {
+    fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: accent, letterSpacing: '0.12em',
+    borderBottom: `2px solid ${accent}`, paddingBottom: '3px', marginBottom: '8px',
+  };
+  const contacts = [
+    pi.email && { val: pi.email, label: 'Email' },
+    pi.phone && { val: pi.phone, label: 'Phone' },
+    pi.linkedin && { val: pi.linkedin, label: 'LinkedIn' },
+    pi.github && { val: pi.github, label: 'GitHub' },
+    pi.portfolio && { val: pi.portfolio, label: 'Portfolio' }
+  ].filter(Boolean);
+
+  return (
+    <div style={{ fontFamily: '"Arial", sans-serif', fontSize: '11px', color: '#1e293b', lineHeight: 1.5, display: 'flex', minHeight: '1122px', width: '100%', boxSizing: 'border-box' }}>
+      {/* Sidebar - Left Column */}
+      <div style={{ width: '32%', backgroundColor: accent, color: '#ffffff', padding: '40px 20px', display: 'flex', flexDirection: 'column', gap: '20px', boxSizing: 'border-box' }}>
+        {pi.photo && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+            <img src={pi.photo} alt="Profile" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '50%', border: '3px solid rgba(255,255,255,0.3)' }} />
+          </div>
+        )}
+        
+        <div>
+          <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', borderBottom: '1px solid rgba(255,255,255,0.3)', paddingBottom: '4px', marginBottom: '8px', letterSpacing: '0.1em' }}>Contact Info</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '10px' }}>
+            {contacts.map((c, i) => (
+              <div key={i}>
+                <span style={{ display: 'block', fontWeight: 700, opacity: 0.8 }}>{c.label}</span>
+                <span style={{ display: 'block', wordBreak: 'break-all' }}>{c.val}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {resume.skills?.length > 0 && (
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', borderBottom: '1px solid rgba(255,255,255,0.3)', paddingBottom: '4px', marginBottom: '8px', letterSpacing: '0.1em' }}>Skills</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+              {resume.skills.map((sk, i) => (
+                <span key={i} style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: '#ffffff', borderRadius: '4px', padding: '2px 8px', fontSize: '9.5px', fontWeight: 600 }}>{sk}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* Main Content - Right Column */}
+      <div style={{ flex: 1, padding: '40px 30px', boxSizing: 'border-box', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div>
+          <div style={{ fontSize: '26px', fontWeight: 900, textTransform: 'uppercase', color: '#1e293b', letterSpacing: '0.04em', lineHeight: 1.15 }}>
+            {pi.fullName || 'YOUR FULL NAME'}
+          </div>
+          {pi.summary && <p style={{ fontSize: '11px', color: '#475569', lineHeight: 1.6, margin: '8px 0 0', textAlign: 'justify' }}>{pi.summary}</p>}
+        </div>
+
+        {resume.education?.length > 0 && <TemplateSection title="Education" SH={SH}>{resume.education.map((edu, i) => <EduRow key={i} edu={edu} dark="#0f172a" mid="#334155" light="#64748b" />)}</TemplateSection>}
+        {resume.experience?.length > 0 && <TemplateSection title="Experience" SH={SH}>{resume.experience.map((exp, i, arr) => <ExpRow key={i} item={exp} dark="#0f172a" mid="#334155" accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+        {resume.internship?.length > 0 && <TemplateSection title="Internship" SH={SH}>{resume.internship.map((exp, i, arr) => <ExpRow key={i} item={exp} dark="#0f172a" mid="#334155" accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+        {resume.projects?.length > 0 && <TemplateSection title="Projects" SH={SH}>{resume.projects.map((proj, i, arr) => <ProjectRow key={i} proj={proj} accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+        {resume.certifications?.length > 0 && <TemplateSection title="Certifications" SH={SH}>{resume.certifications.map((cert, i, arr) => <CertRow key={i} cert={cert} accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+        {resume.achievements?.length > 0 && (
+          <TemplateSection title="Achievements" SH={SH}>
+            <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '11px', color: '#334155', lineHeight: 1.6 }}>
+              {resume.achievements.map((ach, i) => <li key={i}>{ach.text || ach}</li>)}
+            </ul>
+          </TemplateSection>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ── Fresher Template ── */
+const FresherTemplate = ({ resume, tpl }) => {
+  const pi = resume.personalInfo || {};
+  const accent = tpl?.preview?.accentBar || '#059669';
+  const SH = {
+    fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: accent, letterSpacing: '0.12em',
+    borderBottom: `2px solid ${accent}`, paddingBottom: '3px', marginBottom: '8px',
+  };
+  const contacts = [pi.email, pi.phone, pi.linkedin, pi.github, pi.portfolio, pi.website].filter(Boolean);
+
+  return (
+    <div style={{ fontFamily: '"Arial", sans-serif', fontSize: '11px', color: '#1f2937', lineHeight: 1.55 }}>
+      <div style={{ backgroundColor: '#ecfdf5', padding: '20px 24px', margin: '-52px -58px 18px', color: '#064e3b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `3px solid ${accent}` }}>
+        <div>
+          <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '4px', color: '#064e3b' }}>
+            {pi.fullName || 'YOUR FULL NAME'}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 12px', fontSize: '10px', opacity: 0.85 }}>
+            {contacts.map((c, i) => <span key={i}>{c}</span>)}
+          </div>
+        </div>
+        {pi.photo && (
+          <img src={pi.photo} alt="Profile" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '50%', border: `2px solid ${accent}` }} />
+        )}
+      </div>
+
+      {pi.summary && <TemplateSection title="Summary" SH={SH}><p style={{ fontSize: '11px', color: '#374151', lineHeight: 1.7, margin: 0 }}>{pi.summary}</p></TemplateSection>}
+      {resume.education?.length > 0 && <TemplateSection title="Education" SH={SH}>{resume.education.map((edu, i) => <EduRow key={i} edu={edu} dark="#064e3b" mid="#374151" light="#6b7280" />)}</TemplateSection>}
+      {resume.projects?.length > 0 && <TemplateSection title="Academic & Personal Projects" SH={SH}>{resume.projects.map((proj, i, arr) => <ProjectRow key={i} proj={proj} accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.skills?.length > 0 && (
+        <TemplateSection title="Skills" SH={SH}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px 6px' }}>
+            {resume.skills.map((sk, i) => (
+              <span key={i} style={{ backgroundColor: '#d1fae5', color: '#065f46', border: '1px solid #6ee7b7', borderRadius: '4px', padding: '2px 9px', fontSize: '10px', fontWeight: 700 }}>{sk}</span>
+            ))}
+          </div>
+        </TemplateSection>
+      )}
+      {resume.experience?.length > 0 && <TemplateSection title="Work Experience" SH={SH}>{resume.experience.map((exp, i, arr) => <ExpRow key={i} item={exp} dark="#111827" mid="#374151" accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.internship?.length > 0 && <TemplateSection title="Internships" SH={SH}>{resume.internship.map((exp, i, arr) => <ExpRow key={i} item={exp} dark="#111827" mid="#374151" accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.certifications?.length > 0 && <TemplateSection title="Certifications" SH={SH}>{resume.certifications.map((cert, i, arr) => <CertRow key={i} cert={cert} accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+    </div>
+  );
+};
+
+/* ── Simple ATS Template ── */
+const SimpleATSTemplate = ({ resume, tpl }) => {
+  const pi = resume.personalInfo || {};
+  const accent = tpl?.preview?.accentBar || '#374151';
+  const SH = {
+    fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#111827', letterSpacing: '0.12em',
+    borderBottom: '1px solid #111827', paddingBottom: '2px', marginBottom: '8px',
+  };
+  const contacts = [pi.email, pi.phone, pi.linkedin, pi.github, pi.portfolio, pi.website].filter(Boolean);
+
+  return (
+    <div style={{ fontFamily: '"Arial", sans-serif', fontSize: '11px', color: '#111827', lineHeight: 1.5 }}>
+      <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+        <div style={{ fontSize: '22px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          {pi.fullName || 'YOUR FULL NAME'}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0 8px', fontSize: '10px', color: '#374151', marginTop: '4px' }}>
+          {contacts.map((c, i) => (
+            <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
+              {i > 0 && <span style={{ marginRight: '8px', color: '#9ca3af' }}>•</span>}<span>{c}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {pi.summary && <TemplateSection title="Summary" SH={SH}><p style={{ fontSize: '10.5px', color: '#111827', lineHeight: 1.6, margin: 0, textAlign: 'justify' }}>{pi.summary}</p></TemplateSection>}
+      {resume.education?.length > 0 && <TemplateSection title="Education" SH={SH}>{resume.education.map((edu, i) => <EduRow key={i} edu={edu} dark="#111827" mid="#111827" light="#374151" />)}</TemplateSection>}
+      {resume.skills?.length > 0 && (
+        <TemplateSection title="Skills" SH={SH}>
+          <div style={{ fontSize: '10.5px', color: '#111827', lineHeight: 1.6 }}>
+            <strong>Technical Skills:</strong> {resume.skills.join(', ')}
+          </div>
+        </TemplateSection>
+      )}
+      {resume.experience?.length > 0 && <TemplateSection title="Experience" SH={SH}>{resume.experience.map((exp, i, arr) => <ExpRow key={i} item={exp} dark="#111827" mid="#111827" accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.internship?.length > 0 && <TemplateSection title="Internships" SH={SH}>{resume.internship.map((exp, i, arr) => <ExpRow key={i} item={exp} dark="#111827" mid="#111827" accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.projects?.length > 0 && <TemplateSection title="Projects" SH={SH}>{resume.projects.map((proj, i, arr) => <ProjectRow key={i} proj={proj} accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.certifications?.length > 0 && <TemplateSection title="Certifications" SH={SH}>{resume.certifications.map((cert, i, arr) => <CertRow key={i} cert={cert} accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+    </div>
+  );
+};
+
+/* ── Corporate Template ── */
+const CorporateTemplate = ({ resume, tpl }) => {
+  const pi = resume.personalInfo || {};
+  const accent = tpl?.preview?.accentBar || '#0369a1';
+  const SH = {
+    fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: accent, letterSpacing: '0.12em',
+    borderBottom: `2px solid ${accent}`, paddingBottom: '3px', marginBottom: '8px',
+  };
+  const contacts = [pi.email, pi.phone, pi.linkedin, pi.github, pi.portfolio, pi.website].filter(Boolean);
+
+  return (
+    <div style={{ fontFamily: '"Arial", sans-serif', fontSize: '11px', color: '#1e293b', lineHeight: 1.55 }}>
+      <div style={{ backgroundColor: accent, padding: '24px 30px', margin: '-52px -58px 18px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <div style={{ fontSize: '26px', fontWeight: 900, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '6px' }}>
+            {pi.fullName || 'YOUR FULL NAME'}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 14px', fontSize: '10px', opacity: 0.85 }}>
+            {contacts.map((c, i) => <span key={i}>{c}</span>)}
+          </div>
+        </div>
+        {pi.photo && (
+          <img src={pi.photo} alt="Profile" style={{ width: '65px', height: '65px', objectFit: 'cover', borderRadius: '4px', border: '2px solid rgba(255,255,255,0.2)' }} />
+        )}
+      </div>
+
+      {pi.summary && <TemplateSection title="Executive Summary" SH={SH}><p style={{ fontSize: '11px', color: '#334155', lineHeight: 1.7, margin: 0 }}>{pi.summary}</p></TemplateSection>}
+      {resume.education?.length > 0 && <TemplateSection title="Education" SH={SH}>{resume.education.map((edu, i) => <EduRow key={i} edu={edu} dark="#0f172a" mid="#334155" light="#64748b" />)}</TemplateSection>}
+      {resume.skills?.length > 0 && (
+        <TemplateSection title="Core Competencies" SH={SH}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px 6px' }}>
+            {resume.skills.map((sk, i) => (
+              <span key={i} style={{ backgroundColor: '#e0f2fe', color: '#0369a1', border: '1px solid #7dd3fc', borderRadius: '4px', padding: '2px 9px', fontSize: '10px', fontWeight: 700 }}>{sk}</span>
+            ))}
+          </div>
+        </TemplateSection>
+      )}
+      {resume.experience?.length > 0 && <TemplateSection title="Professional Experience" SH={SH}>{resume.experience.map((exp, i, arr) => <ExpRow key={i} item={exp} dark="#0f172a" mid="#334155" accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.internship?.length > 0 && <TemplateSection title="Internship" SH={SH}>{resume.internship.map((exp, i, arr) => <ExpRow key={i} item={exp} dark="#0f172a" mid="#334155" accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.projects?.length > 0 && <TemplateSection title="Key Projects" SH={SH}>{resume.projects.map((proj, i, arr) => <ProjectRow key={i} proj={proj} accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+      {resume.certifications?.length > 0 && <TemplateSection title="Certifications" SH={SH}>{resume.certifications.map((cert, i, arr) => <CertRow key={i} cert={cert} accent={accent} last={i===arr.length-1} />)}</TemplateSection>}
+    </div>
+  );
+};
 
 const RENDERERS = {
   'professional': ProfessionalTemplate,
@@ -521,14 +821,6 @@ const ResumeBuilder = () => {
     {
       id: 'achievements', label: 'Achievements', icon: FiAward,
       isDone: resume?.achievements?.length > 0,
-    },
-    {
-      id: 'languages', label: 'Languages', icon: FiGlobe,
-      isDone: resume?.languages?.length > 0,
-    },
-    {
-      id: 'interests', label: 'Interests', icon: FiHeart,
-      isDone: resume?.interests?.length > 0,
     },
   ];
 
@@ -844,29 +1136,7 @@ const ResumeBuilder = () => {
                 </div>
               </SectionCard>
 
-              {/* Languages */}
-              <SectionCard id="languages" label="Languages" icon={FiGlobe} isOpen={activeSection === 'languages'} isDone={sections[9].isDone} onToggle={() => setActiveSection(activeSection === 'languages' ? '' : 'languages')}>
-                <div className="flex flex-col gap-2">
-                  <Input label="Enter languages (comma separated)" placeholder="English, Hindi, French..." value={(resume.languages || []).join(', ')} onChange={e => updateLanguages(e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {(resume.languages || []).map((lang, i) => (
-                      <span key={i} className="px-3 py-1 bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 text-xs font-semibold rounded-full border border-sky-100 dark:border-sky-800/30">{lang}</span>
-                    ))}
-                  </div>
-                </div>
-              </SectionCard>
 
-              {/* Interests */}
-              <SectionCard id="interests" label="Interests / Hobbies" icon={FiHeart} isOpen={activeSection === 'interests'} isDone={sections[10].isDone} onToggle={() => setActiveSection(activeSection === 'interests' ? '' : 'interests')}>
-                <div className="flex flex-col gap-2">
-                  <Input label="Enter interests (comma separated)" placeholder="Reading, Travel, Chess, Photography..." value={(resume.interests || []).join(', ')} onChange={e => updateInterests(e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {(resume.interests || []).map((interest, i) => (
-                      <span key={i} className="px-3 py-1 bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 text-xs font-semibold rounded-full border border-pink-100 dark:border-pink-800/30">{interest}</span>
-                    ))}
-                  </div>
-                </div>
-              </SectionCard>
               
 
             </div>
