@@ -1,13 +1,18 @@
 import React from 'react';
 
 const ProgressBar = ({
-  value = 0,
+  value,
+  progress,
   max = 100,
   showPercentage = true,
   size = 'md', // sm, md, lg
+  height,
   colorScheme = 'dynamic' // dynamic, brand, success
 }) => {
-  const percentage = Math.min(max, Math.max(0, value));
+  // Support both 'value' and 'progress' props, defaulting to 0
+  const rawValue = value !== undefined ? value : (progress !== undefined ? progress : 0);
+  const parsedValue = typeof rawValue === 'number' ? rawValue : parseFloat(rawValue) || 0;
+  const percentage = Math.min(max, Math.max(0, parsedValue));
 
   const sizes = {
     sm: 'h-1.5',
@@ -28,14 +33,14 @@ const ProgressBar = ({
 
   return (
     <div className="w-full flex items-center gap-3">
-      <div className="flex-1 bg-slate-100 rounded-full overflow-hidden">
+      <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
         <div
-          className={`${sizes[size]} rounded-full transition-all duration-500 ease-out ${getDynamicColor()}`}
+          className={`${height || sizes[size]} rounded-full transition-all duration-500 ease-out ${getDynamicColor()}`}
           style={{ width: `${percentage}%` }}
         />
       </div>
       {showPercentage && (
-        <span className="text-xs font-bold text-slate-700 whitespace-nowrap">
+        <span className="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
           {percentage}%
         </span>
       )}
