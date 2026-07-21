@@ -183,6 +183,30 @@ Consistency is key — apply to a few jobs every day to maximize your chances.
 </td></tr>`);
 }
 
+function passwordResetHTML(name, resetUrl) {
+  return BASE_HTML(`
+<tr><td style="background:linear-gradient(135deg,#4f46e5,#3730a3);padding:36px 32px 28px;text-align:center">
+<h1 style="color:#fff;font-size:22px;margin:0 0 4px;letter-spacing:-0.3px">Reset Your Password</h1>
+<p style="color:#c7d2fe;font-size:13px;margin:0;font-weight:500">IncuXAI Careers Account Security</p>
+</td></tr>
+<tr><td style="padding:32px 32px 24px">
+<p style="color:#1e293b;font-size:15px;margin:0 0 6px;font-weight:600">Hi ${name || 'there'},</p>
+<p style="color:#475569;font-size:13px;line-height:1.7;margin:0 0 20px">
+We received a request to reset the password for your IncuXAI Careers account. Click the button below to set up a new password:
+</p>
+<p style="margin:24px 0;text-align:center">
+<a href="${resetUrl}" style="background:#4f46e5;color:#fff;padding:12px 28px;border-radius:10px;text-decoration:none;font-size:14px;font-weight:700;display:inline-block;box-shadow:0 4px 12px rgba(79,70,229,0.25)">Reset Password →</a>
+</p>
+<p style="color:#64748b;font-size:12px;line-height:1.6;margin:20px 0 0;padding-top:16px;border-top:1px solid #f1f5f9">
+Or copy and paste this link into your browser:<br>
+<a href="${resetUrl}" style="color:#4f46e5;word-break:break-all">${resetUrl}</a>
+</p>
+<p style="color:#94a3b8;font-size:12px;line-height:1.6;margin:16px 0 0;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0">
+🔒 <strong>Security Note:</strong> This password reset link will expire in <strong>30 minutes</strong>. If you did not request a password reset, you can safely ignore this email — your password will remain unchanged and your account is completely secure.
+</p>
+</td></tr>`);
+}
+
 async function sendWelcomeEmail(user) {
   return send({ to: user.email, subject: 'Welcome to IncuXAI Careers — Your Job Search Starts Now!', html: welcomeHTML(user.name) });
 }
@@ -203,4 +227,15 @@ async function sendDailyReminder(user, jobs) {
   return send({ to: user.email, subject: `☀️ ${jobs.length} Jobs Ready — Apply Today!`, html: dailyReminderHTML(user.name, jobs) });
 }
 
-module.exports = { sendWelcomeEmail, sendJobAlert, sendUrgencyAlert, sendResumeReminder, sendDailyReminder };
+async function sendPasswordResetEmail(user, resetUrl) {
+  return send({ to: user.email, subject: 'Reset your IncuXAI Careers password', html: passwordResetHTML(user.name, resetUrl) });
+}
+
+module.exports = {
+  sendWelcomeEmail,
+  sendJobAlert,
+  sendUrgencyAlert,
+  sendResumeReminder,
+  sendDailyReminder,
+  sendPasswordResetEmail
+};
