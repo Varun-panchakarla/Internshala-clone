@@ -10,6 +10,10 @@ import Dashboard from '../pages/Dashboard';
 import JobsPage from '../pages/JobsPage';
 import JobDetails from '../pages/JobDetails';
 import SavedJobs from '../pages/SavedJobs';
+import Applications from '../pages/Applications';
+import RecommendedJobs from '../pages/RecommendedJobs';
+import InterviewPrep from '../pages/InterviewPrep';
+import TechInterviewQuestions from '../pages/TechInterviewQuestions';
 import ResumeBuilder from '../pages/ResumeBuilder';
 import ResumeTemplates from '../pages/ResumeTemplates';
 import Profile from '../pages/Profile';
@@ -244,6 +248,38 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <SavedJobs />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/applications"
+        element={
+          <ProtectedRoute>
+            <Applications />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/recommended-jobs"
+        element={
+          <ProtectedRoute>
+            <RecommendedJobs />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/interview-prep"
+        element={
+          <ProtectedRoute>
+            <InterviewPrep />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/interview-prep/:techId"
+        element={
+          <ProtectedRoute>
+            <TechInterviewQuestions />
           </ProtectedRoute>
         }
       />

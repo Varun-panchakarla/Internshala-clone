@@ -231,11 +231,73 @@ async function sendPasswordResetEmail(user, resetUrl) {
   return send({ to: user.email, subject: 'Reset your IncuXAI Careers password', html: passwordResetHTML(user.name, resetUrl) });
 }
 
+function issueReceivedHTML(name, subject, description) {
+  return BASE_HTML(`
+<tr><td style="background:linear-gradient(135deg,#6366f1,#4f46e5);padding:36px 32px 28px;text-align:center">
+<h1 style="color:#fff;font-size:22px;margin:0 0 4px;letter-spacing:-0.3px">Issue Received</h1>
+<p style="color:#c7d2fe;font-size:13px;margin:0;font-weight:500">Support Ticket Confirmation</p>
+</td></tr>
+<tr><td style="padding:32px 32px 24px">
+<p style="color:#1e293b;font-size:15px;margin:0 0 6px;font-weight:600">Hi ${name || 'there'},</p>
+<p style="color:#475569;font-size:13px;line-height:1.7;margin:0 0 16px">
+  We have successfully received your issue report regarding <strong>${subject}</strong>. Our support team is currently reviewing your ticket.
+</p>
+<div style="background:#f8fafc;border-radius:10px;padding:16px;border:1px solid #e2e8f0;margin-bottom:16px">
+  <h4 style="margin:0 0 8px;font-size:12px;color:#0f172a;text-transform:uppercase">Your Issue Details:</h4>
+  <p style="margin:0;font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap">${description}</p>
+</div>
+<p style="color:#475569;font-size:13px;line-height:1.7;margin:0">
+  We will update you as soon as this issue is resolved. Thank you for your patience.
+</p>
+</td></tr>`);
+}
+
+function issueResolvedHTML(name, subject, adminNotes) {
+  return BASE_HTML(`
+<tr><td style="background:linear-gradient(135deg,#10b981,#059669);padding:36px 32px 28px;text-align:center">
+<h1 style="color:#fff;font-size:22px;margin:0 0 4px;letter-spacing:-0.3px">Issue Resolved!</h1>
+<p style="color:#a7f3d0;font-size:13px;margin:0;font-weight:500">Support Ticket Update</p>
+</td></tr>
+<tr><td style="padding:32px 32px 24px">
+<p style="color:#1e293b;font-size:15px;margin:0 0 6px;font-weight:600">Hi ${name || 'there'},</p>
+<p style="color:#475569;font-size:13px;line-height:1.7;margin:0 0 16px">
+  Great news! The issue you reported regarding <strong>${subject}</strong> has been marked as <strong>Resolved</strong> by our support team.
+</p>
+${adminNotes ? `
+<div style="background:#f0fdf4;border-radius:10px;padding:16px;border:1px solid #bbf7d0;margin-bottom:16px">
+  <h4 style="margin:0 0 8px;font-size:12px;color:#166534;text-transform:uppercase">Support Team Notes:</h4>
+  <p style="margin:0;font-size:13px;color:#1b4332;line-height:1.6;white-space:pre-wrap">${adminNotes}</p>
+</div>
+` : ''}
+<p style="color:#475569;font-size:13px;line-height:1.7;margin:0">
+  Please feel free to reply to this email or submit a new ticket if you continue to encounter any problems.
+</p>
+</td></tr>`);
+}
+
+async function sendIssueReceivedEmail(email, name, subject, description) {
+  return send({
+    to: email,
+    subject: `[Support Ticket] We've received your issue: ${subject}`,
+    html: issueReceivedHTML(name, subject, description)
+  });
+}
+
+async function sendIssueResolvedEmail(email, name, subject, adminNotes) {
+  return send({
+    to: email,
+    subject: `[Resolved] Update on your ticket: ${subject}`,
+    html: issueResolvedHTML(name, subject, adminNotes)
+  });
+}
+
 module.exports = {
   sendWelcomeEmail,
   sendJobAlert,
   sendUrgencyAlert,
   sendResumeReminder,
   sendDailyReminder,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendIssueReceivedEmail,
+  sendIssueResolvedEmail
 };

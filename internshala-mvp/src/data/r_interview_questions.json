@@ -1,0 +1,703 @@
+{
+  "title": "R Interview Questions with Answers",
+  "url": "https://www.geeksforgeeks.org/r-language/r-interview-questions/",
+  "sections": [
+    {
+      "heading": "1. How to install and load a package in R?",
+      "paragraphs": [
+        "You can install a package using the `install.packages()` function and load it with the `library()` function:",
+        "Here, `ggplot2` is installed from CRAN (Comprehensive R Archive Network) and then loaded into the current R session."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "install.packages(\"ggplot2\")  \nlibrary(ggplot2)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "2. What is a data frame in R?",
+      "paragraphs": [
+        "A data frame is a table-like structure in R where data is stored in rows and columns. Each column can have a different data type, unlike a matrix. It is used for handling datasets."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "df <- data.frame(Name=c(\"Amit\",\"Riya\"), Age=c(25,22))\ndf"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "3. Explain different data types in R.",
+      "paragraphs": [],
+      "lists": [
+        [
+          "Numeric: Decimal values, e.g., 3.14.",
+          "Integer: Whole numbers, e.g., 5L.",
+          "Character: Strings, e.g., \"Hello\".",
+          "Logical: TRUE/FALSE values.",
+          "Complex: Numbers with real and imaginary parts.",
+          "Factor: Categorical variables with levels, e.g., gender."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "4. How to read a CSV file in R?",
+      "paragraphs": [
+        "You can use the read.csv() function:",
+        "This loads the CSV file into a data frame for analysis."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "data <- read.csv(\"file.csv\")"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "5. What is the difference between a vector and a list?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "Vector: Stores elements of the same type (numeric, character, etc.).",
+          "List: Can hold multiple data types in one object."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "vec <- c(1,2,3)  \nlst <- list(1,\"R\",TRUE)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "6. Explain for loop and while loop in R.",
+      "paragraphs": [
+        "For loop: Executes code for each element in a sequence.",
+        "While loop: Executes as long as a condition is true."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "for(i in 1:5){ print(i) }",
+        "x <- 1  \nwhile(x <= 5){ print(x); x <- x+1 }"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "7. How to check missing values in R?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "is.na() checks for missing values.",
+          "complete.cases() checks for rows without NA values."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "is.na(c(1,NA,3))  \ncomplete.cases(c(1,NA,3))"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "8. How to create a user-defined function in R?",
+      "paragraphs": [
+        "Functions in R are defined using the function keyword:",
+        "This makes R reusable and modular."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "add <- function(a, b) {\n  return(a + b)\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "9. What is the difference between matrix and data frame?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "Matrix: Can only contain one data type (numeric, character or logical).",
+          "Data frame: Can contain multiple data types across columns."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "10. What are factors in R?",
+      "paragraphs": [
+        "Factors in R are used to represent categorical variables. They store data as integer codes with corresponding labels, making them memory-efficient and useful in modeling. For example, storing gender as a `factor` instead of strings makes statistical operations easier.",
+        "This ensures categorical variables are handled correctly in regression and classification models"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "gender <- factor(c(\"Male\", \"Female\", \"Male\"))"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "11. What is R Markdown?",
+      "paragraphs": [
+        "R Markdown is a tool for creating dynamic documents that combine R code, output and narrative text. It is useful for reproducible reports, research papers and dashboards."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "12. How to delete a column from a data frame?",
+      "paragraphs": [
+        "You can remove columns by subsetting:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "df_new <- df[ , !(names(df) %in% \"column_name\")]"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "13. Explain the use of summary() and str() functions.",
+      "paragraphs": [],
+      "lists": [
+        [
+          "summary(): Provides a statistical summary of an object.",
+          "str(): Displays the internal structure of an object."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "14. How to create a bar plot in R?",
+      "paragraphs": [
+        "Explanation: Bar plots are used to visualize categorical data and quickly interpret counts or proportions."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "counts <- table(df$Gender)\nbarplot(counts, col=c(\"blue\",\"pink\"), main=\"Gender Distribution\")"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "15. What is ggplot2 in R?",
+      "paragraphs": [
+        "`ggplot2` is a well-known R data visualization software that offers a strong and adaptable foundation for developing unique, publication-quality graphics. Its foundation is the idea of the grammar of graphics, which outlines a set of guidelines for producing visualizations.",
+        "Output:"
+      ],
+      "lists": [],
+      "images": [
+        {
+          "alt": "",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20230621162000/ing.png"
+        }
+      ],
+      "code": [
+        "library(ggplot2)\n\n# Example data\ndata <- data.frame(x = c(1, 2, 3, 4, 5),\ny = c(2, 4, 6, 8, 10))\n\n# Create the plot\nplot <- ggplot(data, aes(x, y)) +\ngeom_point()\n\n# Display the plot\nprint(plot)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "16. What is the use of the dplyr package?",
+      "paragraphs": [
+        "The `dplyr` package simplifies data manipulation tasks with easy-to-use functions. It introduces verbs like filter(), select(), mutate(), summarise() and arrange(), which can be chained using the pipe operator %>%.",
+        "It is used because it makes code more readable and concise."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "library(dplyr)\niris %>% filter(Species == \"setosa\") %>% summarise(avg = mean(Sepal.Length))"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "17. How to concatenate strings in R?",
+      "paragraphs": [
+        "The paste() or paste0() functions are used:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "paste(\"Hello\",\"World\")  \npaste0(\"R\",\"Lang\")"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "18. How to handle missing data in R?",
+      "paragraphs": [
+        "Remove:",
+        "Replace:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "cleaned <- na.omit(df)",
+        "df[is.na(df)] <- 0"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "19. How to create a heatmap of correlation matrix in R?",
+      "paragraphs": [
+        "This generates a heatmap showing relationships between variables."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "heatmap(cor(df))"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "20. Create a 3D plot in R",
+      "paragraphs": [
+        "A 3D plot is used to visualize the relationship between three variables simultaneously. It helps in understanding complex patterns and interactions that are difficult to see in 2D plots. In R, there are multiple ways to create 3D plots depending on whether you need static or interactive graphics.",
+        "Using plotly (interactive web-friendly 3D plots): The plotly package allows interactive 3D plotting with additional features like hover info and web integration.",
+        "Output:"
+      ],
+      "lists": [],
+      "images": [
+        {
+          "alt": "3_D_plot",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20250926122341060103/3_D_plot.png"
+        }
+      ],
+      "code": [
+        "install.packages(\"plotly\")\nlibrary(plotly)\n\nplot_ly(x = ~x, y = ~y, z = ~z, type = \"scatter3d\", mode = \"markers\")"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "21. What is the difference between lapply() and sapply()?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "lapply(): Returns a list.",
+          "sapply(): Simplifies output into a vector or matrix if possible."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "lapply(1:3, sqrt)  \nsapply(1:3, sqrt)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "22. What is the difference between merge() and join functions in R?",
+      "paragraphs": [
+        "Explanation: Using `dplyr` joins is often preferred in modern R code for readability and pipeline support."
+      ],
+      "lists": [
+        [
+          "merge(): Base R function to combine data frames using common columns.",
+          "join() functions (inner_join, left_join): Part of `dplyr`, more readable and easier for chaining operations."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "merge(df1, df2, by=\"ID\")"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "23. What is the difference between merge() and cbind()/rbind()?",
+      "paragraphs": [
+        "Explanation: cbind/rbind are simpler and useful when datasets have matching dimensions, while merge is used for relational joins based on keys."
+      ],
+      "lists": [
+        [
+          "merge(): Joins datasets based on common columns.",
+          "cbind(): Combines columns side by side.",
+          "rbind(): Combines rows vertically."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "24. What is the difference between plot(), qplot() and ggplot()?",
+      "paragraphs": [
+        "Explanation: Choosing depends on complexity and visualization requirements."
+      ],
+      "lists": [
+        [
+          "`plot()`: Base R plotting function, simple but less flexible.",
+          "qplot(): Quick plotting in `ggplot2`, less code for basic plots.",
+          "ggplot(): Fully customizable, professional-quality plots."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "25. How to compute standard deviation and variance in R?",
+      "paragraphs": [
+        "Explanation: Standard deviation and variance measure spread of data, important in statistics and modeling."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "sd(df$Age)\nvar(df$Age)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "26. What is a p-value in hypothesis testing?",
+      "paragraphs": [
+        "A p-value represents the probability of observing results at least as extreme as the current data, assuming the null hypothesis is true.",
+        "It is a key concept in statistical inference and hypothesis testing."
+      ],
+      "lists": [
+        [
+          "A low p-value (<0.05) suggests strong evidence against the null hypothesis, leading to its rejection.",
+          "A high p-value indicates insufficient evidence to reject it."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "27. What is bootstrapping in R?",
+      "paragraphs": [
+        "Bootstrapping is a resampling method used to estimate statistics by repeatedly sampling with replacement.",
+        "It helps estimate confidence intervals when data assumptions are not clear."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "library(boot)\nboot_mean <- function(data, indices) mean(data[indices])\nboot(iris$Sepal.Length, boot_mean, R=1000)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "28. How to perform chi-square test in R?",
+      "paragraphs": [
+        "Chi-square tests check the association between categorical variables.",
+        "A low p-value suggests a significant association between variables."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "tbl <- table(mtcars$cyl, mtcars$am)\nchisq.test(tbl)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "29. Explain linear regression in R.",
+      "paragraphs": [
+        "Linear regression models the relationship between a dependent variable and one or more independent variables using a straight line.",
+        "Example:",
+        "The output provides regression coefficients, residuals, R² value and significance tests, which help in understanding the strength of the relationship."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "model <- lm(y ~ x, data = df)\nsummary(model)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "30. What is multiple linear regression in R?",
+      "paragraphs": [
+        "Multiple linear regression models the relationship between one dependent variable and multiple independent variables.",
+        "This helps analyze how different predictors jointly affect the response."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "model <- lm(mpg ~ wt + hp + cyl, data=mtcars)\nsummary(model)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "31. What is logistic regression in R?",
+      "paragraphs": [
+        "Logistic regression is used when the dependent variable is binary (e.g., yes/no, 0/1). Instead of predicting a continuous value, it predicts the probability of an event occurring.",
+        "Example:",
+        "The coefficients are interpreted in terms of odds ratios, making it useful for classification problems such as spam detection or disease prediction"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "model <- glm(y ~ x, data = df, family = binomial)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "32. What is regularization in R?",
+      "paragraphs": [
+        "Regularization is a technique used to prevent overfitting in machine learning models by adding a penalty term to the loss function. This discourages overly complex models. In R, it can be implemented with the glmnet package."
+      ],
+      "lists": [
+        [
+          "Ridge Regression: Uses L2 penalty, shrinks coefficients but doesn’t set them exactly to zero.",
+          "Lasso Regression: Uses L1 penalty, can shrink coefficients to zero (feature selection).",
+          "Elastic Net: Combines both L1 and L2 penalties for balanced regularization."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "33. What is data normalization in R?",
+      "paragraphs": [
+        "Normalization is the process of scaling numerical features so they lie within a standard range (commonly 0–1). This ensures all variables contribute equally in models like distance-based algorithms (e.g., KNN).",
+        "Formula:",
+        "This helps improve model performance and convergence speed."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "(x - min(x)) / (max(x) - min(x))"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "34. What is time series analysis in R?",
+      "paragraphs": [
+        "Time series analysis deals with data recorded over time intervals (daily sales, stock prices, weather data). The goal is to identify patterns like trends, seasonality and to make forecasts. R provides packages such as:"
+      ],
+      "lists": [
+        [
+          "forecast : ARIMA and exponential smoothing.",
+          "xts, zoo : Handling and manipulating time series data"
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "35. How to create a decision tree in R?",
+      "paragraphs": [
+        "A decision tree is a supervised learning algorithm used for classification and regression tasks. In R, the rpart package is commonly used:",
+        "This builds a decision tree on the iris dataset to classify flower species."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "library(rpart)\nmodel <- rpart(Species ~ ., data = iris)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "36. What is multicollinearity in R and how to detect it?",
+      "paragraphs": [
+        "Multicollinearity means predictors are highly correlated, making regression unstable.",
+        "High VIF (>10) indicates multicollinearity."
+      ],
+      "lists": [
+        [
+          "Detect using Variance Inflation Factor (VIF):"
+        ]
+      ],
+      "images": [],
+      "code": [
+        "library(car)\nvif(lm(mpg ~ wt + hp + disp, data=mtcars))"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "37. What are generalized linear models (GLM) in R?",
+      "paragraphs": [
+        "GLMs extend linear models to handle non-normal response variables. Examples:",
+        "They allow modeling beyond just continuous outcomes."
+      ],
+      "lists": [
+        [
+          "Logistic regression (binary outcomes).",
+          "Poisson regression (count data)."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "glm_model <- glm(vs ~ mpg + wt, data=mtcars, family=binomial)\nsummary(glm_model)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "38. What is Poisson regression in R?",
+      "paragraphs": [
+        "Poisson regression is used for modeling count data.",
+        "It assumes counts follow a Poisson distribution and is common in healthcare and traffic studies."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "model <- glm(count ~ predictor, family=poisson, data=df)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "39. How to perform clustering using hierarchical methods in R?",
+      "paragraphs": [
+        "Hierarchical clustering builds a hierarchy of clusters using distance measures.",
+        "Unlike K-means, it does not require specifying the number of clusters beforehand."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "d <- dist(iris[,1:4])\nhc <- hclust(d)\nplot(hc)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "40. What is dimensionality reduction in R?",
+      "paragraphs": [
+        "Dimensionality reduction reduces features while retaining essential information.",
+        "Methods:",
+        "It is useful for high-dimensional datasets like images or text."
+      ],
+      "lists": [
+        [
+          "PCA (Principal Component Analysis).",
+          "t-SNE for visualization."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "library(Rtsne)\ntsne <- Rtsne(iris[,1:4])\nplot(tsne$Y)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "41. What is Kaplan-Meier survival curve in R?",
+      "paragraphs": [
+        "The Kaplan-Meier estimator estimates survival probabilities over time.",
+        "It is widely used in clinical trials to analyze patient survival rates."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "library(survival)\nfit <- survfit(Surv(time, status) ~ 1, data=lung)\nplot(fit)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "42. What is the caret package used for in R?",
+      "paragraphs": [
+        "The caret (Classification And Regression Training) package provides a unified framework for building machine learning models.",
+        "It supports preprocessing, model training, cross-validation and hyperparameter tuning."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "library(caret)\ntrain(Species ~ ., data=iris, method=\"rf\")"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "43. How to build a random forest model in R?",
+      "paragraphs": [
+        "Random Forest is an ensemble method that builds multiple decision trees.",
+        "It handles non-linear relationships well and reduces overfitting."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "library(randomForest)\nrf <- randomForest(Species ~ ., data=iris, ntree=100)\nrf"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "44. What is XGBoost in R?",
+      "paragraphs": [
+        "XGBoost is an optimized gradient boosting library for high performance.",
+        "It is popular in Kaggle competitions due to speed and accuracy."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "library(xgboost)\nmodel <- xgboost(data=as.matrix(iris[,1:4]), label=as.numeric(iris$Species)-1,\n                 nrounds=10, objective=\"multi:softmax\", num_class=3)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "45. How does lazy evaluation work in R?",
+      "paragraphs": [
+        "In R, function arguments are not evaluated until they are actually used inside the function body.",
+        "Here, no error occurs because y is never used. Lazy evaluation improves performance by avoiding unnecessary computation."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "f <- function(x, y) {\n  return(x^2)\n}\nf(2, stop(\"Error!\"))"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "46. What is the apply() function in R?",
+      "paragraphs": [
+        "The apply() function is used to apply a function to the rows or columns of a matrix or array. It helps reduce loops in code.",
+        "This makes data processing faster and more concise."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "m <- matrix(1:9, nrow=3)\napply(m, 1, sum)   # Sum of rows\napply(m, 2, mean)  # Mean of columns"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "47. How to optimize performance in R?",
+      "paragraphs": [
+        "Performance in R can be improved using:",
+        "Optimizations are important when working with big data"
+      ],
+      "lists": [
+        [
+          "Vectorization instead of loops.",
+          "Using data.table for large datasets.",
+          "Parallel processing with parallel or foreach."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "library(parallel)\nmclapply(1:5, function(x) x^2, mc.cores=2)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "48. How does memory management work in R?",
+      "paragraphs": [
+        "R uses garbage collection to free unused memory automatically. Large objects can be removed manually using rm() and memory can be checked with gc(). Efficient memory management is important for handling big data."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "49. What is the difference between R and Python for data science applications?",
+      "paragraphs": [
+        "R is stronger in statistical analysis and visualization, while Python excels in general-purpose programming and machine learning frameworks. Many professionals use them together depending on the task."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "50. How can R be integrated with big data tools like Hadoop or Spark?",
+      "paragraphs": [
+        "R can connect with big data ecosystems using packages like sparklyr (for Spark) and RHadoop. This allows data scientists to process and analyze massive datasets that cannot fit into memory."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    }
+  ]
+}

@@ -23,6 +23,7 @@ export const jobService = {
   saveJob: (jobId) => api.post(`/saved/${jobId}`),
   unsaveJob: (jobId) => api.delete(`/saved/${jobId}`),
   getAppliedJobIds: () => api.get('/applied'),
+  getAppliedJobDetails: () => api.get('/applied/details'),
   applyToJob: (jobId) => api.post(`/applied/${jobId}`),
 };
 

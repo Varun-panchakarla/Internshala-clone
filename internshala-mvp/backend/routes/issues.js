@@ -61,6 +61,19 @@ router.post('/', async (req, res) => {
       screenshot || null
     ]);
 
+    // Send confirmation email asynchronously (do not block client response)
+    try {
+      const { sendIssueReceivedEmail } = require('../utils/email');
+      sendIssueReceivedEmail(
+        email.trim().toLowerCase(),
+        fullName.trim(),
+        subject.trim(),
+        description.trim()
+      );
+    } catch (mailErr) {
+      console.error('[Issues Router] Email failed to send:', mailErr.message);
+    }
+
     res.status(201).json({
       message: 'Issue report submitted successfully.',
       reportId: result.rows[0].id

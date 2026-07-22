@@ -18,6 +18,20 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/applied/details — returns array of detailed applied jobs
+router.get('/details', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT job_id, status, applied_at FROM applied_jobs WHERE user_id = $1 ORDER BY applied_at DESC',
+      [req.user.userId]
+    );
+    res.json({ data: result.rows });
+  } catch (err) {
+    console.error('[Applied] Details error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch applied job details.' });
+  }
+});
+
 // POST /api/applied/:jobId
 router.post('/:jobId', authMiddleware, async (req, res) => {
   try {

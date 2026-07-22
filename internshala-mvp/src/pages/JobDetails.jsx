@@ -7,6 +7,7 @@ import { FiChevronLeft, FiMapPin, FiBriefcase, FiClock, FiBookmark, FiCheck, FiC
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import CompanyLogo from '../components/common/CompanyLogo';
 
 const JobDetails = () => {
   const { id } = useParams();
@@ -115,9 +116,7 @@ const JobDetails = () => {
           
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center font-extrabold text-2xl text-white shadow-inner">
-                {job.logoText}
-              </div>
+              <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company} color="bg-white/15" size="lg" />
               <div>
                 <h1 className="text-xl md:text-2xl font-black mb-1">{job.title}</h1>
                 <p className="text-sm text-white/80 font-semibold">{job.company} • {job.location}</p>

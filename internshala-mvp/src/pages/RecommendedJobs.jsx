@@ -1,41 +1,38 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useJobs } from '../context/JobContext';
-import { useToast } from '../components/common/Toast';
-import { FiBookmark, FiBriefcase, FiMapPin, FiClock, FiTrash2, FiArrowRight } from 'react-icons/fi';
+import { FiBriefcase, FiMapPin, FiClock, FiBookmark, FiArrowRight, FiUser } from 'react-icons/fi';
 import Button from '../components/common/Button';
-import CompanyLogo from '../components/common/CompanyLogo';
 
-const SavedJobs = () => {
-  const { savedJobs, unsaveJob, isJobApplied } = useJobs();
-  const { addToast } = useToast();
+const RecommendedJobs = () => {
+  const { recommendedJobs, saveJob, unsaveJob, isJobSaved, isJobApplied } = useJobs();
   const navigate = useNavigate();
-
-  const handleRemove = async (e, jobId) => {
-    e.stopPropagation();
-    try {
-      await unsaveJob(jobId);
-      addToast('Removed from saved jobs.', 'success');
-    } catch (err) {
-      addToast('Failed to remove job.', 'error');
-    }
-  };
 
   const handleApply = (jobId) => {
     navigate(`/jobs/${jobId}`);
   };
 
+  const handleSaveToggle = async (e, jobId) => {
+    e.stopPropagation();
+    if (isJobSaved(jobId)) {
+      await unsaveJob(jobId);
+    } else {
+      await saveJob(jobId);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 w-full animate-slide-up">
       <div>
-        <h1 className="text-2xl font-black text-slate-800 dark:text-white">Saved Jobs</h1>
-        <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Review and manage positions you have saved for later.</p>
+        <h1 className="text-2xl font-black text-slate-800 dark:text-white">Recommended Jobs</h1>
+        <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Personalized matching based on preferred role, location, and your skills density.</p>
       </div>
 
-      {savedJobs.length > 0 ? (
+      {recommendedJobs.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {savedJobs.map((job) => {
+          {recommendedJobs.map((job) => {
             const isApplied = isJobApplied(job.id);
+            const isSaved = isJobSaved(job.id);
             return (
               <div
                 key={job.id}
@@ -45,9 +42,13 @@ const SavedJobs = () => {
                 <div>
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex items-center gap-3">
-                      <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company} color={job.logoColor} size="sm" />
+                      <div className={`w-10 h-10 rounded-xl ${job.logoColor || 'bg-brand-500'} text-white flex items-center justify-center font-extrabold text-lg shrink-0`}>
+                        {job.logoText || job.company.charAt(0).toUpperCase()}
+                      </div>
                       <div>
-                        <h4 className="text-sm font-extrabold text-slate-800 dark:text-white leading-snug">{job.title}</h4>
+                        <h4 className="text-sm font-extrabold text-slate-800 dark:text-white leading-snug hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                          {job.title}
+                        </h4>
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500">{job.company} • {job.location}</p>
                       </div>
                     </div>
@@ -63,7 +64,7 @@ const SavedJobs = () => {
                     <span className="flex items-center gap-1"><FiClock className="opacity-60" /> {job.employmentType}</span>
                   </div>
 
-                  <p className="text-xs font-extrabold text-brand-600 dark:text-brand-400 mt-3">{job.salary}</p>
+                  <p className="text-xs font-extrabold text-brand-600 dark:text-brand-400 mt-3">{job.salary || 'Salary Undisclosed'}</p>
                 </div>
 
                 <div className="flex items-center gap-2 mt-2 border-t border-slate-50 dark:border-slate-800 pt-4">
@@ -83,10 +84,10 @@ const SavedJobs = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="p-2.5 hover:text-rose-600 hover:border-rose-200 bg-white dark:bg-slate-800 dark:border-slate-700"
-                    onClick={(e) => handleRemove(e, job.id)}
+                    className="p-2.5 bg-white dark:bg-slate-800 dark:border-slate-700"
+                    onClick={(e) => handleSaveToggle(e, job.id)}
                   >
-                    <FiTrash2 className="w-4 h-4 text-slate-400 dark:text-slate-400" />
+                    <FiBookmark className={`w-4 h-4 ${isSaved ? 'fill-rose-500 text-rose-500' : 'text-slate-400 dark:text-slate-400'}`} />
                   </Button>
                 </div>
               </div>
@@ -96,15 +97,15 @@ const SavedJobs = () => {
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-12 text-center shadow-sm flex flex-col items-center justify-center gap-4">
           <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 border border-slate-100 dark:border-slate-700">
-            <FiBookmark className="w-8 h-8" />
+            <FiUser className="w-8 h-8" />
           </div>
           <div>
-            <h3 className="text-base font-extrabold text-slate-800 dark:text-white">No Saved Jobs Yet</h3>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Bookmark jobs while browsing to review and apply to them later.</p>
+            <h3 className="text-base font-extrabold text-slate-800 dark:text-white">Profile Setup Incomplete</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Complete your profile to receive personalized job recommendations.</p>
           </div>
-          <Link to="/jobs">
+          <Link to="/profile">
             <Button variant="primary" size="sm" className="mt-2">
-              Browse All Jobs <FiArrowRight className="ml-1" />
+              Complete Profile <FiArrowRight className="ml-1" />
             </Button>
           </Link>
         </div>
@@ -113,4 +114,4 @@ const SavedJobs = () => {
   );
 };
 
-export default SavedJobs;
+export default RecommendedJobs;
