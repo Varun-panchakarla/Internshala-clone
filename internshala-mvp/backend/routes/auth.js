@@ -459,6 +459,65 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+// POST /api/auth/change-password
+router.post('/change-password', authMiddleware, async (req, res) => {
+  console.log('[Auth Change Password] Request received. req.user:', req.user);
+  try {
+    const { currentPassword, newPassword } = req.body;
+    console.log('[Auth Change Password] Inputs received:', {
+      currentPasswordLength: currentPassword?.length || 0,
+      newPasswordLength: newPassword?.length || 0
+    });
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current password and new password are required.' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+    }
+
+    const userId = req.user.userId;
+    console.log('[Auth Change Password] Querying user with ID:', userId);
+    const userRes = await pool.query('SELECT id, password_hash FROM users WHERE id = $1', [userId]);
+    if (userRes.rows.length === 0) {
+      console.warn('[Auth Change Password] User not found for ID:', userId);
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    const user = userRes.rows[0];
+    if (user.password_hash) {
+      console.log('[Auth Change Password] Verifying current password hash...');
+      const match = await bcrypt.compare(currentPassword, user.password_hash);
+      if (!match) {
+        console.warn('[Auth Change Password] Current password verification failed.');
+        return res.status(400).json({ error: 'Incorrect current password.' });
+      }
+    }
+
+    console.log('[Auth Change Password] Hashing new password...');
+    const newHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    
+    console.log('[Auth Change Password] Updating database password_hash...');
+    const updateResult = await pool.query(
+      'UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2',
+      [newHash, userId]
+    );
+
+    if (updateResult.rowCount === 0) {
+      console.error(`[Auth Change Password Fail] No rows updated for user ID: ${userId}`);
+      return res.status(500).json({ error: 'Database update failed. Password not changed.' });
+    }
+
+    console.log(`[Auth Change Password Success] Successfully updated password hash in users table for ID: ${userId}`);
+    return res.json({ message: 'Password updated successfully!' });
+  } catch (err) {
+    console.error('[Auth Change Password Error] Catch block exception:', err);
+    return res.status(500).json({ 
+      error: `Server error changing password: ${err.message || err}` 
+    });
+  }
+});
+
 function mapProfile(row) {
   if (!row) return {};
   return {
