@@ -94,6 +94,14 @@ async function initDb() {
     "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS looking_for TEXT[] DEFAULT '{}'",
     "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS work_modes TEXT[] DEFAULT '{}'",
     "ALTER TABLE applied_jobs ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Pending'",
+    `CREATE TABLE IF NOT EXISTS email_log (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      email VARCHAR(255) NOT NULL,
+      email_type VARCHAR(50) NOT NULL,
+      sent_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE(user_id, email_type, DATE(sent_at))
+    )`,
   ];
   for (const sql of migrations) {
     try { await pool.query(sql); } catch { /* column may already exist */ }

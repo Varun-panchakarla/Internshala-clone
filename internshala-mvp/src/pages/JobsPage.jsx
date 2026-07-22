@@ -8,6 +8,7 @@ import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import FilterDropdown from '../components/common/FilterDropdown';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import CompanyLogo from '../components/common/CompanyLogo';
 
 const JobsPage = () => {
   const {
@@ -285,11 +286,7 @@ const JobsPage = () => {
                     {/* Header Row */}
                     <div className="flex items-start justify-between gap-4 mb-3">
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl shrink-0 flex items-center justify-center font-extrabold text-xl shadow-sm ${
-                          isFeatured ? 'bg-white/10 text-white' : `${job.logoColor} text-white`
-                        }`}>
-                          {job.logoText}
-                        </div>
+                      <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company} color={job.logoColor} size="md" />
                         <div>
                           <h3 className={`text-base font-extrabold leading-tight ${isFeatured ? 'text-white' : 'text-slate-800 dark:text-slate-100'}`}>
                             {job.title}

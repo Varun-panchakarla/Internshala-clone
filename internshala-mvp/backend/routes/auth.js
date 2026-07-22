@@ -150,8 +150,6 @@ router.post('/login', async (req, res) => {
     const token = signToken(user.id, user.email);
     setCookie(res, token);
 
-    sendWelcomeEmail({ email: user.email, name: user.name });
-
     res.json({
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
       profile: mapProfile(profile),
@@ -194,12 +192,14 @@ router.post('/google', async (req, res) => {
     );
 
     let user;
+    let isNewUser = false;
     if (existing.rows.length > 0) {
       user = existing.rows[0];
       if (!user.google_id) {
         await pool.query('UPDATE users SET google_id = $1 WHERE id = $2', [googleId, user.id]);
       }
     } else {
+      isNewUser = true;
       const result = await pool.query(
         `INSERT INTO users (email, name, google_id) VALUES ($1, $2, $3) RETURNING id, email, name, role`,
         [email, name, googleId]
@@ -215,7 +215,9 @@ router.post('/google', async (req, res) => {
     const profileResult = await pool.query('SELECT * FROM profiles WHERE user_id = $1', [user.id]);
     const profile = profileResult.rows[0] || {};
 
-    sendWelcomeEmail({ email: user.email, name: user.name });
+    if (isNewUser) {
+      sendWelcomeEmail({ email: user.email, name: user.name });
+    }
 
     const token = signToken(user.id, user.email);
     setCookie(res, token);

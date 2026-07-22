@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../components/common/Toast';
 import axios from 'axios';
+import CompanyLogo from '../../components/common/CompanyLogo';
 
 axios.defaults.withCredentials = true;
 import {
@@ -1088,9 +1089,7 @@ const AdminPortal = () => {
                         {recentJobs.map((job) => (
                           <div key={job.id} className="py-3 flex items-center justify-between gap-4 hover:bg-slate-50/60 dark:hover:bg-slate-800/20 px-2 rounded-xl transition-colors">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-300">
-                                {job.company.charAt(0).toUpperCase()}
-                              </div>
+                              <CompanyLogo logo={job.companyLogo} name={job.company} color="bg-slate-100" size="xs" />
                               <div>
                                 <p className="text-xs font-bold text-slate-900 dark:text-white leading-none">{job.title}</p>
                                 <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{job.company} • {job.location}</p>
@@ -1275,12 +1274,7 @@ const AdminPortal = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {companies.map((comp, i) => (
                       <div key={i} className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800 rounded-2xl p-5 flex flex-col items-center text-center hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-xs">
-                        <div
-                          className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg text-white mb-3 shadow-inner border border-slate-200 dark:border-slate-800"
-                          style={{ backgroundColor: comp.logo_color || '#1e293b' }}
-                        >
-                          {comp.company.charAt(0).toUpperCase()}
-                        </div>
+                        <CompanyLogo logo={comp.companyLogo} name={comp.company} color={comp.logo_color || '#1e293b'} size="md" className="mb-3" />
                         <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight mb-1">{comp.company}</h4>
                         <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Active Recruiter Profile</span>
                       </div>
@@ -1330,12 +1324,7 @@ const AdminPortal = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {jobs.map((job) => (
                       <div key={job.id} className="bg-slate-900/40 border border-slate-800/90 rounded-2xl p-5 flex items-start gap-4 hover:border-slate-700 transition-all relative group shadow-lg">
-                        <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-base text-white shadow-inner border border-slate-800"
-                          style={{ backgroundColor: job.logo_color || '#1e293b' }}
-                        >
-                          {job.company.charAt(0).toUpperCase()}
-                        </div>
+                      <CompanyLogo logo={job.companyLogo} name={job.company} color={job.logo_color || '#1e293b'} size="sm" />
                         <div className="flex-1 min-w-0">
                           <h4 className="text-xs font-extrabold text-white leading-tight mb-1 truncate">{job.title}</h4>
                           <p className="text-[10px] text-brand-400 font-bold mb-3">{job.company}</p>
