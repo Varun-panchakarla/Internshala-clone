@@ -622,7 +622,24 @@ router.put('/reports/:id', async (req, res) => {
       return res.status(404).json({ error: 'Report not found.' });
     }
 
-    res.json({ message: 'Report updated successfully.', report: result.rows[0] });
+    const updatedReport = result.rows[0];
+
+    // If updated to Resolved, trigger resolution email
+    if (status === 'Resolved') {
+      try {
+        const { sendIssueResolvedEmail } = require('../utils/email');
+        sendIssueResolvedEmail(
+          updatedReport.email,
+          updatedReport.full_name,
+          updatedReport.subject,
+          updatedReport.admin_notes || adminNotes || ''
+        );
+      } catch (mailErr) {
+        console.error('[Admin Router] Issue resolved email failed to send:', mailErr.message);
+      }
+    }
+
+    res.json({ message: 'Report updated successfully.', report: updatedReport });
   } catch (err) {
     console.error('[Admin Report Update] Error:', err.message);
     res.status(500).json({ error: 'Failed to update report.' });
