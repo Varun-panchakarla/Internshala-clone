@@ -6,7 +6,7 @@ import { useResume } from '../../context/ResumeContext';
 import { useSidebar } from '../../context/SidebarContext';
 import {
   FiBriefcase, FiUser, FiBookmark, FiFileText,
-  FiGrid, FiLayout, FiZap, FiX, FiMenu
+  FiGrid, FiLayout, FiZap, FiX, FiMenu, FiAward
 } from 'react-icons/fi';
 
 const Sidebar = () => {
@@ -34,6 +34,7 @@ const Sidebar = () => {
     { to: '/saved-jobs',       label: 'Saved Jobs',     icon: FiBookmark, description: 'Your shortlist', badge: savedJobs?.length },
     { to: '/resume',           label: 'Resume Builder', icon: FiFileText, description: 'Build & export', scoreBadge: effectiveAtsScore },
     { to: '/resume-templates', label: 'Templates',      icon: FiLayout,   description: '8 pro designs' },
+    { to: '/interview-prep',   label: 'Interview Prep', icon: FiAward,    description: 'Tech Q&As' },
     { to: '/profile',          label: 'My Profile',     icon: FiUser,     description: 'Edit your info', completenessBadge: profileCompletion }
   );
 

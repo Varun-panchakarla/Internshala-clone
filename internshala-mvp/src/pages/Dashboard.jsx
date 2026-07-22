@@ -25,19 +25,22 @@ const Dashboard = () => {
       label: 'Jobs Applied',
       value: appliedJobs?.length || 0,
       color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900/40',
-      icon: FiCheckCircle
+      icon: FiCheckCircle,
+      to: '/applications'
     },
     {
       label: 'Saved Jobs',
       value: savedJobs?.length || 0,
       color: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border-rose-100 dark:border-rose-900/40',
-      icon: FiBookmark
+      icon: FiBookmark,
+      to: '/saved-jobs'
     },
     {
       label: 'Recommended Jobs',
       value: recommendedJobs?.length || 0,
       color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-900/40',
-      icon: FiBriefcase
+      icon: FiBriefcase,
+      to: '/recommended-jobs'
     }
   ];
 
@@ -167,15 +170,19 @@ const Dashboard = () => {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm flex items-center justify-between">
+            <Link
+              key={stat.label}
+              to={stat.to}
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-200 dark:hover:border-slate-700 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+            >
               <div>
                 <span className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">{stat.label}</span>
                 <p className="text-3xl font-extrabold text-slate-800 dark:text-white mt-1">{stat.value}</p>
               </div>
-              <div className={`w-12 h-12 rounded-xl border flex items-center justify-center ${stat.color}`}>
+              <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${stat.color} transition-all duration-200`}>
                 <Icon className="w-6 h-6" />
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
