@@ -4,7 +4,7 @@ import { useResume } from '../context/ResumeContext';
 
 import {
   FiCheckCircle, FiEye, FiArrowRight, FiStar,
-  FiTrendingUp, FiShield, FiZap, FiAward, FiFileText, FiMenu, FiGrid, FiLayout, FiArrowLeft,
+  FiTrendingUp, FiShield, FiZap, FiAward, FiFileText, FiMenu, FiGrid, FiLayout, FiArrowLeft, FiInfo
 } from 'react-icons/fi';
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -131,7 +131,7 @@ const TemplateCard = ({ template, isSelected, onSelect, onPreview }) => {
       className={`group flex flex-col rounded-2xl overflow-hidden border-2 transition-all duration-300 cursor-pointer ${
         isSelected
           ? 'border-brand-500 shadow-xl shadow-brand-100'
-          : 'border-slate-200 hover:border-slate-300 hover:shadow-lg'
+          : 'border-slate-200 hover:border-slate-350 hover:shadow-lg'
       }`}
       style={{ transform: hovered ? 'translateY(-4px)' : 'none' }}
     >
@@ -176,39 +176,63 @@ const TemplateCard = ({ template, isSelected, onSelect, onPreview }) => {
         <p className="text-[11px] text-slate-500 leading-relaxed">{template.description}</p>
 
         {/* Badges */}
-        <div className="flex flex-wrap gap-1.5 mt-1">
-          {(template.is_ats ?? template.isATS) && (
-            <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
-              <FiShield className="w-2.5 h-2.5" /> ATS Friendly
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {/* ATS Friendly / Visual flag */}
+          {(template.is_ats ?? template.isATS) ? (
+            <span className="flex items-center gap-1.5 text-[9.5px] font-black text-white bg-emerald-600 dark:bg-emerald-600 px-2.5 py-0.5 rounded-full shadow-xs uppercase tracking-wider">
+              <FiShield className="w-3 h-3 text-white/90" /> ATS Friendly
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 text-[9.5px] font-black text-white bg-violet-600 dark:bg-violet-600 px-2.5 py-0.5 rounded-full shadow-xs uppercase tracking-wider">
+              <FiZap className="w-3 h-3 text-white/90" /> Visual
             </span>
           )}
-          {!(template.is_ats ?? template.isATS) && (
-            <span className="flex items-center gap-1 text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full">
-              <FiZap className="w-2.5 h-2.5" /> Visual
-            </span>
-          )}
+
+          {/* Popular flag */}
           {(template.is_popular ?? template.isPopular) && (
-            <span className="flex items-center gap-1 text-[9px] font-bold text-brand-700 bg-brand-50 border border-brand-100 px-2 py-0.5 rounded-full">
-              <FiStar className="w-2.5 h-2.5" /> Popular
+            <span className="flex items-center gap-1.5 text-[9.5px] font-black text-white bg-amber-500 dark:bg-amber-500 px-2.5 py-0.5 rounded-full shadow-xs uppercase tracking-wider">
+              <FiStar className="w-3 h-3 text-white/90" /> Popular
             </span>
           )}
+
+          {/* Trending flag */}
           {(template.is_trending ?? template.isTrending) && (
-            <span className="flex items-center gap-1 text-[9px] font-bold text-violet-700 bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-full">
-              <FiTrendingUp className="w-2.5 h-2.5" /> Trending
+            <span className="flex items-center gap-1.5 text-[9.5px] font-black text-white bg-rose-500 dark:bg-rose-500 px-2.5 py-0.5 rounded-full shadow-xs uppercase tracking-wider">
+              <FiTrendingUp className="w-3 h-3 text-white/90" /> Trending
             </span>
           )}
+
+          {/* Best ATS Score flag */}
           {(template.is_best_ats ?? template.isBestATS) && (
-            <span className="flex items-center gap-1 text-[9px] font-bold text-sky-700 bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-full">
-              <FiAward className="w-2.5 h-2.5" /> Best ATS Score
+            <span className="flex items-center gap-1.5 text-[9.5px] font-black text-white bg-sky-650 dark:bg-sky-650 px-2.5 py-0.5 rounded-full shadow-xs uppercase tracking-wider">
+              <FiAward className="w-3 h-3 text-white/90" /> Best ATS
             </span>
           )}
+
+          {/* Dynamic tags from DB */}
+          {template.tags?.map(tag => {
+            const lower = tag.toLowerCase();
+            if (lower === 'ats friendly' || lower === 'visual' || lower === 'popular' || lower === 'trending' || lower === 'best ats score') {
+              return null;
+            }
+            const isPremium = lower.includes('premium') || lower.includes('pro') || lower.includes('executive');
+            const bgClass = isPremium
+              ? 'bg-slate-900 dark:bg-slate-950 text-amber-400 border border-amber-400/30'
+              : 'bg-slate-500 dark:bg-slate-800 text-white';
+            return (
+              <span key={tag} className={`flex items-center gap-1 text-[9.5px] font-black px-2.5 py-0.5 rounded-full shadow-xs uppercase tracking-wider ${bgClass}`}>
+                {tag}
+              </span>
+            );
+          })}
         </div>
+
 
         {/* CTA buttons */}
         <div className="flex gap-2 mt-2">
           <button
             onClick={() => onSelect(template.id)}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               isSelected
                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default'
                 : 'bg-slate-800 text-white hover:bg-slate-700 active:scale-95'

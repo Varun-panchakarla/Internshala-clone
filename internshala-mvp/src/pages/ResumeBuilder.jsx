@@ -14,7 +14,7 @@ import { useToast } from '../components/common/Toast';
 
 import {
   FiSave, FiDownload, FiPlus, FiTrash, FiAward,
-  FiAlertCircle, FiChevronRight, FiBriefcase, FiBookOpen,
+  FiAlertCircle, FiChevronRight, FiChevronDown, FiBriefcase, FiBookOpen,
   FiUser, FiCode, FiFileText, FiCheckSquare, FiLink,
   FiLayout, FiZap, FiShield, FiEye, FiGlobe, FiHeart,
   FiImage, FiMenu, FiGrid,
@@ -704,6 +704,7 @@ const ResumeBuilder = () => {
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   const [compilingResume, setCompilingResume]     = useState(false);
   const [skillsInput, setSkillsInput]             = useState('');
+  const [atsSuggestionsExpanded, setAtsSuggestionsExpanded] = useState(false);
   const skillsInit                                 = useRef(false);
 
   useEffect(() => {
@@ -956,36 +957,52 @@ const ResumeBuilder = () => {
             {/* ATS Suggestions */}
             {atsSuggestions.length > 0 && (
               <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shrink-0">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+                <div
+                  onClick={() => setAtsSuggestionsExpanded(!atsSuggestionsExpanded)}
+                  className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors select-none"
+                >
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-lg bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center">
                       <FiAlertCircle className="w-3 h-3 text-rose-500" />
                     </div>
                     <h3 className="text-[13px] font-bold text-slate-800 dark:text-white">ATS Suggestions</h3>
                   </div>
-                  <span className="text-[10px] font-black bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-full">
-                    {atsSuggestions.length}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-full">
+                      {atsSuggestions.length}
+                    </span>
+                    <FiChevronDown
+                      className={`w-4 h-4 text-slate-400 dark:text-slate-500 transition-transform duration-300 ${
+                        atsSuggestionsExpanded ? 'rotate-180' : 'rotate-0'
+                      }`}
+                    />
+                  </div>
                 </div>
-                <div className="px-5 py-4 flex flex-col gap-2.5 max-h-52 overflow-y-auto scrollbar-none">
-                  {atsSuggestions.map((sug) => {
-                    const impactColor =
-                      sug.impact === 'Critical' ? 'text-rose-500 bg-rose-50 border-rose-100 dark:bg-rose-900/20 dark:border-rose-800/30' :
-                      sug.impact === 'High'     ? 'text-amber-500 bg-amber-50 border-amber-100 dark:bg-amber-900/20 dark:border-amber-800/30' :
-                      'text-blue-500 bg-blue-50 border-blue-100 dark:bg-blue-900/20 dark:border-blue-800/30';
-                    return (
-                      <div key={sug.id} className="flex gap-2.5 items-start p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
-                        <FiAlertCircle className={`shrink-0 w-3.5 h-3.5 mt-0.5 ${sug.impact==='Critical'?'text-rose-500':sug.impact==='High'?'text-amber-500':'text-blue-500'}`} />
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{sug.category}</span>
-                            <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md border ${impactColor}`}>{sug.impact}</span>
+                <div
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                    atsSuggestionsExpanded ? 'max-h-52 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+                  }`}
+                >
+                  <div className="px-5 py-4 flex flex-col gap-2.5 max-h-52 overflow-y-auto scrollbar-none">
+                    {atsSuggestions.map((sug) => {
+                      const impactColor =
+                        sug.impact === 'Critical' ? 'text-rose-500 bg-rose-50 border-rose-100 dark:bg-rose-900/20 dark:border-rose-800/30' :
+                        sug.impact === 'High'     ? 'text-amber-500 bg-amber-50 border-amber-100 dark:bg-amber-900/20 dark:border-amber-800/30' :
+                        'text-blue-500 bg-blue-50 border-blue-100 dark:bg-blue-900/20 dark:border-blue-800/30';
+                      return (
+                        <div key={sug.id} className="flex gap-2.5 items-start p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                          <FiAlertCircle className={`shrink-0 w-3.5 h-3.5 mt-0.5 ${sug.impact==='Critical'?'text-rose-500':sug.impact==='High'?'text-amber-500':'text-blue-500'}`} />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{sug.category}</span>
+                              <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md border ${impactColor}`}>{sug.impact}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">{sug.message}</p>
                           </div>
-                          <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">{sug.message}</p>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}
