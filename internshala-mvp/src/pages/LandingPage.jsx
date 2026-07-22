@@ -6,6 +6,7 @@ import { useToast } from '../components/common/Toast';
 import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
 import Button from '../components/common/Button';
+import CompanyLogo from '../components/common/CompanyLogo';
 import {
   FiSearch,
   FiMapPin,
@@ -314,9 +315,7 @@ const LandingPage = () => {
                     <div>
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm ${job.logoColor || 'bg-slate-800'}`}>
-                            {job.logoText || job.company.charAt(0)}
-                          </div>
+                          <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company.charAt(0)} color={job.logoColor || 'bg-slate-800'} size="sm" />
                           <div>
                             <h3 className="font-bold text-slate-800 dark:text-white text-sm leading-tight">{job.title}</h3>
                             <p className="text-xs text-slate-400 font-medium">{job.company}</p>
@@ -426,9 +425,7 @@ const LandingPage = () => {
                     )}
                     <div>
                       <div className="flex items-start gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 bg-emerald-500">
-                          {job.company.charAt(0)}
-                        </div>
+                      <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company.charAt(0)} color={job.logoColor || 'bg-emerald-500'} size="sm" />
                         <div>
                           <h3 className="font-bold text-slate-800 dark:text-white text-sm">{job.title}</h3>
                           <p className="text-xs text-slate-400 font-medium">{job.company}</p>
@@ -586,9 +583,7 @@ const LandingPage = () => {
                     onClick={() => navigate(`/jobs/${job.id}`)}
                     className="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl hover:shadow-md transition-all cursor-pointer flex items-center gap-4"
                   >
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm bg-sky-600">
-                      {job.company.charAt(0)}
-                    </div>
+                    <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company.charAt(0)} color={job.logoColor || 'bg-sky-600'} size="sm" />
                     <div className="flex-1 min-w-0">
                       <h4 className="font-bold text-slate-800 dark:text-white text-sm">{job.title}</h4>
                       <p className="text-xs text-slate-400">{job.company}</p>

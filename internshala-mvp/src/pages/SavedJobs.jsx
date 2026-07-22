@@ -4,6 +4,7 @@ import { useJobs } from '../context/JobContext';
 import { useToast } from '../components/common/Toast';
 import { FiBookmark, FiBriefcase, FiMapPin, FiClock, FiTrash2, FiArrowRight } from 'react-icons/fi';
 import Button from '../components/common/Button';
+import CompanyLogo from '../components/common/CompanyLogo';
 
 const SavedJobs = () => {
   const { savedJobs, unsaveJob, isJobApplied } = useJobs();
@@ -44,9 +45,7 @@ const SavedJobs = () => {
                 <div>
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl ${job.logoColor} text-white flex items-center justify-center font-extrabold text-lg shrink-0`}>
-                        {job.logoText}
-                      </div>
+                      <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company} color={job.logoColor} size="sm" />
                       <div>
                         <h4 className="text-sm font-extrabold text-slate-800 dark:text-white leading-snug">{job.title}</h4>
                         <p className="text-xs font-bold text-slate-400 dark:text-slate-500">{job.company} • {job.location}</p>

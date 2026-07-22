@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { getCompanyLogo } = require('./utils.js');
 
 const APP_ID = 'bc23f928';
 const APP_KEY = '9e0a97eba76a5d610c3a5995b40cfe15';
@@ -162,7 +163,7 @@ async function fetchFromAdzuna() {
       id: `adz-${job.id}`,
       title: job.title,
       company: companyName,
-      companyLogo: '',
+      companyLogo: getCompanyLogo(companyName),
       logoColor: pickLogoColor(companyName),
       logoText: companyName.charAt(0).toUpperCase(),
       location,

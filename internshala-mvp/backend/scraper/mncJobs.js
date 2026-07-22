@@ -189,7 +189,7 @@ function mapAdzunaJob(job) {
   return {
     title: job.title,
     company: companyName,
-    companyLogo: '',
+    companyLogo: `https://logo.clearbit.com/${companyName.toLowerCase().replace(/\s+/g, '')}.com`,
     logoColor: pickLogoColor(companyName),
     logoText: companyName.charAt(0).toUpperCase(),
     location,

@@ -93,8 +93,8 @@ router.post('/register', async (req, res) => {
     );
     const user = userResult.rows[0];
 
-    await pool.query(
-      `INSERT INTO profiles (user_id, full_name, experience, employment_type) VALUES ($1, $2, $3, $4)`,
+    const profileResult = await pool.query(
+      `INSERT INTO profiles (user_id, full_name, experience, employment_type) VALUES ($1, $2, $3, $4) RETURNING *`,
       [user.id, cleanName, 'Fresher', 'Full-time']
     );
 
@@ -105,12 +105,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
-      profile: {
-        fullName: cleanName,
-        skills: [],
-        experience: 'Fresher',
-        employmentType: 'Full-time',
-      },
+      profile: mapProfile(profileResult.rows[0]),
     });
   } catch (err) {
     console.error('[Auth] Register error:', err.message);
@@ -155,8 +150,6 @@ router.post('/login', async (req, res) => {
     const token = signToken(user.id, user.email);
     setCookie(res, token);
 
-    sendWelcomeEmail({ email: user.email, name: user.name });
-
     res.json({
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
       profile: mapProfile(profile),
@@ -199,12 +192,14 @@ router.post('/google', async (req, res) => {
     );
 
     let user;
+    let isNewUser = false;
     if (existing.rows.length > 0) {
       user = existing.rows[0];
       if (!user.google_id) {
         await pool.query('UPDATE users SET google_id = $1 WHERE id = $2', [googleId, user.id]);
       }
     } else {
+      isNewUser = true;
       const result = await pool.query(
         `INSERT INTO users (email, name, google_id) VALUES ($1, $2, $3) RETURNING id, email, name, role`,
         [email, name, googleId]
@@ -220,7 +215,9 @@ router.post('/google', async (req, res) => {
     const profileResult = await pool.query('SELECT * FROM profiles WHERE user_id = $1', [user.id]);
     const profile = profileResult.rows[0] || {};
 
-    sendWelcomeEmail({ email: user.email, name: user.name });
+    if (isNewUser) {
+      sendWelcomeEmail({ email: user.email, name: user.name });
+    }
 
     const token = signToken(user.id, user.email);
     setCookie(res, token);
@@ -477,6 +474,18 @@ function mapProfile(row) {
     preferredLocation: row.preferred_location || '',
     employmentType: row.employment_type || 'Full-time',
     resumeInfo: row.resume_info || null,
+    contactNumber: row.contact_number || '',
+    currentCity: row.current_city || '',
+    gender: row.gender || '',
+    languages: row.languages || [],
+    currentStatus: row.current_status || '',
+    course: row.course || '',
+    stream: row.stream || '',
+    startYear: row.start_year || '',
+    endYear: row.end_year || '',
+    interests: row.interests || [],
+    lookingFor: row.looking_for || [],
+    workModes: row.work_modes || [],
   };
 }
 

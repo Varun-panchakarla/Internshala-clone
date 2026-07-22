@@ -43,4 +43,17 @@ router.put('/', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/resume/templates
+router.get('/templates', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM resume_templates WHERE is_enabled = true ORDER BY created_at ASC'
+    );
+    res.json({ templates: result.rows });
+  } catch (err) {
+    console.error('[Resume Templates] Get error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch resume templates.' });
+  }
+});
+
 module.exports = router;

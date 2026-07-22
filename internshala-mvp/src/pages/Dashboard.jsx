@@ -6,6 +6,7 @@ import { useResume } from '../context/ResumeContext';
 import { FiBriefcase, FiBookmark, FiCheckCircle, FiFileText, FiAward, FiArrowRight, FiUserCheck, FiAlertTriangle, FiUpload } from 'react-icons/fi';
 import Button from '../components/common/Button';
 import ProgressBar from '../components/common/ProgressBar';
+import CompanyLogo from '../components/common/CompanyLogo';
 
 const Dashboard = () => {
   const { currentUser, profileCompletion } = useAuth();
@@ -205,9 +206,7 @@ const Dashboard = () => {
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl shrink-0 ${job.logoColor} text-white flex items-center justify-center font-extrabold text-lg`}>
-                        {job.logoText}
-                      </div>
+                      <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company} color={job.logoColor} size="sm" />
                       <div>
                         <h4 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">{job.title}</h4>
                         <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold">{job.company} • {job.location}</p>
@@ -269,9 +268,7 @@ const Dashboard = () => {
               <div className="flex flex-col gap-3.5">
                 {/* Logo & Employment Type Badge */}
                 <div className="flex items-center justify-between gap-3">
-                  <div className={`w-10 h-10 rounded-xl shrink-0 ${job.logoColor} text-white flex items-center justify-center font-extrabold text-lg`}>
-                    {job.logoText}
-                  </div>
+                  <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company} color={job.logoColor} size="sm" />
                   <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded text-[10px] font-bold shrink-0">
                     {job.employmentType}
                   </span>

@@ -81,12 +81,42 @@ async function initDb() {
     'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS resume_info JSONB',
     'ALTER TABLE profiles ADD CONSTRAINT IF NOT EXISTS fk_profiles_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE',
     'ALTER TABLE profiles ADD CONSTRAINT IF NOT EXISTS uq_profiles_user UNIQUE (user_id)',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS contact_number VARCHAR(20)',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS current_city VARCHAR(255)',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS gender VARCHAR(50)',
+    "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS languages TEXT[] DEFAULT '{}'",
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS current_status VARCHAR(100)',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS course VARCHAR(255)',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stream VARCHAR(255)',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS start_year VARCHAR(10)',
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS end_year VARCHAR(10)',
+    "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS interests TEXT[] DEFAULT '{}'",
+    "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS looking_for TEXT[] DEFAULT '{}'",
+    "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS work_modes TEXT[] DEFAULT '{}'",
     "ALTER TABLE applied_jobs ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Pending'",
+    `CREATE TABLE IF NOT EXISTS email_log (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      email VARCHAR(255) NOT NULL,
+      email_type VARCHAR(50) NOT NULL,
+      sent_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE(user_id, email_type, DATE(sent_at))
+    )`,
   ];
   for (const sql of migrations) {
     try { await pool.query(sql); } catch { /* column may already exist */ }
   }
   try { await seedJobs(); } catch (err) { console.error('[DB] Seed error:', err.message); }
+  // Reset sequences to match current max IDs (fixes gaps after DELETE)
+  try {
+    const seqReset = [
+      "SELECT setval('users_id_seq', COALESCE((SELECT MAX(id) FROM users), 0) + 1, false)",
+      "SELECT setval('profiles_id_seq', COALESCE((SELECT MAX(id) FROM profiles), 0) + 1, false)",
+    ];
+    for (const sql of seqReset) {
+      await pool.query(sql);
+    }
+  } catch { /* sequences may not exist */ }
 }
 
 // Check if jobs table is empty -> trigger scrape

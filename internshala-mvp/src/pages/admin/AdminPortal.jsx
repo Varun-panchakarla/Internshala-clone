@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../components/common/Toast';
 import axios from 'axios';
+import CompanyLogo from '../../components/common/CompanyLogo';
 
 axios.defaults.withCredentials = true;
 import {
@@ -11,7 +12,7 @@ import {
   FiBell, FiSettings, FiLogOut, FiPlus, FiTrash2, FiEdit, FiSearch,
   FiSliders, FiCheck, FiX, FiCheckCircle, FiInfo, FiChevronRight,
   FiChevronLeft, FiExternalLink, FiUpload, FiMenu, FiCpu, FiGrid, FiUser, FiMapPin, FiClock,
-  FiSun, FiMoon, FiLock, FiHelpCircle, FiChevronDown
+  FiSun, FiMoon, FiLock, FiHelpCircle, FiChevronDown, FiLayout
 } from 'react-icons/fi';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Logo from '../../components/common/Logo';
@@ -123,6 +124,35 @@ const AdminPortal = () => {
   });
 
   const [confirmModal, setConfirmModal] = useState({ open: false, type: '', id: null, message: '' });
+
+  // Resume Templates states
+  const [adminTemplates, setAdminTemplates] = useState([]);
+  const [adminTemplatesLoading, setAdminTemplatesLoading] = useState(false);
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  const [templateForm, setTemplateForm] = useState({
+    id: '',
+    name: '',
+    description: '',
+    category: 'Classic',
+    isAts: true,
+    isPopular: false,
+    isTrending: false,
+    isBestAts: false,
+    tags: '',
+    accent: '#1e293b',
+    preview: {
+      headerBg: '#ffffff',
+      headerColor: '#0d0d0d',
+      accentBar: '#0d0d0d',
+      bodyFont: '"Arial", sans-serif',
+      sectionColor: '#0d0d0d',
+      chipBg: '#f4f4f4',
+      chipBd: '#c8c8c8',
+    },
+    thumbnail: '',
+    isEnabled: true
+  });
 
 
   // Admin Profile Dropdown state & outside click handler
@@ -270,6 +300,7 @@ const AdminPortal = () => {
   };
 
   // Delete Report
+  // Delete Report
   const handleReportDelete = async (id) => {
     if (!window.confirm('Are you sure you want to permanently delete this report? This action cannot be undone.')) {
       return;
@@ -281,6 +312,81 @@ const AdminPortal = () => {
       await fetchReports();
     } catch (err) {
       addToast('Failed to delete report.', 'error');
+    }
+  };
+
+  // Resume Templates CRUD
+  const fetchAdminTemplates = async () => {
+    setAdminTemplatesLoading(true);
+    try {
+      const res = await axios.get('/api/admin/templates');
+      setAdminTemplates(res.data.templates || []);
+    } catch (err) {
+      addToast('Failed to fetch templates.', 'error');
+    } finally {
+      setAdminTemplatesLoading(false);
+    }
+  };
+
+  const handleTemplateSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const formattedTags = typeof templateForm.tags === 'string'
+        ? templateForm.tags.split(',').map(t => t.trim()).filter(Boolean)
+        : templateForm.tags;
+      
+      const payload = {
+        ...templateForm,
+        tags: formattedTags
+      };
+
+      if (editingTemplate) {
+        await axios.put(`/api/admin/templates/${editingTemplate.id}`, payload);
+        addToast('Template updated successfully!', 'success');
+      } else {
+        await axios.post('/api/admin/templates', payload);
+        addToast('Template created successfully!', 'success');
+      }
+      setTemplateModalOpen(false);
+      await fetchAdminTemplates();
+    } catch (err) {
+      addToast(err.response?.data?.error || 'Failed to save template.', 'error');
+    }
+  };
+
+  const handleTemplateDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to permanently delete this template? This will delete it for all users.')) {
+      return;
+    }
+    try {
+      await axios.delete(`/api/admin/templates/${id}`);
+      addToast('Template deleted successfully.', 'success');
+      await fetchAdminTemplates();
+    } catch (err) {
+      addToast('Failed to delete template.', 'error');
+    }
+  };
+
+  const handleToggleTemplateEnabled = async (template) => {
+    try {
+      // API expects camelCase parameters
+      await axios.put(`/api/admin/templates/${template.id}`, {
+        name: template.name,
+        description: template.description,
+        category: template.category,
+        isAts: template.is_ats,
+        isPopular: template.is_popular,
+        isTrending: template.is_trending,
+        isBestAts: template.is_best_ats,
+        tags: template.tags,
+        accent: template.accent,
+        preview: template.preview,
+        isEnabled: !template.is_enabled
+      });
+      addToast(`Template ${!template.is_enabled ? 'enabled' : 'disabled'} successfully.`, 'success');
+      await fetchAdminTemplates();
+    } catch (err) {
+      addToast('Failed to toggle template status.', 'error');
     }
   };
 
@@ -307,6 +413,8 @@ const AdminPortal = () => {
       } else if (currentView === 'reports') {
         setReportsPage(1);
         await fetchReports();
+      } else if (currentView === 'templates') {
+        await fetchAdminTemplates();
       }
       setLoading(false);
     };
@@ -1032,9 +1140,7 @@ const AdminPortal = () => {
                         {recentJobs.map((job) => (
                           <div key={job.id} className="py-3 flex items-center justify-between gap-4 hover:bg-slate-50/60 dark:hover:bg-slate-800/20 px-2 rounded-xl transition-colors">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-300">
-                                {job.company.charAt(0).toUpperCase()}
-                              </div>
+                              <CompanyLogo logo={job.companyLogo} name={job.company} color="bg-slate-100" size="xs" />
                               <div>
                                 <p className="text-xs font-bold text-slate-900 dark:text-white leading-none">{job.title}</p>
                                 <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{job.company} • {job.location}</p>
@@ -1218,18 +1324,10 @@ const AdminPortal = () => {
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {companies.map((comp, i) => (
-                      <div key={i} className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col items-center text-center hover:border-slate-350 dark:hover:border-slate-700 hover:shadow-md transition-all shadow-xs">
-                        <div
-                          className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg mb-3 shadow-inner border border-slate-200 dark:border-slate-800"
-                          style={{
-                            backgroundColor: isDark ? `${comp.logo_color || '#1e293b'}ff` : `${comp.logo_color || '#1e293b'}15`,
-                            color: isDark ? '#ffffff' : (comp.logo_color || '#1e293b')
-                          }}
-                        >
-                          {comp.company.charAt(0).toUpperCase()}
-                        </div>
-                        <h4 className="text-sm font-semibold text-slate-900 dark:text-white leading-tight mb-1">{comp.company}</h4>
-                        <span className="text-[9px] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider">Active Recruiter Profile</span>
+                      <div key={i} className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800 rounded-2xl p-5 flex flex-col items-center text-center hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-xs">
+                        <CompanyLogo logo={comp.companyLogo} name={comp.company} color={comp.logo_color || '#1e293b'} size="md" className="mb-3" />
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight mb-1">{comp.company}</h4>
+                        <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Active Recruiter Profile</span>
                       </div>
                     ))}
                   </div>
@@ -1277,12 +1375,7 @@ const AdminPortal = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {jobs.map((job) => (
                       <div key={job.id} className="bg-slate-900/40 border border-slate-800/90 rounded-2xl p-5 flex items-start gap-4 hover:border-slate-700 transition-all relative group shadow-lg">
-                        <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-base text-white shadow-inner border border-slate-800"
-                          style={{ backgroundColor: job.logo_color || '#1e293b' }}
-                        >
-                          {job.company.charAt(0).toUpperCase()}
-                        </div>
+                      <CompanyLogo logo={job.companyLogo} name={job.company} color={job.logo_color || '#1e293b'} size="sm" />
                         <div className="flex-1 min-w-0">
                           <h4 className="text-xs font-extrabold text-white leading-tight mb-1 truncate">{job.title}</h4>
                           <p className="text-[10px] text-brand-400 font-bold mb-3">{job.company}</p>
@@ -1515,30 +1608,167 @@ const AdminPortal = () => {
               {currentView === 'templates' && (
                 <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
                   <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3 flex items-center justify-between">
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">System Resume Templates</h3>
-                    <span className="text-[10px] font-black text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 px-2.5 py-1 rounded-full uppercase">8 Templates</span>
+                    <div>
+                      <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">System Resume Templates</h3>
+                      <p className="text-xs text-slate-450 mt-1">Configure layout, presets, category and access controls for resume designs.</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-black text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 px-2.5 py-1 rounded-full uppercase">
+                        {adminTemplates.length} Templates
+                      </span>
+                      <button
+                        onClick={() => {
+                          setEditingTemplate(null);
+                          setTemplateForm({
+                            id: '',
+                            name: '',
+                            description: '',
+                            category: 'Classic',
+                            isAts: true,
+                            isPopular: false,
+                            isTrending: false,
+                            isBestAts: false,
+                            tags: '',
+                            accent: '#1e293b',
+                            preview: {
+                              headerBg: '#ffffff',
+                              headerColor: '#0d0d0d',
+                              accentBar: '#0d0d0d',
+                              bodyFont: '"Arial", sans-serif',
+                              sectionColor: '#0d0d0d',
+                              chipBg: '#f4f4f4',
+                              chipBd: '#c8c8c8',
+                            },
+                            thumbnail: '',
+                            isEnabled: true
+                          });
+                          setTemplateModalOpen(true);
+                        }}
+                        className="bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                      >
+                        <FiPlus className="w-3.5 h-3.5" /> Add Template
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {[
-                      { id: 'simple-ats', name: 'ATS Minimalist', category: 'Classic', description: 'Plain layout optimized for high parsing rate on greenhouse/workday.' },
-                      { id: 'modern', name: 'Modern Line', category: 'Modern', description: 'Clean top line accent bar with two-column profile summary structure.' },
-                      { id: 'creative', name: 'Creative Designer', category: 'Creative', description: 'Split background grid sidebar layout suitable for portfolio designs.' },
-                      { id: 'executive', name: 'Executive Corporate', category: 'Executive', description: 'Double border structured template suited for management roles.' }
-                    ].map((temp, i) => (
-                      <div key={i} className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/90 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-xs">
-                        <div>
-                          <span className="text-[9px] font-black text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/15 border border-brand-200 dark:border-brand-500/25 px-2 py-0.5 rounded uppercase tracking-wider">{temp.category}</span>
-                          <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight mt-2.5 mb-1.5">{temp.name}</h4>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal">{temp.description}</p>
+                  {adminTemplatesLoading ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <div className="w-8 h-8 border-3 border-brand-200 border-t-brand-650 rounded-full animate-spin mb-3" />
+                      <p className="text-xs text-slate-500">Loading templates...</p>
+                    </div>
+                  ) : adminTemplates.length === 0 ? (
+                    <div className="text-center py-12 text-slate-400 text-xs">
+                      No templates found. Click "Add Template" to register one.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {adminTemplates.map((temp) => (
+                        <div key={temp.id} className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/90 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-xs relative">
+                          
+                          {/* Thumbnail / Dynamic Mini Preview */}
+                          <div className="w-full h-28 bg-white border border-slate-200/50 dark:border-slate-800 rounded-lg mb-4 overflow-hidden relative group">
+                            {temp.thumbnail ? (
+                              <img src={temp.thumbnail} alt={temp.name} className="w-full h-full object-cover" />
+                            ) : (
+                              // Renders a miniature dynamic representation based on database properties
+                              <div style={{ fontFamily: temp.preview?.bodyFont || '"Arial", sans-serif', height: '100%', padding: '6px', fontSize: '5px' }} className="flex flex-col justify-between select-none">
+                                <div style={{ backgroundColor: temp.preview?.headerBg || '#ffffff', color: temp.preview?.headerColor || '#0d0d0d', padding: '4px' }} className="rounded">
+                                  <div className="font-bold uppercase tracking-wider">{temp.name}</div>
+                                  <div className="opacity-70 mt-0.5">Resume Template Preview</div>
+                                </div>
+                                <div className="flex-1 flex gap-2 mt-2">
+                                  <div className="w-1/3 flex flex-col gap-1.5">
+                                    <div style={{ height: '3px', backgroundColor: temp.preview?.accentBar || '#000000', width: '100%' }} />
+                                    <div style={{ height: '2px', backgroundColor: '#e2e8f0', width: '80%' }} />
+                                    <div style={{ height: '2px', backgroundColor: '#e2e8f0', width: '60%' }} />
+                                  </div>
+                                  <div className="flex-1 flex flex-col gap-1">
+                                    <div style={{ height: '4px', backgroundColor: temp.preview?.sectionColor || '#000000', width: '50%' }} />
+                                    <div style={{ height: '2px', backgroundColor: '#e2e8f0', width: '100%' }} />
+                                    <div style={{ height: '2px', backgroundColor: '#e2e8f0', width: '90%' }} />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div>
+                            <div className="flex justify-between items-start gap-2">
+                              <span className="text-[9px] font-black text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/15 border border-brand-200 dark:border-brand-500/25 px-2 py-0.5 rounded uppercase tracking-wider">
+                                {temp.category}
+                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <span className={`w-2 h-2 rounded-full ${temp.is_enabled ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                                <span className="text-[9px] font-bold text-slate-500 dark:text-slate-450 uppercase">
+                                  {temp.is_enabled ? 'Active' : 'Disabled'}
+                                </span>
+                              </div>
+                            </div>
+                            <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight mt-2.5 mb-1.5">{temp.name}</h4>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal line-clamp-2">{temp.description}</p>
+                          </div>
+
+                          <div className="flex flex-wrap gap-1 mt-3">
+                            {temp.is_ats && <span className="text-[8px] bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-black uppercase">ATS</span>}
+                            {temp.is_popular && <span className="text-[8px] bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded font-black uppercase">Popular</span>}
+                            {temp.is_trending && <span className="text-[8px] bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 px-1.5 py-0.5 rounded font-black uppercase">Trending</span>}
+                            {temp.is_best_ats && <span className="text-[8px] bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 px-1.5 py-0.5 rounded font-black uppercase">Best ATS</span>}
+                          </div>
+
+                          <div className="flex gap-2 border-t border-slate-200/80 dark:border-slate-800/80 pt-3 mt-4 text-[10px] font-bold">
+                            <button
+                              onClick={() => handleToggleTemplateEnabled(temp)}
+                              className={`flex-1 py-1 rounded text-center transition-all cursor-pointer ${
+                                temp.is_enabled
+                                  ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-450 hover:bg-rose-100'
+                                  : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 hover:bg-emerald-100'
+                              }`}
+                            >
+                              {temp.is_enabled ? 'Disable' : 'Enable'}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingTemplate(temp);
+                                setTemplateForm({
+                                  id: temp.id,
+                                  name: temp.name,
+                                  description: temp.description,
+                                  category: temp.category,
+                                  isAts: temp.is_ats,
+                                  isPopular: temp.is_popular,
+                                  isTrending: temp.is_trending,
+                                  isBestAts: temp.is_best_ats,
+                                  tags: Array.isArray(temp.tags) ? temp.tags.join(', ') : temp.tags || '',
+                                  accent: temp.accent,
+                                  preview: temp.preview || {
+                                    headerBg: '#ffffff',
+                                    headerColor: '#0d0d0d',
+                                    accentBar: '#0d0d0d',
+                                    bodyFont: '"Arial", sans-serif',
+                                    sectionColor: '#0d0d0d',
+                                    chipBg: '#f4f4f4',
+                                    chipBd: '#c8c8c8',
+                                  },
+                                  thumbnail: temp.thumbnail || '',
+                                  isEnabled: temp.is_enabled
+                                });
+                                setTemplateModalOpen(true);
+                              }}
+                              className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-355 rounded transition-all cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleTemplateDelete(temp.id)}
+                              className="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-550 rounded transition-all cursor-pointer"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex gap-2 border-t border-slate-200/80 dark:border-slate-800/80 pt-3 mt-4 text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                          <span className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 px-2 py-0.5 rounded">ATS Friendly</span>
-                          <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">Free</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -2393,6 +2623,385 @@ const AdminPortal = () => {
                   </button>
                 </div>
               </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* ───────────────────────────────────────────────────────────────────────
+         MODAL: ADD / EDIT RESUME TEMPLATE
+      ─────────────────────────────────────────────────────────────────────── */}
+      {templateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in" onClick={() => setTemplateModalOpen(false)}>
+          <div className="bg-white dark:bg-[#0a1222] border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl text-slate-900 dark:text-white max-w-4xl w-full overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40">
+              <h2 className="font-extrabold text-sm text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <FiLayout className="text-brand-400" /> {editingTemplate ? `Edit Template: ${editingTemplate.name}` : 'Add New Resume Template'}
+              </h2>
+              <button onClick={() => setTemplateModalOpen(false)} className="text-slate-400 hover:text-white">
+                <FiX className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleTemplateSubmit} className="p-6 flex flex-col md:flex-row gap-6 max-h-[85vh] overflow-y-auto custom-scrollbar">
+              
+              {/* Left Column: Info & Tags */}
+              <div className="flex-1 flex flex-col gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Unique Template ID</label>
+                    <input
+                      type="text"
+                      disabled={!!editingTemplate}
+                      value={templateForm.id}
+                      onChange={(e) => setTemplateForm(prev => ({ ...prev, id: e.target.value }))}
+                      placeholder="e.g. elegant-slate"
+                      className="px-3 py-2 text-xs font-bold bg-slate-900 border border-slate-850 rounded-xl outline-none focus:border-brand-500 text-slate-100 disabled:opacity-50"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Display Name</label>
+                    <input
+                      type="text"
+                      value={templateForm.name}
+                      onChange={(e) => setTemplateForm(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="e.g. Elegant Slate"
+                      className="px-3 py-2 text-xs font-bold bg-slate-900 border border-slate-850 rounded-xl outline-none focus:border-brand-500 text-slate-100"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Category / Theme</label>
+                  <select
+                    value={templateForm.category}
+                    onChange={(e) => setTemplateForm(prev => ({ ...prev, category: e.target.value }))}
+                    className="px-3 py-2 text-xs font-bold bg-slate-900 border border-slate-850 rounded-xl outline-none focus:border-brand-500 text-slate-100 cursor-pointer"
+                  >
+                    <option value="Classic">Classic</option>
+                    <option value="Modern">Modern</option>
+                    <option value="Minimal">Minimal</option>
+                    <option value="Executive">Executive</option>
+                    <option value="Creative">Creative</option>
+                    <option value="Entry Level">Entry Level</option>
+                    <option value="ATS Optimized">ATS Optimized</option>
+                    <option value="Corporate">Corporate</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Description</label>
+                  <textarea
+                    rows={2}
+                    value={templateForm.description}
+                    onChange={(e) => setTemplateForm(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Provide a detailed description of layout, target audience, etc."
+                    className="px-3 py-2 text-xs font-semibold bg-slate-900 border border-slate-850 rounded-xl outline-none focus:border-brand-500 text-slate-100 resize-none"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Tags (comma-separated)</label>
+                  <input
+                    type="text"
+                    value={templateForm.tags}
+                    onChange={(e) => setTemplateForm(prev => ({ ...prev, tags: e.target.value }))}
+                    placeholder="ATS Friendly, Recommended, Simple"
+                    className="px-3 py-2 text-xs font-semibold bg-slate-900 border border-slate-850 rounded-xl outline-none focus:border-brand-500 text-slate-100"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Accent Highlight Hex Color</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={templateForm.accent.startsWith('#') && templateForm.accent.length === 7 ? templateForm.accent : '#1e293b'}
+                      onChange={(e) => setTemplateForm(prev => ({ ...prev, accent: e.target.value }))}
+                      className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer shrink-0"
+                    />
+                    <input
+                      type="text"
+                      value={templateForm.accent}
+                      onChange={(e) => setTemplateForm(prev => ({ ...prev, accent: e.target.value }))}
+                      placeholder="#1e293b"
+                      maxLength={7}
+                      className="flex-1 px-3 py-1.5 text-xs font-bold bg-slate-900 border border-slate-850 rounded-xl outline-none focus:border-brand-500 text-slate-100"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 bg-slate-900/40 p-4 border border-slate-850 rounded-2xl mt-1 text-slate-250">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-extrabold uppercase text-slate-400">Enabled</span>
+                    <input
+                      type="checkbox"
+                      checked={templateForm.isEnabled}
+                      onChange={(e) => setTemplateForm(prev => ({ ...prev, isEnabled: e.target.checked }))}
+                      className="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-800 bg-slate-950 rounded cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-extrabold uppercase text-slate-400">ATS Friendly</span>
+                    <input
+                      type="checkbox"
+                      checked={templateForm.isAts}
+                      onChange={(e) => setTemplateForm(prev => ({ ...prev, isAts: e.target.checked }))}
+                      className="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-800 bg-slate-950 rounded cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-extrabold uppercase text-slate-400">Popular</span>
+                    <input
+                      type="checkbox"
+                      checked={templateForm.isPopular}
+                      onChange={(e) => setTemplateForm(prev => ({ ...prev, isPopular: e.target.checked }))}
+                      className="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-800 bg-slate-950 rounded cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-extrabold uppercase text-slate-400">Trending</span>
+                    <input
+                      type="checkbox"
+                      checked={templateForm.isTrending}
+                      onChange={(e) => setTemplateForm(prev => ({ ...prev, isTrending: e.target.checked }))}
+                      className="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-800 bg-slate-950 rounded cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between col-span-2 border-t border-slate-850 pt-2 mt-1">
+                    <span className="text-[10px] font-extrabold uppercase text-slate-400">Best ATS Score</span>
+                    <input
+                      type="checkbox"
+                      checked={templateForm.isBestAts}
+                      onChange={(e) => setTemplateForm(prev => ({ ...prev, isBestAts: e.target.checked }))}
+                      className="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-800 bg-slate-950 rounded cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Visual Preview Layout & Thumbnail */}
+              <div className="w-full md:w-80 flex flex-col gap-4 border-t md:border-t-0 md:border-l border-slate-800/60 pt-4 md:pt-0 md:pl-6 shrink-0">
+                <div className="border-b border-slate-800 pb-1 mb-1">
+                  <h4 className="text-[10px] font-black uppercase tracking-wider text-brand-400">Design Layout Tokens</h4>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Body Font Family</label>
+                  <select
+                    value={templateForm.preview.bodyFont}
+                    onChange={(e) => setTemplateForm(prev => ({
+                      ...prev,
+                      preview: { ...prev.preview, bodyFont: e.target.value }
+                    }))}
+                    className="px-3 py-2 text-xs font-bold bg-slate-900 border border-slate-850 rounded-xl outline-none focus:border-brand-500 text-slate-100 cursor-pointer"
+                  >
+                    <option value='"Arial", sans-serif'>Arial (Sans-Serif)</option>
+                    <option value='"Times New Roman", Times, serif'>Times New Roman (Serif)</option>
+                    <option value='"Inter", Arial, sans-serif'>Inter (Clean Modern)</option>
+                    <option value='"Georgia", serif'>Georgia (Elegant Serif)</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[10px] font-bold text-slate-400">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Header Bg</label>
+                    <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-850 rounded-xl px-2 py-1">
+                      <input
+                        type="color"
+                        value={templateForm.preview.headerBg.startsWith('#') && templateForm.preview.headerBg.length === 7 ? templateForm.preview.headerBg : '#ffffff'}
+                        onChange={(e) => setTemplateForm(prev => ({
+                          ...prev,
+                          preview: { ...prev.preview, headerBg: e.target.value }
+                        }))}
+                        className="w-6 h-6 rounded bg-transparent cursor-pointer shrink-0"
+                      />
+                      <input
+                        type="text"
+                        value={templateForm.preview.headerBg}
+                        onChange={(e) => setTemplateForm(prev => ({
+                          ...prev,
+                          preview: { ...prev.preview, headerBg: e.target.value }
+                        }))}
+                        className="w-full bg-transparent text-[10px] outline-none font-bold uppercase"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Header Text</label>
+                    <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-850 rounded-xl px-2 py-1">
+                      <input
+                        type="color"
+                        value={templateForm.preview.headerColor.startsWith('#') && templateForm.preview.headerColor.length === 7 ? templateForm.preview.headerColor : '#0d0d0d'}
+                        onChange={(e) => setTemplateForm(prev => ({
+                          ...prev,
+                          preview: { ...prev.preview, headerColor: e.target.value }
+                        }))}
+                        className="w-6 h-6 rounded bg-transparent cursor-pointer shrink-0"
+                      />
+                      <input
+                        type="text"
+                        value={templateForm.preview.headerColor}
+                        onChange={(e) => setTemplateForm(prev => ({
+                          ...prev,
+                          preview: { ...prev.preview, headerColor: e.target.value }
+                        }))}
+                        className="w-full bg-transparent text-[10px] outline-none font-bold uppercase"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Accent Line</label>
+                    <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-850 rounded-xl px-2 py-1">
+                      <input
+                        type="color"
+                        value={templateForm.preview.accentBar.startsWith('#') && templateForm.preview.accentBar.length === 7 ? templateForm.preview.accentBar : '#0d0d0d'}
+                        onChange={(e) => setTemplateForm(prev => ({
+                          ...prev,
+                          preview: { ...prev.preview, accentBar: e.target.value }
+                        }))}
+                        className="w-6 h-6 rounded bg-transparent cursor-pointer shrink-0"
+                      />
+                      <input
+                        type="text"
+                        value={templateForm.preview.accentBar}
+                        onChange={(e) => setTemplateForm(prev => ({
+                          ...prev,
+                          preview: { ...prev.preview, accentBar: e.target.value }
+                        }))}
+                        className="w-full bg-transparent text-[10px] outline-none font-bold uppercase"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Section Title</label>
+                    <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-850 rounded-xl px-2 py-1">
+                      <input
+                        type="color"
+                        value={templateForm.preview.sectionColor.startsWith('#') && templateForm.preview.sectionColor.length === 7 ? templateForm.preview.sectionColor : '#0d0d0d'}
+                        onChange={(e) => setTemplateForm(prev => ({
+                          ...prev,
+                          preview: { ...prev.preview, sectionColor: e.target.value }
+                        }))}
+                        className="w-6 h-6 rounded bg-transparent cursor-pointer shrink-0"
+                      />
+                      <input
+                        type="text"
+                        value={templateForm.preview.sectionColor}
+                        onChange={(e) => setTemplateForm(prev => ({
+                          ...prev,
+                          preview: { ...prev.preview, sectionColor: e.target.value }
+                        }))}
+                        className="w-full bg-transparent text-[10px] outline-none font-bold uppercase"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Tag Card Bg</label>
+                    <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-850 rounded-xl px-2 py-1">
+                      <input
+                        type="color"
+                        value={templateForm.preview.chipBg.startsWith('#') && templateForm.preview.chipBg.length === 7 ? templateForm.preview.chipBg : '#f4f4f4'}
+                        onChange={(e) => setTemplateForm(prev => ({
+                          ...prev,
+                          preview: { ...prev.preview, chipBg: e.target.value }
+                        }))}
+                        className="w-6 h-6 rounded bg-transparent cursor-pointer shrink-0"
+                      />
+                      <input
+                        type="text"
+                        value={templateForm.preview.chipBg}
+                        onChange={(e) => setTemplateForm(prev => ({
+                          ...prev,
+                          preview: { ...prev.preview, chipBg: e.target.value }
+                        }))}
+                        className="w-full bg-transparent text-[10px] outline-none font-bold uppercase"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Tag Border</label>
+                    <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-850 rounded-xl px-2 py-1">
+                      <input
+                        type="color"
+                        value={templateForm.preview.chipBd.startsWith('#') && templateForm.preview.chipBd.length === 7 ? templateForm.preview.chipBd : '#c8c8c8'}
+                        onChange={(e) => setTemplateForm(prev => ({
+                          ...prev,
+                          preview: { ...prev.preview, chipBd: e.target.value }
+                        }))}
+                        className="w-6 h-6 rounded bg-transparent cursor-pointer shrink-0"
+                      />
+                      <input
+                        type="text"
+                        value={templateForm.preview.chipBd}
+                        onChange={(e) => setTemplateForm(prev => ({
+                          ...prev,
+                          preview: { ...prev.preview, chipBd: e.target.value }
+                        }))}
+                        className="w-full bg-transparent text-[10px] outline-none font-bold uppercase"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-800/80 pt-3 mt-1 flex flex-col gap-2">
+                  <label className="text-[9px] font-black uppercase tracking-wider text-slate-500">Upload Thumbnail (Max 150KB)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        if (file.size > 150 * 1024) {
+                          alert('File size must be under 150KB.');
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setTemplateForm(prev => ({ ...prev, thumbnail: reader.result }));
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-900 file:text-slate-350 hover:file:bg-slate-800 cursor-pointer"
+                  />
+                  {templateForm.thumbnail && (
+                    <div className="relative w-full h-20 bg-slate-900 border border-slate-850 rounded-xl overflow-hidden mt-1 group">
+                      <img src={templateForm.thumbnail} alt="Thumbnail preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setTemplateForm(prev => ({ ...prev, thumbnail: '' }))}
+                        className="absolute top-1.5 right-1.5 bg-rose-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-rose-700 cursor-pointer"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2 border-t border-slate-800/80 pt-4 mt-2">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-xs font-extrabold text-white rounded-xl shadow-md cursor-pointer transition-all"
+                  >
+                    Save Template
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTemplateModalOpen(false)}
+                    className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold rounded-xl cursor-pointer transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+
             </form>
           </div>
         </div>
