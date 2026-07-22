@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useResume } from '../context/ResumeContext';
-import { TEMPLATES } from '../data/resumeTemplates';
+
 import {
   FiCheckCircle, FiEye, FiArrowRight, FiStar,
   FiTrendingUp, FiShield, FiZap, FiAward, FiFileText, FiMenu, FiGrid, FiLayout, FiArrowLeft,
@@ -177,27 +177,27 @@ const TemplateCard = ({ template, isSelected, onSelect, onPreview }) => {
 
         {/* Badges */}
         <div className="flex flex-wrap gap-1.5 mt-1">
-          {template.isATS && (
+          {(template.is_ats ?? template.isATS) && (
             <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
               <FiShield className="w-2.5 h-2.5" /> ATS Friendly
             </span>
           )}
-          {!template.isATS && (
+          {!(template.is_ats ?? template.isATS) && (
             <span className="flex items-center gap-1 text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full">
               <FiZap className="w-2.5 h-2.5" /> Visual
             </span>
           )}
-          {template.isPopular && (
+          {(template.is_popular ?? template.isPopular) && (
             <span className="flex items-center gap-1 text-[9px] font-bold text-brand-700 bg-brand-50 border border-brand-100 px-2 py-0.5 rounded-full">
               <FiStar className="w-2.5 h-2.5" /> Popular
             </span>
           )}
-          {template.isTrending && (
+          {(template.is_trending ?? template.isTrending) && (
             <span className="flex items-center gap-1 text-[9px] font-bold text-violet-700 bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-full">
               <FiTrendingUp className="w-2.5 h-2.5" /> Trending
             </span>
           )}
-          {template.isBestATS && (
+          {(template.is_best_ats ?? template.isBestATS) && (
             <span className="flex items-center gap-1 text-[9px] font-bold text-sky-700 bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-full">
               <FiAward className="w-2.5 h-2.5" /> Best ATS Score
             </span>
@@ -255,7 +255,7 @@ const PreviewModal = ({ template, onClose, onSelect }) => {
         <div className="px-6 py-4 flex flex-col gap-3">
           <p className="text-sm text-slate-600">{template.description}</p>
           <div className="flex flex-wrap gap-2">
-            {template.isATS && (
+            {(template.is_ats ?? template.isATS) && (
               <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
                 <FiShield className="w-3 h-3" /> ATS Friendly
               </span>
@@ -290,15 +290,15 @@ const CATEGORIES = ['All', 'Classic', 'Modern', 'Minimal', 'Executive', 'Creativ
 import MainLayout from '../layouts/MainLayout';
 
 const ResumeTemplates = () => {
-  const { selectedTemplate, setSelectedTemplate } = useResume();
+  const { selectedTemplate, setSelectedTemplate, templates = [], loading } = useResume();
   const navigate = useNavigate();
   const [filter, setFilter]         = useState('All');
   const [previewTemplate, setPreviewTemplate] = useState(null);
   const [justSelected, setJustSelected]       = useState(null);
 
   const filtered = filter === 'All'
-    ? TEMPLATES
-    : TEMPLATES.filter(t => t.category === filter);
+    ? templates
+    : templates.filter(t => t.category === filter);
 
   const handleSelect = (templateId) => {
     setSelectedTemplate(templateId);
@@ -307,6 +307,15 @@ const ResumeTemplates = () => {
       navigate('/resume');
     }, 600);
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-650 rounded-full animate-spin mb-4" />
+        <p className="text-slate-500 font-medium">Loading templates...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -328,12 +337,12 @@ const ResumeTemplates = () => {
           </p>
           <div className="flex items-center justify-center gap-6 mt-6">
             <div className="text-center">
-              <div className="text-2xl font-black text-white">{TEMPLATES.length}</div>
+              <div className="text-2xl font-black text-white">{templates.length}</div>
               <div className="text-[10px] text-slate-400 uppercase tracking-wider">Templates</div>
             </div>
             <div className="w-px h-8 bg-white/20" />
             <div className="text-center">
-              <div className="text-2xl font-black text-white">{TEMPLATES.filter(t => t.isATS).length}</div>
+              <div className="text-2xl font-black text-white">{templates.filter(t => t.is_ats ?? t.isATS).length}</div>
               <div className="text-[10px] text-slate-400 uppercase tracking-wider">ATS Friendly</div>
             </div>
             <div className="w-px h-8 bg-white/20" />
@@ -351,7 +360,7 @@ const ResumeTemplates = () => {
           <FiCheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
           <div className="flex-1">
             <span className="text-sm font-bold text-emerald-800">
-              Active Template: {TEMPLATES.find(t => t.id === selectedTemplate)?.name}
+              Active Template: {templates.find(t => t.id === selectedTemplate)?.name}
             </span>
             <span className="text-xs text-emerald-600 ml-2">— Your resume data is safe when you switch.</span>
           </div>
