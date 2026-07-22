@@ -11,7 +11,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useResume } from '../context/ResumeContext';
 import { useToast } from '../components/common/Toast';
-import { TEMPLATES, getTemplateById } from '../data/resumeTemplates';
+
 import {
   FiSave, FiDownload, FiPlus, FiTrash, FiAward,
   FiAlertCircle, FiChevronRight, FiBriefcase, FiBookOpen,
@@ -567,7 +567,20 @@ const RENDERERS = {
 
 const ResumePreview = React.forwardRef(({ resume, templateId }, ref) => {
   if (!resume) return null;
-  const tpl        = getTemplateById(templateId);
+  const { templates = [] } = useResume();
+  const tpl = templates.find(t => t.id === templateId) || {
+    id: 'professional',
+    name: 'Professional',
+    preview: {
+      headerBg: '#ffffff',
+      headerColor: '#0d0d0d',
+      accentBar: '#0d0d0d',
+      bodyFont: '"Times New Roman", Times, serif',
+      sectionColor: '#0d0d0d',
+      chipBg: '#f4f4f4',
+      chipBd: '#c8c8c8',
+    }
+  };
   const TemplateEl = RENDERERS[templateId] || ProfessionalTemplate;
   const isCreative = templateId === 'creative';
 
@@ -589,12 +602,12 @@ const ResumePreview = React.forwardRef(({ resume, templateId }, ref) => {
   );
 });
 
-const TemplateSwitcher = ({ selectedTemplate, onSwitch }) => (
+const TemplateSwitcher = ({ templates = [], selectedTemplate, onSwitch }) => (
   <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5">
-    {TEMPLATES.map(tpl => {
+    {templates.map(tpl => {
       const isActive = selectedTemplate === tpl.id;
-      const dotColor = ['#ffffff','#e2e8f0','#9ca3af'].includes(tpl.preview.accentBar)
-        ? '#334155' : tpl.preview.accentBar;
+      const dotColor = ['#ffffff','#e2e8f0','#9ca3af'].includes(tpl.preview?.accentBar)
+        ? '#334155' : (tpl.preview?.accentBar || '#334155');
       return (
         <button
           key={tpl.id}
@@ -677,7 +690,7 @@ const ResumeBuilder = () => {
   const {
     resume, loading, saving, error,
     resumeCompletion, atsScore, atsSuggestions, atsBreakdown,
-    selectedTemplate, setSelectedTemplate,
+    selectedTemplate, setSelectedTemplate, templates = [],
     updatePersonalInfo, updateEducation, updateExperience,
     updateInternship, updateProjects, updateCertifications,
     updateSkills, updateAchievements, updateLanguages, updateInterests, saveResume,
@@ -755,7 +768,19 @@ const ResumeBuilder = () => {
     }
   };
 
-  const currentTpl = getTemplateById(selectedTemplate);
+  const currentTpl = templates.find(t => t.id === selectedTemplate) || {
+    id: 'professional',
+    name: 'Professional',
+    preview: {
+      headerBg: '#ffffff',
+      headerColor: '#0d0d0d',
+      accentBar: '#0d0d0d',
+      bodyFont: '"Times New Roman", Times, serif',
+      sectionColor: '#0d0d0d',
+      chipBg: '#f4f4f4',
+      chipBd: '#c8c8c8',
+    }
+  };
   const pi = resume?.personalInfo || {};
 
   /* Helpers for Arrays */
@@ -925,7 +950,7 @@ const ResumeBuilder = () => {
             {/* Template Switcher */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shrink-0">
               <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Select Template</p>
-              <TemplateSwitcher selectedTemplate={selectedTemplate} onSwitch={setSelectedTemplate} />
+              <TemplateSwitcher templates={templates} selectedTemplate={selectedTemplate} onSwitch={setSelectedTemplate} />
             </div>
 
             {/* ATS Suggestions */}

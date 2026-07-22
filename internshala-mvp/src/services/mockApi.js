@@ -67,5 +67,9 @@ export const resumeService = {
 
   saveResume: async (resumeData) => {
     return api.put('/resume', { resumeData });
+  },
+
+  getTemplates: async () => {
+    return api.get('/resume/templates');
   }
 };

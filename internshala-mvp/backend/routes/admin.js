@@ -638,4 +638,127 @@ router.delete('/reports/:id', async (req, res) => {
   }
 });
 
+// ─── ADMIN: RESUME TEMPLATES CRUD ───────────────────────────────────────────
+
+router.get('/templates', adminMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM resume_templates ORDER BY created_at DESC');
+    res.json({ templates: result.rows });
+  } catch (err) {
+    console.error('[Admin Templates Get] Error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch templates.' });
+  }
+});
+
+router.post('/templates', adminMiddleware, async (req, res) => {
+  try {
+    const { id, name, description, category, isAts, isPopular, isTrending, isBestAts, tags, accent, preview, thumbnail, isEnabled } = req.body;
+    
+    if (!id || !name || !preview) {
+      return res.status(400).json({ error: 'ID, Name, and Preview Layout settings are required.' });
+    }
+    
+    const checkResult = await pool.query('SELECT id FROM resume_templates WHERE id = $1', [id]);
+    if (checkResult.rows.length > 0) {
+      return res.status(400).json({ error: 'A template with this ID already exists.' });
+    }
+    
+    const result = await pool.query(
+      `INSERT INTO resume_templates (id, name, description, category, is_ats, is_popular, is_trending, is_best_ats, tags, accent, preview, thumbnail, is_enabled)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+       RETURNING *`,
+      [
+        id.toLowerCase().trim(),
+        name,
+        description || '',
+        category || 'Classic',
+        isAts !== undefined ? isAts : true,
+        isPopular !== undefined ? isPopular : false,
+        isTrending !== undefined ? isTrending : false,
+        isBestAts !== undefined ? isBestAts : false,
+        JSON.stringify(tags || []),
+        accent || '#1e293b',
+        JSON.stringify(preview),
+        thumbnail || null,
+        isEnabled !== undefined ? isEnabled : true
+      ]
+    );
+    
+    res.status(201).json({ message: 'Template created successfully.', template: result.rows[0] });
+  } catch (err) {
+    console.error('[Admin Template Create] Error:', err.message);
+    res.status(500).json({ error: 'Failed to create template.' });
+  }
+});
+
+router.put('/templates/:id', adminMiddleware, async (req, res) => {
+  try {
+    const templateId = req.params.id;
+    const { name, description, category, isAts, isPopular, isTrending, isBestAts, tags, accent, preview, thumbnail, isEnabled } = req.body;
+    
+    if (!name || !preview) {
+      return res.status(400).json({ error: 'Name and Preview Layout settings are required.' });
+    }
+    
+    const result = await pool.query(
+      `UPDATE resume_templates SET
+        name = $1,
+        description = $2,
+        category = $3,
+        is_ats = $4,
+        is_popular = $5,
+        is_trending = $6,
+        is_best_ats = $7,
+        tags = $8,
+        accent = $9,
+        preview = $10,
+        thumbnail = COALESCE($11, thumbnail),
+        is_enabled = $12,
+        updated_at = NOW()
+       WHERE id = $13
+       RETURNING *`,
+      [
+        name,
+        description || '',
+        category || 'Classic',
+        isAts !== undefined ? isAts : true,
+        isPopular !== undefined ? isPopular : false,
+        isTrending !== undefined ? isTrending : false,
+        isBestAts !== undefined ? isBestAts : false,
+        JSON.stringify(tags || []),
+        accent || '#1e293b',
+        JSON.stringify(preview),
+        thumbnail || null,
+        isEnabled !== undefined ? isEnabled : true,
+        templateId
+      ]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Template not found.' });
+    }
+    
+    res.json({ message: 'Template updated successfully.', template: result.rows[0] });
+  } catch (err) {
+    console.error('[Admin Template Update] Error:', err.message);
+    res.status(500).json({ error: 'Failed to update template.' });
+  }
+});
+
+router.delete('/templates/:id', adminMiddleware, async (req, res) => {
+  try {
+    const templateId = req.params.id;
+    const result = await pool.query('DELETE FROM resume_templates WHERE id = $1 RETURNING id', [templateId]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Template not found.' });
+    }
+    
+    res.json({ message: 'Template deleted successfully.' });
+  } catch (err) {
+    console.error('[Admin Template Delete] Error:', err.message);
+    res.status(500).json({ error: 'Failed to delete template.' });
+  }
+});
+
 module.exports = router;

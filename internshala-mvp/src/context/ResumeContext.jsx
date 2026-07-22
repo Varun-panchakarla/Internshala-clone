@@ -15,10 +15,20 @@ export const ResumeProvider = ({ children }) => {
   const [selectedTemplate, setSelectedTemplateState] = useState(
     () => localStorage.getItem('jobportal_selected_template') || 'professional'
   );
+  const [templates, setTemplates] = useState([]);
 
   const setSelectedTemplate = (templateId) => {
     setSelectedTemplateState(templateId);
     localStorage.setItem('jobportal_selected_template', templateId);
+  };
+
+  const fetchTemplates = async () => {
+    try {
+      const res = await resumeService.getTemplates();
+      setTemplates(res.data.templates || []);
+    } catch (err) {
+      console.error('Failed to fetch templates', err);
+    }
   };
 
   const fetchResume = async () => {
@@ -34,7 +44,10 @@ export const ResumeProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => { fetchResume(); }, [isAuthenticated, currentUser?.id]);
+  useEffect(() => {
+    fetchResume();
+    fetchTemplates();
+  }, [isAuthenticated, currentUser?.id]);
 
   const updatePersonalInfo = (info) =>
     setResume(prev => prev ? { ...prev, personalInfo: { ...prev.personalInfo, ...info } } : null);
@@ -92,6 +105,8 @@ export const ResumeProvider = ({ children }) => {
     updateInterests,
     saveResume,
     refreshResume: fetchResume,
+    templates,
+    refreshTemplates: fetchTemplates,
   };
 
   return <ResumeContext.Provider value={value}>{children}</ResumeContext.Provider>;
