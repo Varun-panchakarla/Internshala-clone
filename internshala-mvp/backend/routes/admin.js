@@ -43,7 +43,7 @@ router.get('/stats', async (req, res) => {
 
     // Recent job postings
     const recentJobs = await pool.query(
-      'SELECT id, title, company, location, employment_type, created_at FROM jobs ORDER BY created_at DESC LIMIT 5'
+      'SELECT id, title, company, location, employment_type, company_logo as "companyLogo", created_at FROM jobs ORDER BY created_at DESC LIMIT 5'
     );
 
     // Pending applications review count
@@ -292,7 +292,12 @@ router.get('/jobs', async (req, res) => {
     const total = parseInt(countRes.rows[0].count);
 
     const jobsQuery = `
-      SELECT * FROM jobs
+      SELECT id, title, company, location, employment_type, experience,
+             salary_min, salary_max, description, skills, source,
+             company_logo as "companyLogo", logo_color as "logoColor", logo_text as "logoText",
+             match_score as "matchScore", is_featured as "isFeatured",
+             created_at, updated_at
+      FROM jobs
       ${whereClause}
       ORDER BY created_at DESC
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -478,7 +483,7 @@ router.delete('/applications/:id', async (req, res) => {
 router.get('/companies', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT DISTINCT company, company_logo, logo_color FROM jobs WHERE company IS NOT NULL'
+      'SELECT DISTINCT company, company_logo as "companyLogo", logo_color as "logoColor" FROM jobs WHERE company IS NOT NULL'
     );
     res.json({ companies: result.rows });
   } catch (err) {
