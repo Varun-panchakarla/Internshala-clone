@@ -430,31 +430,38 @@ const AdminPortal = () => {
     return (
       <button
         onClick={() => setView(view)}
-        title={isSidebarCollapsed ? name : ""}
-        className={`w-full group flex items-center ${isSidebarCollapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-2.5"} rounded-xl text-[13px] font-medium transition-all duration-200 ease-in-out cursor-pointer active:scale-[0.98] ${
+        title={isSidebarCollapsed ? name : undefined}
+        className={`w-full group relative flex items-center h-10 px-2 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-[13px] font-medium overflow-hidden cursor-pointer active:scale-[0.98] ${
           isActive
-            ? "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 font-semibold border-l-2 border-brand-600 dark:border-brand-500 shadow-2xs"
-            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-200 hover:translate-x-0.5"
+            ? "bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400 font-bold"
+            : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
         }`}
       >
-        <Icon className={`w-4.5 h-4.5 shrink-0 transition-colors duration-200 ${isActive ? "text-brand-600 dark:text-brand-400" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200"}`} />
-        {!isSidebarCollapsed && <span className="truncate transition-opacity duration-200">{name}</span>}
-      </button>
-    );
-  };
+        <div
+          className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            isActive
+              ? "bg-brand-100 dark:bg-brand-800/30"
+              : "bg-slate-100 dark:bg-white/8 group-hover:bg-slate-200 dark:group-hover:bg-white/12"
+          }`}
+        >
+          <Icon className={`w-3.5 h-3.5 shrink-0 transition-colors duration-200 ${isActive ? "text-brand-600 dark:text-brand-400" : "text-slate-400 dark:text-slate-500"}`} />
+        </div>
 
-  const renderMobileStandaloneLink = (name, icon, view) => {
-    const Icon = icon;
-    const isActive = currentView === view;
-    return (
-      <button
-        onClick={() => setView(view)}
-        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ease-in-out active:scale-[0.98] ${
-          isActive ? "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 font-semibold" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/40"
-        }`}
-      >
-        <Icon className="w-4.5 h-4.5" />
-        <span>{name}</span>
+        <div
+          className={`min-w-0 ml-2.5 text-left transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            isSidebarCollapsed
+              ? "opacity-0 max-w-0 -translate-x-2 overflow-hidden pointer-events-none"
+              : "opacity-100 max-w-[150px] translate-x-0"
+          }`}
+        >
+          <p className="leading-none truncate whitespace-nowrap">{name}</p>
+        </div>
+
+        {isSidebarCollapsed && (
+          <div className="absolute left-full ml-3 hidden group-hover:flex items-center px-2.5 py-1 bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xl pointer-events-none whitespace-nowrap z-50 animate-fade-in">
+            {name}
+          </div>
+        )}
       </button>
     );
   };
@@ -468,17 +475,29 @@ const AdminPortal = () => {
       return (
         <button
           onClick={() => {
-            const firstChildView = items[0]?.view;
-            if (firstChildView) setView(firstChildView);
+            setIsSidebarCollapsed(false);
+            setExpandedSection(sectionKey);
           }}
           title={name}
-          className={`w-full group flex items-center justify-center py-3 rounded-xl text-[13px] font-medium transition-all duration-200 cursor-pointer active:scale-[0.98] ${
+          className={`w-full group relative flex items-center h-10 px-2 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-[13px] font-medium overflow-hidden cursor-pointer active:scale-[0.98] ${
             hasActiveChild
-              ? "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 border-l-2 border-brand-600 dark:border-brand-500 font-semibold shadow-2xs"
-              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-200"
+              ? "bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400 font-bold"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
           }`}
         >
-          <Icon className={`w-4.5 h-4.5 shrink-0 transition-colors duration-200 ${hasActiveChild ? "text-brand-600 dark:text-brand-400" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200"}`} />
+          <div
+            className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+              hasActiveChild
+                ? "bg-brand-100 dark:bg-brand-800/30"
+                : "bg-slate-100 dark:bg-white/8 group-hover:bg-slate-200 dark:group-hover:bg-white/12"
+            }`}
+          >
+            <Icon className={`w-3.5 h-3.5 shrink-0 transition-colors duration-200 ${hasActiveChild ? "text-brand-600 dark:text-brand-400" : "text-slate-405 dark:text-slate-500"}`} />
+          </div>
+
+          <div className="absolute left-full ml-3 hidden group-hover:flex items-center px-2.5 py-1 bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xl pointer-events-none whitespace-nowrap z-50 animate-fade-in">
+            {name}
+          </div>
         </button>
       );
     }
@@ -487,14 +506,26 @@ const AdminPortal = () => {
       <div className="space-y-1">
         <button
           onClick={() => setExpandedSection(isExpanded ? null : sectionKey)}
-          className={`w-full group flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ease-in-out cursor-pointer active:scale-[0.98] ${
+          className={`w-full group flex items-center h-10 px-2 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-[13px] font-medium overflow-hidden cursor-pointer active:scale-[0.98] ${
             hasActiveChild
-              ? "text-slate-900 dark:text-slate-200 font-semibold bg-slate-100/80 dark:bg-slate-800/20"
-              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-slate-200 hover:translate-x-0.5"
+              ? "text-slate-900 dark:text-slate-200 font-semibold bg-slate-100/60 dark:bg-slate-800/20"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
           }`}
         >
-          <Icon className={`w-4.5 h-4.5 shrink-0 transition-colors duration-200 ${hasActiveChild ? "text-brand-600 dark:text-brand-400" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200"}`} />
-          <span className="truncate">{name}</span>
+          <div
+            className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+              hasActiveChild
+                ? "bg-brand-100 dark:bg-brand-800/30"
+                : "bg-slate-100 dark:bg-white/8 group-hover:bg-slate-200 dark:group-hover:bg-white/12"
+            }`}
+          >
+            <Icon className={`w-3.5 h-3.5 shrink-0 transition-colors duration-200 ${hasActiveChild ? "text-brand-600 dark:text-brand-400" : "text-slate-400 dark:text-slate-500"}`} />
+          </div>
+
+          <div className="min-w-0 ml-2.5 text-left flex-1">
+            <p className="leading-none truncate whitespace-nowrap">{name}</p>
+          </div>
+          
           <FiChevronRight 
             className={`w-4 h-4 ml-auto text-slate-400 dark:text-slate-500 transition-transform duration-300 ease-in-out ${
               isExpanded ? "rotate-90 text-brand-600 dark:text-brand-400" : "group-hover:text-slate-700 dark:group-hover:text-slate-300"
@@ -517,16 +548,25 @@ const AdminPortal = () => {
                 <button
                   key={item.view}
                   onClick={() => setView(item.view)}
-                  className={`w-full group flex items-center gap-3 pl-10 pr-4 py-2 rounded-lg text-[12px] font-medium transition-all duration-200 ease-in-out cursor-pointer active:scale-[0.98] transform ${
-                    isExpanded ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0 pointer-events-none"
-                  } ${
+                  className={`w-full group flex items-center h-10 px-2 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] text-[13px] font-medium overflow-hidden cursor-pointer active:scale-[0.98] ${
                     isChildActive
-                      ? "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 border-l-2 border-brand-600 dark:border-brand-500 font-semibold shadow-2xs"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/20 hover:text-slate-900 dark:hover:text-slate-200 hover:translate-x-0.5"
+                      ? "bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400 font-bold"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-55 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
-                  <ChildIcon className={`w-3.5 h-3.5 shrink-0 transition-colors duration-200 ${isChildActive ? "text-brand-600 dark:text-brand-400" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300"}`} />
-                  <span className="truncate">{item.name}</span>
+                  <div
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                      isChildActive
+                        ? "bg-brand-100 dark:bg-brand-800/30"
+                        : "bg-slate-100 dark:bg-white/8 group-hover:bg-slate-200 dark:group-hover:bg-white/12"
+                    }`}
+                  >
+                    <ChildIcon className={`w-3.5 h-3.5 shrink-0 transition-colors duration-200 ${isChildActive ? "text-brand-600 dark:text-brand-400" : "text-slate-405 dark:text-slate-500"}`} />
+                  </div>
+
+                  <div className="min-w-0 ml-2.5 text-left">
+                    <p className="leading-none truncate whitespace-nowrap">{item.name}</p>
+                  </div>
                 </button>
               );
             })}
@@ -591,109 +631,10 @@ const AdminPortal = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FB] dark:bg-[#060d1b] text-slate-900 dark:text-slate-100 flex font-sans transition-colors duration-200">
+    <div className="min-h-screen bg-[#F5F7FB] dark:bg-[#060d1b] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       
-      {/* ─── DESKTOP SIDEBAR ─────────────────────────────────────────────────── */}
-      <aside className={`hidden lg:flex flex-col ${isSidebarCollapsed ? "w-20" : "w-64"} bg-white dark:bg-[#0a1222] border-r border-slate-200/80 dark:border-slate-800/80 shrink-0 sticky top-0 h-screen transition-all duration-300 ease-in-out shadow-[1px_0_10px_rgba(0,0,0,0.03)] dark:shadow-none z-20`}>
-        <div className={`h-12 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center shrink-0 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? "justify-center" : "justify-end px-3.5"}`}>
-          <button
-            onClick={handleToggleSidebar}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white transition-all duration-300 ease-in-out cursor-pointer focus:outline-none shrink-0"
-            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            aria-label="Toggle Sidebar"
-          >
-            <FiMenu className={`w-4 h-4 transition-transform duration-300 ease-in-out ${isSidebarCollapsed ? "rotate-180 text-brand-600 dark:text-brand-400" : "rotate-0"}`} />
-          </button>
-        </div>
-
-        <nav className="flex-1 px-4 py-6 space-y-3 overflow-y-auto custom-scrollbar">
-          {renderStandaloneLink('Dashboard', FiGrid, 'dashboard')}
-
-          <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
-
-          {renderAccordionSection('management', 'Management', FiSliders, [
-            { name: 'Users', icon: FiUser, view: 'users' },
-            { name: 'Recruiters', icon: FiUsers, view: 'recruiters' },
-            { name: 'Companies', icon: FiBriefcase, view: 'companies' },
-            { name: 'Jobs', icon: FiCpu, view: 'jobs' },
-            { name: 'Applications', icon: FiFolder, view: 'applications' }
-          ])}
-
-          <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
-
-          {renderStandaloneLink('Resume Templates', FiFileText, 'templates')}
-
-          <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
-
-          {renderAccordionSection('insights', 'Insights', FiTrendingUp, [
-            { name: 'Analytics', icon: FiTrendingUp, view: 'analytics' },
-            { name: 'Reports', icon: FiActivity, view: 'reports' }
-          ])}
-
-          <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
-
-          {renderAccordionSection('system', 'System', FiSettings, [
-            { name: 'Notifications', icon: FiBell, view: 'notifications' },
-            { name: 'Settings', icon: FiSettings, view: 'settings' }
-          ])}
-        </nav>
-
-
-      </aside>
-
-      {/* ─── MOBILE DRAWER SIDEBAR ───────────────────────────────────────────── */}
-      {mobileSidebarOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden bg-slate-950/80 backdrop-blur-sm animate-fade-in" onClick={() => setMobileSidebarOpen(false)}>
-          <aside className="w-64 bg-white dark:bg-[#0a1222] border-r border-slate-200 dark:border-slate-800 flex flex-col h-full animate-slide-up" onClick={(e) => e.stopPropagation()}>
-            <div className="h-16 px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-                <Logo className="h-10 w-auto" mode="auto" />
-              </Link>
-              <button onClick={() => setMobileSidebarOpen(false)} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
-                <FiX className="w-5 h-5" />
-              </button>
-            </div>
-            <nav className="flex-1 px-3 py-4 space-y-3 overflow-y-auto">
-              {renderMobileStandaloneLink('Dashboard', FiGrid, 'dashboard')}
-
-              <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
-
-              {renderMobileAccordionSection('management', 'Management', FiSliders, [
-                { name: 'Users', icon: FiUser, view: 'users' },
-                { name: 'Recruiters', icon: FiUsers, view: 'recruiters' },
-                { name: 'Companies', icon: FiBriefcase, view: 'companies' },
-                { name: 'Jobs', icon: FiCpu, view: 'jobs' },
-                { name: 'Applications', icon: FiFolder, view: 'applications' }
-              ])}
-
-              <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
-
-              {renderMobileStandaloneLink('Resume Templates', FiFileText, 'templates')}
-
-              <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
-
-              {renderMobileAccordionSection('insights', 'Insights', FiTrendingUp, [
-                { name: 'Analytics', icon: FiTrendingUp, view: 'analytics' },
-                { name: 'Reports', icon: FiActivity, view: 'reports' }
-              ])}
-
-              <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
-
-              {renderMobileAccordionSection('system', 'System', FiSettings, [
-                { name: 'Notifications', icon: FiBell, view: 'notifications' },
-                { name: 'Settings', icon: FiSettings, view: 'settings' }
-              ])}
-            </nav>
-
-          </aside>
-        </div>
-      )}
-
-      {/* ─── MAIN APP CONTENT AREA ───────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
-        
-        {/* Top navigation header — matching User Portal header styling & branding */}
-        <header className="h-16 border-b border-slate-200/80 dark:border-slate-900 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 transition-all duration-200 shadow-[0_2px_15px_-3px_rgba(15,23,42,0.05)] dark:shadow-none">
+      {/* ─── TOP FULL-WIDTH HEADER ────────────────────────────────────────── */}
+      <header className="w-full h-16 border-b border-slate-200/80 dark:border-slate-900 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-50 transition-all duration-200 shadow-[0_2px_15px_-3px_rgba(15,23,42,0.05)] dark:shadow-none shrink-0">
           <div className="flex items-center gap-4">
             {/* Mobile Hamburger Drawer Toggle */}
             <button
@@ -721,13 +662,15 @@ const AdminPortal = () => {
             {/* Theme toggle — matching User Portal Navbar */}
             <button
               onClick={toggleTheme}
-              className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/8 hover:text-slate-800 dark:hover:text-white transition-all duration-150 focus:outline-none cursor-pointer"
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/8 hover:text-slate-800 dark:hover:text-white transition-all duration-200 active:scale-90 focus:outline-none cursor-pointer"
               title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
-              {isDark
-                ? <FiSun className="w-4 h-4 text-amber-400" />
-                : <FiMoon className="w-4 h-4" />
-              }
+              <div className={`transition-transform duration-300 ease-in-out ${isDark ? 'rotate-90' : 'rotate-0'}`}>
+                {isDark
+                  ? <FiSun className="w-4 h-4 text-amber-400" />
+                  : <FiMoon className="w-4 h-4" />
+                }
+              </div>
             </button>
 
             {/* Admin Profile Dropdown Trigger */}
@@ -827,6 +770,114 @@ const AdminPortal = () => {
             </div>
           </div>
         </header>
+
+      {/* ─── SIDEBAR & MAIN BODY CONTAINER ─────────────────────────────────── */}
+      <div className="flex-1 flex w-full max-w-none items-start">
+      
+      {/* ─── DESKTOP SIDEBAR ─────────────────────────────────────────────────── */}
+      <aside className={`hidden lg:flex flex-col shrink-0 border-r border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0a1222] h-[calc(100vh-4rem)] sticky top-16 z-30 overflow-y-auto custom-scrollbar will-change-[width] transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-[1px_0_10px_rgba(0,0,0,0.03)] dark:shadow-none ${
+        isSidebarCollapsed ? "w-16" : "w-64"
+      }`}>
+        {/* Top Sidebar Header with Perfectly Centered Hamburger Control */}
+        <div className="h-14 border-b border-slate-200/80 dark:border-slate-800/60 flex items-center shrink-0 w-16 justify-center">
+          <button
+            onClick={handleToggleSidebar}
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/8 hover:text-slate-900 dark:hover:text-white focus:outline-none shrink-0 cursor-pointer"
+            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label="Toggle Sidebar"
+          >
+            <FiMenu className={`w-4 h-4 text-slate-500 dark:text-slate-400 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isSidebarCollapsed ? "rotate-180" : "rotate-0"}`} />
+          </button>
+        </div>
+
+        <nav className="flex-1 px-3 py-3 space-y-1">
+          {renderStandaloneLink('Dashboard', FiGrid, 'dashboard')}
+
+          <hr className="w-10 border-slate-200/60 dark:border-slate-800/60 my-2 transition-none" />
+
+          {renderAccordionSection('management', 'Management', FiSliders, [
+            { name: 'Users', icon: FiUser, view: 'users' },
+            { name: 'Recruiters', icon: FiUsers, view: 'recruiters' },
+            { name: 'Companies', icon: FiBriefcase, view: 'companies' },
+            { name: 'Jobs', icon: FiCpu, view: 'jobs' },
+            { name: 'Applications', icon: FiFolder, view: 'applications' }
+          ])}
+
+          <hr className="w-10 border-slate-200/60 dark:border-slate-800/60 my-2 transition-none" />
+
+          {renderStandaloneLink('Resume Templates', FiFileText, 'templates')}
+
+          <hr className="w-10 border-slate-200/60 dark:border-slate-800/60 my-2 transition-none" />
+
+          {renderAccordionSection('insights', 'Insights', FiTrendingUp, [
+            { name: 'Analytics', icon: FiTrendingUp, view: 'analytics' },
+            { name: 'Reports', icon: FiActivity, view: 'reports' }
+          ])}
+
+          <hr className="w-10 border-slate-200/60 dark:border-slate-800/60 my-2 transition-none" />
+
+          {renderAccordionSection('system', 'System', FiSettings, [
+            { name: 'Notifications', icon: FiBell, view: 'notifications' },
+            { name: 'Settings', icon: FiSettings, view: 'settings' }
+          ])}
+        </nav>
+
+
+      </aside>
+
+      {/* ─── MOBILE DRAWER SIDEBAR ───────────────────────────────────────────── */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 flex lg:hidden bg-slate-950/80 backdrop-blur-sm animate-fade-in" onClick={() => setMobileSidebarOpen(false)}>
+          <aside className="w-64 bg-white dark:bg-[#0a1222] border-r border-slate-200 dark:border-slate-800 flex flex-col h-full animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="h-16 px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+                <Logo className="h-10 w-auto" mode="auto" />
+              </Link>
+              <button onClick={() => setMobileSidebarOpen(false)} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+            <nav className="flex-1 px-3 py-4 space-y-3 overflow-y-auto">
+              {renderMobileStandaloneLink('Dashboard', FiGrid, 'dashboard')}
+
+              <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
+
+              {renderMobileAccordionSection('management', 'Management', FiSliders, [
+                { name: 'Users', icon: FiUser, view: 'users' },
+                { name: 'Recruiters', icon: FiUsers, view: 'recruiters' },
+                { name: 'Companies', icon: FiBriefcase, view: 'companies' },
+                { name: 'Jobs', icon: FiCpu, view: 'jobs' },
+                { name: 'Applications', icon: FiFolder, view: 'applications' }
+              ])}
+
+              <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
+
+              {renderMobileStandaloneLink('Resume Templates', FiFileText, 'templates')}
+
+              <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
+
+              {renderMobileAccordionSection('insights', 'Insights', FiTrendingUp, [
+                { name: 'Analytics', icon: FiTrendingUp, view: 'analytics' },
+                { name: 'Reports', icon: FiActivity, view: 'reports' }
+              ])}
+
+              <hr className="border-slate-200/60 dark:border-slate-800/60 my-2 mx-2" />
+
+              {renderMobileAccordionSection('system', 'System', FiSettings, [
+                { name: 'Notifications', icon: FiBell, view: 'notifications' },
+                { name: 'Settings', icon: FiSettings, view: 'settings' }
+              ])}
+            </nav>
+
+          </aside>
+        </div>
+      )}
+
+      {/* ─── MAIN APP CONTENT AREA ───────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-[calc(100vh-4rem)]">
+        
+        {/* Top navigation header — matching User Portal header styling & branding */}
+        
 
         {/* Content body container */}
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-screen-xl w-full mx-auto">
@@ -1159,23 +1210,26 @@ const AdminPortal = () => {
                  VIEW: COMPANIES
               ────────────────────────────────────────────────────────────── */}
               {currentView === 'companies' && (
-                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
-                  <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3 flex items-center justify-between">
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Registered Companies</h3>
-                    <span className="text-[10px] font-black text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 px-2.5 py-1 rounded-full uppercase">{companies.length} Total</span>
+                <div className="bg-white dark:bg-[#0a1222] border border-slate-200 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
+                  <div className="border-b border-slate-200 dark:border-slate-800/80 pb-3 flex items-center justify-between">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-400">Registered Companies</h3>
+                    <span className="text-[10px] font-black text-brand-700 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-200/80 dark:border-brand-500/20 px-2.5 py-1 rounded-full uppercase">{companies.length} Total</span>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {companies.map((comp, i) => (
-                      <div key={i} className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800 rounded-2xl p-5 flex flex-col items-center text-center hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-xs">
+                      <div key={i} className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col items-center text-center hover:border-slate-350 dark:hover:border-slate-700 hover:shadow-md transition-all shadow-xs">
                         <div
-                          className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg text-white mb-3 shadow-inner border border-slate-200 dark:border-slate-800"
-                          style={{ backgroundColor: comp.logo_color || '#1e293b' }}
+                          className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg mb-3 shadow-inner border border-slate-200 dark:border-slate-800"
+                          style={{
+                            backgroundColor: isDark ? `${comp.logo_color || '#1e293b'}ff` : `${comp.logo_color || '#1e293b'}15`,
+                            color: isDark ? '#ffffff' : (comp.logo_color || '#1e293b')
+                          }}
                         >
                           {comp.company.charAt(0).toUpperCase()}
                         </div>
-                        <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight mb-1">{comp.company}</h4>
-                        <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Active Recruiter Profile</span>
+                        <h4 className="text-sm font-semibold text-slate-900 dark:text-white leading-tight mb-1">{comp.company}</h4>
+                        <span className="text-[9px] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider">Active Recruiter Profile</span>
                       </div>
                     ))}
                   </div>
@@ -1950,6 +2004,8 @@ const AdminPortal = () => {
             </div>
           )}
         </main>
+      </div>
+      
       </div>
 
       {/* ───────────────────────────────────────────────────────────────────────

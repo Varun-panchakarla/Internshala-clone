@@ -9,6 +9,7 @@ export const JobProvider = ({ children }) => {
   const [jobs, setJobs] = useState([]);
   const [savedJobIds, setSavedJobIds] = useState([]);
   const [appliedJobIds, setAppliedJobIds] = useState([]);
+  const [appliedDetails, setAppliedDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -39,9 +40,13 @@ export const JobProvider = ({ children }) => {
 
         const appliedRes = await jobService.getAppliedJobIds();
         setAppliedJobIds(appliedRes.data.data || []);
+
+        const detailsRes = await jobService.getAppliedJobDetails();
+        setAppliedDetails(detailsRes.data.data || []);
       } else {
         setSavedJobIds([]);
         setAppliedJobIds([]);
+        setAppliedDetails([]);
       }
     } catch (err) {
       setError(err.message);
@@ -78,6 +83,7 @@ export const JobProvider = ({ children }) => {
     try {
       await jobService.applyToJob(jobId);
       setAppliedJobIds(prev => [...prev, jobId]);
+      setAppliedDetails(prev => [{ job_id: jobId, status: 'Pending', applied_at: new Date().toISOString() }, ...prev]);
     } catch (err) {
       console.error('Failed to apply to job', err);
       throw err;
@@ -267,6 +273,7 @@ export const JobProvider = ({ children }) => {
     recommendedJobs,
     savedJobs,
     appliedJobs,
+    appliedDetails,
     savedJobIds,
     appliedJobIds,
     loading,

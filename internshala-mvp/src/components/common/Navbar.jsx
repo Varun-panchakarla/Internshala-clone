@@ -76,13 +76,15 @@ const Navbar = () => {
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/8 hover:text-slate-800 dark:hover:text-white transition-all duration-150 focus:outline-none"
+              className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/8 hover:text-slate-800 dark:hover:text-white transition-all duration-200 active:scale-90 focus:outline-none cursor-pointer"
               title={isDark ? 'Light Mode' : 'Dark Mode'}
             >
-              {isDark
-                ? <FiSun className="w-4 h-4 text-amber-400" />
-                : <FiMoon className="w-4 h-4" />
-              }
+              <div className={`transition-transform duration-300 ease-in-out ${isDark ? 'rotate-90' : 'rotate-0'}`}>
+                {isDark
+                  ? <FiSun className="w-4 h-4 text-amber-400" />
+                  : <FiMoon className="w-4 h-4" />
+                }
+              </div>
             </button>
 
             {isAuthenticated ? (
