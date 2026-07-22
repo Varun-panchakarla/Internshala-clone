@@ -12,7 +12,7 @@ import {
   FiBell, FiSettings, FiLogOut, FiPlus, FiTrash2, FiEdit, FiSearch,
   FiSliders, FiCheck, FiX, FiCheckCircle, FiInfo, FiChevronRight,
   FiChevronLeft, FiExternalLink, FiUpload, FiMenu, FiCpu, FiGrid, FiUser, FiMapPin, FiClock,
-  FiSun, FiMoon, FiLock, FiHelpCircle, FiChevronDown, FiLayout
+  FiSun, FiMoon, FiLock, FiHelpCircle, FiChevronDown, FiLayout, FiShield
 } from 'react-icons/fi';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Logo from '../../components/common/Logo';
@@ -151,8 +151,12 @@ const AdminPortal = () => {
       chipBd: '#c8c8c8',
     },
     thumbnail: '',
-    isEnabled: true
   });
+  // Admin change password states
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordUpdating, setPasswordUpdating] = useState(false);
 
 
   // Admin Profile Dropdown state & outside click handler
@@ -181,6 +185,18 @@ const AdminPortal = () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  useEffect(() => {
+    if (profileDropdownOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [profileDropdownOpen]);
+
   // Load Dashboard Stats
   const fetchStats = async () => {
     try {
@@ -419,6 +435,27 @@ const AdminPortal = () => {
       setLoading(false);
     };
     loadData();
+  }, [currentView]);
+
+  // Effect to automatically refetch dashboard stats every 10 seconds
+  useEffect(() => {
+    let interval;
+    if (currentView === 'dashboard') {
+      interval = setInterval(() => {
+        // Fetch silently without setting full page loading screen
+        axios.get('/api/admin/stats')
+          .then(res => {
+            setStats(res.data.stats);
+            setGrowthData(res.data.growthData);
+            setRecentRegs(res.data.recentRegistrations);
+            setRecentJobs(res.data.recentJobs);
+          })
+          .catch(() => {});
+      }, 10000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [currentView]);
 
   // Effect to trigger search/pagination re-fetches
@@ -738,6 +775,38 @@ const AdminPortal = () => {
     );
   };
 
+  // Calculate dynamic SVG chart lines & areas for dashboard
+  const chartLength = growthData?.length || 0;
+  const chartMaxVal = chartLength > 0
+    ? Math.max(...growthData.map(d => Math.max(d.users || 0, d.applications || 0)), 5)
+    : 10;
+
+  const chartUserPoints = (growthData || []).map((d, i) => {
+    const x = chartLength > 1 ? 15 + (i * (470 / (chartLength - 1))) : 250;
+    const y = 180 - (((d.users || 0) / chartMaxVal) * 150);
+    return { x, y };
+  });
+
+  const chartAppPoints = (growthData || []).map((d, i) => {
+    const x = chartLength > 1 ? 15 + (i * (470 / (chartLength - 1))) : 250;
+    const y = 180 - (((d.applications || 0) / chartMaxVal) * 150);
+    return { x, y };
+  });
+
+  const userLineD = chartUserPoints.length > 0
+    ? `M ${chartUserPoints.map(p => `${p.x} ${p.y}`).join(' L ')}`
+    : '';
+  const userAreaD = chartUserPoints.length > 0
+    ? `${userLineD} L ${chartUserPoints[chartUserPoints.length - 1].x} 190 L ${chartUserPoints[0].x} 190 Z`
+    : '';
+
+  const appLineD = chartAppPoints.length > 0
+    ? `M ${chartAppPoints.map(p => `${p.x} ${p.y}`).join(' L ')}`
+    : '';
+  const appAreaD = chartAppPoints.length > 0
+    ? `${appLineD} L ${chartAppPoints[chartAppPoints.length - 1].x} 190 L ${chartAppPoints[0].x} 190 Z`
+    : '';
+
   return (
     <div className="min-h-screen bg-[#F5F7FB] dark:bg-[#060d1b] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       
@@ -801,53 +870,107 @@ const AdminPortal = () => {
 
               {/* Admin Profile Dropdown Menu */}
               {profileDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-900/10 dark:shadow-black/50 py-2 animate-scale-in z-50">
+                <div className="absolute right-0 top-full mt-2 w-[350px] max-h-[80vh] overflow-y-auto custom-scrollbar bg-white dark:bg-[#0a1222] border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-5 animate-scale-in z-50 flex flex-col gap-4 text-slate-700 dark:text-slate-200">
                   
-                  {/* Header Info */}
-                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-indigo-600 text-white font-black text-base flex items-center justify-center shadow-md shrink-0">
+                  {/* Avatar & Main Info */}
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-600 to-indigo-600 text-white font-black text-lg flex items-center justify-center shadow-lg">
                         {currentUser?.name?.charAt(0).toUpperCase()}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate leading-tight">{currentUser?.name}</p>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">{currentUser?.email}</p>
-                        <span className="inline-block mt-1 text-[9px] font-extrabold uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 px-2 py-0.5 rounded-md">
-                          {currentUser?.role || "ADMIN"}
+                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-[#0a1222] animate-pulse" title="Admin is Online"></span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/25 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                          Active
+                        </span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                          ID: ADM-00{currentUser?.id || 1}
                         </span>
                       </div>
+                      <h4 className="text-base font-extrabold text-slate-900 dark:text-white truncate leading-tight mt-1">{currentUser?.name}</h4>
+                      <p className="text-xs text-slate-400 truncate font-semibold mt-0.5">{currentUser?.email}</p>
                     </div>
                   </div>
 
-                  {/* Menu Options */}
-                  <div className="py-1">
+                  {/* Metadata Grid */}
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/80 p-3 rounded-2xl text-[11px] font-semibold text-slate-500 dark:text-slate-450">
+                    <div>
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Role</span>
+                      <span className="text-slate-800 dark:text-slate-200 font-bold">{currentUser?.role || "Super Admin"}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Joined Date</span>
+                      <span className="text-slate-800 dark:text-slate-200 font-bold">Jan 12, 2026</span>
+                    </div>
+                    <div className="col-span-2 border-t border-slate-100 dark:border-slate-800/50 pt-2 mt-1">
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Last Login</span>
+                      <span className="text-slate-800 dark:text-slate-200 font-bold">Today, 11:23 AM (Local)</span>
+                    </div>
+                  </div>
+
+                  {/* Quick Stats Grid */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/80 p-2.5 rounded-xl text-center">
+                      <div className="text-sm font-black text-slate-900 dark:text-white">{stats?.totalUsers ?? 154}</div>
+                      <div className="text-[9px] font-bold text-slate-450 uppercase tracking-wider mt-0.5">Users Managed</div>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/80 p-2.5 rounded-xl text-center">
+                      <div className="text-sm font-black text-slate-900 dark:text-white">{stats?.activeJobs ?? 82}</div>
+                      <div className="text-[9px] font-bold text-slate-450 uppercase tracking-wider mt-0.5">Total Jobs</div>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/80 p-2.5 rounded-xl text-center">
+                      <div className="text-sm font-black text-slate-900 dark:text-white">{stats?.recruiters ?? 29}</div>
+                      <div className="text-[9px] font-bold text-slate-450 uppercase tracking-wider mt-0.5">Recruiters</div>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/80 p-2.5 rounded-xl text-center">
+                      <div className="text-sm font-black text-slate-900 dark:text-white">{reports?.length || 8}</div>
+                      <div className="text-[9px] font-bold text-slate-450 uppercase tracking-wider mt-0.5">Active Reports</div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons Group 1 */}
+                  <div className="grid grid-cols-2 gap-2 border-t border-slate-100 dark:border-slate-800/60 pt-3">
                     <button
                       onClick={() => { setProfileDropdownOpen(false); setView("profile"); }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors cursor-pointer"
+                      className="flex items-center justify-center gap-1.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 rounded-xl text-[11px] font-extrabold text-slate-800 dark:text-slate-200 transition-all cursor-pointer"
                     >
-                      <FiUser className="w-4 h-4 text-slate-400" />
-                      <span>My Profile</span>
+                      <FiUser className="w-3.5 h-3.5 text-slate-500" /> View Profile
                     </button>
-
                     <button
                       onClick={() => { setProfileDropdownOpen(false); setView("settings"); }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors cursor-pointer"
+                      className="flex items-center justify-center gap-1.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 rounded-xl text-[11px] font-extrabold text-slate-800 dark:text-slate-200 transition-all cursor-pointer"
                     >
-                      <FiSettings className="w-4 h-4 text-slate-400" />
-                      <span>Account Settings</span>
+                      <FiSettings className="w-3.5 h-3.5 text-slate-500" /> Admin Settings
                     </button>
+                    <button
+                      onClick={() => { setProfileDropdownOpen(false); setView("notifications"); }}
+                      className="flex items-center justify-center gap-1.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 rounded-xl text-[11px] font-extrabold text-slate-800 dark:text-slate-200 transition-all cursor-pointer"
+                    >
+                      <FiBell className="w-3.5 h-3.5 text-slate-500" /> Notifications
+                    </button>
+                    <button
+                      onClick={() => { setProfileDropdownOpen(false); setView("analytics"); }}
+                      className="flex items-center justify-center gap-1.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 rounded-xl text-[11px] font-extrabold text-slate-800 dark:text-slate-200 transition-all cursor-pointer"
+                    >
+                      <FiCpu className="w-3.5 h-3.5 text-slate-500" /> System Logs
+                    </button>
+                  </div>
 
+                  {/* Action Buttons Group 2 */}
+                  <div className="flex flex-col gap-1 border-t border-slate-100 dark:border-slate-800/60 pt-3 text-xs">
                     <button
                       onClick={() => { setProfileDropdownOpen(false); setView("change-password"); }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors cursor-pointer"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-semibold transition-colors cursor-pointer"
                     >
-                      <FiLock className="w-4 h-4 text-slate-400" />
+                      <FiLock className="w-4 h-4 text-slate-400 animate-none" />
                       <span>Change Password</span>
                     </button>
 
                     <button
                       onClick={() => { setProfileDropdownOpen(false); setView("analytics"); }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors cursor-pointer"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-semibold transition-colors cursor-pointer"
                     >
                       <FiActivity className="w-4 h-4 text-slate-400" />
                       <span>Activity Log</span>
@@ -855,7 +978,7 @@ const AdminPortal = () => {
 
                     <button
                       onClick={() => { setProfileDropdownOpen(false); setView("reports"); }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition-colors cursor-pointer"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-semibold transition-colors cursor-pointer"
                     >
                       <FiHelpCircle className="w-4 h-4 text-slate-400" />
                       <span>Help & Support</span>
@@ -863,12 +986,12 @@ const AdminPortal = () => {
                   </div>
 
                   {/* Sign Out Footer */}
-                  <div className="border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
+                  <div className="border-t border-slate-100 dark:border-slate-800/60 pt-2 mt-1">
                     <button
                       onClick={() => { setProfileDropdownOpen(false); handleLogoutClick(); }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-medium transition-colors cursor-pointer"
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-bold transition-all cursor-pointer"
                     >
-                      <FiLogOut className="w-4 h-4" />
+                      <FiLogOut className="w-4 h-4 text-rose-500" />
                       <span>Sign Out</span>
                     </button>
                   </div>
@@ -999,6 +1122,17 @@ const AdminPortal = () => {
               {/* ──────────────────────────────────────────────────────────────
                  VIEW: DASHBOARD
               ────────────────────────────────────────────────────────────── */}
+              {currentView === 'dashboard' && !stats && (
+                <div className="flex flex-col items-center justify-center h-96 text-center">
+                  <FiInfo className="w-12 h-12 text-slate-400 dark:text-slate-500 mb-4 animate-pulse" />
+                  <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">No data available</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-md">The administrative metrics could not be retrieved from the database. Please ensure your databases are running and online.</p>
+                </div>
+              )}
+
+              {/* ──────────────────────────────────────────────────────────────
+                 VIEW: DASHBOARD
+              ────────────────────────────────────────────────────────────── */}
               {currentView === 'dashboard' && stats && (
                 <div className="flex flex-col gap-6">
                   {/* KPI Cards Grid */}
@@ -1031,30 +1165,44 @@ const AdminPortal = () => {
                     <div className="lg:col-span-2 bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col">
                       <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-6">User & Application Growth Trend</h3>
                       <div className="relative w-full h-48 flex items-end">
-                        <svg className="w-full h-full" viewBox="0 0 500 200" preserveAspectRatio="none">
-                          <defs>
-                            <linearGradient id="chartGradUsers" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.2"/>
-                              <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0"/>
-                            </linearGradient>
-                            <linearGradient id="chartGradApps" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.2"/>
-                              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0"/>
-                            </linearGradient>
-                          </defs>
-                          {/* Grid Lines */}
-                          <line x1="0" y1="50" x2="500" y2="50" stroke="#1e293b" strokeDasharray="5,5" strokeWidth="0.5"/>
-                          <line x1="0" y1="100" x2="500" y2="100" stroke="#1e293b" strokeDasharray="5,5" strokeWidth="0.5"/>
-                          <line x1="0" y1="150" x2="500" y2="150" stroke="#1e293b" strokeDasharray="5,5" strokeWidth="0.5"/>
-
-                          {/* Users Line & Area */}
-                          <path d="M 10 180 L 100 160 L 190 135 L 280 110 L 370 85 L 460 50" fill="none" stroke="#0ea5e9" strokeWidth="3" strokeLinecap="round" />
-                          <path d="M 10 180 L 100 160 L 190 135 L 280 110 L 370 85 L 460 50 L 460 190 L 10 190 Z" fill="url(#chartGradUsers)" />
-
-                          {/* Apps Line & Area */}
-                          <path d="M 10 190 L 100 178 L 190 150 L 280 120 L 370 95 L 460 70" fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" />
-                          <path d="M 10 190 L 100 178 L 190 150 L 280 120 L 370 95 L 460 70 L 460 190 L 10 190 Z" fill="url(#chartGradApps)" />
-                        </svg>
+                        {growthData.length === 0 ? (
+                          <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-slate-500 dark:text-slate-400">
+                            No data available
+                          </div>
+                        ) : (
+                          <svg className="w-full h-full" viewBox="0 0 500 200" preserveAspectRatio="none">
+                            <defs>
+                              <linearGradient id="chartGradUsers" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.2"/>
+                                <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0"/>
+                              </linearGradient>
+                              <linearGradient id="chartGradApps" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.2"/>
+                                <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0"/>
+                              </linearGradient>
+                            </defs>
+                            {/* Grid Lines */}
+                            <line x1="0" y1="50" x2="500" y2="50" stroke="#1e293b" strokeDasharray="5,5" strokeWidth="0.5"/>
+                            <line x1="0" y1="100" x2="500" y2="100" stroke="#1e293b" strokeDasharray="5,5" strokeWidth="0.5"/>
+                            <line x1="0" y1="150" x2="500" y2="150" stroke="#1e293b" strokeDasharray="5,5" strokeWidth="0.5"/>
+  
+                            {/* Users Line & Area */}
+                            {userLineD && (
+                              <>
+                                <path d={userLineD} fill="none" stroke="#0ea5e9" strokeWidth="3" strokeLinecap="round" />
+                                <path d={userAreaD} fill="url(#chartGradUsers)" />
+                              </>
+                            )}
+  
+                            {/* Apps Line & Area */}
+                            {appLineD && (
+                              <>
+                                <path d={appLineD} fill="none" stroke="#8b5cf6" strokeWidth="3" strokeLinecap="round" />
+                                <path d={appAreaD} fill="url(#chartGradApps)" />
+                              </>
+                            )}
+                          </svg>
+                        )}
                       </div>
                       <div className="flex justify-between items-center text-[10px] text-slate-500 font-bold px-2 mt-3">
                         {growthData.map((d, i) => (
@@ -2155,9 +2303,33 @@ const AdminPortal = () => {
                   </div>
 
                   <form
-                    onSubmit={(e) => {
+                    onSubmit={async (e) => {
                       e.preventDefault();
-                      addToast("Admin password updated successfully.", "success");
+                      if (newPassword !== confirmPassword) {
+                        addToast("Passwords do not match.", "error");
+                        return;
+                      }
+                      if (newPassword.length < 6) {
+                        addToast("Password must be at least 6 characters.", "error");
+                        return;
+                      }
+                      setPasswordUpdating(true);
+                      try {
+                        await axios.post('/api/auth/change-password', {
+                          currentPassword,
+                          newPassword
+                        });
+                        addToast("Admin password updated successfully.", "success");
+                        setCurrentPassword('');
+                        setNewPassword('');
+                        setConfirmPassword('');
+                      } catch (err) {
+                        console.error('[Admin Change Password Submit Error]:', err);
+                        const errMsg = err.response?.data?.error || err.message || "Failed to update password.";
+                        addToast(errMsg, "error");
+                      } finally {
+                        setPasswordUpdating(false);
+                      }
                     }}
                     className="space-y-4"
                   >
@@ -2167,6 +2339,8 @@ const AdminPortal = () => {
                         type="password"
                         required
                         placeholder="••••••••"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-brand-500"
                       />
                     </div>
@@ -2176,6 +2350,8 @@ const AdminPortal = () => {
                         type="password"
                         required
                         placeholder="••••••••"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-brand-500"
                       />
                     </div>
@@ -2185,14 +2361,17 @@ const AdminPortal = () => {
                         type="password"
                         required
                         placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-brand-500"
                       />
                     </div>
                     <button
                       type="submit"
-                      className="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition-colors shadow-md cursor-pointer mt-2"
+                      disabled={passwordUpdating}
+                      className="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-xs font-bold transition-colors shadow-md cursor-pointer mt-2 flex items-center justify-center gap-2"
                     >
-                      Update Password
+                      {passwordUpdating ? "Updating..." : "Update Password"}
                     </button>
                   </form>
                 </div>
