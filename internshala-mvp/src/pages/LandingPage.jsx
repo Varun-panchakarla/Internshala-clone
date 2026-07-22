@@ -52,6 +52,8 @@ const LandingPage = () => {
   // Horizontal scroll for Jobs section
   const jobScrollRef = useRef(null);
   const [jobScrollThumbStyle, setJobScrollThumbStyle] = useState({ width: '0%', left: '0%' });
+  const [isJobScrollAtStart, setIsJobScrollAtStart] = useState(true);
+  const [isJobScrollAtEnd, setIsJobScrollAtEnd] = useState(false);
 
   // Filters & Categories for Jobs section
   const [activeJobFilter, setActiveJobFilter] = useState('');
@@ -60,6 +62,8 @@ const LandingPage = () => {
   // Horizontal scroll for Internships section  
   const intScrollRef = useRef(null);
   const [intScrollThumbStyle, setIntScrollThumbStyle] = useState({ width: '0%', left: '0%' });
+  const [isIntScrollAtStart, setIsIntScrollAtStart] = useState(true);
+  const [isIntScrollAtEnd, setIsIntScrollAtEnd] = useState(false);
 
   // Filters for Internship section
   const intFilters = ['Big brands', 'Work from home', 'Part-time', 'MBA', 'Engineering', 'Media', 'Design', 'Data Science'];
@@ -77,11 +81,15 @@ const LandingPage = () => {
   }, []);
 
   // Handle scroll position tracking in real-time
-  const handleScrollUpdate = (container, setThumb) => {
+  const handleScrollUpdate = (container, setThumb, setAtStart, setAtEnd) => {
     if (!container.current) return;
     window.requestAnimationFrame(() => {
       if (!container.current) return;
       const { scrollLeft, scrollWidth, clientWidth } = container.current;
+      
+      setAtStart(scrollLeft <= 5);
+      setAtEnd(scrollLeft + clientWidth >= scrollWidth - 10);
+
       const maxScrollLeft = scrollWidth - clientWidth;
       if (maxScrollLeft <= 0) {
         setThumb({ width: '100%', left: '0%' });
@@ -104,8 +112,8 @@ const LandingPage = () => {
 
   useEffect(() => {
     const updateThumbs = () => {
-      handleScrollUpdate(jobScrollRef, setJobScrollThumbStyle);
-      handleScrollUpdate(intScrollRef, setIntScrollThumbStyle);
+      handleScrollUpdate(jobScrollRef, setJobScrollThumbStyle, setIsJobScrollAtStart, setIsJobScrollAtEnd);
+      handleScrollUpdate(intScrollRef, setIntScrollThumbStyle, setIsIntScrollAtStart, setIsIntScrollAtEnd);
     };
     updateThumbs();
     window.addEventListener('resize', updateThumbs);
@@ -174,12 +182,129 @@ const LandingPage = () => {
     { quote: 'Finding verified internships with good stipends was tough. Now I\'m interning at Slack with a ₹35k/month stipend.' , name: 'Ananya Iyer', role: 'SWE Intern', company: 'Slack', avatar: 'bg-amber-500' },
   ];
 
-  // Filter job and internship
-  const internshipPosts = jobs.filter(j => j.employmentType === 'Internship').slice(0, 7);
-  const regularPosts = jobs.filter(j => j.employmentType !== 'Internship').slice(0, 7);
+  // Dynamic filter lists for Jobs and Internships showcases
+  const getFilteredInternships = () => {
+    let list = jobs.filter(j => j.employmentType === 'Internship');
+    if (activeIntFilter) {
+      const filterVal = activeIntFilter.toLowerCase();
+      if (filterVal === 'big brands') {
+        const bigBrands = ['google', 'stripe', 'canva', 'slack', 'netflix', 'meta', 'figma', 'spotify', 'airbnb', 'purplle', 'tripjack', 'jsw severfield structures ltd. (jssl)'];
+        list = list.filter(j => bigBrands.includes(j.company.toLowerCase()));
+      } else if (filterVal === 'work from home') {
+        list = list.filter(j => j.location.toLowerCase().includes('remote') || j.location.toLowerCase().includes('work from home'));
+      } else if (filterVal === 'part-time') {
+        list = list.filter(j => j.employmentType === 'Part-time' || j.title.toLowerCase().includes('part-time'));
+      } else if (filterVal === 'mba') {
+        list = list.filter(j => 
+          j.title.toLowerCase().includes('sales') || 
+          j.title.toLowerCase().includes('business') || 
+          j.title.toLowerCase().includes('marketing') ||
+          j.title.toLowerCase().includes('hr') ||
+          j.title.toLowerCase().includes('talent') ||
+          j.title.toLowerCase().includes('recruitment')
+        );
+      } else if (filterVal === 'engineering') {
+        list = list.filter(j => 
+          j.title.toLowerCase().includes('engineer') || 
+          j.title.toLowerCase().includes('developer') || 
+          j.title.toLowerCase().includes('web') || 
+          j.title.toLowerCase().includes('tech') || 
+          j.title.toLowerCase().includes('code') || 
+          j.title.toLowerCase().includes('software') || 
+          j.skills.some(s => ['react', 'node.js', 'javascript', 'python', 'sql', 'css', 'html'].includes(s.toLowerCase()))
+        );
+      } else if (filterVal === 'media') {
+        list = list.filter(j => 
+          j.title.toLowerCase().includes('video') || 
+          j.title.toLowerCase().includes('editing') || 
+          j.title.toLowerCase().includes('media') || 
+          j.title.toLowerCase().includes('content') || 
+          j.title.toLowerCase().includes('write')
+        );
+      } else if (filterVal === 'design') {
+        list = list.filter(j => 
+          j.title.toLowerCase().includes('design') || 
+          j.title.toLowerCase().includes('figma') || 
+          j.title.toLowerCase().includes('ui') || 
+          j.title.toLowerCase().includes('ux') || 
+          j.title.toLowerCase().includes('graphic')
+        );
+      } else if (filterVal === 'data science') {
+        list = list.filter(j => 
+          j.title.toLowerCase().includes('data') || 
+          j.title.toLowerCase().includes('analyst') || 
+          j.title.toLowerCase().includes('science') || 
+          j.title.toLowerCase().includes('python') || 
+          j.title.toLowerCase().includes('database') ||
+          j.title.toLowerCase().includes('ai')
+        );
+      }
+    }
+    return list;
+  };
 
-  const allJobPosts = jobs.slice(0, 7);
-  const allInternshipPosts = jobs.filter(j => j.employmentType === 'Internship').slice(0, 7);
+  const getFilteredJobs = () => {
+    let list = jobs.filter(j => j.employmentType !== 'Internship');
+    if (activeJobFilter) {
+      const filterVal = activeJobFilter.toLowerCase();
+      if (filterVal === 'big brands') {
+        const bigBrands = ['google', 'stripe', 'canva', 'slack', 'netflix', 'meta', 'figma', 'spotify', 'airbnb'];
+        list = list.filter(j => bigBrands.includes(j.company.toLowerCase()));
+      } else if (filterVal === 'work from home') {
+        list = list.filter(j => j.location.toLowerCase().includes('remote') || j.location.toLowerCase().includes('work from home'));
+      } else if (filterVal === 'part-time') {
+        list = list.filter(j => j.employmentType === 'Part-time' || j.title.toLowerCase().includes('part-time'));
+      } else if (filterVal === 'mba') {
+        list = list.filter(j => 
+          j.title.toLowerCase().includes('sales') || 
+          j.title.toLowerCase().includes('business') || 
+          j.title.toLowerCase().includes('marketing') ||
+          j.title.toLowerCase().includes('hr') ||
+          j.title.toLowerCase().includes('talent') ||
+          j.title.toLowerCase().includes('recruitment')
+        );
+      } else if (filterVal === 'engineering') {
+        list = list.filter(j => 
+          j.title.toLowerCase().includes('engineer') || 
+          j.title.toLowerCase().includes('developer') || 
+          j.title.toLowerCase().includes('web') || 
+          j.title.toLowerCase().includes('tech') || 
+          j.title.toLowerCase().includes('code') || 
+          j.title.toLowerCase().includes('software') || 
+          j.skills.some(s => ['react', 'node.js', 'javascript', 'python', 'sql', 'css', 'html'].includes(s.toLowerCase()))
+        );
+      } else if (filterVal === 'media') {
+        list = list.filter(j => 
+          j.title.toLowerCase().includes('video') || 
+          j.title.toLowerCase().includes('editing') || 
+          j.title.toLowerCase().includes('media') || 
+          j.title.toLowerCase().includes('content') || 
+          j.title.toLowerCase().includes('write')
+        );
+      } else if (filterVal === 'design') {
+        list = list.filter(j => 
+          j.title.toLowerCase().includes('design') || 
+          j.title.toLowerCase().includes('figma') || 
+          j.title.toLowerCase().includes('ui') || 
+          j.title.toLowerCase().includes('ux') || 
+          j.title.toLowerCase().includes('graphic')
+        );
+      } else if (filterVal === 'data science') {
+        list = list.filter(j => 
+          j.title.toLowerCase().includes('data') || 
+          j.title.toLowerCase().includes('analyst') || 
+          j.title.toLowerCase().includes('science') || 
+          j.title.toLowerCase().includes('python') || 
+          j.title.toLowerCase().includes('database') ||
+          j.title.toLowerCase().includes('ai')
+        );
+      }
+    }
+    return list;
+  };
+
+  const allInternshipPosts = getFilteredInternships().slice(0, 8);
+  const allJobPosts = getFilteredJobs().slice(0, 8);
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-slate-950 transition-colors duration-300">
@@ -302,7 +427,7 @@ const LandingPage = () => {
           <div className="relative">
             <div
               ref={jobScrollRef}
-              onScroll={() => handleScrollUpdate(jobScrollRef, setJobScrollThumbStyle)}
+              onScroll={() => handleScrollUpdate(jobScrollRef, setJobScrollThumbStyle, setIsJobScrollAtStart, setIsJobScrollAtEnd)}
               className="flex overflow-x-auto gap-4 pb-4 scroll-smooth hide-scrollbar"
             >
               {allJobPosts.length > 0 ? (
@@ -360,13 +485,21 @@ const LandingPage = () => {
 
             {/* Scroll controller */}
             <div className="flex items-center justify-center mt-4 gap-4">
-              <button onClick={() => scrollTo(jobScrollRef, 'left')} className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+              <button
+                disabled={isJobScrollAtStart}
+                onClick={() => scrollTo(jobScrollRef, 'left')}
+                className={`w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-650 dark:hover:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer ${isJobScrollAtStart ? 'opacity-40 cursor-not-allowed' : ''}`}
+              >
                 <FiChevronLeft className="w-4 h-4" />
               </button>
               <div className="w-32 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden relative">
                 <div className="absolute top-0 bottom-0 bg-sky-500 rounded-full will-change-[left]" style={jobScrollThumbStyle} />
               </div>
-              <button onClick={() => scrollTo(jobScrollRef, 'right')} className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+              <button
+                disabled={isJobScrollAtEnd}
+                onClick={() => scrollTo(jobScrollRef, 'right')}
+                className={`w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-650 dark:hover:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer ${isJobScrollAtEnd ? 'opacity-40 cursor-not-allowed' : ''}`}
+              >
                 <FiChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -403,12 +536,11 @@ const LandingPage = () => {
               </button>
             ))}
           </div>
-
           {/* Scroll container */}
           <div className="relative">
             <div
               ref={intScrollRef}
-              onScroll={() => handleScrollUpdate(intScrollRef, setIntScrollThumbStyle)}
+              onScroll={() => handleScrollUpdate(intScrollRef, setIntScrollThumbStyle, setIsIntScrollAtStart, setIsIntScrollAtEnd)}
               className="flex overflow-x-auto gap-4 pb-4 scroll-smooth hide-scrollbar"
             >
               {allInternshipPosts.length > 0 ? (
@@ -416,36 +548,39 @@ const LandingPage = () => {
                   <div
                     key={job.id}
                     onClick={() => navigate(`/jobs/${job.id}`)}
-                    className="group min-w-[280px] sm:min-w-[300px] md:min-w-[320px] bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 hover:border-sky-200 dark:hover:border-sky-800/40 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+                    className="group min-w-[280px] sm:min-w-[300px] md:min-w-[320px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-sky-200 dark:hover:border-sky-800/40 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between"
                   >
-                    {job.duration && (
-                      <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 rounded inline-block w-fit mb-2">
-                        <FiClock className="inline w-3 h-3 mr-1" />{job.duration}
-                      </span>
-                    )}
                     <div>
-                      <div className="flex items-start gap-3 mb-3">
-                      <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company.charAt(0)} color={job.logoColor || 'bg-emerald-500'} size="sm" />
+                      {/* Actively Hiring Badge */}
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 px-2.5 py-1 rounded-md border border-sky-100 dark:border-sky-900/30 w-fit mb-3">
+                        <FiTrendingUp className="w-3.5 h-3.5" />
+                        <span>Actively hiring</span>
+                      </div>
+
+                      <div className="flex justify-between items-start gap-4 mb-4">
                         <div>
-                          <h3 className="font-bold text-slate-800 dark:text-white text-sm">{job.title}</h3>
-                          <p className="text-xs text-slate-400 font-medium">{job.company}</p>
+                          <h3 className="font-extrabold text-slate-800 dark:text-white text-sm sm:text-base leading-snug group-hover:text-sky-600 transition-colors">{job.title}</h3>
+                          <span className="text-xs text-slate-400 font-bold block mt-1">{job.company}</span>
                         </div>
+                        {job.companyLogo ? (
+                          <img src={job.companyLogo} alt="logo" className="w-10 h-10 rounded-xl object-contain bg-slate-50 border border-slate-100" />
+                        ) : (
+                          <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company.charAt(0)} color={job.logoColor || 'bg-sky-600'} size="sm" />
+                        )}
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-4">{job.description}</p>
-                      <div className="flex flex-wrap gap-1.5 mb-3">
-                        <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 dark:bg-slate-800 text-slate-500 text-[10px] font-semibold">
-                          <FiMapPin className="w-3 h-3" /> {job.location}
-                        </span>
-                        <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 dark:bg-slate-800 text-slate-500 text-[10px] font-semibold">
-                          {job.salary}
-                        </span>
-                      </div>
-                      <div className="pt-3 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between">
-                        <span className="text-xs font-bold text-sky-600">{job.employmentType}</span>
-                        <span className="text-xs text-sky-600 font-semibold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          View details <FiArrowRight className="w-3 h-3" />
-                        </span>
-                      </div>
+
+                      <ul className="flex flex-col gap-2 mb-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        <li className="flex items-center gap-2"><FiMapPin className="w-4 h-4 text-slate-400 shrink-0" /> {job.location}</li>
+                        <li className="flex items-center gap-2"><FiDollarSign className="w-4 h-4 text-slate-400 shrink-0" /> {job.salary}</li>
+                        <li className="flex items-center gap-2"><FiClock className="w-4 h-4 text-slate-400 shrink-0" /> {job.duration || '3 Months'}</li>
+                      </ul>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between mt-auto">
+                      <span className="text-[10px] font-bold tracking-wider uppercase bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2.5 py-1 rounded">Internship</span>
+                      <span className="text-xs text-sky-600 dark:text-sky-400 font-extrabold flex items-center gap-1 group-hover:translate-x-0.5 transition-all">
+                        View details <FiChevronRight className="w-4 h-4" />
+                      </span>
                     </div>
                   </div>
                 ))
@@ -455,27 +590,39 @@ const LandingPage = () => {
               {/* View all card */}
               <div
                 onClick={() => { resetFilters(); setFilters(prev => ({ ...prev, employmentType: 'Internship' })); navigate('/jobs'); }}
-                className="min-w-[240px] bg-cover bg-center rounded-2xl p-6 flex flex-col justify-between cursor-pointer"
-                style={{ backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+                className="min-w-[280px] sm:min-w-[300px] md:min-w-[320px] bg-slate-900 dark:bg-slate-950 rounded-2xl p-6 flex flex-col justify-between cursor-pointer border border-slate-800 relative overflow-hidden group/viewall"
               >
-                <p className="text-white text-lg font-extrabold">Unlock your true potential</p>
-                <p className="text-white/80 text-sm font-medium">Explore more than 500+ internships</p>
-                <div className="flex items-center gap-2 mt-4">
-                  <span className="text-white text-sm font-bold">View internships </span>
-                  <i className="text-white"><FiArrowRight /></i>
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/60 to-sky-950/60 opacity-90 group-hover/viewall:opacity-100 transition-opacity" />
+                <div className="relative z-10">
+                  <p className="text-white text-lg font-black tracking-tight mb-2">Unlock your true potential</p>
+                  <p className="text-white/70 text-xs font-semibold">Explore more than {jobs.filter(j => j.employmentType === 'Internship').length || '15,000'}+ internships</p>
+                </div>
+                <div className="relative z-10 flex items-center justify-between border-t border-white/10 pt-4 mt-8">
+                  <span className="text-white text-xs font-extrabold">View internships</span>
+                  <div className="w-8 h-8 rounded-full bg-white/10 group-hover/viewall:bg-white/20 transition-colors flex items-center justify-center text-white">
+                    <FiArrowRight className="w-4 h-4" />
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Scroll controller */}
             <div className="flex items-center justify-center mt-4 gap-4">
-              <button onClick={() => scrollTo(intScrollRef, 'left')} className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+              <button
+                disabled={isIntScrollAtStart}
+                onClick={() => scrollTo(intScrollRef, 'left')}
+                className={`w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-650 dark:hover:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer ${isIntScrollAtStart ? 'opacity-40 cursor-not-allowed' : ''}`}
+              >
                 <FiChevronLeft className="w-4 h-4" />
               </button>
               <div className="w-32 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden relative">
                 <div className="absolute top-0 bottom-0 bg-sky-500 rounded-full will-change-[left]" style={intScrollThumbStyle} />
               </div>
-              <button onClick={() => scrollTo(intScrollRef, 'right')} className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+              <button
+                disabled={isIntScrollAtEnd}
+                onClick={() => scrollTo(intScrollRef, 'right')}
+                className={`w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-650 dark:hover:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer ${isIntScrollAtEnd ? 'opacity-40 cursor-not-allowed' : ''}`}
+              >
                 <FiChevronRight className="w-4 h-4" />
               </button>
             </div>
