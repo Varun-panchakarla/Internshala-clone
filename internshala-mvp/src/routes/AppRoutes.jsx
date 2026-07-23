@@ -13,6 +13,9 @@ import SavedJobs from '../pages/SavedJobs';
 import Applications from '../pages/Applications';
 import RecommendedJobs from '../pages/RecommendedJobs';
 import InterviewPrep from '../pages/InterviewPrep';
+import TechnicalInterviewPrep from '../pages/TechnicalInterviewPrep';
+import HRInterviewQuestions from '../pages/HRInterviewQuestions';
+import CodingQuestions from '../pages/CodingQuestions';
 import TechInterviewQuestions from '../pages/TechInterviewQuestions';
 import ResumeBuilder from '../pages/ResumeBuilder';
 import ResumeTemplates from '../pages/ResumeTemplates';
@@ -272,6 +275,30 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <InterviewPrep />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/interview-prep/technical"
+        element={
+          <ProtectedRoute>
+            <TechnicalInterviewPrep />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/interview-prep/hr"
+        element={
+          <ProtectedRoute>
+            <HRInterviewQuestions />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/interview-prep/coding"
+        element={
+          <ProtectedRoute>
+            <CodingQuestions />
           </ProtectedRoute>
         }
       />

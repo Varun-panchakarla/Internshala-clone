@@ -90,6 +90,7 @@ router.get('/stats', async (req, res) => {
 
   let recentJobsList = [];
   try {
+    // Recent job postings
     const r = await pool.query(
       'SELECT id, title, company, location, employment_type, company_logo as "companyLogo", created_at FROM jobs ORDER BY created_at DESC LIMIT 5'
     );

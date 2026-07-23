@@ -18,8 +18,13 @@ const escapeHtml = (text) => {
 // Custom light token-based syntax highlighter for Python/JS/Java/C/C++/R/C# code
 const highlightCode = (code, language) => {
   if (!code) return '';
-  const lang = language?.toLowerCase() || 'python';
-  if (lang !== 'python' && lang !== 'javascript' && lang !== 'java' && lang !== 'c' && lang !== 'cpp' && lang !== 'r' && lang !== 'csharp') {
+  let lang = language?.toLowerCase() || 'python';
+  if (lang === 'react' || lang === 'nodejs' || lang === 'express') {
+    lang = 'javascript';
+  } else if (lang === 'postgresql') {
+    lang = 'sql';
+  }
+  if (lang !== 'python' && lang !== 'javascript' && lang !== 'java' && lang !== 'c' && lang !== 'cpp' && lang !== 'r' && lang !== 'csharp' && lang !== 'sql' && lang !== 'html' && lang !== 'css') {
     return escapeHtml(code);
   }
 
@@ -28,7 +33,10 @@ const highlightCode = (code, language) => {
     // Check if line is a full line comment
     if (
       ((lang === 'python' || lang === 'r') && line.trim().startsWith('#')) ||
-      ((lang !== 'python' && lang !== 'r') && line.trim().startsWith('//'))
+      (lang === 'sql' && line.trim().startsWith('--')) ||
+      (lang === 'html' && line.trim().startsWith('<!--')) ||
+      (lang === 'css' && (line.trim().startsWith('/*') || line.trim().startsWith('//'))) ||
+      ((lang !== 'python' && lang !== 'r' && lang !== 'sql' && lang !== 'html' && lang !== 'css') && line.trim().startsWith('//'))
     ) {
       return `___SPAN_SLATE_START___${escapeHtml(line)}___SPAN_END___`;
     }
@@ -43,7 +51,10 @@ const highlightCode = (code, language) => {
       if (char === "'" && !inDoubleQuote) inSingleQuote = !inSingleQuote;
       if (
         (char === '#' && (lang === 'python' || lang === 'r') && !inDoubleQuote && !inSingleQuote) ||
-        (char === '/' && (lang === 'javascript' || lang === 'java' || lang === 'c' || lang === 'cpp') && line[i+1] === '/' && !inDoubleQuote && !inSingleQuote)
+        (char === '/' && (lang === 'javascript' || lang === 'java' || lang === 'c' || lang === 'cpp') && line[i+1] === '/' && !inDoubleQuote && !inSingleQuote) ||
+        (char === '/' && lang === 'css' && line[i+1] === '*' && !inDoubleQuote && !inSingleQuote) ||
+        (char === '<' && lang === 'html' && line.slice(i, i+4) === '<!--' && !inDoubleQuote && !inSingleQuote) ||
+        (char === '-' && lang === 'sql' && line[i+1] === '-' && !inDoubleQuote && !inSingleQuote)
       ) {
         commentIndex = i;
         break;
@@ -82,6 +93,12 @@ const highlightCode = (code, language) => {
       ? /\b(class|public|private|protected|virtual|friend|template|typename|namespace|using|new|delete|this|const|static|inline|operator|throw|catch|try|int|char|float|double|void|if|else|while|for|return|switch|case|break|continue|struct|union|typedef|volatile|register|extern|auto|goto)\b/g
       : lang === 'r'
       ? /\b(function|if|else|while|for|in|repeat|break|next|return)\b/g
+      : lang === 'sql'
+      ? /\b(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|JOIN|ON|GROUP\s+BY|HAVING|ORDER\s+BY|CREATE|TABLE|ALTER|DROP|INDEX|VIEW|WITH|AS|AND|OR|NOT|IN|EXISTS|UNION|ALL|INTO|VALUES|SET|LEFT|RIGHT|INNER|OUTER|CROSS|FULL|BY|DISTINCT|CASE|WHEN|THEN|ELSE|END|LIMIT|TOP|OFFSET)\b/gi
+      : lang === 'html'
+      ? /\b(html|body|head|title|meta|link|script|style|div|span|p|a|img|section|article|aside|header|footer|form|input|button|label|select|option|textarea|table|thead|tbody|tr|th|td|ul|ol|li|canvas|svg|iframe)\b/g
+      : lang === 'css'
+      ? /\b(color|background|margin|padding|display|position|flex|grid|width|height|border|font|outline|top|right|bottom|left|opacity|transition|animation|box-sizing|justify-content|align-items|flex-direction|grid-template)\b/g
       : lang === 'csharp'
       ? /\b(class|struct|interface|namespace|using|public|private|protected|internal|void|int|string|double|float|bool|char|if|else|while|for|foreach|switch|case|break|continue|return|new|this|base|override|virtual|abstract|static|readonly|const|try|catch|finally|throw|async|await|get|set|value|delegate|event)\b/g
       : /\b(function|const|let|var|return|if|else|for|while|in|of|try|catch|finally|import|from|export|default|class|extends|new|await|async)\b/g;
@@ -98,6 +115,12 @@ const highlightCode = (code, language) => {
       ? /\b(cout|cin|endl|vector|string|map|set|list|printf|scanf|malloc|calloc|realloc|free|NULL|exit|stderr|stdout|stdin|include|define|undef|ifdef|ifndef|endif)\b/g
       : lang === 'r'
       ? /\b(print|c|list|vector|matrix|data\.frame|factor|summary|plot|library|require|install\.packages|mean|median|sd|var|apply|lapply|sapply|tapply|cat|TRUE|FALSE|NULL|NA|NaN|Inf)\b/g
+      : lang === 'sql'
+      ? /\b(COUNT|SUM|AVG|MIN|MAX|COALESCE|RANK|DENSE_RANK|ROW_NUMBER|LAG|LEAD|NULL|TRUE|FALSE)\b/gi
+      : lang === 'html'
+      ? /\b(class|id|href|src|alt|type|value|name|placeholder|action|method|rel|target|style|defer|async|enctype|contenteditable|tabindex)\b/g
+      : lang === 'css'
+      ? /\b(block|inline|absolute|relative|fixed|static|none|hidden|visible|bold|italic|center|auto|inherit|initial|revert|unset|important)\b/g
       : lang === 'csharp'
       ? /\b(Console|WriteLine|ReadLine|Write|Read|Convert|ToString|ToInt32|List|Dictionary|Task|System|true|false|null)\b/g
       : /\b(console|log|length|map|filter|reduce|true|false|null|undefined|Promise)\b/g;
@@ -300,13 +323,19 @@ const TechInterviewQuestions = () => {
         continue;
       }
 
-      // Skip Relevant Resources and other resource dividers
-      if (headingLower.includes('resource') || headingLower.includes('relevant resources')) {
-        continue;
-      }
-
       // Extract Clean Title (stripping original scraped number prefix)
       const cleanTitle = heading.replace(/^\d+\s*\.?\s*/, '').trim();
+      const cleanTitleLower = cleanTitle.toLowerCase();
+
+      // Skip Relevant Resources and other resource dividers
+      if (
+        cleanTitleLower.includes('relevant resources') ||
+        cleanTitleLower.includes('additional resources') ||
+        cleanTitleLower === 'resources' ||
+        cleanTitleLower === 'resource'
+      ) {
+        continue;
+      }
 
       questionsList.push({
         id: `${techId}-${heading}`,

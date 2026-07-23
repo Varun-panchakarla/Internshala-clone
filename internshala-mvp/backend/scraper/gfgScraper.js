@@ -124,7 +124,9 @@ async function runScraper() {
       
       // 4. Code Blocks
       if (tagName === 'pre') {
-        let codeText = $el.text();
+        const $codeClone = $el.clone();
+        $codeClone.find('br').replaceWith('\n');
+        let codeText = $codeClone.text();
         
         // Strip any nested syntax-highlighting HTML elements (like span, div, code, pre)
         const htmlTagPattern = /<\/?(span|div|code|pre|p|a|br|img|strong|em|li|ul|ol)\b[^>]*>/gi;
@@ -165,22 +167,22 @@ async function runScraper() {
         
         $el.find('tr').each((trIdx, trEl) => {
           const rowData = [];
-          const ths = $(trEl).find('th');
-          if (ths.length > 0) {
-            ths.each((thIdx, thEl) => {
-              rowData.push($(thEl).text().trim().replace(/\s+/g, ' '));
+          const cells = $(trEl).children('th, td');
+          if (cells.length > 0) {
+            cells.each((_, cellEl) => {
+              const text = $(cellEl).text();
+              const cleanedText = text
+                .split(/\r?\n/)
+                .map(line => line.trim().replace(/[ \t]+/g, ' '))
+                .filter(line => line.length > 0)
+                .join('\n');
+              rowData.push(cleanedText);
             });
-            if (headers.length === 0) {
+            
+            const isHeaderRow = $(trEl).closest('thead').length > 0 || (headers.length === 0 && trIdx === 0);
+            if (isHeaderRow && headers.length === 0) {
               headers.push(...rowData);
             } else {
-              rows.push(rowData);
-            }
-          } else {
-            const tds = $(trEl).find('td');
-            if (tds.length > 0) {
-              tds.each((tdIdx, tdEl) => {
-                rowData.push($(tdEl).text().trim().replace(/\s+/g, ' '));
-              });
               rows.push(rowData);
             }
           }
