@@ -44,7 +44,7 @@ router.put('/', authMiddleware, async (req, res) => {
 });
 
 // GET /api/resume/templates
-router.get('/templates', authMiddleware, async (req, res) => {
+router.get('/templates', async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT * FROM resume_templates WHERE is_enabled = true ORDER BY created_at ASC'
