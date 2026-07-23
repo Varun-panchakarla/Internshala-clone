@@ -28,6 +28,16 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [showEmailForm, setShowEmailForm] = useState(false);
+  const [googleScriptLoaded, setGoogleScriptLoaded] = useState(true);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (typeof window !== 'undefined' && !window.google) {
+        setGoogleScriptLoaded(false);
+      }
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const validate = () => {
     const tempErrors = {};
@@ -175,6 +185,12 @@ const Register = () => {
                   onError={() => addToast('Google sign-in failed.', 'error')}
                 />
               </div>
+
+              {!googleScriptLoaded && (
+                <p className="text-[11px] text-slate-500 font-semibold text-center leading-normal bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                  Having trouble seeing the Google button? Access the site via <span className="text-brand-600 dark:text-brand-400">http://localhost:5173</span> (not 127.0.0.1) and disable any active ad-blockers.
+                </p>
+              )}
 
               <div className="flex items-center my-2">
                 <div className="flex-grow border-t border-slate-100"></div>
