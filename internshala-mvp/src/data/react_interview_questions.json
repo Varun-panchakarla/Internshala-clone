@@ -1,0 +1,1873 @@
+{
+  "title": "React Interview Questions and Answers",
+  "url": "https://www.geeksforgeeks.org/reactjs/react-interview-questions/",
+  "sections": [
+    {
+      "heading": "Basic React Interview Questions",
+      "paragraphs": [
+        "Covers the fundamental concepts of React, including components, `JSX`, `props`, `state`, DOM handling, and core principles that form the foundation for building dynamic and efficient user interfaces."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "1. How does React.js work?",
+      "paragraphs": [
+        "React.js works on a component-based architecture and uses a virtual DOM to efficiently update and render user interfaces."
+      ],
+      "lists": [
+        [
+          "Components: UI is broken into reusable, independent pieces.",
+          "`JSX`: Allows writing HTML-like code inside JavaScript for easier UI development..",
+          "`Virtual DOM`: A lightweight copy of the real DOM that tracks changes.",
+          "Reconciliation: Compares old and new `Virtual DOM` and updates only the changed parts in the real DOM.",
+          "One-way Data Flow: Ensures predictable UI updates by passing data from parent to child via `props`.",
+          "State Management: React automatically re-renders components when their `state` changes."
+        ]
+      ],
+      "images": [
+        {
+          "alt": "working_of_react-",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20250919113552560439/working_of_react-.webp"
+        }
+      ],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "2. What is JSX and how is it converted into JavaScript?",
+      "paragraphs": [
+        "Example: The name written in curly braces { } signifies `JSX`",
+        "Browsers can’t understand `JSX` directly. Instead, tools like Babel transpile it into plain JavaScript using React.createElement().",
+        "Babel converts it into:"
+      ],
+      "lists": [
+        [
+          "`JSX`: Syntax extension for JavaScript, mainly used with React.",
+          "HTML in JS: Allows writing HTML-like code inside JavaScript for easier readability and maintenance.",
+          "Expressions: Embed JavaScript expressions in `JSX` using {}."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "const name = \"Learner\";\nconst element = (\n    <h1>\n        Hello,\n        {name}.Welcome to GeeksforGeeks.\n    </h1>\n);",
+        "const element = <h1>Hello, Geeks!</h1>;",
+        "const element = React.createElement(\"h1\", null, \"Hello, World!\");"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "3. What is a React component?",
+      "paragraphs": [
+        "A Component is one of the core building blocks of React. In other words, we can say that every application you will develop in React will be made up of pieces called components. Components make the task of building UIs much easier.",
+        "In React, we mainly have two types of components:"
+      ],
+      "lists": [
+        [
+          "Functional Components: Functional components are simply JavaScript functions. Initially, they were limited in terms of features like `state` and lifecycle methods. However, with the introduction of Hooks, functional components can now use `state`, manage side effects, and access other features that were once exclusive to class components.",
+          "Class Components: Class components are more complex than functional components. They are able to manage `state`, handle lifecycle methods, and can also interact with other components. Class components can pass data between each other via `props`, similar to functional components."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "4. Difference between functional and class component in React?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Functional Components",
+            "Class Components"
+          ],
+          "rows": [
+            [
+              "A functional component is just a plain JavaScript pure function that accepts props as an argument",
+              "A class component requires you to extend from React. Component and create a render function"
+            ],
+            [
+              "No render method used",
+              "It must have the render() method returning JSX"
+            ],
+            [
+              "Also known as Stateless components",
+              "Also known as Stateful components"
+            ],
+            [
+              "React lifecycle methods (for example, componentDidMount) cannot be used in functional components.",
+              "React lifecycle methods can be used inside class components (for example, componentDidMount)."
+            ],
+            [
+              "Constructors are not used.",
+              "Constructor is used as it needs to store state."
+            ],
+            [
+              "Uses hooks like useState for managing state.",
+              "Uses this.state and this.setState for state management"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "5. What are props and default props in React?",
+      "paragraphs": [
+        "React allows us to pass information to a Component using something called `props` (which stands for properties). Props are objects which can be used inside a component. We can access any `props` inside from the component’s class to which the `props` is passed. The `props` can be accessed as shown below:",
+        "Default `props` are fallback values assigned to a component’s `props` when the parent does not provide them. They help prevent undefined errors and make components more robust. Default `props` can be defined using:"
+      ],
+      "lists": [
+        [
+          "Class components: ComponentName.defaultProps = { propName: defaultValue }",
+          "Functional components: Assigning default values in function parameters."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "this.props.propName;"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "6. What is state in React and how do you update it?",
+      "paragraphs": [
+        "State is the internal, mutable data of a React component that controls its behavior and rendering. When `state` changes, React re-renders the component to update the UI.",
+        "State is updated using setState() in class components or the `useState` setter function in functional components. Updates are asynchronous and can be triggered by events, user interactions, or API responses. When new `state` depends on the previous `state`, the functional form (setState(prev => ...)) should be used."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "7. Difference Between Props and State in React?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "PROPS",
+            "STATE"
+          ],
+          "rows": [
+            [
+              "The Data is passed from one component to another.",
+              "The Data is passed within the component only."
+            ],
+            [
+              "It is Immutable (cannot be modified).",
+              "It is Mutable ( can be modified)."
+            ],
+            [
+              "Props can be used with state and functional components.",
+              "The state can be used only with the state components/class component (Before 16.0)."
+            ],
+            [
+              "Props are read-only.",
+              "The state is both read and write."
+            ],
+            [
+              "Example: Passing a title or onClick handler to a button component.",
+              "Example: A counter value that increases when you click a button."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "8. What are fragments in React?",
+      "paragraphs": [
+        "In React, fragments allow you to group multiple elements without adding extra nodes to the DOM. Normally, returning multiple elements requires a wrapper like a <div>, which can create unnecessary DOM elements. Fragments solve this by letting you return multiple elements without extra wrappers."
+      ],
+      "lists": [
+        [
+          "Fragments avoid extra DOM nodes.",
+          "Short syntax: <>  </> (cannot use attributes).",
+          "Full syntax: <React.Fragment>  </React.Fragment> (can use key).",
+          "Useful in lists, tables, and grouping multiple elements.",
+          "Helps keep the DOM clean and lightweight."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "9. What is the difference between controlled and uncontrolled components?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Controlled Components",
+            "Uncontrolled Components"
+          ],
+          "rows": [
+            [
+              "The React state controls the form input value.",
+              "The DOM manages the input value."
+            ],
+            [
+              "Every change in input updates the state via onChange.",
+              "React uses ref to access the current value when needed."
+            ],
+            [
+              "Provides full control over input data.",
+              "Less code, simpler for basic forms."
+            ],
+            [
+              "Useful for validation, conditional rendering, or complex forms.",
+              "Less control over validation and state management."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "10. How does the DOM manage the input value in uncontrolled components?",
+      "paragraphs": [
+        "React does not manage the form input’s `state`. Instead, the DOM itself keeps track of the input’s value. You can access the value when needed using refs"
+      ],
+      "lists": [
+        [
+          "Input values are stored in the DOM, not React `state`.",
+          "Use React.`createRef`() or `useRef`() to access the current value.",
+          "Useful when you don’t need to react to every change or for simple forms."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "11. Explain CORS in React with Axios.",
+      "paragraphs": [
+        "Cross-Origin Resource Sharing (CORS) is a security mechanism that allows or restricts requests from a different domain than the server’s. In React, CORS issues arise when the frontend (e.g., running on localhost:3000) makes requests to a backend on a different domain (e.g., api.example.com). Axios, a popular HTTP client, can be configured to handle CORS-compliant requests.",
+        "Handling CORS:",
+        "Example (Axios with CORS):"
+      ],
+      "lists": [
+        [
+          "Backend Configuration: The server must include CORS headers like Access-Control-Allow-Origin to permit requests from the frontend’s domain.",
+          "Frontend with Axios: Ensure requests include proper headers and handle CORS errors gracefully."
+        ],
+        [
+          "CORS is a server-side concern; the frontend can only handle errors, not resolve CORS issues.",
+          "Use a proxy in development (e.g., in package.json: \"proxy\": \"https://api.example.com\") to bypass CORS.",
+          "Libraries like fetch can also handle CORS, but Axios simplifies configuration."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import axios from 'axios';\n\nfunction fetchData() {\n  axios.get('https://api.example.com/data', {\n    headers: {\n      'Content-Type': 'application/json',\n    },\n    withCredentials: true, // If cookies or auth are needed\n  })\n    .then(response => console.log(response.data))\n    .catch(error => console.error('CORS error:', error));\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "12. What is the Higher-Order Component?",
+      "paragraphs": [
+        "A Higher-Order Component (HOC) is a pattern in React used to enhance or modify a component by wrapping it with another component.",
+        "Output:"
+      ],
+      "lists": [
+        [
+          "HOC is a function that takes a component and returns a new component with added functionality or behavior.",
+          "It’s commonly used for cross-cutting concerns like authentication, fetching data, or adding styling.",
+          "Example: Adding extra functionality (like logging) to an existing component without modifying the original component."
+        ],
+        [
+          "withLogging.js: A HOC that logs `props` and returns a new component.",
+          "MyComponent.js: Displays a message passed as a prop.",
+          "App.js: Wraps MyComponent with withLogging to log `props` and display the message."
+        ]
+      ],
+      "images": [
+        {
+          "alt": "hoc",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20250321164641361558/hoc.png"
+        }
+      ],
+      "code": [
+        "import React from 'react';\n\nfunction withLogging(Component) {\n    return function (props) {\n        console.log('Rendering component with props:', props);\n        return <Component {...props} />; \n    };\n}\n\nexport default withLogging;",
+        "import React from 'react';\n\nconst MyComponent = (props) => {\n    return {props.message};\n};\n\nexport default MyComponent;",
+        "import React from \"react\";\nimport MyComponent from \"./MyComponent\";\nimport withLogging from \"./withLogging\";\n\nconst ComponentLogging = withLogging(MyComponent);\n\nconst App = () => {\n    return (\n        \n            <ComponentLogging message=\"Hello, World!\" />\n        \n    );\n};\n\nexport default App;"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "13. What is the difference between ReactDOM and React?",
+      "paragraphs": [
+        "ReactDOM is a separate package that bridges React’s `Virtual DOM` with the browser’s real DOM. It provides methods to render, update, and remove React components in the DOM.",
+        "Example (ReactDOM):"
+      ],
+      "lists": [
+        [
+          "Rendering Components: ReactDOM.createRoot and root.render mount components to a DOM node.",
+          "Updating the DOM: ReactDOM applies `Virtual DOM` changes to the real DOM efficiently.",
+          "Unmounting: ReactDOM.unmountComponentAtNode removes components from the DOM."
+        ],
+        [
+          "React handles component logic; ReactDOM handles DOM integration.",
+          "React 18 introduced createRoot for concurrent rendering, replacing ReactDOM.render.",
+          "For more details, see ReactDOM and React vs ReactDOM."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import ReactDOM from 'react-dom/client';\nimport App from './App';\n\nconst root = ReactDOM.createRoot(document.getElementById('root'));\nroot.render(<App />);"
+      ],
+      "tables": [
+        {
+          "headers": [
+            "React",
+            "ReactDOM"
+          ],
+          "rows": [
+            [
+              "JavaScript library for building UI components.",
+              "Package for rendering components to the browser DOM."
+            ],
+            [
+              "Defines component structure, state, and logic.",
+              "Manages DOM rendering and updates."
+            ],
+            [
+              "Component creation, state management, UI logic.",
+              "Interacting with the browser’s DOM."
+            ],
+            [
+              "Create components, manage state/lifecycle.",
+              "createRoot, render, hydrate, unmount."
+            ],
+            [
+              "N/A (no direct DOM interaction).",
+              "ReactDOM.createRoot, ReactDOM.hydrate, etc."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "14. What is Axios and how to use it in React?",
+      "paragraphs": [
+        "Axios is a promise-based HTTP client for making asynchronous requests to REST APIs. It’s widely used in React for CRUD operations due to its simplicity, support for the Promise API, and features like request cancellation and interceptors.",
+        "Installation:",
+        "Example:"
+      ],
+      "lists": [
+        [
+          "Axios supports features like request timeouts, interceptors, and automatic JSON parsing.",
+          "Use interceptors for global error handling or adding auth headers.",
+          "Alternatives include fetch, but Axios provides a more robust API."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "npm install axios",
+        "import { useState, useEffect } from 'react';\nimport axios from 'axios';\n\nfunction DataFetcher() {\n  const [data, setData] = useState(null);\n  const [loading, setLoading] = useState(true);\n\n  useEffect(() => {\n    axios.get('https://api.example.com/data')\n      .then(response => {\n        setData(response.data);\n        setLoading(false);\n      })\n      .catch(error => console.error('Error:', error));\n  }, []);\n\n  if (loading) return Loading...;\n  return Data: {data.name};\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "15. What is React Material UI?",
+      "paragraphs": [
+        "Material UI is a popular React UI framework that provides pre-built components following Google’s Material Design guidelines. It offers customizable, accessible, and responsive components for building modern React applications. Material UI is widely used for its ease of integration and compatibility with frameworks like React, Angular, and Vue.",
+        "Example:"
+      ],
+      "lists": [
+        [
+          "Install with npm install @mui/material @emotion/react @emotion/styled.",
+          "Components are highly customizable via `props` or theme overrides.",
+          "Supports TypeScript and server-side rendering for production-ready apps."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import { Button, TextField } from '@mui/material';\n\nfunction Form() {\n  return (\n    \n      <TextField label=\"Name\" variant=\"outlined\" />\n      <Button variant=\"contained\" color=\"primary\">\n        Submit\n      </Button>\n    \n  );\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "16. What is Conditional Rendering in React?",
+      "paragraphs": [
+        "Conditional rendering in React involves dynamically displaying components or elements based on conditions like `state`, `props`, or API responses. It’s essential for creating responsive UIs tailored to user interactions or data.",
+        "Use Cases:",
+        "Example:"
+      ],
+      "lists": [
+        [
+          "Show/hide elements based on authentication status.",
+          "Display different layouts for user roles.",
+          "Render loading spinners during data fetching.",
+          "Conditionally show UI based on API responses."
+        ],
+        [
+          "Use ternary operators or logical && for concise rendering.",
+          "Move complex logic outside `JSX` for readability.",
+          "Avoid over-nesting conditions to maintain clarity."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import { useState } from 'react';\n\nfunction UserStatus() {\n  const [isLoggedIn, setIsLoggedIn] = useState(false);\n\n  return (\n    \n      {isLoggedIn ? <h1>Welcome, User!</h1> : <h1>Please Log In</h1>}\n      <button onClick={() => setIsLoggedIn(!isLoggedIn)}>\n        {isLoggedIn ? 'Log Out' : 'Log In'}\n      </button>\n    \n  );\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "17. How to avoid binding in ReactJS?",
+      "paragraphs": [
+        "In class components, event handlers require binding to ensure the correct this context. However, binding can be avoided to reduce boilerplate and improve performance.",
+        "Methods to Avoid Binding:",
+        "1. Arrow Functions in Class Fields: Define methods as arrow functions to lexically bind this.",
+        "2. Arrow Functions in Render: Use inline arrow functions (but avoid for performance-critical components).",
+        "3. Custom Hooks/HOCs: In functional components, hooks eliminate binding entirely."
+      ],
+      "lists": [
+        [
+          "Arrow functions are the modern standard to avoid binding.",
+          "Avoid inline functions in render for memoized components to prevent re-renders.",
+          "Functional components with hooks make binding obsolete."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "class MyComponent extends React.Component {\n  handleClick = () => {\n    console.log(this.state);\n  };\n  render() {\n    return <button onClick={this.handleClick}>Click</button>;\n  }\n}",
+        "<button onClick={() => this.handleClick()}>Click</button>",
+        "function MyComponent() {\n  const handleClick = () => {\n    console.log('Clicked');\n  };\n  return <button onClick={handleClick}>Click</button>;\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "18. What is the use of CSS Modules in React?",
+      "paragraphs": [
+        "CSS Modules scope styles locally to a component, preventing style conflicts in large applications. They generate unique class names at build time, ensuring styles apply only to the intended component.",
+        "Example:"
+      ],
+      "lists": [
+        [
+          "CSS Modules are enabled in Create React App by default with .module.css files.",
+          "Use camelCase for class names in JavaScript (e.g., styles.myButton).",
+          "Alternatives include styled-components or Tailwind CSS."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "/* styles.module.css */\n.button {\n  background-color: blue;\n  color: white;\n}",
+        "import styles from './styles.module.css';\n\nfunction Button() {\n  return <button className={styles.button}>Click</button>;\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "React Hooks Interview Questions",
+      "paragraphs": [
+        "How React Hooks enable functional components to manage `state`, handle side effects, and reuse logic efficiently, along with best practices for writing clean and optimized React code."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "19. Write a program to create a counter with increment and decrement?",
+      "paragraphs": [
+        "This program demonstrates a simple counter using the `useState` hook to manage `state` and event handlers for incrementing and decrementing the count. The UI updates automatically when the `state` changes.",
+        "Example:",
+        "How It Works:",
+        "Points:"
+      ],
+      "lists": [
+        [
+          "`useState` initializes counter to 0 and provides setCounter to update it.",
+          "handleIncrement increases the counter by calling setCounter(counter + 1).",
+          "handleDecrement decreases the counter by calling setCounter(counter - 1).",
+          "The UI displays the current counter value and updates on button clicks."
+        ],
+        [
+          "Use descriptive handler names (e.g., handleIncrement) for clarity.",
+          "Inline styles are used here for simplicity; prefer CSS Modules or styled-components in production.",
+          "Ensure `state` updates are immutable to avoid bugs."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import React, { useState } from 'react';\n\nfunction Counter() {\n  const [counter, setCounter] = useState(0);\n\n  const handleIncrement = () => {\n    setCounter(counter + 1);\n  };\n\n  const handleDecrement = () => {\n    setCounter(counter - 1);\n  };\n\n  return (\n    \n      <h2>React Counter</h2>\n      {counter}\n      \n        <button\n          onClick={handleIncrement}\n          style={{ margin: '5px', padding: '10px 20px' }}\n        >\n          Increment\n        </button>\n        <button\n          onClick={handleDecrement}\n          style={{ margin: '5px', padding: '10px 20px' }}\n        >\n          Decrement\n        </button>\n      \n    \n  );\n}\n\nexport default Counter;"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "20. What is the difference between useRef and createRef in React?",
+      "paragraphs": [
+        "Both `useRef` and `createRef` create mutable references in React, but they differ in their usage, behavior, and context.",
+        "Example (`useRef`):",
+        "Example (`createRef`):"
+      ],
+      "lists": [
+        [
+          "`useRef` is preferred in modern React for functional components.",
+          "`createRef` in class components can cause issues if not managed carefully, as it creates a new ref on each render.",
+          "`useRef` can store mutable values without triggering re-renders, unlike `state`."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import { useRef, useEffect } from 'react';\nfunction InputFocus() {\n  const inputRef = useRef(null);\n  useEffect(() => {\n    inputRef.current.focus();\n  }, []);\n  return <input ref={inputRef} />;\n}",
+        "class InputFocus extends React.Component {\n  constructor(props) {\n    super(props);\n    this.inputRef = React.createRef();\n  }\n  componentDidMount() {\n    this.inputRef.current.focus();\n  }\n  render() {\n    return <input ref={this.inputRef} />;\n  }\n}"
+      ],
+      "tables": [
+        {
+          "headers": [
+            "useRef",
+            "createRef"
+          ],
+          "rows": [
+            [
+              "Hook used in React",
+              "Function used in React"
+            ],
+            [
+              "Used in functional components",
+              "Used in class components"
+            ],
+            [
+              "Persists the same ref object across re-renders",
+              "Creates a new ref object on every render"
+            ],
+            [
+              "Returns an object with a current property",
+              "Returns an object with a current property"
+            ],
+            [
+              "Used for DOM references instance variables and storing previous values",
+              "Mainly used for DOM references in class components"
+            ],
+            [
+              "Syntax: const ref = useRef(null)",
+              "Syntax: this.ref = React.createRef()"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "21. What are Hooks in React and why were they introduced?",
+      "paragraphs": [
+        "Hooks are special functions in React that let you use `state`, lifecycle methods, and other React features in functional components, which were previously only available in class components.",
+        "Why introduced:"
+      ],
+      "lists": [
+        [
+          "Before hooks, `state` and lifecycle methods could only be used in class components, leading to more boilerplate code and complex patterns.",
+          "Hooks allow simpler, cleaner code using functional components.",
+          "They promote reusability and composition of logic between components."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import React, { useState } from 'react';\n\nfunction Counter() {\n  const [count, setCount] = useState(0);\n  return (\n    \n      {count}\n      <button onClick={() => setCount(count + 1)}>Increment</button>\n    \n  );\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "22. How does the useState hook work?",
+      "paragraphs": [
+        "The `useState` hook allows you to add `state` to functional components. It returns a `state` variable and a setter function to update that `state`. When the `state` changes, React re-renders the component with the updated value."
+      ],
+      "lists": [
+        [
+          "count is the current `state` value.",
+          "setCount is the function used to update `state`.",
+          "0 is the initial value when the component mounts. When setCount is called, React re-renders Counter with the new count value."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import { useState } from 'react';\n\nfunction Counter() {\n  const [count, setCount] = useState(0);\n\n  return (\n    \n      Count: {count}\n      <button onClick={() => setCount(count + 1)}>Increment</button>\n    \n  );\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "23. What is useEffect in React and what is the role of its dependency array?",
+      "paragraphs": [
+        "`useEffect` is a React hook that allows functional components to perform side effects such as fetching data, setting up subscriptions, or directly manipulating the DOM. It runs after the component renders, ensuring the UI is updated first.",
+        "The dependency array controls when the effect runs:",
+        "`useEffect` can also return a cleanup function that runs on unmount or before the next effect, helping prevent memory leaks."
+      ],
+      "lists": [
+        [
+          "[] : Runs once after the component mounts (like componentDidMount).",
+          "[dep1, dep2] : Runs only when a dependency changes.",
+          "Omitted (no array) : Runs after every render."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "useEffect(() => {\n  console.log('Effect runs');\n  return () => console.log('Cleanup runs');\n}, [dependency]);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "24. What is the difference between useEffect and useLayoutEffect?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "useEffect",
+            "useLayoutEffect"
+          ],
+          "rows": [
+            [
+              "Runs after render and painting",
+              "Runs before painting, after DOM updates"
+            ],
+            [
+              "Non-blocking",
+              "Blocking"
+            ],
+            [
+              "Used for data fetching, subscriptions, timers",
+              "Used for reading layout, measuring DOM, or sync DOM updates"
+            ],
+            [
+              "Safer for most side effects",
+              "Can slow rendering if heavy logic is used"
+            ],
+            [
+              "Runs after every render by default (or based on dependency array)",
+              "Use when DOM measurements are needed before painting"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "25. What is the useContext hook and when should you use it?",
+      "paragraphs": [
+        "The `useContext` hook allows functional components to consume values from a React Context without passing `props` through every level of the component tree (avoiding “prop drilling”).",
+        "When to use it:"
+      ],
+      "lists": [
+        [
+          "Sharing global data like theme, user info, or authentication status.",
+          "Avoiding prop drilling through many component levels.",
+          "When multiple components need access to the same `state` or data."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "26. What is the useReducer hook and when is it preferred over useState?",
+      "paragraphs": [
+        "The `useReducer` is a React hook used to manage complex `state` logic in functional components. It works similarly to `Redux`: you define a reducer function that takes the current `state` and an action, and returns a new `state`.",
+        "Preferred over `useState` when:"
+      ],
+      "lists": [
+        [
+          "`state` is the current `state`.",
+          "dispatch is used to send actions to update the `state`."
+        ],
+        [
+          "State logic is complex or has multiple sub-values.",
+          "Next `state` depends on previous `state`.",
+          "You want centralized `state` management in a component."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "const [state, dispatch] = useReducer(reducer, initialState);\n\n// Example usage:\ndispatch({ type: 'increment' });"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "27. What is the useRef hook and what are its common use cases?",
+      "paragraphs": [
+        "The `useRef` hook creates a mutable object that persists across renders without causing re-renders. It is commonly used to access DOM elements or store mutable values.",
+        "Common use cases:"
+      ],
+      "lists": [
+        [
+          "inputRef stores a reference to the input DOM node.",
+          "Calling inputRef.current.focus() focuses the input without re-rendering the component."
+        ],
+        [
+          "Accessing DOM nodes directly (focus, scroll, measure).",
+          "Storing mutable values that don’t trigger re-renders.",
+          "Keeping previous `state` values for comparison."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import { useRef } from 'react';\n\nfunction App() {\n  const inputRef = useRef();\n\n  const focusInput = () => {\n    inputRef.current.focus();\n  };\n\n  return (\n    \n      <input ref={inputRef} type=\"text\" />\n      <button onClick={focusInput}>Focus</button>\n    \n  );\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "28. Explain the difference between useMemo and useCallback?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "useMemo",
+            "useCallback"
+          ],
+          "rows": [
+            [
+              "Memoizes computed values",
+              "Memoizes functions"
+            ],
+            [
+              "Returns the result of a function",
+              "Returns the function itself"
+            ],
+            [
+              "Avoids expensive recalculations on re-render",
+              "Prevents re-creating functions on re-render"
+            ],
+            [
+              "Improves performance by caching values",
+              "Improves performance by avoiding unnecessary renders"
+            ],
+            [
+              "Key idea: caches value",
+              "Key idea: caches function"
+            ],
+            [
+              "Syntax: useMemo(() => computeValue(a, b), [a, b])",
+              "Syntax: useCallback(() => handleClick(id), [id])"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "29. What are custom hooks in React and how do you create one?",
+      "paragraphs": [
+        "Custom hooks are reusable functions that let you extract and share logic between functional components. They are JavaScript functions whose names start with use and can call other hooks like `useState` or `useEffect`.",
+        "In this example, useFetch is a custom hook that fetches data from an API and manages loading `state`. The hook is reused in App to keep the component clean and separate the data-fetching logic."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "import { useState, useEffect } from 'react';\n\nfunction useFetch(url) {\n  const [data, setData] = useState(null);\n  const [loading, setLoading] = useState(true);\n\n  useEffect(() => {\n    fetch(url)\n      .then(res => res.json())\n      .then(data => {\n        setData(data);\n        setLoading(false);\n      });\n  }, [url]);\n\n  return { data, loading };\n}\n\n// Usage in a component\nfunction App() {\n  const { data, loading } = useFetch('https://api.example.com/data');\n\n  if (loading) return Loading...;\n  return {JSON.stringify(data)};\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "30. What are the rules of hooks and why are they important?",
+      "paragraphs": [
+        "Hooks in React must follow certain rules to work correctly. These rules ensure that React can track `state` and effects reliably and prevent unexpected bugs.",
+        "Why they are important:"
+      ],
+      "lists": [
+        [
+          "Always call hooks at the top level of your component or custom hook.",
+          "Only call hooks from React functional components or custom hooks.",
+          "Custom hooks should always start with use, like useFetch or useForm."
+        ],
+        [
+          "Preserve `state` and effect order between renders.",
+          "Ensure components behave predictably.",
+          "Prevent bugs and unexpected behavior when using hooks like `useState` and `useEffect`."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "React State Management Interview Questions",
+      "paragraphs": [
+        "How React manages and updates component `state`, covering core concepts, `state` handling techniques, and best practices for maintaining predictable and scalable application data flow."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "31. What is Redux?",
+      "paragraphs": [
+        "`Redux` is a great way to store the entire application's `state` in a single store. When your application is small, you wouldn't be facing issues in handling the `state`. But when it starts growing you will find that `state` in various components is becoming unmanageable. Here `Redux` solves your problem.",
+        "`Redux` mainly works on three components",
+        "Store contains JavaScript objects. You can change the `state` by firing actions from your application. After that, you can write reducers for these actions and modify the `state`. The whole transition is kept inside the reducer, and it should not have any side effects.",
+        "Output:"
+      ],
+      "lists": [
+        [
+          "Action: Actions are payloads of information that send data from the application to the store. Actions are the only source of information for the store. We send them to the store using the store.dispatch().",
+          "Reducer: Reducer specifies how the applications' `state` changes in response to actions sent to the store. Actions describe what happened, but it doesn't describe how the application's `state` changes. Basically, a reducer determines how the `state` will change to action.",
+          "Store: Store objects bring the action and reducer together. You can access the `state` via getState(); It allows the `state` to be updated via dispatch (action);"
+        ],
+        [
+          "Store: A `Redux` store is created with a counterReducer to manage a count `state`.",
+          "Provider: Provider from react-redux makes the `Redux` store available to components.",
+          "Counter Component: useSelector fetches the count from the `Redux` store and useDispatch dispatches INCREMENT and DECREMENT actions to update the `state`."
+        ]
+      ],
+      "images": [
+        {
+          "alt": "redux",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20250321165445410227/redux.gif"
+        }
+      ],
+      "code": [
+        "import React from 'react';\nimport { Provider, useDispatch, useSelector } from 'react-redux';\nimport store from './store'; // Import the Redux store\n\nconst Counter = () => {\n    const dispatch = useDispatch(); // Dispatch actions to the store\n    const count = useSelector((state) => state.count); // Get count from Redux state\n\n    return (\n        \n            <h1>Count: {count}</h1>\n            <button onClick={() => dispatch({ type: 'INCREMENT' })}>Increment</button>\n            <button onClick={() => dispatch({ type: 'DECREMENT' })}>Decrement</button>\n        \n    );\n};\n\nconst App = () => (\n    <Provider store={store}>\n        <Counter />\n    </Provider>\n);\n\nexport default App;",
+        "import { createStore } from 'redux';\n\n// Reducer function to manage the state\nconst initialState = { count: 0 };\n\nconst counterReducer = (state = initialState, action) => {\n    switch (action.type) {\n        case 'INCREMENT':\n            return { count: state.count + 1 };\n        case 'DECREMENT':\n            return { count: state.count - 1 };\n        default:\n            return state;\n    }\n};\n\n// Create the Redux store\nconst store = createStore(counterReducer);\n\nexport default store;"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "32. What is Flux architecture in Redux?",
+      "paragraphs": [
+        "Flux is an application architecture popularized by Facebook for managing data flow in React applications. It emphasizes unidirectional data flow, which `Redux` builds upon. Flux consists of four parts: Dispatcher, Stores, Actions, and Views (React components).",
+        "Flux in `Redux`:",
+        "Points:"
+      ],
+      "lists": [
+        [
+          "Store: Equivalent to `Redux`’s store, holding the application `state`.",
+          "Actions: Same as `Redux` actions, triggering `state` changes.",
+          "Dispatcher: Handled internally by `Redux`, dispatching actions to reducers.",
+          "Reducers: Replace Flux’s store logic, updating `state` based on actions."
+        ],
+        [
+          "`Redux` is a refined implementation of Flux with a single store and pure reducers.",
+          "Unidirectional data flow ensures predictable `state` management.",
+          "Use `Redux` Toolkit to simplify Flux-like patterns in modern `Redux`."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "33. Explain Redux and its components.",
+      "paragraphs": [
+        "`Redux` is a `state` management library for predictable `state` updates. Its core components are:",
+        "Example:"
+      ],
+      "lists": [
+        [
+          "Store: Holds the entire application `state` in a single object.",
+          "Actions: Plain objects describing `state` changes (e.g., { type: 'ADD', payload: 1 }).",
+          "Reducers: Pure functions that update `state` based on actions."
+        ],
+        [
+          "Use `Redux` Toolkit to reduce boilerplate in modern `Redux`.",
+          "Middleware like `Redux` Thunk enables async actions."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import { configureStore, createSlice } from '@reduxjs/toolkit';\nimport { Provider, useSelector, useDispatch } from 'react-redux';\n\n// Slice\nconst counterSlice = createSlice({\n  name: 'counter',\n  initialState: { count: 0 },\n  reducers: {\n    add: (state, action) => {\n      state.count += action.payload;\n    },\n  },\n});\n\nconst { add } = counterSlice.actions;\n\n// Store\nconst store = configureStore({\n  reducer: counterSlice.reducer,\n});\n\n// Component\nfunction Counter() {\n  const count = useSelector(state => state.count);\n  const dispatch = useDispatch();\n\n  return (\n    \n      Count: {count}\n      <button onClick={() => dispatch(add(1))}>\n        Add\n      </button>\n    \n  );\n}\n\n// App\nfunction App() {\n  return (\n    <Provider store={store}>\n      <Counter />\n    </Provider>\n  );\n}",
+        "Redux is overkill for small apps; consider Context API instead."
+      ],
+      "tables": []
+    },
+    {
+      "heading": "34. What are the benefits of using React Redux?",
+      "paragraphs": [
+        "React `Redux` is the official React binding for `Redux`, a `state` management library that centralizes application `state` in a single store. It simplifies passing `state` between components, eliminating the need for prop drilling in large applications. `Redux` ensures predictable `state` updates through a unidirectional data flow, making it ideal for complex apps with shared `state`.",
+        "Example:"
+      ],
+      "lists": [
+        [
+          "Store: A single source of truth for the application `state`.",
+          "Actions: Objects that describe `state` changes.",
+          "Reducers: Pure functions that update the `state` based on actions."
+        ],
+        [
+          "React `Redux` connects React components to the `Redux` store using hooks like useSelector and useDispatch.",
+          "It’s suited for large-scale apps with complex `state` requirements.",
+          "Alternatives include `Context API` or Zustand for simpler `state` management."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import { configureStore, createSlice } from '@reduxjs/toolkit';\nimport { Provider, useSelector, useDispatch } from 'react-redux';\n\n// Slice\nconst counterSlice = createSlice({\n  name: 'counter',\n  initialState: { count: 0 },\n  reducers: {\n    increment: (state) => {\n      state.count += 1;\n    },\n  },\n});\n\nconst { increment } = counterSlice.actions;\n\n// Store\nconst store = configureStore({\n  reducer: counterSlice.reducer,\n});\n\n// Component\nfunction Counter() {\n  const count = useSelector((state) => state.count);\n  const dispatch = useDispatch();\n\n  return (\n    \n      {count}\n      <button onClick={() => dispatch(increment())}>Increment</button>\n    \n  );\n}\n\n// App\nfunction App() {\n  return (\n    <Provider store={store}>\n      <Counter />\n    </Provider>\n  );\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "35. What are the benefits of using React Redux?",
+      "paragraphs": [
+        "React `Redux` offers several advantages for managing `state` in React applications, particularly in large or complex projects.",
+        "Benefits:",
+        "Points:"
+      ],
+      "lists": [
+        [
+          "Centralized State Management: A single store holds all application `state`, making it easier to manage and access.",
+          "Performance Optimization: `Redux` prevents unnecessary re-renders by updating only components subscribed to relevant `state` changes.",
+          "Debugging: Tools like `Redux` DevTools enable time-travel debugging, action replay, and `state` inspection.",
+          "Persistent State: State can be saved to localStorage or a database for persistence across sessions.",
+          "Predictable Updates: Reducers are pure functions, ensuring consistent `state` changes.",
+          "Scalability: `Redux`’s structure supports growing applications with complex `state` interactions."
+        ],
+        [
+          "Use `Redux` for apps with global `state` shared across many components.",
+          "Combine with middleware like `Redux` Thunk for asynchronous operations.",
+          "Evaluate simpler alternatives like `Context API` for smaller apps to avoid overhead."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "36. Explain the core components of React Redux.",
+      "paragraphs": [
+        "React `Redux` relies on four core concepts that define how data flows through a `Redux`-powered React application.",
+        "Core Components:"
+      ],
+      "lists": [
+        [
+          "`Redux` Store: A single JavaScript object that holds the entire application `state`. Created using createStore from `Redux`.import { createStore } from 'redux';const store = createStore(reducer);",
+          "Action Creators: Functions that return action objects, describing what should happen.const increment = () => ({ type: 'INCREMENT' });",
+          "Actions: Plain objects with a type property (and optional payload) that trigger `state` changes.{ type: 'INCREMENT', payload: 1 }",
+          "Reducers: Pure functions that take the current `state` and an action, returning a new `state`.const reducer = (`state` = { count: 0 }, action) => {  switch (action.type) {    case 'INCREMENT':      return { count: `state`.count + 1 };    default:      return `state`;  }};"
+        ],
+        [
+          "The store dispatches actions, which reducers process to update the `state`.",
+          "Use Provider from react-redux to make the store available to components.",
+          "Actions are dispatched using useDispatch or connect in React `Redux`."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import { createStore } from 'redux';\nconst store = createStore(reducer);",
+        "const increment = () => ({ type: 'INCREMENT' });",
+        "{ type: 'INCREMENT', payload: 1 }",
+        "const reducer = (state = { count: 0 }, action) => {\n  switch (action.type) {\n    case 'INCREMENT':\n      return { count: state.count + 1 };\n    default:\n      return state;\n  }\n};"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "37. How can we combine multiple reducers in React?",
+      "paragraphs": [
+        "In `Redux`, large applications often require multiple reducers to manage different parts of the `state`. The combineReducers function from `Redux` merges these reducers into a single root reducer, which is then passed to the store.",
+        "Syntax:",
+        "Example:"
+      ],
+      "lists": [
+        [
+          "combineReducers creates a `state` object where each key corresponds to a reducer’s `state` slice.",
+          "Each reducer manages its own `state` independently, promoting modularity.",
+          "Use with useSelector to access specific `state` slices in components."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import { combineReducers } from 'redux';\nconst rootReducer = combineReducers({\n  reducer1: reducer1,\n  reducer2: reducer2,\n});",
+        "import { createStore, combineReducers } from 'redux';\n\n// Books Reducer\nconst booksReducer = (state = [], action) => {\n  switch (action.type) {\n    case 'ADD_BOOK':\n      return [...state, action.payload];\n    default:\n      return state;\n  }\n};\n\n// Active Book Reducer\nconst activeBookReducer = (state = null, action) => {\n  switch (action.type) {\n    case 'SELECT_BOOK':\n      return action.payload;\n    default:\n      return state;\n  }\n};\n// Combine Reducers\nconst rootReducer = combineReducers({\n  books: booksReducer,\n  activeBook: activeBookReducer,\n});\n\n// Create Store\nconst store = createStore(rootReducer);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "38. Explain Provider and Consumer in Context API?",
+      "paragraphs": [
+        "The `Context API` uses two key components to manage data flow: Provider and Consumer.",
+        "Example:"
+      ],
+      "lists": [
+        [
+          "Provider: A component that wraps part of the application and supplies the context value to its descendants. It’s typically placed high in the component tree.",
+          "Consumer: A component (or `useContext` hook) that accesses the context value provided by the nearest Provider. It subscribes to changes in the context value."
+        ],
+        [
+          "A Provider can override the default context value for its subtree.",
+          "Multiple Providers can be nested, with children accessing the nearest one.",
+          "Use `useContext` in functional components for simpler consumption."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import { createContext, useContext } from 'react';\n\nconst UserContext = createContext(null);\n\nfunction App() {\n  const user = { name: 'John' };\n  return (\n    <UserContext.Provider value={user}>\n      <Child />\n    </UserContext.Provider>\n  );\n}\n\nfunction Child() {\n  const user = useContext(UserContext);\n  return User: {user.name};\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "39. What is State Management in React and what is the difference between Local and Global State?",
+      "paragraphs": [
+        "State management refers to how an application handles and shares data across components. It ensures that the UI is updated correctly whenever the underlying data (`state`) changes. In React, `state` can be managed locally (inside components) or globally (shared across multiple components using context, `Redux`, Zustand, etc.)."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Local State",
+            "Global State"
+          ],
+          "rows": [
+            [
+              "Data managed within a single component.",
+              "Data shared across multiple components."
+            ],
+            [
+              "Controlled using useState or useReducer inside the component.",
+              "Managed using Context API, Redux, Zustand, etc."
+            ],
+            [
+              "Used for UI-related data like form inputs, modals, or toggles.",
+              "Used for app-wide data like authentication, user info, or theme"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "40. What are some popular state management solutions in React/Next.js?",
+      "paragraphs": [
+        "There are several approaches and libraries for managing `state` in React and Next.js, depending on the scale and complexity of your application:"
+      ],
+      "lists": [
+        [
+          "React built-in hooks: `useState`, `useReducer`, `useContext` – for local or small-scale `state` management.",
+          "`Context API`: Ideal for small to medium global `state` needs.",
+          "`Redux` / `Redux` Toolkit: Widely used for large-scale applications with complex `state` logic.",
+          "Zustand: Lightweight `state` management library for simplicity and performance.",
+          "Recoil / Jotai / MobX: Alternative libraries offering fine-grained `state` control.",
+          "Server-side `state` (Next.js): useSWR, React Query, or Server Actions for fetching and caching server data efficiently."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "41. When should you use Redux over Context API?",
+      "paragraphs": [
+        "Choosing between `Redux` and `Context API` depends on the size and complexity of your application:",
+        "Use `Redux` when:",
+        "Use `Context API` when:"
+      ],
+      "lists": [
+        [
+          "The application is large and complex.",
+          "You need predictable `state` management with debugging tools (e.g., `Redux` DevTools).",
+          "There are frequent `state` updates and many shared states across components."
+        ],
+        [
+          "The application is small or medium-sized.",
+          "You only need to share simple `state`, such as theme, language, or user info."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "42. What is the difference between Client State and Server State?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Client State",
+            "Server State"
+          ],
+          "rows": [
+            [
+              "Managed locally in the app",
+              "Managed on backend/server"
+            ],
+            [
+              "Controlled by useState, useReducer, Context",
+              "Controlled via API or DB"
+            ],
+            [
+              "Short-lived (browser session)",
+              "Persistent across sessions/users"
+            ],
+            [
+              "Examples: form inputs, UI toggles",
+              "Examples: user data, product list"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "43. Explain the Context API in React.",
+      "paragraphs": [
+        "The `Context API` in React is used to share data globally across components without prop drilling. It allows you to wrap components with a provider and access the shared value anywhere in the tree using `useContext`.createContext() : Creates a context."
+      ],
+      "lists": [
+        [
+          "Avoids prop drilling.",
+          "Uses Provider to supply data.",
+          "Components consume data with `useContext` or Consumer.",
+          "Best for global values like theme, auth, language.",
+          "Often combined with `useState`/`useReducer` for updates."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "44.  What is the role of useReducer in state management?",
+      "paragraphs": [
+        "The `useReducer` hook in React plays an important role in `state` management when the logic for updating `state` is complex or involves multiple actions. Unlike `useState`, which is best for simple `state` updates, `useReducer` organizes `state` transitions using a reducer function, making the code more predictable and easier to maintain. It is especially useful in larger applications or when managing related pieces of `state`."
+      ],
+      "lists": [
+        [
+          "Manages complex `state` logic more effectively than `useState`.",
+          "Uses a reducer function that takes `state` and action, then returns a new `state`.",
+          "Returns [`state`, dispatch], where dispatch triggers actions.",
+          "Helps keep `state` updates predictable and organized.",
+          "Often used in forms, lists, or apps needing `Redux`-like patterns."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "45. How do you handle persistent state in React apps?",
+      "paragraphs": [
+        "Persistent `state` ensures that certain data remains available even after page reloads or across sessions. Common approaches include:"
+      ],
+      "lists": [
+        [
+          "localStorage or sessionStorage: Save `state` that persists across page reloads.",
+          "Combine `state` hooks with effects: Use `useState` or `useReducer` together with `useEffect` to sync `state` with storage.",
+          "IndexedDB: For larger or more complex client-side storage needs.",
+          "Backend storage: Store `state` on a server/database via APIs for server-side persistence.",
+          "State management libraries: Use `Redux`, Zustand, or `Context API` with persistence middleware.",
+          "Cookies: Suitable for small pieces of data, like authentication tokens."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "46. What is the difference between derived state and computed state in React?",
+      "paragraphs": [
+        "In React, sometimes you need values that depend on other `state` or `props`. These values can be handled as derived `state` or computed `state`, but they work differently:"
+      ],
+      "lists": [
+        [
+          "Derived `state`: State calculated from `props` or other `state`. Should be avoided if it can be computed during render.",
+          "Computed `state`: Calculated on the fly during render or using hooks like `useMemo`. Ensures data stays consistent without storing redundant `state`."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "47. How can you optimize state updates for performance in React?",
+      "paragraphs": [
+        "Optimizing `state` updates ensures that components re-render only when necessary, improving performance in React applications:"
+      ],
+      "lists": [
+        [
+          "Keep `state` localized to the smallest possible component.",
+          "Use `useMemo` and `useCallback` to avoid unnecessary re-renders.",
+          "Batch `state` updates where possible.",
+          "Avoid deep nested objects in `state`; normalize the data.",
+          "Use `state` management libraries efficiently (e.g., `Redux` selectors, Zustand slices)."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "48. How do you handle asynchronous state updates in React?",
+      "paragraphs": [
+        "In React, `state` updates are asynchronous, so you need to handle them carefully to ensure predictable results:"
+      ],
+      "lists": [
+        [
+          "State updates (via setState or the setter from `useState`) do not happen immediately.",
+          "Use the functional form of setState when the new `state` depends on the previous `state`:"
+        ],
+        [
+          "For multiple sequential updates, consider `useReducer` for predictable `state` transitions.",
+          "Use effects (`useEffect`) to react to changes in `state` asynchronously."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "setCount(prevCount => prevCount + 1);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "React Rendering & Performance Questions:",
+      "paragraphs": [
+        "An exploration of how React updates the UI efficiently, focusing on rendering behavior, optimization techniques, and best practices to improve application performance."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "49. What is StrictMode in React?",
+      "paragraphs": [
+        "StrictMode is a React component that wraps parts of an application to highlight potential issues during development. It doesn’t render any UI but enables additional checks and warnings to improve code quality.",
+        "Features:",
+        "Example:"
+      ],
+      "lists": [
+        [
+          "Identifies deprecated APIs and unsafe lifecycle methods.",
+          "Warns about side effects in `useEffect` or `useState`.",
+          "Detects unexpected side effects by double-invoking certain functions in development."
+        ],
+        [
+          "Only active in development mode; no impact in production.",
+          "Helps catch bugs early, especially with React 18’s concurrent features.",
+          "Wrap only specific parts of the app if needed to isolate checks."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\n\nconst root = ReactDOM.createRoot(document.getElementById('root'));\nroot.render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>\n);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "50. Can you explain what the Virtual DOM is and how React uses it?",
+      "paragraphs": [
+        "The `Virtual DOM` (VDOM) is a lightweight, in-memory representation of the real DOM in the browser. Instead of updating the actual DOM directly, which can be slow and costly, React first updates the `Virtual DOM` when a component’s `state` or `props` change. React then compares the new `Virtual DOM` with the previous one using a process called diffing, identifies the minimum set of changes needed, and updates only those parts of the real DOM. This approach makes UI updates faster and more efficient by reducing unnecessary DOM manipulations. Key points:"
+      ],
+      "lists": [
+        [
+          "`Virtual DOM` is a JavaScript object representing the real DOM.",
+          "React updates the VDOM first, not the real DOM.",
+          "Uses a diffing algorithm to detect changes efficiently.",
+          "Only the necessary parts of the real DOM are updated.",
+          "Improves performance and user experience in dynamic applications."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "51. What do you understand by reconciliation in React? Why is it important?",
+      "paragraphs": [
+        "Reconciliation in React is the process of comparing the new `Virtual DOM` with the previous one to determine what has changed. React then updates only the necessary parts of the real DOM, instead of re-rendering the entire UI. This approach improves performance, rendering speed, and efficiency, ensuring a smooth and responsive user experience. Key points:"
+      ],
+      "lists": [
+        [
+          "Reconciliation is React’s process to update the DOM efficiently.",
+          "Compares new `Virtual DOM` with previous `Virtual DOM` using diffing.",
+          "Updates only the changed parts of the real DOM.",
+          "Improves performance, rendering speed, and efficiency.",
+          "Ensures a smooth and responsive UI."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "52. How does React.memo help improve performance?",
+      "paragraphs": [
+        "React.memo is a higher-order component that prevents unnecessary re-renders of functional components. It re-renders a component only if its `props` have changed, which helps improve performance in components that render frequently or are part of large lists.",
+        "Example: If you have a large list of items and only one item changes, React.memo ensures that the other list items do not re-render, saving processing time and improving UI performance."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "53. If I ask you to optimize a slow React application, what techniques would you use?",
+      "paragraphs": [
+        "To improve performance in a slow React application, you can use several optimization techniques:"
+      ],
+      "lists": [
+        [
+          "Use React.memo, `useMemo`, and `useCallback` to avoid unnecessary re-renders.",
+          "Split code using React.lazy and Suspense for on-demand component loading.",
+          "Optimize large lists with react-window or react-virtualized.",
+          "Avoid anonymous functions in render; use `useCallback` instead.",
+          "Keep `state` localized as much as possible instead of placing everything in global `state`.",
+          "Use proper key `props` when rendering lists.",
+          "For server data, use libraries like React Query or SWR with caching to reduce unnecessary refetching."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "54. What do you mean by code splitting and lazy loading in React?",
+      "paragraphs": [
+        "Code splitting and lazy loading are techniques used to improve performance by reducing the initial load time of a React application.",
+        "In React, this is often implemented with React.lazy and <Suspense>:"
+      ],
+      "lists": [
+        [
+          "Code Splitting: Breaks the app’s bundle into smaller chunks so the browser loads only what’s necessary.",
+          "Lazy Loading: Loads components only when they are needed, instead of loading everything upfront."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "const MyComponent = React.lazy(() => import('./MyComponent'));\n\nfunction App() {\n  return (\n    <Suspense fallback={Loading...}>\n      <MyComponent />\n    </Suspense>\n  );\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "55. How would you optimize a slow React application?",
+      "paragraphs": [
+        "Optimizing a React application ensures faster rendering and better performance, especially for large or complex apps:"
+      ],
+      "lists": [
+        [
+          "Use React.memo, `useMemo`, and `useCallback` to avoid unnecessary re-renders.",
+          "Split code with React.lazy and Suspense for on-demand loading.",
+          "Optimize large lists using react-window or react-virtualized.",
+          "Avoid anonymous functions in render; use `useCallback` instead.",
+          "Keep `state` localized instead of storing everything globally.",
+          "Use proper key `props` in lists to prevent unnecessary re-renders.",
+          "For server data, use React Query or SWR with caching to reduce refetching."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "56. What is the difference between React.PureComponent and React.Component?",
+      "paragraphs": [
+        "Both Component and PureComponent are used to create class components, but they handle re-rendering differently:"
+      ],
+      "lists": [
+        [
+          "React.Component: Always re-renders when setState is called, regardless of whether the `state` or `props` have changed.",
+          "React.PureComponent: Implements a shallow comparison of `props` and `state`; it only re-renders if something has actually changed."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "57. How does React handle re-rendering when state or props change?",
+      "paragraphs": [
+        "Components automatically re-render when their `state` or `props` change, but React optimizes this process using the virtual DOM:"
+      ],
+      "lists": [
+        [
+          "When `state` or `props` change, React creates a new `Virtual DOM` for the component.",
+          "It compares the new `Virtual DOM` with the previous one (diffing algorithm) to detect changes.",
+          "Only the necessary parts of the real DOM are updated.",
+          "This approach improves performance by avoiding full DOM updates and ensures the UI stays in sync with the data."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "58. What is the difference between controlled and uncontrolled components in terms of rendering?",
+      "paragraphs": [
+        "Form inputs can be controlled or uncontrolled, and this affects how they are rendered and updated:"
+      ],
+      "lists": [
+        [
+          "Controlled components: React manages the input’s value through `state`. The UI is always in sync with React `state`, and updates happen on every change via onChange.",
+          "Uncontrolled components: The DOM manages the input’s value, and React only accesses it when needed using refs. Useful for simple forms where you don’t need to track every change."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "59. How do useMemo and useCallback help improve performance in React?",
+      "paragraphs": [
+        "In React, re-renders can be expensive if functions or computed values are recreated unnecessarily. `useMemo` and `useCallback` help optimize rendering by caching values and functions:"
+      ],
+      "lists": [
+        [
+          "`useMemo`: Memoizes the result of a computation so that it is recalculated only when its dependencies change.",
+          "`useCallback`: Memoizes a function so that it is not recreated on every render, preventing unnecessary re-renders in child components.",
+          "Both hooks help avoid expensive recalculations and unnecessary re-renders, improving performance in large or complex components."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "React Arrays & Lists Questions:",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "60. How do you render a list of items in React?",
+      "paragraphs": [
+        "In React, lists are usually rendered using JavaScript’s .map() method. Each list item should also have a unique key prop so React can efficiently track and update elements.",
+        "In this Example, .map() is used to iterate over the array, and the key prop helps React identify each list item uniquely."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const fruits = [\"Apple\", \"Banana\", \"Mango\"];\nreturn (\n  \n    {fruits.map((fruit, index) => (\n      {fruit}\n    ))}\n  \n);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "61. Why is the key prop important in React lists?",
+      "paragraphs": [
+        "The key prop is important because it helps React efficiently manage list rendering. It allows React to identify which items have changed, been added, or removed, instead of re-rendering the entire list."
+      ],
+      "lists": [
+        [
+          "Helps React track elements and update only what’s necessary.",
+          "Prevents unnecessary re-renders, improving performance.",
+          "Best practice: Use a unique ID as the key instead of the array index whenever possible."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "62. What happens if we use the array index as a key in React?",
+      "paragraphs": [
+        "Using the array index as a key technically works, but it is not recommended in most cases. If the list changes (items are reordered, added, or removed), React may reuse components incorrectly, leading to UI bugs."
+      ],
+      "lists": [
+        [
+          "Can cause issues when list items are reordered.",
+          "May lead to incorrect updates if items are added or removed.",
+          "Safe only for static lists that never change."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "63. How do you conditionally render list items in React?",
+      "paragraphs": [
+        "In React, list items can be conditionally rendered using techniques like if statements, ternary operators, or array methods such as .filter() combined with .map()."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const users = [{name: \"Aman\", active: true}, {name: \"Raj\", active: false}];\nreturn (\n  \n    {users\n      .filter(user => user.active)\n      .map(user => {user.name})}\n  \n);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "64. How do you update or remove an item from a list in React state?",
+      "paragraphs": [
+        "State is immutable, so you cannot modify arrays directly. Instead, you create a new array using methods like .map() or .filter() and then update `state` with that new array.",
+        "Example (removing an item):",
+        "In this example, .filter() creates a new array without the removed item, and setList updates the `state`."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const [list, setList] = useState([\"A\", \"B\", \"C\"]);\n\nconst removeItem = (item) => {\n  setList(list.filter(i => i !== item));\n};"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "65. What are some performance tips when rendering large lists in React?",
+      "paragraphs": [
+        "Rendering very large lists can hurt performance, so React provides techniques and best practices to optimize them:"
+      ],
+      "lists": [
+        [
+          "Use unique keys so React can efficiently track items.",
+          "Use virtualization libraries like react-window or react-virtualized to render only the visible portion of the list.",
+          "Memoize list items with React.memo to prevent unnecessary re-renders.",
+          "Implement pagination or lazy loading instead of rendering thousands of items at once."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "66. How would you render a nested list in React?",
+      "paragraphs": [
+        "You can nest .map() calls: one for the parent array and another for the child array.",
+        "In this example, each level of data gets its own .map() loop, and both parent and child elements should have unique key `props`."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const categories = [\n  { name: \"Fruits\", items: [\"Apple\", \"Banana\"] },\n  { name: \"Veggies\", items: [\"Carrot\", \"Tomato\"] }\n];\n\nreturn (\n  \n    {categories.map(cat => (\n      \n        <h3>{cat.name}</h3>\n        \n          {cat.items.map(item => (\n            {item}\n          ))}\n        \n      \n    ))}\n  \n);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "67. How do you handle dynamic addition of items in a list?",
+      "paragraphs": [
+        "In React, since `state` is immutable, you cannot directly modify the existing array. Instead, you create a new array that includes the new item and update `state`."
+      ],
+      "lists": [
+        [
+          "[...list, item] creates a new array with the existing items plus the new one.",
+          "Calling setList with this new array updates the `state` and triggers a re-render, showing the updated list in the UI."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "const [list, setList] = useState([\"A\", \"B\"]);\n\nconst addItem = (item) => {\n  setList([...list, item]);\n};"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "68. How do you handle dynamic sorting or filtering of lists in React?",
+      "paragraphs": [
+        "In React, lists are usually stored in `state`, and you can sort or filter them dynamically by creating a new array based on the original list and updating the `state`."
+      ],
+      "lists": [
+        [
+          "filter creates a new array containing only the items that meet the condition.",
+          "sort rearranges the array items; using [...users] ensures the original `state` is not mutated.",
+          "Updating `state` with the new array triggers a re-render, displaying the sorted or filtered list in the UI."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "const [users, setUsers] = useState([\n  { name: \"Alen\", age: 25 },\n  { name: \"Roy\", age: 30 },\n  { name: \"Sebin\", age: 22 }\n]);\n\n// Filter active users\nconst filteredUsers = users.filter(user => user.age > 24);\n\n// Sort by name\nconst sortedUsers = [...users].sort((a, b) => a.name.localeCompare(b.name));"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "69. What is the difference between rendering lists with map() vs forEach()?",
+      "paragraphs": [
+        "When rendering lists, it’s important to return `JSX` elements for each item. The choice between map() and forEach() affects this:",
+        "Example using map():"
+      ],
+      "lists": [
+        [
+          "map(): Returns a new array, which can contain `JSX` elements to be rendered. This is the preferred method for rendering lists in React.",
+          "forEach(): Does not return a new array, so it cannot directly produce elements for rendering. It’s only useful for side effects."
+        ],
+        [
+          "map returns an array of <li> elements, which React renders.",
+          "Using forEach here would not work, because it does not return the array of elements."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "const fruits = [\"Apple\", \"Banana\", \"Mango\"];\nreturn (\n  \n    {fruits.map(fruit => {fruit})}\n  \n);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "React Forms & Events Questions:",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "70. How are forms handled in React compared to plain HTML?",
+      "paragraphs": [
+        "In plain HTML, the browser’s DOM manages form data. In React, form inputs are usually controlled components:",
+        "In this example, the input is fully controlled by React through value and onChange."
+      ],
+      "lists": [
+        [
+          "The form values live in `state`.",
+          "Each keystroke triggers an onChange handler to update `state`.",
+          "This makes the data predictable and easy to validate before submission."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "function MyForm() {\n  const [name, setName] = React.useState(\"\");\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    alert(\"Submitted: \" + name);\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <input \n        type=\"text\" \n        value={name} \n        onChange={(e) => setName(e.target.value)} \n      />\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "71. How do you prevent the default form submission behavior in React?",
+      "paragraphs": [
+        "By using event.preventDefault() inside the form’s onSubmit handler.",
+        "In this example, the page is stopped from reloading and lets React control what happens on submit."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const handleSubmit = (e) => {\n  e.preventDefault();\n  console.log(\"Form submitted!\");\n};"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "72. What is event bubbling and how can you stop it in React?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "Event Bubbling: When an event triggered on a child element propagates upward to its parent elements.",
+          "In React, you can stop it using event.stopPropagation()."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "const handleClick = (e) => {\n  e.stopPropagation();\n  console.log(\"Child clicked, but won’t bubble up.\");\n};"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "73. How do you handle multiple input fields in a single form in React?",
+      "paragraphs": [
+        "By using a single `state` object and updating it dynamically with name and value.",
+        "Example:",
+        "This way, one handler can manage multiple inputs."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const [formData, setFormData] = useState({ name: \"\", email: \"\" });\n\nconst handleChange = (e) => {\n  setFormData({ ...formData, [e.target.name]: e.target.value });\n};"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "74. How do you reset form fields after submission in React?",
+      "paragraphs": [
+        "In React, form inputs are usually controlled components, meaning their values are stored in `state`. To reset a form, you simply reset the `state` that controls the inputs:"
+      ],
+      "lists": [
+        [
+          "setFormData({ name: \"\", email: \"\" }) resets all input fields to their initial values.",
+          "This triggers a re-render, updating the UI with empty inputs."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "const [formData, setFormData] = useState({ name: \"\", email: \"\" });\n\nconst handleSubmit = (e) => {\n  e.preventDefault();\n  console.log(formData);\n  // Reset form fields\n  setFormData({ name: \"\", email: \"\" });\n};"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "React Routing Questions:",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "75. Explain the types of routers in React?",
+      "paragraphs": [
+        "React Router provides three types of routers for handling navigation in React applications, each suited for different use cases.",
+        "Types of Routers:",
+        "1. BrowserRouter: Uses HTML5 history API (pushState, replaceState, popState) to manage URLs, providing clean URLs (e.g., /about). Ideal for web applications with server support.",
+        "2. HashRouter: Uses the hash portion of the URL (e.g., /#about) for routing. Suitable for static sites or environments without server-side routing.",
+        "3. MemoryRouter: Stores URL history in memory, not in the browser. Useful for testing or non-browser environments like React Native."
+      ],
+      "lists": [
+        [
+          "BrowserRouter is the most common for modern web apps.",
+          "HashRouter is simpler for static hosting but less SEO-friendly.",
+          "MemoryRouter is rare, primarily for non-browser contexts."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import { BrowserRouter } from 'react-router-dom';",
+        "import { HashRouter } from 'react-router-dom';",
+        "import { MemoryRouter } from 'react-router-dom';"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "76. What is React Router and why is it used?",
+      "paragraphs": [
+        "React Router is a library that enables client-side routing in React applications. It allows you to create single-page applications (SPAs) where navigation between views happens without a full page reload, making apps faster and smoother."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "77. Difference between <a> tag and <Link> in React Router?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "<a> tag: Reloads the whole page when navigating.",
+          "<Link> component: Updates the URL and changes the component without reloading (SPA behavior)."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "78. What are the main components of React Router?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "<BrowserRouter> – Wraps the app and enables routing.",
+          "<Routes> – Container for all route definitions.",
+          "<Route> – Defines a path and the component to render.",
+          "<Link> / <NavLink> – For navigation.",
+          "useNavigate() – For programmatic navigation."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "79. What is the difference between useHistory and useNavigate?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "In React Router v5 : navigation was done using useHistory().",
+          "In React Router v6 : replaced with useNavigate()."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "const navigate = useNavigate();\nnavigate(\"/dashboard\");"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "80. How do you implement nested routes in React Router?",
+      "paragraphs": [
+        "/dashboard/profile : shows Profile inside Dashboard."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<Routes>\n  <Route path=\"/dashboard\" element={<Dashboard />}>\n    <Route path=\"profile\" element={<Profile />} />\n    <Route path=\"settings\" element={<Settings />} />\n  </Route>\n</Routes>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "81. What are route parameters and how do you access them?",
+      "paragraphs": [
+        "Route params are dynamic parts of the URL.",
+        "Inside User component:",
+        "/users/101 : id = 101"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<Route path=\"/users/:id\" element={<User />} />",
+        "import { useParams } from \"react-router-dom\";\nconst { id } = useParams();"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "82. How do you redirect a user in React Router?",
+      "paragraphs": [
+        "Using useNavigate() hook for programmatic redirects."
+      ],
+      "lists": [
+        [
+          "Using <Navigate> component:"
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<Route path=\"/old\" element={<Navigate to=\"/new\" />} />"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "83. What is the difference between client-side routing and server-side routing?",
+      "paragraphs": [
+        "Client-Side Routing",
+        "Example Flow:",
+        "Server-Side Routing",
+        "In server-side routing, whenever a user clicks a link or enters a URL:",
+        "Example Flow:"
+      ],
+      "lists": [
+        [
+          "In client-side routing, only the first request loads the HTML + JS bundle.",
+          "After that, navigation happens inside the browser using JavaScript (like React Router).",
+          "The page doesn’t reload : only the required component/view updates."
+        ],
+        [
+          "User visits /about.",
+          "Server sends index.html + JS bundle (React app).",
+          "React Router detects /about and loads <About /> component without reloading the page."
+        ],
+        [
+          "A request goes to the server.",
+          "The server processes it and sends back a new HTML page.",
+          "The browser reloads the page completely."
+        ],
+        [
+          "User visits /about.",
+          "Browser sends a request to server : /about.",
+          "Server responds with an about.html page.",
+          "Browser reloads and shows About page."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "84. Difference between <Switch> and <Routes> in React Router",
+      "paragraphs": [
+        "Switch:",
+        "Routes:"
+      ],
+      "lists": [
+        [
+          "Used in React Router v5 to render only the first matching route.",
+          "Checks routes from top to bottom and renders the first match.",
+          "If multiple routes match, only the first one is rendered.",
+          "The order of routes is very important.",
+          "Supported component, render, and children `props`.",
+          "Needed the exact keyword to avoid unwanted matches.",
+          "Nested routes were harder to manage."
+        ],
+        [
+          "Introduced in React Router v6 as a replacement for <Switch>.",
+          "Uses a ranking algorithm to automatically find the best match.",
+          "The order of routes does not matter.",
+          "Supports only the element prop for rendering.",
+          "Cleaner and simpler syntax compared to <Switch>.",
+          "No need for the exact keyword anymore.",
+          "Makes nested routing much easier.",
+          "<Switch> is deprecated, and <Routes> is now the recommended way."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "import { Routes, Route } from \"react-router-dom\";\n\n<Routes>\n  <Route path=\"/\" element={<Home />} />\n  <Route path=\"/about\" element={<About />} />\n  <Route path=\"/contact\" element={<Contact />} />\n</Routes>"
+      ],
+      "tables": []
+    }
+  ]
+}

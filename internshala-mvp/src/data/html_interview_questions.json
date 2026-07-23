@@ -1,0 +1,1452 @@
+{
+  "title": "HTML Interview Questions and Answers",
+  "url": "https://www.geeksforgeeks.org/html/html-interview-questions/",
+  "sections": [
+    {
+      "heading": "Beginner HTML Questions",
+      "paragraphs": [
+        "Here are some beginner-friendly HTML questions to help you get started."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "1. What are HTML tags?",
+      "paragraphs": [
+        "HTML tags are special keywords enclosed in angle brackets (< >) that tell a web browser how to structure and display content on a webpage."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<h1>Hello!</h1> <!-- This makes a big **heading** -->\nA **paragraph** goes here."
+      ],
+      "tables": []
+    },
+    {
+      "heading": "2. What’s the difference between HTML and HTML5?",
+      "paragraphs": [
+        "HTML is the general name for HyperText Markup Language, and HTML5 is the latest launched version in 2014. HTML5 added awesome features like:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Aspect",
+            "HTML",
+            "HTML5"
+          ],
+          "rows": [
+            [
+              "Doctype",
+              "Long & complex",
+              "Simple: <!DOCTYPE html>"
+            ],
+            [
+              "Multimedia",
+              "Needs plugins (Flash)",
+              "<audio>, <video>"
+            ],
+            [
+              "Graphics",
+              "No native support",
+              "<canvas>, <svg>"
+            ],
+            [
+              "Forms",
+              "Basic inputs",
+              "New inputs: email, date, etc."
+            ],
+            [
+              "Semantic Tags",
+              "Uses <div> mostly",
+              "<header>, <footer>, <article>"
+            ],
+            [
+              "APIs",
+              "None",
+              "Geolocation, Web Storage, etc"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "3. What’s the basic structure of an HTML document?",
+      "paragraphs": [
+        "Every HTML document needs a specific setup so browsers know how to read it. It’s like the blueprint for your web page. Here’s what goes in it:"
+      ],
+      "lists": [
+        [
+          "<!DOCTYPE html>: Tells the browser this is an HTML5 page.",
+          "`<html>`: The main container for everything else.",
+          "<head>: Holds behind-the-scenes info like the page title or links to CSS and JavaScript.",
+          "`<body>`: Where all the visible stuff goes, like text, images, or links."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>My Cool **Website**</title>\n</head>\n<body>\n  <h1>Hey There!</h1>\n  Welcome to my **page**.\n</body>\n</html>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "4. What’s the difference between a tag and an element?",
+      "paragraphs": [
+        "A tag is just the code you write, like `<p>` or </p>, inside angle brackets. An element is the whole package: the opening tag, the content inside, and the closing tag. Some tags, like `<img>`, are self-closing and don’t need a closing partner. So, tags are the tools, and elements are what you build with them."
+      ],
+      "lists": [
+        [
+          "Tag: `<div>` or </div>, just the code.",
+          "Element: `<div>`Hi there!</div>, the tag plus content."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "This is an **element**. <!--  and  are **tags** -->"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "5. What are attributes in HTML?",
+      "paragraphs": [
+        "Attributes are extra details you add to an opening tag to give it more powers. They look like name=\"value\". For example, they can tell a link where to go or an image what picture to show. Common ones are `href` for links, `src` for images, and id to give something a unique name."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "Click this **link** <!-- **href** is an **attribute** -->\n <!-- **src** and **alt** are **attributes** -->"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "6. What is the difference between <section>, <article>, and <div>?",
+      "paragraphs": [
+        "`<div>` is a generic container for styling or layout, `<section>` groups thematically related content, and `<article>` represents self-contained, independent content like blog posts or news items."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "<div>",
+            "<section>",
+            "<article>"
+          ],
+          "rows": [
+            [
+              "Generic container, no semantic meaning.",
+              "Groups related content thematically.",
+              "Self-contained content that stands independently."
+            ],
+            [
+              "Used for grouping elements.",
+              "Usually includes a heading (<h1>–<h6>).",
+              "Suitable for blog posts, news articles, comments."
+            ],
+            [
+              "Mainly for styling or layout purposes.",
+              "Helps structure content logically on the page.",
+              "Can be reused or syndicated."
+            ],
+            [
+              "Example: <div class=\"card\"><p>Styled content box</p></div>",
+              "Example: <section><h2>Services</h2><p>Web development and design</p></section>",
+              "Example: <article><h2>Blog Post</h2><p>This is a blog article</p></article>"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "7. How do you create hyperlinks? What are absolute vs relative URLs?",
+      "paragraphs": [
+        "A hyperlink is created using the `<a>` (anchor) tag and an `href` attribute that says where the link goes. The text inside the tag is what people click on to visit another page or resource.",
+        "This makes a clickable link that says “Go to Example” and takes you to that website.",
+        "Absolute URL: An absolute URL specifies the full path to the resource, including the protocol (http, https, etc.), domain, and file path. It works independently of the current page location.",
+        "Relative URL: A relative URL specifies the path to the resource relative to the current page’s location. It is used when linking to resources within the same website/project."
+      ],
+      "lists": [
+        [
+          "No matter where the current page is hosted, this link always points to the full domain."
+        ],
+        [
+          "If the current website is hosted at https://www.mysite.com, this link points to https://www.mysite.com/about.html."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "Go to Example",
+        "About Us",
+        "About Us"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "8. What’s the <img> tag for?",
+      "paragraphs": [
+        "The `<img>` tag puts pictures on your web page. It’s a self-closing tag, so it doesn’t need a closing part. You need two main attributes:",
+        "The `alt` text also helps Google understand your image, which is great for SEO."
+      ],
+      "lists": [
+        [
+          "`src`: Tells the browser where to find the image file.",
+          "`alt`: Gives a description of the image for accessibility (like for people using screen readers) or if the image doesn’t load."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "9. What’s the difference between block-level and inline elements?",
+      "paragraphs": [
+        "Block-level and inline elements act differently on a web page:"
+      ],
+      "lists": [
+        [
+          "Block-level elements: Take up the whole width of their space, start on a new line, and stack like boxes (e.g., `<div>`, `<p>`, <h1>). They’re great for big sections like paragraphs or headers.",
+          "Inline elements: Only use the space their content needs, stay on the same line, and flow with text (e.g., `<span>`, `<a>`, `<img>`). They’re perfect for small bits like links or images within a sentence."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "This **block** starts a new line.\nAnother **block**.\nThis **inline** stays here and so does this."
+      ],
+      "tables": []
+    },
+    {
+      "heading": "10. What kinds of lists can you make in HTML?",
+      "paragraphs": [
+        "HTML lets you create three types of lists:",
+        "For ordered and unordered lists, each item goes in an <li> (list item) tag."
+      ],
+      "lists": [
+        [
+          "Ordered List (<ol>): Shows items with numbers or letters (like 1, 2, 3).",
+          "Unordered List (<ul>): Uses bullets for items.",
+          "Description List (<dl>): Pairs terms (<dt>) with their descriptions (<dd>)."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "First **item**\n  Second **item**\n\n\n  **Bullet** point\n  Another **point**\n\n<dl>\n  <dt>**HTML**</dt>\n  <dd>**HyperText Markup Language**</dd>\n</dl>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "11. What is the <form> tag and what do action and method do?",
+      "paragraphs": [
+        "The `<form>` tag in HTML is used to create a form that collects user input and sends it to a server for processing. It acts as a container for input elements like text boxes, checkboxes, radio buttons, and buttons.",
+        "action attribute: Defines where the form data should be sent once the user submits it.",
+        "method attribute: Defines how the form data will be sent to the server.",
+        "This form asks for a name and sends it to /submit."
+      ],
+      "lists": [
+        [
+          "Example: action=\"/submit.php\" will send the form data to the submit.php file on the server."
+        ],
+        [
+          "GET: Appends the form data into the URL (visible in the address bar, suitable for non-sensitive data, like search queries).",
+          "POST: Sends data in the request body (not visible in the URL, better for sensitive or large data like passwords and file uploads)."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<form action=\"/submit\" method=\"post\">\n  <label for=\"name\">**Name**:</label>\n  <input type=\"text\" id=\"name\" name=\"name\">\n  <input type=\"submit\" value=\"**Send**\">\n</form>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "12. What does the <br> tag do and when should you avoid it?",
+      "paragraphs": [
+        "The <br> tag adds a line break, moving content to the next line without starting a new paragraph."
+      ],
+      "lists": [
+        [
+          "It’s self-closing and handy for things like addresses or poems where you want a quick line shift without extra space.",
+          "It should not be used for layout or spacing. Instead, use semantic HTML and CSS for better readability and maintainability."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "123 **Main St****New York**, NY"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "13. How do you make a link open in a new tab safely?",
+      "paragraphs": [
+        "To make a hyperlink open in a new tab, add target=\"_blank\" to the `<a>` tag. This keeps the current page open while the new page loads in a separate tab. Adding rel=\"noopener\" is a good idea for security, so the new tab can’t mess with your original page."
+      ],
+      "lists": [
+        [
+          "Using target=\"_blank\" alone exposes a security risk: the new page can access the window.opener property and potentially manipulate the original page (phishing or malicious redirects).",
+          "We add rel=\"noopener\" to prevent the new page from accessing window.opener"
+        ]
+      ],
+      "images": [],
+      "code": [
+        "Open in a **New Tab**"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "14. What does the <title> tag do and why is it important for SEO?",
+      "paragraphs": [
+        "The <title> tag sets the name of your web page that appears in the browser tab and helps people and search engines know what your page is about."
+      ],
+      "lists": [
+        [
+          "Helps Search Engines: Makes it easier for Google and others to understand your page.",
+          "Helps Visitors: Lets people quickly see what your page is about, so they know if they want to click."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<head>  <title>My Awesome **Website**</title></head>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "15. What’s the <meta>tag?",
+      "paragraphs": [
+        "The <meta> tag lives in the <head> and gives extra info about your web page, like what character set it uses, a description for search engines, or settings for mobile screens. It’s not visible to users but helps browsers and Google understand your page better."
+      ],
+      "lists": [
+        [
+          "Charset (<meta charset=\"UTF-8\">): Defines the character encoding of the web page. UTF-8 is the most widely used because it supports almost all characters and symbols across different languages.",
+          "Viewport: It helps control how a page is displayed on mobile and tablet devices. Ensures the website is responsive by setting the width of the page equal to the device’s screen width.",
+          "Description: It provides a short summary of the web page’s content. This description often appears in search engine results (SEO)."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<meta charset=\"UTF-8\"> <!-- Sets the **character encoding** --><meta name=\"description\" content=\"A cool **webpage**\"> <!-- Helps with **SEO** -->\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <!-- Makes it **mobile-friendly** -->"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "16. How do you make a table?",
+      "paragraphs": [
+        "A table is built with the <table> tag. You use <tr> for rows, <th> for headers, and <td> for data cells. Tables organize data in a grid, like for schedules or charts. For accessibility, add <thead>, <tbody>, and <caption> to make it clear what the table is about."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<table>\n  <caption>**Sales** Chart</caption>\n  <tr>\n    <th>**Item**</th>\n    <th>**Price**</th>\n  </tr>\n  <tr>\n    <td>**Book**</td>\n    <td>$10</td>\n  </tr>\n</table>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "17. How do you make an email link?",
+      "paragraphs": [
+        "An email link uses the `<a>` tag with a mailto: in the `href` attribute. When clicked, it opens the user’s email app with a new message to the email address you specify."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "Send an **Email**"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "18. What’s the <em> tag?",
+      "paragraphs": [
+        "The <em> tag emphasizes text, usually making it italic. Unlike <i>, which is just for style, <em> has meaning—it tells screen readers to stress the text, helping with accessibility and adding a bit of tone to your content."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "I **love** to **code**!"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "19. How do you make a checkbox?",
+      "paragraphs": [
+        "A checkbox uses <input type=\"checkbox\"> to let users select multiple options. Use a unique id for each checkbox and connect it to a <label> for accessibility. Use the same name to group them and checked to pre-select."
+      ],
+      "lists": [
+        [
+          "Each checkbox: unique id, meaningful value.",
+          "Label: <label for=\"...\"> or wrap the input.",
+          "Group: <fieldset> + <legend> describes the set.",
+          "Same name for the group (e.g., name=\"hobbies\")."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<input type=\"checkbox\" id=\"news\" name=\"news\" checked><label for=\"news\">Get the **Newsletter**</label>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "20. What is the <label> tag and how does for/id improve accessibility?",
+      "paragraphs": [
+        "The <label> tag provides a text description for a form input. Using for (on <label>) and id (on the input) links them so clicking the label focuses the input, and screen readers announce them together—greatly improving accessibility.",
+        "How for and id work together:",
+        "They create a direct connection between a label and its input, improving usability and accessibility."
+      ],
+      "lists": [
+        [
+          "Without a label: Users must click the small input box, and screen readers may not identify the field clearly.",
+          "With a label: Clicking the text focuses the input, and screen readers read the label with the field."
+        ],
+        [
+          "Each form control (like <input>) has a unique id.",
+          "The <label> uses the for attribute with the same value as that id.",
+          "This creates a direct link between the text and the input."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<label for=\"name\">**Name**:</label><input type=\"text\" id=\"name\" name=\"name\">"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "21. How do you make a dropdown list?",
+      "paragraphs": [
+        "A dropdown list uses the <select> tag, with options inside <option> tags. The name attribute sends the chosen value, and value sets what goes to the server. Pair it with a <label> for accessibility."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<label for=\"fruits\">Pick a **fruit**:</label>\n<select id=\"fruits\" name=\"fruits\">\n  <option value=\"apple\">**Apple**</option>\n  <option value=\"banana\">**Banana**</option>\n</select>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "22. What is the <blockquote> tag and when should you use cite?",
+      "paragraphs": [
+        "The <blockquote> tag is for long quotes from somewhere else, often shown with indentation. You can add a cite attribute to note the source URL, though it’s not visible. It’s semantic, so search engines know it’s a quote, which helps with SEO."
+      ],
+      "lists": [
+        [
+          "Cite Attribute: Specifies the source URL of the quote.",
+          "Accessibility: Screen readers can detect the source, helping visually impaired users.",
+          "SEO & Documentation: Search engines and documentation tools can recognize and credit the quote properly."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<blockquote cite=\"https://example.com/\">  A really **inspiring quote**.</blockquote>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "23. How HTML is different from CSS?",
+      "paragraphs": [
+        "HTML provides the structure and content of a webpage, while CSS controls its design and visual layout."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "HTML",
+            "CSS"
+          ],
+          "rows": [
+            [
+              "Defines the structure and content of a webpage",
+              "Styles and formats the appearance of the webpage"
+            ],
+            [
+              "Uses tags to add elements like text, images, and links",
+              "Uses selectors and properties to control colors, fonts, spacing, etc."
+            ],
+            [
+              "Forms the backbone of any webpage",
+              "Enhances visual appeal and layout"
+            ],
+            [
+              "Determines what appears on the page",
+              "Determines how it appears"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Intermediate HTML Questions",
+      "paragraphs": [
+        "These questions go beyond the basics, focusing on HTML5 features, semantics, forms, and attributes that improve accessibility, SEO, and user experience."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "24. What are semantic HTML elements?",
+      "paragraphs": [
+        "Semantic HTML elements clearly describe their purpose (e.g., <header>, <nav>, `<article>`, <footer>), making code readable, improving accessibility, and helping SEO."
+      ],
+      "lists": [
+        [
+          "Improves accessibility for screen readers.",
+          "Helps search engines understand page structure."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<header>\n  <nav>\n    \n      **Home**\n    \n  </nav>\n</header>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "25. How do you add a video in HTML5?",
+      "paragraphs": [
+        "HTML5 <video> tag lets you embed videos without extra software. Use controls for play/pause buttons, <source> for the video file, and fallback text if unsupported."
+      ],
+      "lists": [
+        [
+          "controls adds play, pause, and volume options.",
+          "<source> specifies video file and format."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<video controls>\n  <source src=\"movie.mp4\" type=\"video/mp4\">\n  Your **browser** doesn’t support **videos**.\n</video>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "26. Why is the alt attribute important in <img>?",
+      "paragraphs": [
+        "The `alt` attribute in `<img>` describes what the image is about. It’s a big deal because:"
+      ],
+      "lists": [
+        [
+          "Accessibility: Screen readers read it to visually impaired users.",
+          "SEO: Search engines use it to index images.",
+          "Backup: It shows up if the image doesn’t load."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "27. What’s the <fieldset>tag?",
+      "paragraphs": [
+        "<fieldset> groups related form elements, and <legend> adds a title for the group, improving form clarity and accessibility."
+      ],
+      "lists": [
+        [
+          "Helps users understand related fields.",
+          "Screen readers announce the group and its purpose."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<fieldset>\n  <legend>**Personal** Details</legend>\n  <label for=\"name\">**Name**:</label>\n  <input type=\"text\" id=\"name\" name=\"name\">\n</fieldset>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "28. What does <noscript> do and why is it still relevant?",
+      "paragraphs": [
+        "The <noscript> tag in HTML provides fallback content for users whose browsers do not support JavaScript or have it disabled. Anything inside <noscript> is displayed only when scripts can’t run."
+      ],
+      "lists": [
+        [
+          "Accessibility & graceful degradation: Some users disable JavaScript for speed, privacy, or security. <noscript> ensures they don’t miss critical content.",
+          "SEO impact: Search engine crawlers may not fully execute scripts; fallback text in <noscript> can improve discoverability.",
+          "Security environments: In corporate firewalls or browsers with JS blocked, <noscript> ensures forms, links, or instructions are still visible."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<script>\n  document.write(\"**JavaScript** is on!\");\n</script>\n<noscript>**JavaScript** is off. Turn it on for the full experience.</noscript>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "29. How do you add a JavaScript file?",
+      "paragraphs": [
+        "To add an external JavaScript file, use the <script> tag with a `src` attribute pointing to the file. Put it in the <head> (with `defer` or `async`) or at the end of `<body>` so the page loads faster without waiting for the script."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<script src=\"mycode.js\"></script>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "30. How do you add CSS styling in an HTML file?",
+      "paragraphs": [
+        "You can add CSS styling in three ways: inline, internal, or external, to style HTML elements and control their appearance."
+      ],
+      "lists": [
+        [
+          "Inline CSS: Apply styles directly to an element using the style attribute.<p style=\"color: blue; font-size: 16px;\">Hello!</p>",
+          "Internal CSS: Place CSS inside a <style> tag within the <head> section.<head>  <style>    p { color: blue; font-size: 16px; }  </style></head>",
+          "External CSS: Link an external .css file using the <link> tag.<head>  <link rel=\"stylesheet\" `href`=\"styles.css\"></head>"
+        ]
+      ],
+      "images": [],
+      "code": [
+        "Hello!",
+        "<head>\n  <style>\n    p { color: blue; font-size: 16px; }\n  </style>\n</head>",
+        "<head>\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "31. When should you use <strong>/<em> vs <b>/<i>? (semantics vs presentation)",
+      "paragraphs": [
+        "You should use <strong> and <em> when you want to give text semantic meaning, since they signal importance or emphasis to browsers, screen readers, and search engines—<strong> usually renders bold and <em> italic, but also carry meaning for accessibility."
+      ],
+      "lists": [
+        [
+          "<strong> and <em>: Give semantic meaning; show importance or emphasis.",
+          "<b> and <i>: Purely for styling; <b> makes text bold, <i> makes it italic. Useful for UI elements, foreign words, or stylistic highlights."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<b>**Bold** for looks</b>**Important** stuff"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "32. How do you make a multi-line text input?",
+      "paragraphs": [
+        "The <textarea> tag lets users type longer text, like a comment. You set its size with rows and cols attributes, and name sends the data when the form is submitted. You can add default text inside the tags."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<label for=\"comment\">**Comment**:</label>\n<textarea id=\"comment\" name=\"comment\" rows=\"4\" cols=\"50\">Type something here</textarea>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "33. What’s the action attribute in a form?",
+      "paragraphs": [
+        "The action attribute in a `<form>` tells the browser where to send the form data when submitted, like to a server address. If you don’t include it, the data goes to the same page you’re on."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<form action=\"/send-data\" method=\"post\">\n  <input type=\"text\" name=\"username\">\n  <input type=\"submit\">\n</form>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "34. What’s the <base> tag?",
+      "paragraphs": [
+        "The <base> tag goes in the <head> and sets a default starting point for all relative URLs on your page. It’s like saying, “All my links start from this address.” Be careful, as it affects every link on the page."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<head>\n  <base href=\"https://example.com//stuff/\">\n</head>\n**Link** <!-- Goes to https://example.com//stuff/page.html -->"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "35. What is enctype in forms? When to use multipart/form-data?",
+      "paragraphs": [
+        "The `enctype` attribute determines how form data is encoded when sent to the server, usually with method=\"post\". Here are the main types:",
+        "You should use `enctype`=\"multipart/form-data\" when your form involves file uploads (via <input type=\"file\">). Unlike the default encoding, this type splits the data into separate parts (one per field), allowing binary files (like images, PDFs, or videos) to be sent correctly along with text fields."
+      ],
+      "lists": [
+        [
+          "application/x-www-form-urlencoded: The default, turns data into URL-friendly format.",
+          "multipart/form-data: Needed for uploading files.",
+          "text/plain: Sends data as plain text (not common)."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<form action=\"/upload\" method=\"post\" enctype=\"multipart/form-data\">\n  <input type=\"file\" name=\"file\">\n  <input type=\"submit\">\n</form>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "36. How do you make a hidden input field?",
+      "paragraphs": [
+        "A hidden input field (<input type=\"hidden\">) stores data that gets sent with the form but isn’t shown to users. It’s great for things like user IDs or session tokens that the server needs."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<input type=\"hidden\" name=\"userID\" value=\"12345\">"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "37. What’s the <address>tag?",
+      "paragraphs": [
+        "The <address> tag holds contact info for the person or group behind a page or section, like an email, website, or street address. It’s semantic, so search engines recognize it, and browsers often style it in italics. It is used to display the author’s or owner’s contact details of a document or article."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<address>\n  **Jane Doe**\n  jane@example.com\n  456 **Park Ave**, **USA**\n</address>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "38. What’s the lang attribute in <html>?",
+      "paragraphs": [
+        "The lang attribute in the `<html>` tag tells browsers and search engines the main language of your page (like en for English). It helps screen readers read the content correctly and improves SEO for targeting the right audience."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<html lang=\"en\">\n  <head>\n    <title>My **English** Page</title>\n  </head>\n  <body>\n    Hello, **world**!\n  </body>\n</html>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "39. What’s the contenteditable attribute?",
+      "paragraphs": [
+        "The `contenteditable` attribute, when set to true, lets users edit text or content right in the browser. It’s cool for things like live editing tools, but you’ll need JavaScript to save the changes."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "Click to **edit** this **text**."
+      ],
+      "tables": []
+    },
+    {
+      "heading": "40. Are <div> and <span> tags similar?",
+      "paragraphs": [
+        "Both the tags (`<div>` and `<span>`) are used to represent the part of the web page. The `<div>` tag is used as the block component, and the `<span>` tag is used as an inline component."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "A Computer Science Portal for Geeks\n    \n        GeeksforGeeks"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "<div> tag",
+      "paragraphs": [],
+      "lists": [
+        [
+          "Block-level container used to divide sections of a webpage.",
+          "Commonly used for layout (header, footer, sections, etc.).",
+          "Always has opening `<div>` and closing </div> tags."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "<span> tag",
+      "paragraphs": [],
+      "lists": [
+        [
+          "Inline container used to style or group small pieces of content.",
+          "Does not start on a new line.",
+          "Mainly used with class or id when no semantic tag fits."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "First **item**\n  Second **item**\n\n\n  **Bullet** point\n  Another **point**\n\n<dl>\n  <dt>**HTML**</dt>2. Differences between  &  tag:\n  <dd>**HyperText Markup Language**</dd>\n\n</dl>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "41. Differences between <div> & <span> tag?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "<div> tag",
+            "<span> tag"
+          ],
+          "rows": [
+            [
+              "The <div> tag is a block level element.",
+              "The <span> tag is an inline element."
+            ],
+            [
+              "It is best to attach it to a section of a web page.",
+              "It is best to attach CSS to a small section of a line on a web page."
+            ],
+            [
+              "It accepts align attribute.",
+              "It does not accept aligned attributes."
+            ],
+            [
+              "This tag should be used to wrap a section, for highlighting that section.",
+              "This tag should be used to wrap any specific word that you want to highlight on your webpage."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "42. Are <div> and <span> tags similar?",
+      "paragraphs": [
+        "Both the tags (`<div>` and `<span>`) are used to represent the part of the web page. The `<div>` tag is used as the block component, and the `<span>` tag is used as an inline component.",
+        "`<div>` tag: The div tag is known as the Division tag. It is a block-level tag & is used in HTML to make divisions of content on the web page (text, images, header, footer, navigation bar, etc). Div tag has both openings (`<div>`) and closing (</div>) tags, and it is mandatory to close the tag.",
+        "`<span>` tag: The HTML span element is a generic inline container for inline elements and content. It is used to group elements for styling purposes (by using the class or id attributes). A better way to use it is when no other semantic element is available."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "A Computer Science Portal for Geeks\n    \n        GeeksforGeeks"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "43. What is the difference between classes and id?",
+      "paragraphs": [
+        "id Attribute: The id attribute is a unique identifier that is used to specify the document. It is used by CSS and JavaScript to perform a certain task for a unique element. In CSS, the id attribute is written using the # symbol followed by id.",
+        "Syntax:",
+        "class Attribute: The class attribute is used to specify one or more class names for an HTML element. The class attribute can be used on any HTML element. The class name can be used by CSS and JavaScript to perform certain tasks for elements with the specified class name. The class name can be represented by using the “.” symbol.",
+        "Syntax:",
+        "The only difference between them is that “id” is unique on a page and can only apply to at most one element, while the “class” selector can apply to multiple elements."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<element id=\"id_name\">\n\nIn CSS Stylesheet:\n#id_name {\n    // CSS Property\n}",
+        "<element class=\"class_name>\n\nIn CSS Stylesheet:\n.class {\n    // CSS Property\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "44. How can we create a nested webpage in HTML?",
+      "paragraphs": [
+        "When the content of one completely different webpage is embedded into another webpage, it is called a nested webpage. The nested webpage can be created using the following 2 methods:"
+      ],
+      "lists": [
+        [
+          "`<iframe>` tag: The iframe in HTML stands for Inline Frame. The “iframe” tag defines a rectangular region within the document in which the browser can display a separate document, including scrollbars and borders.",
+          "<embed> tag: The <embed> tag in HTML is used for embedding external applications which are generally multimedia content like audio or video into an HTML document."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "45. What are the tags that can be used inside the <head> tag?",
+      "paragraphs": [
+        "The <head> element is like a container for metadata i.e. data about data and it also lies between the `<html>` tag and the `<body>` tag. Metadata is the data about the HTML document and is not displayed on the webpage. It defines the document title, style, script, and other meta information.",
+        "The HTML <head> element is a container for the following elements:"
+      ],
+      "lists": [
+        [
+          "<title>: It defines the title of the webpage.",
+          "<link>: It is most often used to link an external CSS file.",
+          "<meta>: It is used to specify the Character set, Page description, Keywords, Author of the document, and Viewport settings. It will not be displayed but is used by browsers on how to display content or reload pages and by search engines, and other web services.",
+          "<base>: It is used to specify the base URL or target for relative URLs.",
+          "<style>: It is used to make internal CSS within our HTML webpage.",
+          "<script>: It is used to define within the HTML webpage."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "46. What are meta tags? How are they important?",
+      "paragraphs": [
+        "The metadata means information about data. The <meta> tag in HTML provides information about HTML Document or in simple words, it provides important information about a document. These tags are basically used to add name/value pairs to describe properties of HTML documents, such as expiry date, author name, list of keywords, document author, etc. This tag is an empty element because it only has an opening tag and no closing tag, but it carries information within its attributes. A web document can include one or more meta tags depending on information, but in general, it doesn’t affect the physical appearance of the document.",
+        "Syntax:"
+      ],
+      "lists": [
+        [
+          "The <meta> tag contents are not visible in the browser.",
+          "<meta> tags are added inside the <head> section of an HTML document.",
+          "They are used to provide additional information (metadata) about the HTML page.",
+          "<meta> tags help in Search Engine Optimization (SEO)."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<meta attribute-name=\"value\">"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "47.What is HTML Layout?",
+      "paragraphs": [
+        "Page layout is the part of graphic design that deals with the arrangement of visual elements on a page. Page layout is used to make the web pages look better. It establishes the overall appearance, relative importance, and relationships between the graphic elements to achieve a smooth flow of information and eye movement for maximum effectiveness or impact.",
+        "Page Layout Information:"
+      ],
+      "lists": [
+        [
+          "Header: The part of the front end which is used at the top of the page. <header> tag is used to add header section in web pages.",
+          "Navigation bar: The navigation bar is the same as the menu list. It is used to display the content information using hyperlinks.",
+          "Index / Sidebar: It holds additional information or advertisements and is not always necessary to be added to the page.",
+          "Content Section: The content section is the main part where content is displayed.",
+          "Footer: The footer section contains the contact information and other query related to web pages. The footer section is always put on the bottom of the web pages. The <footer> tag is used to set the footer on web pages."
+        ]
+      ],
+      "images": [
+        {
+          "alt": "layout",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20260119105756116735/layout.png"
+        }
+      ],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "48. What are semantic elements?",
+      "paragraphs": [
+        "Semantic Elements have meaningful names which tell about the type of content. For instance header, footer, table, … etc. HTML5 introduces many semantic elements as mentioned below which make the code easier to write and understand for the developer as well as instruct the browser on how to treat them."
+      ],
+      "lists": [
+        [
+          "article: It contains independent content which doesn't require any other context.",
+          "aside: It is used to place content in a sidebar i.e. aside from the existing content.",
+          "details: It defines additional details that the user can hide or view.",
+          "figure & figcaption: It is used to add an image to a web page with a small description.",
+          "footer: It is located at the bottom of any article or document, they can contain contact details, copyright information, etc.",
+          "header: It is used for the header of a section introductory of a page.",
+          "main: It defines the main content of the document.",
+          "mark: It is used to highlight the text.",
+          "nav: It is used to define a set of navigation links in the form of a navigation bar or nav menu.",
+          "section: A page can be split into sections like Introduction, Contact Information, Details, etc and each of these sections can be in a different section tag."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "49. What are HTML entities?",
+      "paragraphs": [
+        "HTML entities provides some method to display reserved characters. Reserved characters are those characters that are either reserved for HTML or those which are not present in the basic keyboard.",
+        "For Example: '<' is already reserved in HTML language. Sometimes this character needs to display on the web page which creates ambiguity in the code. Along with these are the characteristics which are normally not present in basic keyboard ( £, ¥, €, © ), etc. HTML provides some Entity names and Entity numbers to use these symbols. Entity number is easy to learn."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "50. How can we add symbols in HTML?",
+      "paragraphs": [
+        "There are some characters in HTML that are reserved, & have special meaning when they are used in an HTML document. Like if you used less than or greater than sign in your HTML document then the browser will treat them differently. So we will use HTML entities to insert  HTML symbols in a webpage."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Special Symbols",
+            "Syntax"
+          ],
+          "rows": [
+            [
+              "©:copyright",
+              "&copy;"
+            ],
+            [
+              "®:registered trademark",
+              "&reg;"
+            ],
+            [
+              "™:trade mark",
+              "&trade;"
+            ],
+            [
+              "@: at",
+              "&commat;"
+            ],
+            [
+              "¶: paragraph",
+              "&para;"
+            ],
+            [
+              "§: section",
+              "&sect;"
+            ],
+            [
+              "ℂ: double-struck capital c",
+              "&copf;"
+            ],
+            [
+              "℅: care of",
+              "&incare;"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "51. What is HTML Encoding?",
+      "paragraphs": [
+        "A Uniform Resource Locator (URL) is simply the address of a website to access the website content like www.geeksforgeeks.org. But there are certain characters allowed to use in the URL like alphabets A-Z and a-z, numbers 0-9, and a few special characters. They can be used as it is but the rest of the characters that are not in this list are used after encoding them to a suitable form.URL Encoding is the process of converting the URL into a valid format that is accepted by web browsers. URL Encoding takes place by replacing all the characters that are not allowed with a % sign followed by two hexadecimal digits. These two hexadecimal values represent the numerical values of the character in the ASCII character set. For example, a space is not acceptable in a URL and is replaced by ‘%20’ or a ‘+’ sign while encoding. Similarly, a $ sign is replaced by ‘%24’.",
+        "Reserved Characters: There are certain characters that sometimes have special meanings in the URL and they can be used in both ways. For example, the ‘/’ character is a reserved character and it has a special meaning when being used as a delimiter to separate the paths of a URL. Here it is used by encoding it to ‘%2F’. Else when it has no special purpose it can be used normally."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "52. What is the difference between the POST method and the GET method?",
+      "paragraphs": [
+        "The Hypertext Transfer Protocol (HTTP) is designed to enable communications between clients and servers. HTTP works as a request-response protocol between a client and server. There are 2 HTTP request methods ie., GET & POST"
+      ],
+      "lists": [
+        [
+          "GET: It requests data from a specified resource.",
+          "POST: This method is used to submit data to be processed to a specified resource.",
+          "The bold parts in the URL are the GET parameters and the italic parts are the value of those parameters.",
+          "More than one parameter=value can be embedded in the URL by concatenating with ampersands (&).",
+          "One can only send simple text data via GET method."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "53. What is HTML Canvas?",
+      "paragraphs": [
+        "The HTML “canvas” element is used to draw graphics via JavaScript.The “canvas” element is only a container for graphics. One must use JavaScript to actually draw the graphics. Canvas has several methods for drawing paths, boxes, circles, text, and adding images.",
+        "Example: The canvas would be a rectangular area on an HTML page. By default, a canvas has no border and no content. An id attribute has been specified to refer to it in a script, and a width and height attribute to define the size of the canvas. The style attribute is used to add a border.",
+        "Output:"
+      ],
+      "lists": [],
+      "images": [
+        {
+          "alt": "Html",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20260119114424876554/Html.png"
+        }
+      ],
+      "code": [
+        "<!DOCTYPE html>\n<html>\n\n<body>\n    <canvas id=\"myCanvas\" \n            width=\"400\" \n            height=\"200\"\n            style=\"border:2px solid #000000;\">\n    </canvas>\n</body>\n</html>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "54. What is SVG?",
+      "paragraphs": [
+        "SVG stands for Scalable Vector Graphics. It basically defines vector-based graphics in XML format. SVG graphics do NOT lose any quality if they are zoomed or resized. Every element and every attribute in SVG files can be animated.",
+        "Advantages of SVG: Advantages of using SVG over other image formats (like JPEG and GIF) are:"
+      ],
+      "lists": [
+        [
+          "SVG images can be created and edited with any text editor.",
+          "SVG images can be searched, indexed, scripted, and compressed.",
+          "SVG images are scalable.",
+          "SVG images can be printed with high quality at any resolution."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "55. What are the different multimedia formats supported by HTML?",
+      "paragraphs": [
+        "Multimedia files have formats and different extensions like .wav, .mp3, .mp4, .mpg, .wmv, and .avi."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "56. How can we allow the browser to tell our location using HTML Geolocation API?",
+      "paragraphs": [
+        "Geo-location in HTML5 is used to share the location with some web site and aware of the exact location. It is mainly used for local businesses, restaurants, or to show locations on the map. It uses JavaScript to give the latitude and longitude to the backend server. Most of the browsers support Geolocation API. Geo-location API uses a global navigator object which can be created as follows:",
+        "Displaying Location using HTML Geolocation: The following code is displaying the current location with the help of latitude and longitude via HTML Geolocation."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "var loc = navigator.geolocation",
+        "<!DOCTYPE html>\n<html>\n\n<head>\n    <title>Latitude and longitude</title>\n    <style>\n        .gfg {\n            font-size: 40px;\n            font-weight: bold;\n            color: #009900;\n            margin-left: 50px;\n        }\n        \n        .geeks {\n            margin-left: 150px;\n        }\n        \n        p {\n            font-size: 20px;\n            margin-left: 20px;\n        }\n    </style>\n</head>\n\n<body>\n    GeeksforGeeks\n    Displaying location using Latitude and Longitude\n    <button class=\"geeks\" \n            onclick=\"getlocation()\">\n        Click\n    </button>\n    \n\n    <script>\n        var variable1 = document.getElementById(\"demo1\");\n    \n        function getlocation() {\n            navigator.geolocation.getCurrentPosition(showLoc);\n        }\n    \n        function showLoc(pos) {\n            variable1.innerHTML = \"Latitude: \" \n        + pos.coords.latitude \n        + \"Longitude: \"\n        + pos.coords.longitude;\n        }\n    </script>\n</body>\n</html>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "57. What is HTML Web Storage API?",
+      "paragraphs": [
+        "SessionStorage and LocalStorage are known as the web storage API. Data can be stored on the client-side by using these APIs.",
+        "SessionStorage:"
+      ],
+      "lists": [
+        [
+          "SessionStorage is used for storing data on the client-side.",
+          "The maximum limit of data saving in SessionStorage is about 5 MB.",
+          "Data in the SessionStorage exist till the current tab is open if we close the current tab then our data will also erase automatically from the SessionStorage.",
+          "Like SessionStorage, LocalStorage is also used for storing the data on the client-side.",
+          "The maximum limit of data saving is about 5 MB in LocalStorage also.",
+          "LocalStorage has no expiration time, Data in the LocalStorage persist till the user manually deletes it. This is the only difference between LocalStorage and SessionStorage."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "58. What are forms in HTML?",
+      "paragraphs": [
+        "HTML Form is a document that stores information of a user on a web server using interactive controls. An HTML form contains different kinds of information such as username, password, contact number, email id, etc.",
+        "The elements used in an HTML form are check box, input box, radio buttons, submit buttons, etc. Using these elements the information of a user is submitted on a web server. The form tag is used to create an HTML form.",
+        "Output:"
+      ],
+      "lists": [],
+      "images": [
+        {
+          "alt": "html1",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20260119115109645602/html1.png"
+        }
+      ],
+      "code": [
+        "<!DOCTYPE html>\n<html>\n\n<body>\n    <form> \n        Username:\n        \n        <input type=\"text\" \n               name=\"username\">\n         \n        Email id:\n        <input type=\"text\" \n               name=\"email_id\">\n        \n        <input type=\"submit\" \n               value=\"Submit\">\n    </form>\n</body>\n</html>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "Advanced HTML Questions",
+      "paragraphs": [
+        "These questions cover modern and specialized HTML features—like `<canvas>`, `<dialog>`, Web Components, ARIA, and SEO-friendly practices"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "59. What’s the <canvas> element?",
+      "paragraphs": [
+        "The `<canvas>` element is like a blank drawing board for creating graphics, animations, or even games with JavaScript (using the Canvas API). You set its size with width and height. It’s often used for charts or fun visuals, with fallback text for browsers that don’t support it."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<canvas id=\"myCanvas\" width=\"200\" height=\"100\">\n  Your **browser** doesn’t support **canvas**.\n</canvas>\n<script>\n  const ctx = document.getElementById('myCanvas').getContext('2d');\n  ctx.fillRect(0, 0, 100, 50); // Draws a **rectangle**\n</script>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "60. What is the <dialog> element and how do showModal() / close() work?",
+      "paragraphs": [
+        "The `<dialog>` element in HTML provides a native, accessible way to create modal and non-modal dialogs. Unlike custom popups built with `<div>` and JavaScript, `<dialog>` comes with built-in focus management, keyboard accessibility, and an optional backdrop for modals.",
+        "Using showModal()",
+        "Using close()"
+      ],
+      "lists": [
+        [
+          "Displays the dialog as a modal with a backdrop.",
+          "Focus automatically moves inside the dialog.",
+          "Blocks interaction with other page content until closed."
+        ],
+        [
+          "Closes the dialog and removes the modal backdrop.",
+          "Can return a value (string) to indicate why it was closed.",
+          "Restores focus back to the element that opened it."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<dialog id=\"myDialog\">\n  This is a modal dialog.\n  <button id=\"closeBtn\">Close</button>\n</dialog>\n\n<button id=\"openBtn\">Open Dialog</button>\n\n<script>\n  const dialog = document.getElementById(\"myDialog\");\n  document.getElementById(\"openBtn\").onclick = () => dialog.showModal();\n  document.getElementById(\"closeBtn\").onclick = () => dialog.close();\n</script>",
+        "dialog.close(\"user-cancelled\");"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "61. How do you add SVG to HTML?",
+      "paragraphs": [
+        "SVG (Scalable Vector Graphics) uses the <svg>tag to create graphics that look sharp at any size. They’re perfect for icons, logos, or charts because they’re lightweight and don’t get pixelated.",
+        "This draws a red circle."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<svg width=\"100\" height=\"100\">\n  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "62. What are data attributes?",
+      "paragraphs": [
+        "Data attributes (data-*) let you store custom info in HTML elements that JavaScript can use. They start with data- and a name you choose, and you grab them with the dataset property. They’re handy for passing data to scripts without messing up the age."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "**User**\n<script>\n  const div = document.querySelector('div');\n  console.log(div.dataset.userId); // 12345\n  console.log(div.dataset.role); // **admin**\n</script>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "63. What’s the <template>tag?",
+      "paragraphs": [
+        "The `<template>` tag holds HTML content that doesn’t show up right away but can be used later with JavaScript. It’s like a stash for reusable code, perfect for components or dynamic content that you’ll add when needed."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<template id=\"my-template\">\n  Hello, **world**!\n</template>\n<script>\n  const template = document.getElementById('my-template').content;\n  document.body.appendChild(template.cloneNode(true));\n</script>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "64. What’s the rel attribute in <link>?",
+      "paragraphs": [
+        "The rel attribute in <link> explains how the linked resource relates to your page. Common ones are stylesheet for CSS, icon for favicons, or alternate for things like RSS feeds. It helps browsers know what the link is for."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<link rel=\"stylesheet\" href=\"styles.css\"><link rel=\"icon\" href=\"favicon.ico\">"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "65. How do you show different language versions of a webpage?",
+      "paragraphs": [
+        "Use <link> with rel=\"alternate\" and hreflang to point to versions of your page in other languages. The hreflang attribute uses a language code (like fr for French) to tell search engines which version to show users."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<link rel=\"alternate\" href=\"example.fr.html\" hreflang=\"fr\"><link rel=\"alternate\" href=\"example.es.html\" hreflang=\"es\">"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "66. What’s the <output> tag?",
+      "paragraphs": [
+        "The `<output>` tag shows the result of something a user does or a calculation, usually in a form. It links to inputs with the forattribute and updates with JavaScript or the oninputevent, great for live updates like a calculator."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<form oninput=\"result.value=parseInt(a.value)+parseInt(b.value)\">\n  <input type=\"number\" id=\"a\" value=\"0\"> +\n  <input type=\"number\" id=\"b\" value=\"0\"> =\n  <output name=\"result\" for=\"a b\">0</output>\n</form>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "67. What’s the <datalist>tag?",
+      "paragraphs": [
+        "The `<datalist>` tag gives a list of suggestions for an <input>field, like an autocomplete dropdown. Connect it with the listattribute in <input> matching the `<datalist>`’s id. Users can type or pick from the list."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<label for=\"browser\">Choose a **browser**:</label>\n<input list=\"browsers\" id=\"browser\" name=\"browser\">\n<datalist id=\"browsers\">\n  <option value=\"Chrome\">\n  <option value=\"Firefox\">\n</datalist>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "68. What’s the difference between defer and async in <script>?",
+      "paragraphs": [
+        "The `defer` and `async` attributes make JavaScript files load smarter to speed up your page:"
+      ],
+      "lists": [
+        [
+          "`defer`: Grabs the script while the page loads but waits until the HTML is fully ready to run it, keeping scripts in order.",
+          "`async`: Runs the script as soon as it’s downloaded, which might mix up the order and cause issues if it needs the page to be ready."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<script defer src=\"script1.js\"></script> <!-- Runs after **HTML** is ready -->\n<script async src=\"script2.js\"></script> <!-- Runs as soon as it’s **downloaded** -->"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "69. What are Web Components?",
+      "paragraphs": [
+        "Web Components are a way to create custom HTML elements that you can reuse, with their own styles and behavior hidden away. They use:",
+        "They’re awesome for building modular pieces that work without needing a big framework."
+      ],
+      "lists": [
+        [
+          "Custom Elements: Make your own tags (like <my-cool-tag>).",
+          "Shadow DOM: Keeps styles and code separate from the rest of the page.",
+          "HTML Templates: Store code in `<template>` for later use."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<custom-element>Cool **stuff**</custom-element>\n<script>\n  class CustomElement extends HTMLElement {\n    constructor() {\n      super();\n      this.attachShadow({ mode: 'open' });\n      this.shadowRoot.innerHTML = 'My **Custom** Component';\n    }\n  }\n  customElements.define('custom-element', CustomElement);\n</script>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "70. What’s ARIA, and how do you use it?",
+      "paragraphs": [
+        "ARIA (Accessible Rich Internet Applications) adds attributes to make dynamic or tricky web content easier for screen readers to understand. ARIA roles (like role=\"alert\") and properties (like aria-label) give extra clues, especially for JavaScript-heavy pages."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<button aria-label=\"Close **dialog**\">X</button> <!-- Explains what the **button** does -->\n**Error**: Bad **input** <!-- Marks it as an **urgent** message -->"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "71. How do you lazy-load images and control loading priority?",
+      "paragraphs": [
+        "Lazy loading waits to load images until they’re almost visible on the screen, making your page load faster. Just add loading=\"lazy\" to `<img>` or `<iframe>`. Modern browsers support this, and it’s great for pages with lots of images.",
+        "The problem: browsers don’t always know which images matter most to you. That’s why attributes like fetchpriority and <link rel=\"preload\"> exist—to give hints about resource importance."
+      ],
+      "lists": [
+        [
+          "loading=\"lazy\"; Loads only when close to being visible.",
+          "loading=\"eager\"; Loads immediately, regardless of whether it’s in view.",
+          "loading=\"auto\"; Lets the browser decide."
+        ],
+        [
+          "fetchpriority: This is a developer hint to tell the browser how urgent an image is relative to others. For example, a hero image at the top should not be delayed behind thumbnail images far below the fold.",
+          "<link rel=\"preload\">: This is a stronger instruction—it asks the browser to start fetching the resource as soon as possible, even before it’s needed in rendering. It’s often used for critical images, fonts, or scripts."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "72. What’s microdata, and how does it help SEO?",
+      "paragraphs": [
+        "Microdata adds structured data to your HTML with attributes like itemscope, itemtype, and itemprop, using standards like Schema.org. It helps search engines understand your content (like a product’s price or a person’s name), which can make your search results pop with rich snippets."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "**John Doe**\n  **Developer**"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "73. How do you make HTML better for SEO?",
+      "paragraphs": [
+        "To make your HTML shine for SEO, so search engines love your page, try these:"
+      ],
+      "lists": [
+        [
+          "Use semantic elements like <header> or `<article>` to organize content clearly.",
+          "Add <meta>tags like description to summarize your page.",
+          "Put alttext on images so Google can index them.",
+          "Use hreflang for multilingual sites to reach the right users.",
+          "Speed up loading with `defer` or `async` for scripts."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "<head>\n  <meta name=\"description\" content=\"Learn **web development** tips\">\n  <title>**Web** Guide</title>\n</head>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "74. What’s the <picture> element?",
+      "paragraphs": [
+        "The `<picture>` element lets you offer different images for responsive design or formats like WebP. It uses <source>tags with rules (like screen size) and a fallback `<img>` tag, so browsers pick the best image."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<picture>\n  <source media=\"(min-width: 800px)\" srcset=\"big.jpg\">\n  <source srcset=\"small.webp\" type=\"image/webp\">\n  \n</picture>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "75. How do you create an iframe?",
+      "paragraphs": [
+        "An iframe (`<iframe>`) embeds another webpage or content inside your page. Use attributes like `src`, width, and height to control it. It’s great for things like maps, videos, or forms from other sites."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<iframe src=\"https://example.com/\" width=\"600\" height=\"400\" title=\"**Embedded** Page\"></iframe>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "76. What’s the tabindex attribute?",
+      "paragraphs": [
+        "The `tabindex` attribute controls how elements get focused when users navigate with a keyboard. Here’s how it works:"
+      ],
+      "lists": [
+        [
+          "0: Lets the element be focused in the normal order.",
+          "Positive numbers (like 1): Sets a custom focus order (use sparingly).",
+          "-1: Makes it focusable with code but skips it when tabbing."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "**Focusable** div<button tabindex=\"1\">First **button**</button>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "77. How do you validate an HTML form?",
+      "paragraphs": [
+        "HTML5 has built-in validation for forms using attributes like required, type, pattern, or min/max. These check user input before the form is sent, saving server work. You can also use JavaScript for fancier checks.",
+        "This checks for a valid email and makes it required."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<form>\n  <label for=\"email\">**Email**:</label>\n  <input type=\"email\" id=\"email\" name=\"email\" required pattern=\"[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$\">\n  <input type=\"submit\">\n</form>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "78. What are the <figure> and <figcaption> tags?",
+      "paragraphs": [
+        "The <figure> tag groups content like images or charts, and <figcaption> adds a caption to explain it. They’re semantic, so they help accessibility (for screen readers) and SEO by linking the caption to the content."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<figure>\n  \n  <figcaption>**Sales** data for 2024</figcaption>\n</figure>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "79. What are HTML Global Attributes? Give examples.",
+      "paragraphs": [
+        "Global attributes are special attributes that can be used on any HTML element, not just specific tags. They give elements extra functionality or metadata without changing the tag itself.",
+        "Common Global Attributes:",
+        "1. id – Assigns a unique identifier to an element.",
+        "2. class – Assigns one or more classes for CSS styling or JavaScript.",
+        "3. title – Provides extra information shown as a tooltip on hover.",
+        "4. hidden – Hides the element from display.",
+        "5. `tabindex` – Controls the order of keyboard focus on elements.",
+        "6. `contenteditable`– Makes an element editable by the user in the browser.",
+        "7. data- (custom data attributes) – Stores custom data that JavaScript can access.",
+        "Key Point: Global attributes can be applied to almost any HTML tag, making them extremely versatile for styling, scripting, and accessibility."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "Welcome to my page",
+        "Content here",
+        "<abbr title=\"HyperText Markup Language\">HTML</abbr>",
+        "This text is hidden",
+        "<button tabindex=\"1\">Click Me</button>",
+        "Edit this text",
+        "User Info"
+      ],
+      "tables": []
+    }
+  ]
+}

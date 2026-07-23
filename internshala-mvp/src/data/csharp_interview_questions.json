@@ -52,7 +52,7 @@
             [
               "4.",
               "C language can be executed cross-platform.",
-              "Whereas .NET Framework is required to execute C# language."
+              "Whereas .NET Framework is required to execute C# language."
             ],
             [
               "5.",
@@ -125,7 +125,7 @@
     {
       "heading": "6. What is enum in C#?",
       "paragraphs": [
-        "Enumeration (or enum) is a value data type in C#. It is mainly used to assign the names or string values to integral constants, which make a program easy to read and maintain. For example, the 4 suits in a deck of playing cards may be 4 enumerators named Club, Diamond, Heart, and Spade, belonging to an enumerated type named Suit. Other examples include natural enumerated types (like the planets, days of the week, colors, directions, etc.). The main objective of enum is to define our own data types(Enumerated Data Types). Enumeration is declared using the enum keyword directly inside a namespace, class, or structure. To read more, refer to the article: Enum in C#"
+        "Enumeration (or enum) is a value data type in C#. It is mainly used to assign the names or string values to integral constants, which make a program easy to read and maintain. For example, the 4 suits in a deck of playing cards may be 4 enumerators named Club, Diamond, Heart, and Spade, belonging to an enumerated type named Suit. Other examples include natural enumerated types (like the planets, days of the week, colors, directions, etc.). The main objective of enum is to define our own data types(Enumerated Data Types). Enumeration is declared `using` the enum keyword directly inside a `namespace`, class, or structure. To read more, refer to the article: Enum in C#"
       ],
       "lists": [],
       "images": [],
@@ -146,7 +146,7 @@
     {
       "heading": "8. What are Properties in C#?",
       "paragraphs": [
-        "Properties are the special type of class members that provides a flexible mechanism to read, write, or compute the value of a private field. Properties can be used as if they are public data members, but they are actually special methods called accessors. This enables data to be accessed easily and helps to promote the flexibility and safety of methods. Encapsulation and hiding of information can also be achieved using properties. It uses pre-defined methods which are “get” and “set” methods which help to access and modify the properties.",
+        "Properties are the special type of class members that provides a flexible mechanism to read, write, or compute the value of a private field. Properties can be used as if they are public data members, but they are actually special methods called accessors. This enables data to be accessed easily and helps to promote the flexibility and safety of methods. Encapsulation and hiding of information can also be achieved `using` properties. It uses pre-defined methods which are “get” and “set” methods which help to access and modify the properties.",
         "Accessors: The block of “set” and “get” is known as “Accessors”. It is very essential to restrict the accessibility of the property. There are two types of accessors i.e. get accessors and set accessors. There are different types of properties based on the “get” and set accessors:"
       ],
       "lists": [
@@ -164,7 +164,7 @@
     {
       "heading": "9. What is the difference between constant and read-only in C#?",
       "paragraphs": [
-        "In C#, a const keyword is used to declare constant fields and constant local. The value of the constant field is the same throughout the program or in other words, once the constant field is assigned the value of this field is not be changed. In C#, constant fields and locals are not variables, a constant is a number, string, null reference, boolean values. readonly keyword is used to declare a readonly variable. This readonly keyword shows that you can assign the variable only when you declare a variable or in a constructor of the same class in which it is declared.",
+        "In C#, a `const` keyword is used to declare constant fields and constant local. The value of the constant field is the same throughout the program or in other words, once the constant field is assigned the value of this field is not be changed. In C#, constant fields and locals are not variables, a constant is a number, string, null reference, boolean values. `readonly` keyword is used to declare a `readonly` variable. This `readonly` keyword shows that you can assign the variable only when you declare a variable or in a constructor of the same class in which it is declared.",
         "To read more, refer to the article: constant and read-only in C#"
       ],
       "lists": [],
@@ -207,7 +207,7 @@
       "heading": "13.  What is the difference between \"is\" and \"as\" operators in C#?",
       "paragraphs": [
         "C# includes three keywords that support runtime type identification: is, as, and typeof.",
-        "is operator: We can determine if an object is of a particular type by using the is operator. Its general form is shown here:",
+        "is operator: We can determine if an object is of a particular type by `using` the is operator. Its general form is shown here:",
         "expr is type",
         "Here, expr is an expression that describes an object whose type is being tested against type. If the type of expr is that the same as, or compatible with, type, then the result of this operation is true. Otherwise, it is false. Thus, if the result is true, expr is a  form of type. Because it applies to is, one type is compatible with another if both are the equivalent of type, or if a reference, boxing, or unboxing conversion exists.",
         "As operator: Sometimes if we want to try a conversion at runtime, but not throw an exception if the conversion fails (which is the case when a cast is used). To do this, use the as operator, which has this general form:",
@@ -232,7 +232,7 @@
     {
       "heading": "15. What are namespaces in C#?",
       "paragraphs": [
-        "It provides a way to keep one set of names(like class names) different from other sets of names. The biggest advantage of using namespace is that the class names which are declared in one namespace will not clash with the same class names declared in another namespace. It is also referred as named group of classes having common features. To read more about this, please refer to Namespaces in C#"
+        "It provides a way to keep one set of names(like class names) different from other sets of names. The biggest advantage of `using` `namespace` is that the class names which are declared in one `namespace` will not clash with the same class names declared in another `namespace`. It is also referred as named group of classes having common features. To read more about this, please refer to Namespaces in C#"
       ],
       "lists": [],
       "images": [],
@@ -242,7 +242,7 @@
     {
       "heading": "16.  Who can be the members of namespaces in C#?",
       "paragraphs": [
-        "The members of a namespace can be namespaces, interfaces, structures, and delegates."
+        "The members of a `namespace` can be namespaces, interfaces, structures, and delegates."
       ],
       "lists": [],
       "images": [
@@ -286,7 +286,7 @@
       "heading": "19. What is the  System. String and System.Text.StringBuilder classes?",
       "paragraphs": [
         "C# StringBuilder is similar to Java StringBuilder. A String object is immutable, i.e. a String cannot be changed once created. Every time when you use any of the methods of the System. String class, then you create a new string object in memory. For example, a string “GeeksForGeeks” occupies memory in the heap, now, changing the initial string “GeeksForGeeks” to “GFG” will create a new string object on the memory heap instead of modifying the initial string at the same memory location. In situations where you need to perform repeated modifications to a string, we need the StringBuilder class.",
-        "To avoid string replacing, appending, removing, or inserting new strings in the initial string C# introduce StringBuilder concept. StringBuilder is a dynamic object. It doesn’t create a new object in the memory but dynamically expands the needed memory to accommodate the modified or new string. To read more, refer to the article: System.String and System.Text.StringBuilder in C#"
+        "To avoid string replacing, appending, removing, or inserting new strings in the initial string C# introduce StringBuilder concept. StringBuilder is a `dynamic` object. It doesn’t create a new object in the memory but dynamically expands the needed memory to accommodate the modified or new string. To read more, refer to the article: System.String and System.Text.StringBuilder in C#"
       ],
       "lists": [],
       "images": [],
@@ -400,16 +400,14 @@
     {
       "heading": "24. What are partial classes in C#?",
       "paragraphs": [
-        "A partial class is a special feature of C#. It provides a special ability to implement the functionality of a single class into multiple files and all these files are combined into a single class file when the application is compiled. A partial class is created by using a partial keyword. This keyword is also useful to split the functionality of methods, interfaces, or structure into multiple files.",
-        "public partial Class_name",
-        "{",
-        "// Code",
-        "}",
+        "A `partial` class is a special feature of C#. It provides a special ability to implement the functionality of a single class into multiple files and all these files are combined into a single class file when the application is compiled. A `partial` class is created by `using` a `partial` keyword. This keyword is also useful to split the functionality of methods, interfaces, or structure into multiple files.",
         "To read more, refer to the article: Partial classes in C#"
       ],
       "lists": [],
       "images": [],
-      "code": [],
+      "code": [
+        "public partial Class_name\n{\n    // Code\n}"
+      ],
       "tables": []
     },
     {
@@ -417,7 +415,7 @@
       "paragraphs": [
         "When an object is assigned to an object variable of the specific type, then the C# compiler performs the binding with the help of .NET Framework. C# performs two different types of bindings which are:",
         "It recognizes and checks the methods, or properties during compile time. In this binding, the compiler already knows about what kind of object it is and what are the methods or properties it holds, here the objects are static objects. The performance of early binding is fast and it is easy to code. It decreases the number of run-time errors.",
-        "In late binding, the compiler does not know about what kind of object it is and what are the methods or properties it holds, here the objects are dynamic objects. The type of the object is decided on the basis of the data it holds on the right-hand side during run-time. Basically, late binding is achieved by using virtual methods. The performance of late binding is slower than early binding because it requires lookups at run-time. To read more, refer to the article: Early binding and Late Binding"
+        "In late binding, the compiler does not know about what kind of object it is and what are the methods or properties it holds, here the objects are `dynamic` objects. The type of the object is decided on the basis of the data it holds on the right-hand side during run-time. Basically, late binding is achieved by `using` virtual methods. The performance of late binding is slower than early binding because it requires lookups at run-time. To read more, refer to the article: Early binding and Late Binding"
       ],
       "lists": [
         [
@@ -448,7 +446,7 @@
     {
       "heading": "27. What is Reflection in C#?",
       "paragraphs": [
-        "Reflection is the process of describing the metadata of types, methods, and fields in a code. The namespace System. Reflection enables you to obtain data about the loaded assemblies, the elements within them like classes, methods, and value types. To read more, refer to the article: Reflection in C#"
+        "Reflection is the process of describing the metadata of types, methods, and fields in a code. The `namespace` System. Reflection enables you to obtain data about the loaded assemblies, the elements within them like classes, methods, and value types. To read more, refer to the article: Reflection in C#"
       ],
       "lists": [],
       "images": [],
@@ -469,7 +467,7 @@
     {
       "heading": "29. What is Multithreading with .NET?",
       "paragraphs": [
-        "Multi-threading is a process that contains multiple threads within a single process. Here each thread performs different activities. For example, we have a class and this call contains two different methods, now using multithreading each method is executed by a separate thread. So the major advantage of multithreading is it works simultaneously, which means multiple tasks execute at the same time. And also maximizing the utilization of the CPU because multithreading works on time-sharing concept mean each thread takes its own time for execution and does not affect the execution of another thread, this time interval is given by the operating system. To read more, refer to the article: Multithreading in C#"
+        "Multi-threading is a process that contains multiple threads within a single process. Here each thread performs different activities. For example, we have a class and this call contains two different methods, now `using` multithreading each method is executed by a separate thread. So the major advantage of multithreading is it works simultaneously, which means multiple tasks execute at the same time. And also maximizing the utilization of the CPU because multithreading works on time-sharing concept mean each thread takes its own time for execution and does not affect the execution of another thread, this time interval is given by the operating system. To read more, refer to the article: Multithreading in C#"
       ],
       "lists": [],
       "images": [],
@@ -479,7 +477,7 @@
     {
       "heading": "30. What is LINQ in C#?",
       "paragraphs": [
-        "LINQ is known as Language Integrated Query and it is introduced in .NET 3.5 and Visual Studio 2008. The beauty of LINQ is it provides the ability to .NET languages(like C#, VB.NET, etc.) to generate queries to retrieve data from the data source. For example, a program may get information from the student records or accessing employee records, etc. In, past years, such type of data is stored in a separate database from the application, and you need to learn different types of query language to access such type of data like SQL, XML, etc. And also you cannot create a query using C# language or any other .NET language.",
+        "LINQ is known as Language Integrated Query and it is introduced in .NET 3.5 and Visual Studio 2008. The beauty of LINQ is it provides the ability to .NET languages(like C#, VB.NET, etc.) to generate queries to retrieve data from the data source. For example, a program may get information from the student records or accessing employee records, etc. In, past years, such type of data is stored in a separate database from the application, and you need to learn different types of query language to access such type of data like SQL, XML, etc. And also you cannot create a query `using` C# language or any other .NET language.",
         "To overcome such types of problems Microsoft developed LINQ. It attaches one, more power to the C# or .NET languages to generate a query for any LINQ compatible data source. And the best part is the syntax used to create a query is the same no matter which type of data source is used means the syntax of creating query data in a relational database is the same as that used to create query data stored in an array there is no need to use SQL or any other non-.NET language mechanism. You can also use LINQ with SQL, with XML files, with ADO.NET, with web services, and with any other database. To read more, refer to the article: LINQ in C#"
       ],
       "lists": [],
@@ -500,21 +498,21 @@
     {
       "heading": "32.  What are sealed classes in C#?",
       "paragraphs": [
-        "Sealed classes are used to restrict the users from inheriting the class. A class can be sealed by using the sealed keyword. The keyword tells the compiler that the class is sealed, and therefore, cannot be extended. No class can be derived from a sealed class.",
+        "Sealed classes are used to restrict the users from inheriting the class. A class can be sealed by `using` the sealed keyword. The keyword tells the compiler that the class is sealed, and therefore, cannot be extended. No class can be derived from a sealed class.",
         "The following is the syntax of a sealed class :",
         "A method can also be sealed, and in that case, the method cannot be overridden. However, a method can be sealed in the classes in which they have been inherited. If you want to declare a method as sealed, then it has to be declared as virtual in its base class. To read more, refer to the article: Sealed Classes in C#"
       ],
       "lists": [],
       "images": [],
       "code": [
-        "sealed class class_name{    // data members    // methods    .    .    .}"
+        "sealed class class_name\n{\n    // data members\n    // methods\n    .\n    .\n    .\n\n}"
       ],
       "tables": []
     },
     {
       "heading": "33. What is the Constructor Chaining in C#?",
       "paragraphs": [
-        "We can call an overloaded constructor from another constructor using this keyword but the constructor must belong to the same class because this keyword is pointing to the members of the same class in which this is used. This type of calling the overloaded constructor is also termed as Constructor Chaining. To read more, refer to the article: Constructor Chaining"
+        "We can call an overloaded constructor from another constructor `using` this keyword but the constructor must belong to the same class because this keyword is pointing to the members of the same class in which this is used. This type of calling the overloaded constructor is also termed as Constructor Chaining. To read more, refer to the article: Constructor Chaining"
       ],
       "lists": [],
       "images": [],
@@ -543,7 +541,7 @@
     {
       "heading": "35. What is a Virtual Method in C#?",
       "paragraphs": [
-        "In C# virtual method is a strategy that can be reclassified in derived classes. We can implement the virtual method in the base class and derived class. It is utilized when a method's fundamental work is similar but in some cases derived class needed additional functionalities. A virtual method is declared in the parent class that can be overridden in the child class. We make a virtual method in the base class by using the virtual keyword and that method is overridden in the derived class using the Override keyword.  It is not necessary for every derived class to inherit a virtual method, but a virtual method must be created in the base class. Hence the virtual method is also known as Polymorphism. To read more, refer to the article: Virtual Method in C#"
+        "In C# virtual method is a strategy that can be reclassified in derived classes. We can implement the virtual method in the base class and derived class. It is utilized when a method's fundamental work is similar but in some cases derived class needed additional functionalities. A virtual method is declared in the parent class that can be overridden in the child class. We make a virtual method in the base class by `using` the virtual keyword and that method is overridden in the derived class `using` the Override keyword.  It is not necessary for every derived class to inherit a virtual method, but a virtual method must be created in the base class. Hence the virtual method is also known as Polymorphism. To read more, refer to the article: Virtual Method in C#"
       ],
       "lists": [],
       "images": [],
@@ -553,7 +551,7 @@
     {
       "heading": "36.  What is File Handling in C#?",
       "paragraphs": [
-        "Generally, the file is used to store the data. The term File Handling refers to the various operations like creating the file, reading from the file, writing to the file, appending the file, etc. There are two basic operations that are mostly used in file handling is reading and writing of the file. The file becomes stream when we open the file for writing and reading. A stream is a sequence of bytes that is used for communication. Two streams can be formed from the file one is the input stream which is used to read the file and another is the output stream is used to write in the file. In C#, the System.IO namespace contains classes that handle input and output streams and provide information about file and directory structure."
+        "Generally, the file is used to store the data. The term File Handling refers to the various operations like creating the file, reading from the file, writing to the file, appending the file, etc. There are two basic operations that are mostly used in file handling is reading and writing of the file. The file becomes stream when we open the file for writing and reading. A stream is a sequence of bytes that is used for communication. Two streams can be formed from the file one is the input stream which is used to read the file and another is the output stream is used to write in the file. In C#, the System.IO `namespace` contains classes that handle input and output streams and provide information about file and directory structure."
       ],
       "lists": [],
       "images": [],
@@ -602,13 +600,13 @@
     {
       "heading": "39. How to implement a singleton design pattern in C#?",
       "paragraphs": [
-        "We can implement a singleton design pattern in C# using:"
+        "We can implement a singleton design pattern in C# `using`:"
       ],
       "lists": [
         [
           "No Thread Safe Singleton.",
           "Thread-Safety Singleton.",
-          "Thread-Safety Singleton using Double-Check Locking.",
+          "Thread-Safety Singleton `using` Double-Check Locking.",
           "Thread-safe without a lock.",
           "Using .NET 4's Lazy<T> type."
         ]
@@ -622,7 +620,7 @@
       "paragraphs": [
         "An event is a notification that some action has occurred. Delegates and events are related because an event is built upon a delegate. Both expand the set of programming tasks to which C# can be applied. It is an important C# feature is built upon the foundation of delegates: the event. An event is, essentially, an automatic notification that some action has occurred. Events work like this:",
         "An object that has an interest in an event registers an event handler for that event. When the event occurs, all registered handlers are called. Event handlers are represented by delegates.",
-        "Events are members of a class and are declared using the event keyword. Its most commonly used form is shown here:",
+        "Events are members of a class and are declared `using` the event keyword. Its most commonly used form is shown here:",
         "event event-delegate event-name;",
         "Here, event-delegate is the name of the delegate used to support the event, and event-name is the name of the specific event object being declared."
       ],
@@ -662,7 +660,7 @@
     {
       "heading": "43. What are Generics in C#?",
       "paragraphs": [
-        "Generic is a class that allows the user to define classes and methods with the placeholder. Generics were added to version 2.0 of the C# language. The basic idea behind using Generic is to allow type (Integer, String, … etc, and user-defined types) to be a parameter to methods, classes, and interfaces. A primary limitation of collections is the absence of effective type checking. This means that you can put any object in a collection because all classes in the C# programming language extend from the object base class. This compromises type safety and contradicts the basic definition of C# as a type-safe language. In addition, using collections involves a significant performance overhead in the form of implicit and explicit type casting that is required to add or retrieve objects from a collection. To read more, refer to the article: Generics in C#"
+        "Generic is a class that allows the user to define classes and methods with the placeholder. Generics were added to version 2.0 of the C# language. The basic idea behind `using` Generic is to allow type (Integer, String, … etc, and user-defined types) to be a parameter to methods, classes, and interfaces. A primary limitation of collections is the absence of effective type checking. This means that you can put any object in a collection because all classes in the C# programming language extend from the object base class. This compromises type safety and contradicts the basic definition of C# as a type-safe language. In addition, `using` collections involves a significant performance overhead in the form of implicit and explicit type casting that is required to add or retrieve objects from a collection. To read more, refer to the article: Generics in C#"
       ],
       "lists": [],
       "images": [],
@@ -695,7 +693,7 @@
     {
       "heading": "45. What is a Hash table class in C#?",
       "paragraphs": [
-        "The Hashtable class represents a collection of key/value pairs that are organized based on the hash code of the key. This class comes under the System. Collections namespace. The Hashtable class provides various types of methods that are used to perform different types of operations on the hashtables. In Hashtable, keys are used to access the elements present in the collection. For very large Hashtable objects, you can increase the maximum capacity to 2 billion elements on a 64-bit system."
+        "The Hashtable class represents a collection of key/value pairs that are organized based on the hash code of the key. This class comes under the System. Collections `namespace`. The Hashtable class provides various types of methods that are used to perform different types of operations on the hashtables. In Hashtable, keys are used to access the elements present in the collection. For very large Hashtable objects, you can increase the maximum capacity to 2 billion elements on a 64-bit system."
       ],
       "lists": [],
       "images": [],
@@ -721,7 +719,7 @@
         [
           "It helps you in code reuse, performance, and type safety.",
           "You can create your own generic classes, methods, interfaces, and delegates.",
-          "You can create generic collection classes. The .NET Framework class library contains many new generic collection classes in System.Collections.Generic namespace.",
+          "You can create generic collection classes. The .NET Framework class library contains many new generic collection classes in System.Collections.Generic `namespace`.",
           "You can get information on the types used in generic data types at run-time."
         ]
       ],

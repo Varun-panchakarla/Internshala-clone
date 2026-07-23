@@ -3283,7 +3283,7 @@
       "images": [],
       "code": [
         "// Java Program to implement\n// ArrayStoreException\npublic class GFG {\n    public static void main(String args[])\n    {\n        // Since Double class extends Number class\n        // only Double type numbers\n        // can be stored in this array\n        Number[] a = new Double[2];\n        // Trying to store an integer value\n        // in this Double type array\n        a[0] = new Integer(4);\n    }\n}",
-        "Exception in thread \"main\" java.lang.ArrayStoreException: java.lang.Integer    at GFG.main(GFG.java:6)"
+        "Exception in thread \"main\" java.lang.ArrayStoreException: java.lang.Integer\n    at GFG.main(GFG.java:6)"
       ],
       "tables": []
     },
@@ -3403,7 +3403,7 @@
       "images": [],
       "code": [
         "// Java Program to use final\n// keyword\nimport java.io.*;\n// Driver Class\nclass GFG {\n    // Main function\n    public static void main(String[] args)\n    {\n        final int x = 100;\n        x = 50;\n    }\n}",
-        "./GFG.java:6: error: cannot assign a value to final variable x          x=50;          ^1 error"
+        "./GFG.java:6: error: cannot assign a value to final variable x\n          x=50;\n          ^\n1 error"
       ],
       "tables": []
     },
@@ -3650,7 +3650,7 @@
       "images": [],
       "code": [
         "class DemoSleep extends Thread {\n    public void run() {\n        for (int i = 1; i <= 5; i++) {\n            System.out.println(\"Thread running: \" + i);\n            try {\n                Thread.sleep(1000); // pauses for 1 second\n            } catch (InterruptedException e) {\n                System.out.println(\"Thread interrupted\");\n            }\n        }\n    }\n    \n    public static void main(String[] args) {\n        DemoSleep t = new DemoSleep();\n        t.start();\n    }\n}",
-        "Thread running: 1Thread running: 2Thread running: 3Thread running: 4Thread running: 5"
+        "Thread running: 1\nThread running: 2\nThread running: 3\nThread running: 4\nThread running: 5"
       ],
       "tables": []
     },
@@ -3828,7 +3828,7 @@
       "images": [],
       "code": [
         "// Java Program to demonstrate memory leaks\nimport java.io.*;\nimport java.util.Vector;\nclass GFG {\n    public static void main(String[] args)\n    {\n        Vector a = new Vector(21312312);\n        Vector b = new Vector(2147412344);\n        Vector c = new Vector(219944);\n        System.out.println(\"Memory Leak in Java\");\n    }\n}",
-        "Exception in thread \"main\" java.lang.OutOfMemoryError: Java heap space    at java.base/java.util.Vector.<init>(Vector.java:142)    at java.base/java.util.Vector.<init>(Vector.java:155)    at GFG.main(GFG.java:9)"
+        "Exception in thread \"main\" java.lang.OutOfMemoryError: Java heap space\n    at java.base/java.util.Vector.<init>(Vector.java:142)\n    at java.base/java.util.Vector.<init>(Vector.java:155)\n    at GFG.main(GFG.java:9)"
       ],
       "tables": []
     },

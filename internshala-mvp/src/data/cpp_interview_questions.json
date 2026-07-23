@@ -631,7 +631,11 @@
     {
       "heading": "26. What is a virtual destructor in C++?",
       "paragraphs": [
-        "A virtual destructor is a destructor declared with the virtual keyword in a base class. It ensures that when an object of a derived class is deleted through a base class pointer, the destructors of both the derived and base classes are called in the correct order."
+        "A virtual destructor is a destructor declared with the virtual keyword in a base class. It ensures that when an object of a derived class is deleted through a base class pointer, the destructors of both the derived and base classes are called in the correct order.",
+        "class Base {",
+        "public:",
+        "virtual ~Base() {}",
+        "};"
       ],
       "lists": [
         [
@@ -641,9 +645,7 @@
         ]
       ],
       "images": [],
-      "code": [
-        "class Base {\npublic:\n    virtual ~Base() {}\n};"
-      ],
+      "code": [],
       "tables": []
     },
     {
@@ -1530,7 +1532,10 @@
     {
       "heading": "62. What is the use of noexcept in C++ exception handling?",
       "paragraphs": [
-        "The noexcept keyword specifies that a function does not throw exceptions. It makes intent clear to both the compiler and developers. If a noexcept function does throw, std::terminate() is called. noexcept is especially important for move constructors and destructors, where it enables optimizations such as exception-safe move operations in standard containers."
+        "The noexcept keyword specifies that a function does not throw exceptions. It makes intent clear to both the compiler and developers. If a noexcept function does throw, std::terminate() is called. noexcept is especially important for move constructors and destructors, where it enables optimizations such as exception-safe move operations in standard containers.",
+        "void display() noexcept {",
+        "cout << \"This function won't throw\";",
+        "}"
       ],
       "lists": [
         [
@@ -1540,9 +1545,7 @@
         ]
       ],
       "images": [],
-      "code": [
-        "void display() noexcept {\n    cout << \"This function won't throw\";\n}"
-      ],
+      "code": [],
       "tables": []
     },
     {
