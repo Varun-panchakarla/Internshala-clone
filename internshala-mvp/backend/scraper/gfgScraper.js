@@ -211,6 +211,35 @@ async function runScraper() {
       url: pageUrl,
       sections: processedSections
     };
+
+    // Helper to clean invisible/unwanted unicode, control characters and double backticks
+    const cleanString = (str) => {
+      if (typeof str !== 'string') return str;
+      return str
+        .replace(/[\u200B-\u200D\uFEFF\u200E\u200F\u202A-\u202E\uFFFD\u25A1]/g, '')
+        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '')
+        .replace(/```/g, '___TRIPLE_BACKTICK___')
+        .replace(/``/g, '`')
+        .replace(/___TRIPLE_BACKTICK___/g, '```')
+        .trim();
+    };
+
+    const cleanData = (obj) => {
+      if (typeof obj === 'string') {
+        return cleanString(obj);
+      } else if (Array.isArray(obj)) {
+        return obj.map(cleanData);
+      } else if (obj !== null && typeof obj === 'object') {
+        const cleaned = {};
+        for (const key in obj) {
+          cleaned[key] = cleanData(obj[key]);
+        }
+        return cleaned;
+      }
+      return obj;
+    };
+
+    const cleanedOutputData = cleanData(outputData);
     
     // Save to the frontend data directory
     const outputDir = path.join(__dirname, '../../src/data');
@@ -219,7 +248,7 @@ async function runScraper() {
     }
     
     const outputPath = path.join(outputDir, outputFilename);
-    fs.writeFileSync(outputPath, JSON.stringify(outputData, null, 2), 'utf-8');
+    fs.writeFileSync(outputPath, JSON.stringify(cleanedOutputData, null, 2), 'utf-8');
     
     console.log("Question saved:", processedSections.length, "questions total.");
     console.log(`[Scraper] Success! Scraped ${processedSections.length} sections.`);

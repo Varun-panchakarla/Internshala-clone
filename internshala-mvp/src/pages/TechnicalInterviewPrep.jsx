@@ -106,14 +106,7 @@ const TechnicalInterviewPrep = () => {
       active: true,
       color: 'text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800'
     },
-    {
-      id: 'mongodb',
-      name: 'MongoDB',
-      icon: FiDatabase,
-      desc: 'Document schema design, aggregation pipelines, replica sets, sharding, and BSON indexing.',
-      active: false,
-      color: 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/30 border-teal-100 dark:border-teal-900/40'
-    },
+
     {
       id: 'html',
       name: 'HTML',
@@ -132,10 +125,10 @@ const TechnicalInterviewPrep = () => {
     },
     {
       id: 'dsa',
-      name: 'DSA',
+      name: 'Data Structures',
       icon: FiGitBranch,
       desc: 'Arrays, Trees, Graphs, sorting, binary searches, dynamic programming, and complexity analyses.',
-      active: false,
+      active: true,
       color: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border-rose-100 dark:border-rose-900/40'
     },
     {
@@ -143,7 +136,7 @@ const TechnicalInterviewPrep = () => {
       name: 'OOP',
       icon: FiPackage,
       desc: 'Inheritance paradigms, polymorphism patterns, encapsulations, abstractions, and SOLID standards.',
-      active: false,
+      active: true,
       color: 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/30 border-violet-100 dark:border-violet-900/40'
     },
     {
@@ -151,7 +144,7 @@ const TechnicalInterviewPrep = () => {
       name: 'DBMS',
       icon: FiDatabase,
       desc: 'Normalizations (1NF to BCNF), database recovery models, locking protocols, and query trees.',
-      active: false,
+      active: true,
       color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/30 border-purple-100 dark:border-purple-900/40'
     },
     {
@@ -159,7 +152,7 @@ const TechnicalInterviewPrep = () => {
       name: 'Operating Systems',
       icon: FiTerminal,
       desc: 'Process scheduling threads, deadlocks detection, virtual memory paging, and file management setups.',
-      active: false,
+      active: true,
       color: 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-950/30 border-lime-100 dark:border-lime-900/40'
     },
     {
@@ -167,7 +160,7 @@ const TechnicalInterviewPrep = () => {
       name: 'Computer Networks',
       icon: FiGlobe,
       desc: 'TCP/IP layers, routing protocol algorithms, DNS processes, HTTP/S structures, and secure socket layers.',
-      active: false,
+      active: true,
       color: 'text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/30 border-pink-100 dark:border-pink-900/40'
     }
   ];

@@ -433,7 +433,7 @@
           "Use efficient conditions (avoid functions on columns)",
           "Filter data early and avoid `SELECT` *",
           "Optimize joins and reduce extra data",
-          "Rewrite queries if needed (JOIN, ``UNION` ALL`)",
+          "Rewrite queries if needed (JOIN, `UNION` ALL`)",
           "Use pagination, caching or partitioning for large data"
         ]
       ],

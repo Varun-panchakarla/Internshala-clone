@@ -1426,26 +1426,25 @@
       "paragraphs": [
         "Global attributes are special attributes that can be used on any HTML element, not just specific tags. They give elements extra functionality or metadata without changing the tag itself.",
         "Common Global Attributes:",
-        "1. id – Assigns a unique identifier to an element.",
-        "2. class – Assigns one or more classes for CSS styling or JavaScript.",
-        "3. title – Provides extra information shown as a tooltip on hover.",
-        "4. hidden – Hides the element from display.",
-        "5. `tabindex` – Controls the order of keyboard focus on elements.",
-        "6. `contenteditable`– Makes an element editable by the user in the browser.",
-        "7. data- (custom data attributes) – Stores custom data that JavaScript can access.",
+        "1. **id** – Assigns a unique identifier to an element.",
+        "`<p id=\"intro\">Welcome to my page</p>`",
+        "2. **class** – Assigns one or more classes for CSS styling or JavaScript.",
+        "`<div class=\"content\">Content here</div>`",
+        "3. **title** – Provides extra information shown as a tooltip on hover.",
+        "`<abbr title=\"HyperText Markup Language\">HTML</abbr>`",
+        "4. **hidden** – Hides the element from display.",
+        "`<p hidden>This text is hidden</p>`",
+        "5. **`tabindex`** – Controls the order of keyboard focus on elements.",
+        "`<button tabindex=\"1\">Click Me</button>`",
+        "6. **`contenteditable`** – Makes an element editable by the user in the browser.",
+        "`<p contenteditable=\"true\">Edit this text</p>`",
+        "7. **data-*** (custom data attributes) – Stores custom data that JavaScript can access.",
+        "`<div data-user=\"123\">User Info</div>`",
         "Key Point: Global attributes can be applied to almost any HTML tag, making them extremely versatile for styling, scripting, and accessibility."
       ],
       "lists": [],
       "images": [],
-      "code": [
-        "Welcome to my page",
-        "Content here",
-        "<abbr title=\"HyperText Markup Language\">HTML</abbr>",
-        "This text is hidden",
-        "<button tabindex=\"1\">Click Me</button>",
-        "Edit this text",
-        "User Info"
-      ],
+      "code": [],
       "tables": []
     }
   ]

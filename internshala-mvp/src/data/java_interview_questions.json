@@ -2633,7 +2633,7 @@
       "paragraphs": [
         "ConcurrentHashMap is implemented using Hashtable.",
         "Syntax:",
-        "public class ConcurrentHashMap<K, ​V>     extends AbstractMap<K, ​V> implements ConcurrentMap<K, ​V>, Serializable",
+        "public class ConcurrentHashMap<K, V>     extends AbstractMap<K, V> implements ConcurrentMap<K, V>, Serializable",
         "Parameters: K is the key Object type and V is the value Object type"
       ],
       "lists": [],
