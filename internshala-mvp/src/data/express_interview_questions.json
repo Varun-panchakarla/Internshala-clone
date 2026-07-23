@@ -1,0 +1,798 @@
+{
+  "title": "ExpressJS Interview Questions and Answers",
+  "url": "https://www.geeksforgeeks.org/node-js/top-50-express-js-interview-questions-and-answers/",
+  "sections": [
+    {
+      "heading": "1. What is the default port number for an Express.js application?",
+      "paragraphs": [
+        "Example:"
+      ],
+      "lists": [
+        [
+          "`Express.js` does not have a fixed default port.",
+          "Developers usually run apps on port 3000 by convention.",
+          "You can specify any port when starting the server."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "const express = require('express');\nconst app = express();\n\napp.get('/', (req, res) => res.send('Hello Express'));\n\napp.listen(3000, () => {\n  console.log('Server running on port 3000');\n});"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "2. What is middleware in Express.js?",
+      "paragraphs": [
+        "Middleware functions are functions that have access to req, res, and next objects. They execute code, modify requests/responses, or end the request-response cycle."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "3. What is the role of next() in middleware?",
+      "paragraphs": [
+        "The `next()` function is a callback that middleware uses to pass control to the next middleware function in the stack."
+      ],
+      "lists": [
+        [
+          "If `next()` is not called, the request will hang (never move forward).",
+          "If `next()` is called, the request moves to the next middleware or route handler."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "4. What is routing in Express.js?",
+      "paragraphs": [
+        "Routing refers to how an application’s endpoints (URIs) respond to client requests.",
+        "Example:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "app.get('/home', (req, res) => {\n  res.send('Welcome to Home Page');\n});"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "5. Difference between app.use() and app.get()?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "`app.use()` → used to mount middleware functions.",
+          "`app.get()` → handles GET requests for a specific route."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "6. Differentiate between NodeJS and ExpressJS?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "NodeJS",
+            "ExpressJS"
+          ],
+          "rows": [
+            [
+              "A runtime environment that allows JavaScript to be executed outside the browser.",
+              "A web framework built on top of NodeJS to simplify server-side development."
+            ],
+            [
+              "A server-side JavaScript runtime.",
+              "A backend web framework based on NodeJS."
+            ],
+            [
+              "Can be used to create APIs but requires extra effort.",
+              "Provides an easy and structured way to develop RESTful APIs."
+            ],
+            [
+              "Slightly faster as it's minimal and doesn't include extra abstractions.",
+              "Adds a slight overhead due to additional features but is still highly efficient."
+            ],
+            [
+              "Ideal for low-level operations, real-time applications, microservices, and command-line tools.",
+              "Ideal for web applications, APIs, RESTful services, and middleware-based projects."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "7. Mentions few features of ExpressJS.",
+      "paragraphs": [
+        "Few features of the `ExpressJS` includes"
+      ],
+      "lists": [
+        [
+          "Routing: Express provides a simple way to define routes for handling HTTP requests. Routes are used to map different URLs to specific pieces of code, making it easy to organize your application's logic.",
+          "Middleware: Express uses middleware functions to perform tasks during the request-response cycle. Middleware functions have access to the request, response, and the next middleware function.",
+          "HTTP Utility Methods: Express mainly used for handling HTTP methods like GET, POST, PUT, and DELETE. This makes it easy to define how the application should respond to different types of HTTP requests.",
+          "Static File Serving: It can also serve static files, such as images, CSS, and JavaScript, with the help of built-in express.static middleware.",
+          "Security: It includes features and middleware to strengthen the security of your web applications, such as the helmet middleware to secure your app."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "8. What are some popular alternatives to ExpressJS?",
+      "paragraphs": [
+        "There are several popular alternatives to `ExpressJS` which includes:"
+      ],
+      "lists": [
+        [
+          "Koa.js",
+          "Hapi.js",
+          "Sails.js",
+          "Fastify"
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "9. Which major tools can be integrated with ExpressJS?",
+      "paragraphs": [
+        "There are many tools and libraries that can be integrated with `ExpressJS` such as:"
+      ],
+      "lists": [
+        [
+          "Database tools: MongoDB, MySQL, PostgreSQL.",
+          "Template Engines: EJS, Pug, Mustache.",
+          "Authentication libraries: Passport.js.",
+          "Logging libraries: Morgan, Winston.",
+          "Validation libraries: Joi, express-validator.",
+          "ORM libraries: Sequelize, Mongoose."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "10. What is .env file used for?",
+      "paragraphs": [
+        "The .env file is used for storing sensitive information in a web application which we don't want to expose to others like password, database connection string etc. It is a simple text file where each line represents a key-value pair, and these pairs are used to configure various aspects of the application."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "11. What are JWT?",
+      "paragraphs": [
+        "JSON Web Tokens are mainly a token which is used for authentication and information exchange. When a user signs in to an application, the application then assigns JWT to that user. Subsequent requests by the user will include the assigned JWT. This token tells the server what routes, services, and resources the user is allowed to access. Json Web Token includes 3 part namely- Header, Payload and Signature."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "12. Create a simple middleware for validating user.",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [
+        "// Simple user validation middleware\nconst validateUser = (req, res, next) => {\n    const user = req.user;\n\n    if (!user) {\n        return res.status(401).json({ error: 'Unauthorized - User not found' });\n    }\n\n    next();\n};\n\napp.get('/profile', validateUser, (req, res) => {\n    const user = req.user;\n    res.json({ message: 'Profile page', username: user.username });\n});"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "13. What is Bcrypt used for?",
+      "paragraphs": [
+        "Bcrypt is a password hashing function which is used to securely hash and store user passwords. It is designed to be slow and computationally intensive, making it resistant to brute-force attacks and rainbow table attacks. Bcrypt is a key component in enhancing the security of user authentication systems."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "14. Why should you separate the Express app and server?",
+      "paragraphs": [
+        "In `ExpressJS`, it is recommended to separate the Express App and the server setup. This provides the modularity and flexibility and makes the codebase more easier to maintain and test. Here are some reasons why you should separate the Express app and server:"
+      ],
+      "lists": [
+        [
+          "Modularity: You can define routes, middleware, and other components in the Express app independently of the server configuration.",
+          "Ease of Testing: Separation makes it easier to write unit tests for the Express app without starting an actual server. You can test routes, middleware, and other components in isolation.",
+          "Reusability: You can reuse the same Express app in different server configurations.",
+          "Configuration Management: Separating the app and server allows for cleaner configuration management.",
+          "Scalability: It provides a foundation for a scalable code structure. As your application grows, it will easier to maintain the code."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "15. What do you understand about ESLint?",
+      "paragraphs": [
+        "EsLint is a JavaScript linting tool which is used for automatically detecting incorrect patterns found in ECMAScript/JavaScript code. It is used with the purpose of improving code quality, making code more consistent, and avoiding bugs. ESLint is written using NodeJS to provide a fast runtime environment and easy installation via npm."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "16. Define the concept of the test pyramid.",
+      "paragraphs": [
+        "The Test Pyramid is a concept in software testing that represents the distribution of different types of tests. It was introduced by Mike Cohn, and it suggests that a testing strategy should be shaped like a pyramid, with the majority of tests at the base and fewer tests as you move up. The Test Pyramid consists of three levels: Unit Tests, Integration Tests, and End-to-End (E2E) Tests."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "17. Differentiate between res.send() and res.json().",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Feature",
+            "res.send()",
+            "res.json()"
+          ],
+          "rows": [
+            [
+              "Purpose",
+              "Sends a response of any type (string, object, array, buffer, etc.).",
+              "Specifically sends a JSON response."
+            ],
+            [
+              "Data Handling",
+              "Converts objects/arrays into JSON automatically, but also supports sending other data formats.",
+              "Converts objects/arrays into JSON format explicitly."
+            ],
+            [
+              "Response Type",
+              "Can send text, HTML, JSON, or any other data type.",
+              "Only sends JSON-formatted responses."
+            ],
+            [
+              "Use Case",
+              "Used when sending various types of responses, including HTML pages, strings, or JSON data.",
+              "Used specifically for sending JSON responses in APIs."
+            ],
+            [
+              "Example Usage",
+              "res.send('Hello World!')",
+              "res.json({ message: 'Success' })"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "18. What is meant by Scaffolding in ExpressJS?",
+      "paragraphs": [
+        "Scaffolding in `ExpressJS` refers to the process of generating a basic project structure automatically. This can speed up the initial setup and help maintain consistency in the way projects are structured, especially in large teams."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "19. How would you install an Express application generator for scaffolding?",
+      "paragraphs": [
+        "Express application generator are used for quickly setting up a new Express application with some basic structure. You can install it using Node Package Manager (npm), which comes with NodeJS.",
+        "To install it globally:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "npm install -g express-generator"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "20. What is Yeoman and how to install Yeoman for scaffolding?",
+      "paragraphs": [
+        "Yeoman is a scaffolding tool for web applications that helps developers to create new projects by providing a generator-based workflow.",
+        "To install Yeoman run the following command:",
+        "Yeoman works with generators, which are packages that define the structure and configuration of a project. You can install a generator like this:",
+        "Once installed, you can use Yeoman to create a new application:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "npm install -g yo",
+        "npm install -g generator-express",
+        "yo appname"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "21. What is CORS in ExpressJS?",
+      "paragraphs": [
+        "CORS (Cross-Origin Resource Sharing) is a security feature implemented by web browsers to control how web pages in one domain can request and interact with resources hosted on another domain.",
+        "In the context of `ExpressJS`, CORS refers to a middleware that enables Cross-Origin Resource Sharing for your application. This allows the application to control which domains can access your resources by setting HTTP headers."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "22. What are Built-in Middlewares?",
+      "paragraphs": [
+        "`ExpressJS`, includes a set of built-in middlewares that provide common functionality. These built-in middlewares are included by default when you create an Express application and can be used to handle various tasks. Here are some of the built-in middlewares in Express:"
+      ],
+      "lists": [
+        [
+          "ExpressJSon(): This middleware is used to parse incoming JSON requests. It automatically parses the request body if the Content-Type header is set to application/json.",
+          "express.Router(): The express.Router() function is often used to create modular route handlers. It allows you to group route handlers together and then use them as a middleware.",
+          "express.static(): This middleware is used to serve static files, such as images, CSS, and JavaScript files, from a specified directory."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "23. How would you configure properties in ExpressJS?",
+      "paragraphs": [
+        "In `ExpressJS`, you can configure properties using the app.set() method. This method allows you to set various properties and options which affects the behavior of the Express application.",
+        "Here, name represents the name of the property you want to configure, and value is the value you want to assign to that property. Express provides a wide range of properties that you can configure based on your application's requirements."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "app.set(name, value);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "24. Which template engines do Express support?",
+      "paragraphs": [
+        "`ExpressJS` supports any template engine that follows the (path, locals, callback) signature."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "25. Elaborate on the various methods of debugging on both Linux and Windows systems?",
+      "paragraphs": [
+        "The debugging is the vital need at the time of software development to identifying issues in the application's logic, handling of HTTP requests, middleware execution, and other aspects specific to web development. Here are some methods commonly used for debugging an `ExpressJS` application on both Linux and Windows:"
+      ],
+      "lists": [
+        [
+          "Console.log: The simplest way to debug an `ExpressJS` application is by using console.log(). You can output messages to the console which can be viewed in the terminal.",
+          "Node Inspector: This is a powerful tool that allows you to debug your applications using Chrome Developer Tools. It supports features like setting breakpoints, stepping over functions, and inspecting variables.",
+          "Visual Studio Code Debugger: VS Code provides a built-in debugger that works on both Linux and Windows. It supports advanced features like conditional breakpoints, function breakpoints, and logpoints.",
+          "Utilizing debug module: The debug module is a small NodeJS debugging utility that allows you to create debugging scopes."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "26. Name some databases that integrate with ExpressJS?",
+      "paragraphs": [
+        "`ExpressJS` can support a variety of the databases which includes:"
+      ],
+      "lists": [
+        [
+          "MySQL",
+          "MongoDB",
+          "PostgreSQL",
+          "SQLite",
+          "Oracle"
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "27. How would you render plain HTML using ExpressJS?",
+      "paragraphs": [
+        "In `ExpressJS`, you can render plain HTML using the `res.send()` method or res.sendFile() method.",
+        "Sample code:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "//using res.send\n\nconst express = require('express');\nconst app = express();\nconst port = 8000;\n\napp.get('/', (req, res) => {\n    const htmlContent = '<html><body><h1>Hello, World!</h1></body></html>';\n    res.send(htmlContent);\n});\n\n\napp.listen(port, () => {\n    console.log(`Server is listening on port ${port}`);\n});",
+        "//using res.sendFile\n\nconst express = require('express');\nconst path = require('path');\nconst app = express();\nconst port = 8000;\n\napp.get('/', (req, res) => {\n    const filePath = path.join(__dirname, 'public', 'index.html');\n    res.sendFile(filePath);\n});\n\napp.listen(port, () => {\n    console.log(`Server is listening on port ${port}`);\n});"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "28. What is the use of 'Response.cookie()' function?",
+      "paragraphs": [
+        "The response.cookie() function in `ExpressJS` is used to set cookies in the HTTP response. Cookies are small pieces of data sent from a server and stored on the client's browser. They are commonly used to store information about the user or to maintain session data."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "res.cookie(name, value, [options]);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "29. Under what circumstances does a Cross-Origin resource fail in ExpressJS?",
+      "paragraphs": [
+        "When a Cross-Origin Resource Sharing request is made, the browser enforces certain security checks, and the request may fail under various circumstances:"
+      ],
+      "lists": [
+        [
+          "No CORS Headers: The server doesn't include the necessary CORS headers in its response.",
+          "Mismatched Origin: The requesting origin does not match the origin specified in the Access-Control-Allow-Origin header.",
+          "Restricted HTTP Methods: The browser enforces restrictions on which HTTP methods are allowed in cross-origin requests.",
+          "No Credentials: The browser makes restrictions on requests that include credentials (such as cookies or HTTP authentication)."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "30. What is Pug template engine in ExpressJS?",
+      "paragraphs": [
+        "Pug is a popular template engine for `ExpressJS` and other NodeJS frameworks. You can use Pug to render dynamic HTML pages on the server side. It allows you to write templates using a syntax that relies on indentation and concise tags."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "31. What is meant by the sanitizing input process in ExpressJS?",
+      "paragraphs": [
+        "Sanitizing input in `ExpressJS` application is an important security practice to prevent various types of attacks, such as Cross-Site Scripting (XSS) and SQL injection. It involves cleaning and validating user input before using it in your application so that it does not contain malicious code or can be a security risk."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "32. How to generating a skeleton ExpressJS app using terminal command?",
+      "paragraphs": [
+        "To generate a skeleton for an `ExpressJS` application using the terminal, you can use the Express application generator which is a command-line tool provided by the `ExpressJS` framework. This generator will setup a basic directory structure which includes necessary files, and installs essential dependencies.",
+        "Steps to generate:",
+        "Step 1: Open your terminal and install the Express application generator globally using the following command:",
+        "Step 2: After that you can use the express command to generate your `ExpressJS` app.",
+        "Step 3: Now go to the app directory and install the dependencies and start the app by running-"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "npm install -g express-generator",
+        "express my-express-app",
+        "npm install\nnpm start"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "33. How do you secure Express.js applications?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "Use Helmet.js",
+          "Sanitize inputs",
+          "Enable HTTPS",
+          "Rate limiting"
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "34. What are the types of middlewares?",
+      "paragraphs": [
+        "There are mainly five types of Middleware in `ExpressJS`:"
+      ],
+      "lists": [
+        [
+          "Application-level middleware",
+          "Router-level middleware",
+          "Error-handling middleware",
+          "Built-in middleware",
+          "Third-party middleware"
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "35. List the built-in middleware functions provided by Express.",
+      "paragraphs": [
+        "`ExpressJS` comes with several built-in middleware functions. Few of them are:"
+      ],
+      "lists": [
+        [
+          "ExpressJSON: This is used for parsing incoming requests with JSON payloads.",
+          "express.static: This is used to serve static files like images, CSS files, and JavaScript files.",
+          "express.urlencoded: This is used for parsing incoming requests with URL-encoded payloads.",
+          "express.raw: This is used for parse incoming requests with a raw body.",
+          "express.text: This is used for parse incoming requests with a text body."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "36. Mention some third-party middleware provided by ExpressJS.",
+      "paragraphs": [
+        "`ExpressJS` allows you to use third-party middleware to extend and enhance the functionality of your web application.",
+        "Here are some commonly used third-party middleware in `ExpressJS`"
+      ],
+      "lists": [
+        [
+          "body-parser: This middleware is used to parse incoming request bodies, allowing you to access form data or JSON payloads on req.body.",
+          "cors: This module provides middleware to enable Cross-Origin Resource Sharing (CORS) in your Express application.",
+          "morgan: Morgan is a middleware module that provides request logging functionality.",
+          "helmet: Helmet helps to secure Express apps by setting various HTTP headers.",
+          "express-session: This middleware is used for managing user sessions in your Express application.",
+          "passport: This middleware is used for implementing authentication and authorization in Express applications."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "37. When application-level Middleware is used?",
+      "paragraphs": [
+        "Application-level middlewares are bound to an instance of the Express application and are executed for every incoming request. These middlewares are defined using the `app.use()` method, and they can perform tasks such as logging, authentication, setting global variables, and more."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "38. Explain Router-level Middleware.",
+      "paragraphs": [
+        "Router-level middlewares are specific to a particular router instance. This type of middleware is bound to an instance of express.Router(). Router-level middleware works similarly to application-level middleware, but it's only invoked for the routes that are handled by that router instance. This allows you to apply middleware to specific subsets of your routes, keeping your application organized and manageable."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "39. How to secure ExpressJS application?",
+      "paragraphs": [
+        "It is very important to secure your application to protect it against various security threats. We can follow few best practices in our `ExpressJS` app to enhance the security of our application."
+      ],
+      "lists": [
+        [
+          "Keep Dependencies Updated: Regularly update your project dependencies, including `ExpressJS` and other npm packages.",
+          "Use Helmet Middleware: The helmet middleware helps secure your application by setting various HTTP headers. It helps prevent common web vulnerabilities.",
+          "Set Secure HTTP Headers: Configure your application to include secure HTTP headers, such as Content Security Policy (CSP), Strict-Transport-Security (HSTS), and others.",
+          "Use HTTPS: Always use HTTPS to encrypt data in transit. Obtain an SSL certificate for your domain and configure your server to use HTTPS.",
+          "Secure Database Access: Use parameterized queries or prepared statements to prevent SQL injection attacks. Ensure that your database credentials are secure and not exposed in configuration files."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "40. What is Express router() function?",
+      "paragraphs": [
+        "The express.Router() function is used to create a new router object. This function is used when you want to create a new router object in your program to handle requests."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "express.Router( [options] )"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "41. What are the different types of HTTP requests?",
+      "paragraphs": [
+        "The primary HTTP methods are commonly referred to as CRUD operations, representing Create, Read, Update, and Delete. Here are the main HTTP methods:"
+      ],
+      "lists": [
+        [
+          "GET: The GET method is used to request data from a specified resource.",
+          "POST: The POST method is used to submit data to be processed to a specified resource.",
+          "PUT: The PUT method is used to update a resource or create a new resource if it does not exist.",
+          "PATCH: The PATCH method is used to apply partial modifications to a resource.",
+          "DELETE: The DELETE method is used to request that a specified resource be removed."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "42. Do Other MVC frameworks also support scaffolding?",
+      "paragraphs": [
+        "The Scaffolding technique is supported by other MVC frameworks also which includes-  Ruby on Rails, OutSystems Platform, Play framework, Django, MonoRail, Brail, Symfony, Laravel, CodeIgniter, YII, CakePHP, Phalcon PHP, Model-Glue, PRADO, Grails, Catalyst, Seam Framework, Spring Roo, ASP.NET, etc."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "43. Which are the arguments available to an ExpressJS route handler function?",
+      "paragraphs": [
+        "A route handler is a function that handles a specific route and typically sends the final response to the client using the res object. It has access to the following arguments:"
+      ],
+      "lists": [
+        [
+          "req: This represents the HTTP request object which holds information about the incoming request. It allows you to access and manipulate the request data.",
+          "res: This represents the HTTP response object which is used to send the response back to the client. It provides methods and properties to set response headers, status codes, and send the response body.",
+          "next: This is an optional callback function. If called, it passes control to the next middleware or route handler. Note that if a function calls `next()` instead of sending a response, it behaves as middleware rather than a route handler."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "44. How can you deal with error handling in ExpressJS?",
+      "paragraphs": [
+        "`ExpressJS` provides built-in error-handling mechanism with the help of the `next()` function. When an error occurs, you can pass it to the next middleware or route handler using the `next()` function. You can also add an error-handling middleware to your application that will be executed whenever an error occurs."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "45. What is the difference between a traditional server and an ExpressJS server?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Feature",
+            "Traditional Server (PHP, Java, .NET)",
+            "ExpressJS Server (NodeJS)"
+          ],
+          "rows": [
+            [
+              "Language",
+              "Uses languages like PHP, Java, C#, Python.",
+              "Uses JavaScript (NodeJS)."
+            ],
+            [
+              "Architecture",
+              "Multi-threaded, blocking I/O.",
+              "Single-threaded, non-blocking I/O."
+            ],
+            [
+              "Performance",
+              "Slower due to thread-based handling.",
+              "Faster due to event-driven, async processing."
+            ],
+            [
+              "Routing Mechanism",
+              "Routing is predefined and handled differently for each language.",
+              "ExpressJS provides a built-in and flexible routing system."
+            ],
+            [
+              "Used For",
+              "Enterprise applications, legacy systems, large-scale applications.",
+              "APIs, SPAs, microservices, real-time applications."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "46. What is the purpose of the next() function in ExpressJS?",
+      "paragraphs": [
+        "The `next()` function is used to pass control from one middleware function to the next function. It is used to execute the next middleware function in the chain. If there are no next middleware function in the chain then it will give control to router or other functions in the app. If you don't call `next()` in a middleware function, the request-response cycle can be terminated, and subsequent middleware functions won't be executed."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "47. What is the difference between app.route() and app.use() in ExpressJS?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Feature",
+            "app.route()",
+            "app.use()"
+          ],
+          "rows": [
+            [
+              "Purpose",
+              "Defines multiple HTTP methods (GET, POST, PUT, etc.) for a single route.",
+              "Mounts middleware or routers to handle requests."
+            ],
+            [
+              "Middleware Support",
+              "Does not apply middleware; only handles route-specific logic.",
+              "Used to apply middleware functions like authentication, logging, or parsing request bodies."
+            ],
+            [
+              "Routing Scope",
+              "Specific to a single route.",
+              "Can apply to multiple routes or all requests."
+            ],
+            [
+              "Example Usage",
+              "javascript app.route('/user') .get((req, res) => res.send('GET User')) .post((req, res) => res.send('POST User')) .put((req, res) => res.send('PUT User'));",
+              "javascript app.use('/user', (req, res, next) => { console.log('Middleware for /user'); next(); });"
+            ],
+            [
+              "Used For",
+              "When multiple HTTP methods need to be handled for the same path.",
+              "When applying middleware globally or to a group of routes."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "48. Explain what dynamic routing is in ExpressJS.",
+      "paragraphs": [
+        "Dynamic routing in `ExpressJS` include parameters, which allows you to create flexible and dynamic routes in your web application. This parameters are used in your route handlers to customize the behaviour based on the data provided.",
+        "In Express, dynamic routing is achieved by using route parameters, denoted by a colon (:) followed by the parameter name.",
+        "Here's a simple example:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const express = require('express');\nconst app = express();\n\n// Dynamic route with a parameter\napp.get('/users/:userId', (req, res) => {\n    const userId = req.params.userId;\n    res.send(`User ID: ${userId}`);\n});\n\n// Start the server\nconst port = 8000;\napp.listen(port, () => {\n    console.log(`Server is listening on port ${port}`);\n});"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "49. How to serve static files in ExpressJS?",
+      "paragraphs": [
+        "In `ExpressJS`, you can serve static files using the built-in express.static middleware. This middleware function takes the root directory of your static files as an argument and serves them automatically."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "50. What is the use of app.use() in ExpressJS?",
+      "paragraphs": [
+        "`app.use()` is used to add middleware functions in an Express application. It can be used to add global middleware functions or to add middleware functions to specific routes."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    }
+  ]
+}

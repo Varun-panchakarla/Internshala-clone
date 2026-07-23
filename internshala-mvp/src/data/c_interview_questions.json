@@ -527,8 +527,8 @@
               "Type conversion is done at compile time."
             ],
             [
-              "Syntax: destination_data_type = (target_data_type) variable_to_be_converted;",
-              "Syntax: int a = 20; float b; b = a; // a = 20.0000"
+              "Syntax: destination_data_type = (target_data_type) variable_to_be_converted;",
+              "Syntax: int a = 20; float b; b = a; // a = 20.0000"
             ]
           ]
         }
@@ -1507,9 +1507,9 @@
       "heading": "43. What is union?",
       "paragraphs": [
         "A union is a user-defined data type in C that allows multiple members to share the same memory location. At any given time, only one member can hold a valid value.",
-        "Syntax:",
-        "`union name_of_union { data_type member1; data_type member2; };`",
-        "Here, both variables share the same memory location, so only one member should be used at a time."
+        "Syntax",
+        "union name_of_union{   data_type name;   data_type name;};",
+        "Here, both i and f share the same memory location, so only one member should be used at a time."
       ],
       "lists": [
         [
@@ -1618,9 +1618,13 @@
       "heading": "47. What are enumerations?",
       "paragraphs": [
         "An enumeration (enum) is a user-defined data type that assigns meaningful names to a set of integral constants. It improves code readability and makes programs easier to maintain.",
-        "Syntax:",
-        "`enum enum_name { constant1, constant2, constant3 };`",
-        "In the above example, we declared \"day\" as the variable, and the value of \"Wed\" is allocated to day, which is 2. So as a result, 2 is printed."
+        "Syntax",
+        "enum enum_name {",
+        "constant1,",
+        "constant2,",
+        "constant3",
+        "};",
+        "In the above example, we declared “day” as the variable, and the value of “Wed” is allocated to day, which is 2. So as a result, 2 is printed."
       ],
       "lists": [
         [
@@ -1671,7 +1675,7 @@
       ],
       "code": [
         "// C program to print Fibonacci Series\n// with recursion and without recursion\n#include <stdio.h>\n\n// Recursive Function to print\n// Fibonacci Series\nvoid Fibonacci(int num, int first, int second, int third)\n{\n    if (num > 0) {\n        third = first + second;\n        first = second;\n        second = third;\n\n        printf(\"%d \", third);\n\n        // Recursive call for it's\n        // n-1 value\n        Fibonacci(num - 1, first, second, third)\n    }\n}\n\n// Driver code\nint main()\n{\n    int num;\n\n    printf(\"Please Enter number of Elements: \");\n    scanf(\"%d\", &num);\n\n    printf(\n        \"Fibonacci Series with the help of Recursion:\\n\");\n\n    printf(\"%d %d \", 0, 1);\n\n    // we are passing n-2 because we have\n    // already printed 2 numbers i.e, 0 and 1\n\n    Fibonacci(num - 2, 0, 1, 0);\n\n    printf(\"\\nFibonacci Series without Using Recursion:\\n\");\n\n    int first = 0, second = 1, third = 0;\n\n    printf(\"%d %d \", 0, 1);\n\n    // Loop will start from 2 because we have\n    // already printed 0 and 1\n    for (int i = 2; i < num; i++) {\n        third = first + second;\n\n        printf(\"%d \", third);\n\n        first = second;\n        second = third;\n    }\n\n    return 0;\n}",
-        "Output:Please Enter number of Elements: 5Fibonacci Series with the help of Recursion:0 1 1 2 3 Fibonacci Series without Using Recursion:0 1 1 2 3"
+        "Output:\nPlease Enter number of Elements: 5\nFibonacci Series with the help of Recursion:\n0 1 1 2 3 \nFibonacci Series without Using Recursion:\n0 1 1 2 3"
       ],
       "tables": []
     },
@@ -1821,7 +1825,10 @@
       "heading": "55. What are command line arguments?",
       "paragraphs": [
         "Command-line arguments are values passed to a C program when it is executed from the command line. They allow users to provide input without modifying the program.",
-        "Syntax:"
+        "Syntax",
+        "int main(int argc, char *argv[]) {",
+        "// Code",
+        "}"
       ],
       "lists": [
         [
@@ -1830,9 +1837,7 @@
         ]
       ],
       "images": [],
-      "code": [
-        "int main(int argc, char *argv[]) {\n    // Code\n}"
-      ],
+      "code": [],
       "tables": []
     },
     {
@@ -1982,7 +1987,7 @@
       "images": [],
       "code": [
         "#include <stdio.h>\n#include <math.h>\n\n// Function to calculate the number of digits\nint countDigits(int n) {\n    int count = 0;\n    while (n != 0) {\n        count++;\n        n /= 10;\n    }\n    return count;\n}\n\nint main() {\n    int n;\n    printf(\"Enter Number: \\n\");\n    scanf(\"%d\", &n);\n\n    int var = n;\n    int sum = 0;\n\n    // Get number of digits\n    int D = countDigits(n);\n\n    // Calculate the sum of digits raised\n    // to the power D\n    while (n > 0) {\n        int rem = n % 10;\n        sum += pow(rem, D);\n        n = n / 10;\n    }\n    \n    // If the sum equals the original number,\n    // it's an Armstrong number\n    if (var == sum) {\n        printf(\"%d is an Armstrong number \\n\", var);\n    } else {\n        printf(\"%d is not an Armstrong number \\n\", var);\n    }\n\n    return 0;\n}",
-        "Enter number: 82088208 is an Armstrong number"
+        "Enter number: 8208\n8208 is an Armstrong number"
       ],
       "tables": []
     },
@@ -2029,10 +2034,12 @@
       "heading": "65. What is the use of printf() and scanf() functions in C Programming language? Also, explain format specifiers.",
       "paragraphs": [
         "`printf()` function is used to print the value which is passed as the parameter to it on the console screen.",
-        "Syntax: `printf(\"%X\", variable_of_X_type);`",
+        "Syntax:",
+        "print(\"%X\",variable_of_X_type);",
         "`scanf()` method, reads the values from the console as per the data type specified.",
-        "Syntax: `scanf(\"%X\", &variable_of_X_type);`",
-        "In C, format specifiers are used to tell the compiler what type of data will be present in the variable during input using `scanf()` or output using `printf()`."
+        "Syntax:",
+        "scanf(\"%X\",&variable_of_X_type);",
+        "In C format specifiers are used to tell the compiler what type of data will be present in the variable during input using `scanf()` or output using print()."
       ],
       "lists": [
         [

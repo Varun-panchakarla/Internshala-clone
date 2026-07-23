@@ -1,0 +1,1356 @@
+{
+  "title": "Node.js Interview Questions and Answers",
+  "url": "https://www.geeksforgeeks.org/node-js/node-interview-questions-and-answers/",
+  "sections": [
+    {
+      "heading": "Basics",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Node.js Fundamentals & Architecture",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "1. How does Node.js work?",
+      "paragraphs": [
+        "`Node.js` works on a single-threaded, event-driven architecture using the `V8` JavaScript engine."
+      ],
+      "lists": [
+        [
+          "`V8` Engine: Compiles JavaScript into fast machine code.",
+          "Event Loop: Handles asynchronous tasks (I/O, timers, requests) without blocking the main thread.",
+          "Libuv library: Provides a thread pool and handles background tasks like file system operations and networking.",
+          "Non-blocking I/O: Lets `Node.js` process thousands of concurrent requests efficiently without creating multiple threads"
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "2. Can you access DOM in Node?",
+      "paragraphs": [
+        "No, you cannot access the DOM in `Node.js` because `Node.js` is a server-side environment, while the DOM (Document Object Model) is a client-side concept used in browsers to interact with HTML and XML documents.",
+        "`Node.js` runs on the server and does not have access to a browser's DOM, which is part of the browser's environment. The DOM allows you to manipulate the content and structure of web pages, but it is not available in `Node.js`, as it operates on the backend, outside the context of a web page or browser."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "3. What is V8 engine in Node.js?",
+      "paragraphs": [
+        "The `V8` engine in `Node.js` is an open-source JavaScript engine developed by Google, written in C++. It is the same engine that powers Google Chrome. In `Node.js`, the `V8` engine:"
+      ],
+      "lists": [
+        [
+          "Compiles JavaScript to machine code, enabling fast execution.",
+          "Handles memory management and garbage collection efficiently.",
+          "Provides the core runtime to run JavaScript outside the browser, which `Node.js` extends with additional APIs."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "4. Explain the engine Google uses for NodeJS",
+      "paragraphs": [
+        "The engine used by Google for `NodeJS` is `V8`. It is one the fastest engine as it is written in C++. It provides a runtime environment for the execution of JavaScript code. The best part is that the JavaScript engine is completely independent of the browser in which it runs. It has a huge community and is highly portable."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "5. What do you mean by event loop in Node.js?",
+      "paragraphs": [
+        "The event loop in `Node.js` is a mechanism that allows it to handle multiple asynchronous tasks concurrently within a single thread. It continuously listens for events and executes associated callback functions.",
+        "Example:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "console.log(\"Start\");\n\nsetTimeout(() => {\n  console.log(\"Timeout callback\");\n}, 0);\n\nconsole.log(\"End\");"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "6. Why is Node.js single-threaded?",
+      "paragraphs": [
+        "`Node.js` is single-threaded because it's based on the asynchronous, non-blocking nature of JavaScript. This design makes it simpler to develop and maintain, and it allows `Node.js` to handle many concurrent requests efficiently."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "7. If Node.js is single-threaded, then how does it handle concurrency?",
+      "paragraphs": [
+        "`Node.js` is single-threaded, but it can handle concurrency efficiently through its event-driven, non-blocking I/O model."
+      ],
+      "lists": [
+        [
+          "`Node.js` uses a single-threaded event loop to handle requests.",
+          "I/O operations run asynchronously, so other tasks continue without blocking.",
+          "Completed tasks add callbacks to a queue, which the event loop executes."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "8. What is control flow in Node.js?",
+      "paragraphs": [
+        "In `Node.js`, control flow refers to the order in which asynchronous operations (like file reads, API calls, DB queries) are executed and how their results are handled.",
+        "Because, `Node.js` is non-blocking and event-driven, tasks don’t always finish in the order they start. Control flow ensures they are managed correctly."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "9. What is the order in which control flow statements get executed?",
+      "paragraphs": [
+        "The order in which the statements are executed is as follows:"
+      ],
+      "lists": [
+        [
+          "Execution and queue handling",
+          "Collection of data and storing it",
+          "Handling concurrency",
+          "Executing the next lines of code"
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Why Node.js: Strengths, Weaknesses & Comparisons",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "10. Why is Node.js preferred over other backend technologies like Java and PHP?",
+      "paragraphs": [
+        "Here are some reasons why `Node.js` is preferred:"
+      ],
+      "lists": [
+        [
+          "Fast Performance: `Node.js` is known for its speed in handling I/O-heavy tasks.",
+          "`npm` Ecosystem: Node Package Manager offers over 50,000 bundles to help developers speed up development.",
+          "Real-Time Applications: Perfect for data-intensive, real-time apps as it doesn't wait for APIs to return data.",
+          "Unified Codebase: The Same code is used for both server and client, improving synchronization.",
+          "Easy for JavaScript Developers: Since `Node.js` is based on JavaScript, web developers can easily integrate it into their projects."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "11. What are the pros and cons of NodeJS?",
+      "paragraphs": [
+        "Pros of `NodeJS`",
+        "Cons of `NodeJS`"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Pros",
+            "Explanation"
+          ],
+          "rows": [
+            [
+              "Non-blocking, Asynchronous I/O",
+              "NodeJS handles multiple requests simultaneously without waiting for one to finish, making it ideal for I/O-heavy applications like APIs, real-time apps, etc."
+            ],
+            [
+              "High Performance (V8 Engine)",
+              "Built on Chrome's V8 JavaScript engine, NodeJS compiles JavaScript directly into machine code, leading to faster execution, especially for I/O-bound tasks."
+            ],
+            [
+              "Active Community",
+              "NodeJS has a large, active, and supportive community, making it easier to find solutions to problems and stay updated with the latest advancements."
+            ]
+          ]
+        },
+        {
+          "headers": [
+            "Cons",
+            "Explanation"
+          ],
+          "rows": [
+            [
+              "Single-Threaded Nature",
+              "While the single-threaded model is a benefit for I/O-bound tasks, it limits NodeJS for certain types of applications, especially those requiring heavy computation."
+            ],
+            [
+              "Callback Hell",
+              "Asynchronous programming can lead to deeply nested callbacks, which can result in \"callback hell\" or difficult-to-manage code if not handled properly (e.g., with Promises)."
+            ],
+            [
+              "Debugging Difficulties",
+              "Debugging asynchronous code in NodeJS can be tricky due to its non-blocking nature. Stack traces can be harder to follow in a callback-heavy codebase."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "12. What are the main disadvantages of Node.js?",
+      "paragraphs": [
+        "Here are some main disadvantages of `Node.js` listed below:"
+      ],
+      "lists": [
+        [
+          "Single-threaded nature: It may not fully utilize multi-core CPUs, limiting performance.",
+          "NoSQL preference: Relational databases like MySQL aren't commonly used.",
+          "Rapid API changes: Frequent updates can introduce instability and compatibility issues."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "13. What is the difference between Node.js and Angular?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Node.js",
+            "Angular"
+          ],
+          "rows": [
+            [
+              "Node.js is a server-side runtime environment used to execute JavaScript outside the browser.",
+              "Angular is a front-end framework used to build dynamic and interactive user interfaces."
+            ],
+            [
+              "It is mainly used for backend development such as APIs, servers, and database communication.",
+              "It is mainly used for frontend development to create responsive single-page applications (SPAs)."
+            ],
+            [
+              "Node.js runs on the server to handle client requests and responses.",
+              "Angular runs in the browser to manage the user interface."
+            ],
+            [
+              "It uses JavaScript for backend logic and server-side operations.",
+              "It primarily uses TypeScript for building structured frontend applications."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "14. Explain the difference between Node.js and server-side scripting languages like Python",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Node.js",
+            "Server-Side Scripting Languages"
+          ],
+          "rows": [
+            [
+              "A runtime environment for executing JavaScript outside the browser.",
+              "A programming language that can be used for server-side scripting (e.g., Python, PHP, Ruby)."
+            ],
+            [
+              "Built on JavaScript, primarily used for asynchronous programming.",
+              "Built on Python, which is synchronous by default, but can also be used for asynchronous programming."
+            ],
+            [
+              "Non-blocking, event-driven I/O model using the Event Loop.",
+              "Thread-based concurrency (multi-threading) or asynchronous programming with frameworks like asyncio."
+            ],
+            [
+              "Highly performant for I/O-heavy tasks but less efficient for CPU-heavy operations due to single-threaded nature.",
+              "More suitable for CPU-heavy operations but can be less performant in handling high concurrency compared to Node.js."
+            ],
+            [
+              "Used for building fast, scalable, I/O-bound applications (e.g., APIs, real-time apps).",
+              "Commonly used for general-purpose programming, web development, and CPU-bound tasks (e.g., Django for web, machine learning with libraries like TensorFlow)."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Synchronous vs Asynchronous & Callbacks",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "15. What is the difference between Synchronous and Asynchronous functions?",
+      "paragraphs": [
+        "Here are the differences between Synchronous and Asynchronous functions:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Synchronous Functions",
+            "Asynchronous Functions"
+          ],
+          "rows": [
+            [
+              "Blocks the execution until the task completes.",
+              "Does not block the execution; allows other tasks to proceed concurrently."
+            ],
+            [
+              "Executes tasks sequentially; each task must be completed before the next one starts.",
+              "Initiate tasks and proceed with other operations while waiting for completion."
+            ],
+            [
+              "Returns the result immediately after completion.",
+              "Typically returns a promise or callback or uses event handling to handle the result upon completion."
+            ],
+            [
+              "Errors can be easily caught with try-catch blocks.",
+              "Error handling is more complex and often involves callbacks, promises, or async/await syntax."
+            ],
+            [
+              "Suitable for simple, sequential tasks with predictable execution flow.",
+              "Ideal for I/O-bound operations, network requests, and tasks requiring parallel processing."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "16. How many types of API functions are there in Node.js?",
+      "paragraphs": [
+        "There are two types of API functions:"
+      ],
+      "lists": [
+        [
+          "Asynchronous, non-blocking functions - mostly I/O operations which can be fork out of the main loop.",
+          "Synchronous, blocking functions - mostly operations that influence the process running in the main loop."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "17. Explain asynchronous and non-blocking APIs in NodeJS.",
+      "paragraphs": [],
+      "lists": [
+        [
+          "Asynchronous APIs: They allow `NodeJS` to start an operation (e.g., reading a file or making a database request) and move on to the next task without waiting for the operation to finish. Once the task completes, a callback function is executed to handle the result.",
+          "Non-blocking: It refers to the behavior where an API does not block the execution of subsequent code while waiting for an I/O operation to finish. Instead, `NodeJS` uses the event loop to continue processing other operations."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "18.What is a callback function in NodeJS?",
+      "paragraphs": [
+        "A callback is a function which is called after a given task. In `NodeJS` callback functions prevents any blocking and enables other code to run in the meantime."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "19. What is callback hell?",
+      "paragraphs": [
+        "Callback hell is an issue caused by a nested callback. This causes the code to look like a pyramid and makes it unable to read To overcome this situation, we use promises."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "20. What are promises in Node.js?",
+      "paragraphs": [
+        "A Promise in `Node.js` is an object that represents the eventual completion or failure of an asynchronous operation and its resulting value. It is used to handle asynchronous operations more efficiently compared to callbacks. Promises help avoid callback hell by enabling better chaining using .then() and .catch() methods."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "21. What are the three methods to avoid callback hell?",
+      "paragraphs": [
+        "The three methods to avoid callback hell are:"
+      ],
+      "lists": [
+        [
+          "Using async/await()",
+          "Using promises",
+          "Using generators"
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "The Module System",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "22. What are the module in Node.js?",
+      "paragraphs": [
+        "In `Node.js`, a Module is a reusable block of code that provides specific functionality and can be organized in one or multiple files. Modules help simplify applications by dividing code into smaller, manageable parts. Examples include http, fs, os, and path."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "23. What is the purpose of the 'require' keyword in Node.js?",
+      "paragraphs": [
+        "The `require` keyword in `Node.js` is used to include and import modules (external or built-in) into a `Node.js` application."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const http = require('http')   //imports the HTTP module to create a server."
+      ],
+      "tables": []
+    },
+    {
+      "heading": "24. How to import a module in Node.js?",
+      "paragraphs": [
+        "We use the `require` module to import the External libraries in `Node.js`. The result returned by `require`() is stored in a variable, which is used to invoke the functions using the dot notation.",
+        "You can import modules in two ways:"
+      ],
+      "lists": [
+        [
+          "CommonJS (default):"
+        ],
+        [
+          "ES Modules (modern):"
+        ]
+      ],
+      "images": [],
+      "code": [
+        "const fs = require('fs');      // Built-in module\nconst add = require('./math'); // Custom module",
+        "import fs from 'fs';\nimport { add } from './math.js';"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "25. Which command used to import external libraries?",
+      "paragraphs": [
+        "In `Node.js`, you can import external libraries (also known as packages) using the `require`() function. This allows you to include modules or packages that you have installed via `npm` (Node Package Manager)."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const express = require('express');"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "NPM & Package Management",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "26. What is NPM?",
+      "paragraphs": [
+        "`npm` stands for Node Package Manager. It is used in `Node.js` to install and manage packages (libraries or dependencies) required for JavaScript applications."
+      ],
+      "lists": [
+        [
+          "Uses `package.json` to manage project dependencies and metadata.",
+          "Works through CLI commands like `npm` install, `npm` update, and `npm` uninstall."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "27. What is package.json in Node.js?",
+      "paragraphs": [
+        "`package.json` in `Node.js` is a metadata file that contains project-specific information such as dependencies, scripts, version, author details, and other configuration settings required for managing and building the project.",
+        "Example:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "{\n    \"name\": \"app\",\n    \"version\": \"1.0.0\",\n    \"main\": \"index.js\",\n    \"scripts\": {\n        \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n    },\n    \"keywords\": [],\n    \"author\": \"\",\n    \"license\": \"ISC\",\n    \"description\": \"\",\n    \"dependencies\": {\n        \"express\": \"^4.21.2\"\n    }\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "28. How do you install, update, and delete a dependency?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "Install the Dependencies"
+        ],
+        [
+          "Update the Dependencies"
+        ],
+        [
+          "Delete the Dependencies"
+        ]
+      ],
+      "images": [
+        {
+          "alt": "Screenshot-2025-05-12-124300",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20250512124331501218/Screenshot-2025-05-12-124300.png"
+        },
+        {
+          "alt": "Screenshot-2025-05-12-124424",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20250512124437147000/Screenshot-2025-05-12-124424.png"
+        },
+        {
+          "alt": "Screenshot-2025-05-12-124548",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20250512124558295269/Screenshot-2025-05-12-124548.png"
+        }
+      ],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "29. How do you manage packages in your Node.js project?",
+      "paragraphs": [
+        "In a `Node.js` project, package management is handled through `npm` (Node Package Manager), which is the default package manager for `Node.js`, which allows you to install and manage third-party packages and create and publish your packages."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Building Your First Server",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "30. How to create the simple HTTP server in Node.js?",
+      "paragraphs": [
+        "You can create a simple HTTP server in `Node.js` using the built-in http module:",
+        "Output:"
+      ],
+      "lists": [],
+      "images": [
+        {
+          "alt": "Screenshot-2025-03-05-151651",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20250305170819518788/Screenshot-2025-03-05-151651.png"
+        }
+      ],
+      "code": [
+        "const http = require('http');\n\nconst server = http.createServer((req, res) => {\n  res.writeHead(200, { 'Content-Type': 'text/plain' });\n  res.end('Hello, World!');\n});\nserver.listen(3000, () => {\n  console.log('Server is running at http://localhost:3000/');\n});",
+        "node app.js"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "31. How do we create simple ExpressJS application in NodeJS?",
+      "paragraphs": [
+        "Step 1: Install `NodeJS`",
+        "Ensure that you have `NodeJS` installed on your machine. You can download it from nodejs.org.",
+        "Step 2: Create a New Directory",
+        "Open a terminal/command prompt and create a new directory for your project:",
+        "Step 3: Initialize a `NodeJS` Project",
+        "Run `npm` init to initialize a new `NodeJS` project. This will create a `package.json` file:",
+        "The -y flag automatically answers \"yes\" to all prompts.",
+        "Step 4: Install Express.js",
+        "This will add Express to your node_modules folder and save it as a dependency in `package.json`.",
+        "Create the Main Application File (app.js or index.js)",
+        "In the root of your project folder, create a new file named app.js or index.js:",
+        "Step 5: Write Your Express Application Code",
+        "Open app.js and write the following code to set up a basic Express server:",
+        "Run the application by using the command:",
+        "Open your browser and visit http://localhost:3000. You should see the message: \"Hello, Express!\"."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "mkdir express-app\ncd express-app",
+        "npm init -y",
+        "npm install express",
+        "touch app.js",
+        "// Load the Express moduleconstexpress=require('express');constapp=express();app.get('/',(req,res)=>{res.send('Hello, Express!');});constPORT=3000;app.listen(PORT,()=>{console.log(`Server is running on http://localhost:${PORT}`);});",
+        "node app.js"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "32. What are the most commonly used libraries in Node.js?",
+      "paragraphs": [
+        "There are the two most commonly used libraries in `Node.js`:"
+      ],
+      "lists": [
+        [
+          "`ExpressJS`: `ExpressJS` is a minimal and flexible web application framework for building robust APIs and web apps. It simplifies routing, middleware handling, and request/response management.",
+          "Mongoose: An Object Data Modeling (ODM) library for MongoDB and `Node.js`, it helps in managing data relationships, schema validation, and business logic."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Environment Setup & Dev Tools",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "33. How to handle environment variables in Node.js?",
+      "paragraphs": [
+        "We use process.env to handle environment variables in `Node.js`. We can specify environment configurations as well as keys in the .env file. To access the variable in the application, we use the “process.env.VARIABLE_NAME” syntax.",
+        "To use it we have to install the dotenv package using the below command:",
+        "Use .env file with dotenv:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "npm install dotenv",
+        "require('dotenv').config();\nconst port = process.env.PORT || 3000;"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "34. What is the purpose of NODE_ENV?",
+      "paragraphs": [
+        "The NODE_ENV environment variable in `Node.js` is used to specify the environment in which the `Node.js` application is running. It helps in distinguishing between different stages of the application's lifecycle, such as development, testing, or production, and allows you to customize the behavior of the application based on that environment."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "35. What is REPL in Node.js?",
+      "paragraphs": [
+        "REPL in `Node.js` stands for Read, Evaluate, Print, and Loop. It is a computer environment similar to the shell which is useful for writing and debugging code as it executes the code in on go."
+      ],
+      "lists": [
+        [
+          "Read: It reads the input provided by the user (JavaScript expressions or commands).",
+          "Eval: It evaluates the input (executes the code).",
+          "Print: It prints the result of the evaluation to the console.",
+          "Loop: It loops back, allowing you to enter more code and get immediate results."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "36. Name the tool used for writing consistent code",
+      "paragraphs": [
+        "ESLint is a tool used in many IDEs to write consistent code styles. ESLint is written using `NodeJS` to provide a fast runtime environment and easy installation via `npm`."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Intermediate",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Event-Driven Programming & EventEmitter",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "37. What is event-driven programming in Node.js?",
+      "paragraphs": [
+        "Event-driven programming is used to synchronize the occurrence of multiple events and to make the program as simple as possible. The basic components of an Event-Driven Program are:"
+      ],
+      "lists": [
+        [
+          "A callback function ( called an event handler) is called when an event is triggered.",
+          "An event loop that listens for event triggers and calls the corresponding event handler for that event."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "38. What is an Event Emitter in Node.js?",
+      "paragraphs": [
+        "In `Node.js`, an Event Emitter is a class that allows objects to emit events and register listeners (callbacks) to handle those events. It is part of the events module and is commonly used to handle asynchronous events and to implement an observer pattern, where an object (the emitter) triggers events, and other objects (listeners) respond to those events."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Timers & Event Loop Internals",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "39. Explain the use of the timers module in Node.js.",
+      "paragraphs": [
+        "The Timers module in `Node.js` contains various functions that allow us to execute a block of code or a function after a set period. The Timers module is global, we do not need to use `require`() to import it.",
+        "It has the following methods:",
+        "1. `setTimeout()` method",
+        "The `setTimeout()` function is used to execute a function once after a specified delay (in milliseconds).",
+        "2. `setImmediate()` method",
+        "The `setImmediate()` function is used to execute a callback function immediately after the current event loop cycle, i.e., after the I/O events in the `Node.js` event loop have been processed. It is similar to `setTimeout()` with a delay of 0 milliseconds, but it differs in terms of when the function is executed.",
+        "3. setInterval() method",
+        "The setInterval() function is used to execute a function repeatedly, with a fixed time delay between each call."
+      ],
+      "lists": [
+        [
+          "callback: The function to be executed after the delay.",
+          "delay: The time in milliseconds after which the function is executed.",
+          "[arg1, arg2, ...]: Optional arguments that can be passed to the callback function."
+        ],
+        [
+          "callback: The function to be executed.",
+          "[arg1, arg2, ...]: Optional arguments to pass to the callback function."
+        ],
+        [
+          "callback: The function to be executed repeatedly.",
+          "delay: The time in milliseconds between each execution.",
+          "[arg1, arg2, ...]: Optional arguments that can be passed to the callback function."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "setTimeout(callback, delay, [arg1, arg2, ...]);",
+        "setImmediate(callback, [arg1, arg2, ...]);",
+        "setInterval(callback, delay, [arg1, arg2, ...]);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "40. Difference between setImmediate() and process.nextTick() methods",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "setImmediate()",
+            "process.nextTick()"
+          ],
+          "rows": [
+            [
+              "Executes callback in the check phase of the event loop",
+              "Executes callback in the next tick queue"
+            ],
+            [
+              "Runs after I/O events",
+              "Runs before I/O events"
+            ],
+            [
+              "Scheduled to run on the next iteration of the event loop",
+              "Runs immediately after the current operation completes"
+            ],
+            [
+              "Lower priority than nextTick",
+              "Higher priority than setImmediate"
+            ],
+            [
+              "Does not block I/O operations",
+              "Can block I/O if overused"
+            ],
+            [
+              "Used when you want to run code after I/O tasks",
+              "Used for immediate execution after current function"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "41. What is the difference between setImmediate() and setTimeout()?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "steImmediate()",
+            "setTimeout()"
+          ],
+          "rows": [
+            [
+              "Executes the callback immediately after the current event loop phase.",
+              "Executes the callback after the specified delay (in ms)."
+            ],
+            [
+              "Adds the callback to the next iteration of the event loop, in the check phase.",
+              "Adds the callback to the timer queue, to be executed after the specified delay."
+            ],
+            [
+              "Has no timer; it is designed for immediate execution.",
+              "Executes only after the specified delay, which may vary slightly based on system timing resolution."
+            ],
+            [
+              "No delay, always executes after the current phase finishes.",
+              "Executes after the specified delay (minimum of 1 ms)."
+            ],
+            [
+              "Used for callbacks that need to run immediately after I/O events or timers.",
+              "Used for delaying the execution of a callback by a specific time."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "HTTP, REST & Middleware",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "42. What are the different types of HTTP requests?",
+      "paragraphs": [
+        "The different types of HTTP requests are mentioned below:"
+      ],
+      "lists": [
+        [
+          "GET: Retrieve data.",
+          "POST: Create new resource.",
+          "PUT: Update an entire resource.",
+          "PATCH: Partially update a resource.",
+          "DELETE: Remove a resource."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "43. What is REST API?",
+      "paragraphs": [
+        "REST API stands for REpresentational State Transfer API. It is a type of API (Application Programming Interface) that allows communication between different systems over the internet. REST APIs work by sending requests and receiving responses, typically in JSON format, between the client and server.",
+        "REST APIs use HTTP methods (such as GET, POST, PUT, DELETE) to define actions that can be performed on resources. These methods align with CRUD (Create, Read, Update, Delete) operations, which are used to manipulate resources over the web."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "44. What is the use of url module in NodeJS?",
+      "paragraphs": [
+        "In `NodeJS` url module is used to split the URL of the website into parts so that it becomes readable and can be used in the different parts of the application. The parse() method is used with the url module to separate the URL of the website into parts."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "45. Explain the concept of middleware in NodeJS.",
+      "paragraphs": [
+        "In `NodeJS`, middleware refers to functions that are executed during the request-response cycle of an HTTP request. These functions can perform a variety of tasks such as modifying the request or response objects, handling errors, or terminating the request-response cycle."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "46. What is a .body-parser in Node.js?",
+      "paragraphs": [
+        "Body-parser is the `Node.js` body-parsing middleware. It is responsible for parsing the incoming request bodies in a middleware before you handle it. It is an `npm` module that processes data sent in HTTP requests."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "47. What is CORS in Node.js?",
+      "paragraphs": [
+        "The word CORS stands for “Cross-Origin Resource Sharing”. Cross-Origin Resource Sharing is an HTTP-header based mechanism implemented by the browser which allows a server or an API to indicate any origins (different in terms of protocol, hostname, or port) other than its origin from which the unknown origin gets permission to access and load resources. The cors package available in the `npm` registry is used to tackle CORS errors in a `Node.js` application."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Buffers, Streams & Crypto",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "48. What is a buffer in Node.js?",
+      "paragraphs": [
+        "The Buffer class in `Node.js` is used to perform operations on raw binary data. Generally, Buffer refers to the particular memory location in memory. Buffer and array have some similarities, but the difference is that array can be any type, and it can be resizable. Buffers only deal with binary data, and it can not be resizable. Each integer in a buffer represents a byte. console.log() function is used to print the Buffer instance."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "49. What are streams in Node.js?",
+      "paragraphs": [
+        "In `Node.js`, streams are a powerful way to handle data in chunks rather than loading the entire data into memory. Streams allow for the efficient processing of large volumes of data, especially in situations where the data size is too large to fit into memory all at once.",
+        "There are four types of the Streams:"
+      ],
+      "lists": [
+        [
+          "Readable Streams: These streams allow you to read data. For example, reading data from a file or receiving HTTP request data. Example:"
+        ],
+        [
+          "Writable Streams: These streams allow you to write data. For example, writing data to a file or sending HTTP response data. Example:"
+        ],
+        [
+          "Duplex Streams: These are both readable and writable. You can both read and write data using the same stream. Example: A TCP socket."
+        ],
+        [
+          "Transform Streams: These are a type of duplex stream where the data is transformed as it is read and written. Example: A zlib stream to compress or decompress data."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "fs.createReadStream() or http.IncomingMessage.",
+        "fs.createWriteStream() or http.ServerResponse."
+      ],
+      "tables": []
+    },
+    {
+      "heading": "50. Explain the crypto module in Node.js.",
+      "paragraphs": [
+        "The crypto module is used for encrypting, decrypting, or hashing any type of data. This encryption and decryption basically help to secure and add a layer of authentication to the data. The main use case of the crypto module is to convert the plain readable text to an encrypted format and decrypt it when required."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Child Processes",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "51. What are child processes in NodeJS?",
+      "paragraphs": [
+        "Usually, `NodeJS` allows single-threaded, non-blocking performance but running a single thread in a CPU cannot handle increasing workload hence the child_process module can be used to spawn child processes. The child processes communicate with each other using a built-in messaging system."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "52. What is a fork in Node.js?",
+      "paragraphs": [
+        "Fork is a method in `Node.js` that is used to create child processes. It helps to handle the increasing workload. It creates a new instance of the engine which enables multiple processes to run the code."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "53. What is the difference between spawn() and fork() method?",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "spawn()",
+            "fork()"
+          ],
+          "rows": [
+            [
+              "Used to run any system command",
+              "Used specifically to create new Node.js processes"
+            ],
+            [
+              "Executes external programs",
+              "Executes another JavaScript file"
+            ],
+            [
+              "Does not create communication channel by default",
+              "Creates built-in communication channel (IPC)"
+            ],
+            [
+              "Suitable for running large processes",
+              "Suitable for Node-to-Node communication"
+            ],
+            [
+              "Returns a stream for data handling",
+              "Returns an object with messaging support"
+            ],
+            [
+              "Used for general process execution",
+              "Used for creating child Node.js modules"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Working with Databases",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "54. How to handle database connection in NodeJS?",
+      "paragraphs": [
+        "To handle database connection in `NodeJS` we use the driver for MySQL and libraries like Mongoose for connecting to the MongoDB database. These libraries provide methods to connect to the database and execute queries."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "55. How to Connect Node.js to a MongoDB Database?",
+      "paragraphs": [
+        "To connect to the MongoDB database write the following code after installing the Mongoose package:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const mongoose = require(\"mongoose\");\n\nmongoose.connect(\"DATABASE_URL_HERE\", {\n   useNewUrlParser: true,\n   useUnifiedTopology: true\n});"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "56. Explain the Node.js Redis module.",
+      "paragraphs": [
+        "Redis is an Open Source store for storing data structures. It is used in multiple ways. It is used as a database, cache, and message broker. It can store data structures such as strings, hashes, sets, sorted sets, bitmaps, indexes, and streams. Redis is very useful for `Node.js` developers as it reduces the cache size which makes the application more efficient. However, it is very easy to integrate Redis with `Node.js` applications."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Testing & Security",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "57. What is a test pyramid in Node.js?",
+      "paragraphs": [
+        "The Test Pyramid is a strategy for structuring tests in a software project to ensure efficiency, maintainability, and good coverage. It consists of three levels:"
+      ],
+      "lists": [
+        [
+          "Unit Tests (Base): Test individual components or functions in isolation. These tests are fast and numerous.Example: Testing a single function like add(1, 2).",
+          "Integration Tests (Middle): Test interactions between components to ensure they work together. These are slower than unit tests but cover more functionality.Example: Testing API routes to ensure they connect properly with the database.",
+          "End-to-End Tests (Top): Test the entire application flow from the user interface to the backend. These are slow and fewer in number.Example: Simulating user login and navigating the application."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "58. How to validate data in NodeJS?",
+      "paragraphs": [
+        "Validation in `NodeJS` can be easily done by using the express-validator module. This module is popular for data validation. There are other modules available in the market like hapi/joi, etc but express-validator is widely used and popular among them."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "59. Explain the use of the passport module in Node.js",
+      "paragraphs": [
+        "The passport module is used for adding authentication features to our website or web app. It implements authentication measure which helps to perform sign-in operations."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "60. Explain the tls module in Node.js.",
+      "paragraphs": [
+        "The tls module provides an implementation of the Transport Layer Security (TLS) and Secure Socket Layer (SSL) protocols that are built on top of OpenSSL. It helps to establish a secure connection on the network."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Advanced",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Sessions, Auth & File Uploads",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "61. How to manage sessions in Node.js?",
+      "paragraphs": [
+        "Session management can be done in `Node.js` by using the express-session module. It helps in saving the data in the key-value form. In this module, the session data is not saved in the cookie itself, just the session ID."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "62. How can we implement authentication and authorization in Node.js?",
+      "paragraphs": [
+        "Authentication is the process of verifying a user’s identity, while Authorization determines what actions or resources that user is allowed to access. In `Node.js`, these can be implemented using packages such as Passport (for strategies like OAuth, Google, GitHub, etc.) and JWT(jsonwebtoken) for token-based authentication and role-based authorization."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "63. Explain the packages used for file uploading in Node.js.the",
+      "paragraphs": [
+        "The package used for file uploading in `Node.js` is Multer. The file can be uploaded to the server using this module. There are other modules in the market but Multer is very popular when it comes to file uploading. Multer is a `Node.js` middleware that is used for handling multipart/form-data, which is a mostly used library for uploading files."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "64. What is a cluster in Node.js?",
+      "paragraphs": [
+        "Due to a single thread in `Node.js`, it handles memory more efficiently because there are no multiple threads due to which no thread management is needed. Now, to handle workload efficiently and to take advantage of computer multi-core systems, cluster modules are created that provide us the way to make child processes that run simultaneously with a single parent process."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "65. Explain some of the cluster methods in Node.js",
+      "paragraphs": [],
+      "lists": [
+        [
+          "Fork(): It creates a new child process from the master. The isMaster returns true if the current process is master or else false.",
+          "isWorker: It returns true if the current process is a worker or else false.",
+          "process: It returns the child process which is global.",
+          "send(): It sends a message from worker to master or vice versa.",
+          "kill(): It is used to kill the current worker."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Core Networking & Utility",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "66. What is web socket?",
+      "paragraphs": [
+        "Web Socket is a protocol that provides full-duplex (multiway) communication i.e. allows communication in both directions simultaneously. Web Socket is a modern web technology in which there is a continuous connection between the user’s browser (client) and the server. In this type of communication, between the web server and the web browser, both of them can send messages to each other at any point in time."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "67. Explain the util module in Node.js",
+      "paragraphs": [
+        "The Util module in `Node.js` provides access to various utility functions. There are various utility modules available in the `Node.js` module library."
+      ],
+      "lists": [
+        [
+          "OS Module: Operating System-based utility modules for `Node.js` are provided by the OS module.",
+          "Path Module: The path module in `Node.js` is used for transforming and handling various file paths.",
+          "DNS Module: DNS Module enables us to use the underlying Operating System name resolution functionalities. The actual DNS lookup is also performed by the DNS Module.",
+          "Net Module: Net Module in `Node.js` is used for the creation of both client and server. Similar to DNS Module this module also provides an asynchronous network wrapper."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "68. What is the role of net module in NodeJS?",
+      "paragraphs": [
+        "The net module in `NodeJS` is used to create TCP client and serve in `NodeJS`. This module establishes connections, handles incoming requests, and share data over the network."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "69. Explain DNS module in Node.js",
+      "paragraphs": [
+        "DNS is a node module used to do name resolution facility which is provided by the operating system as well as used to do an actual DNS lookup. Its main advantage is that there is no need for memorizing IP addresses – DNS servers provide a nifty solution for converting domain or subdomain names to IP addresses."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Node.js Internals & Global Objects",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "70. What is piping in Node.js?",
+      "paragraphs": [
+        "In `Node.js`, piping refers to the process of passing the output of one stream directly into another stream. It allows data to flow through multiple streams without needing to store it in memory or temporarily write it to disk. This is a common pattern used in file handling, HTTP requests, and other I/O operations in `Node.js`."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "71. What are global objects in NodeJS?",
+      "paragraphs": [
+        "Global objects in `NodeJS` are objects that are available in all modules without needing to be imported. These objects provide built-in functionalities and information about the `NodeJS` environment. They are similar to the window object in browsers but are tailored for server-side JavaScript."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "72. How to read command line arguments in Node.js?",
+      "paragraphs": [
+        "Command-line arguments (CLI) are strings of text used to pass additional information to a program when an application is running through the command line interface of an operating system. We can easily read these arguments by the global object in node i.e. process object. Below is the approach:",
+        "Step 1: Save a file as index.js and paste the below code inside the file.",
+        "Step 2: Run the index.js file using the below command:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "let arguments = process.argv ; \n  \nconsole.log(arguments) ;",
+        "node index.js"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "73. What is reactor pattern in NodeJS?",
+      "paragraphs": [
+        "Reactor Pattern is used to avoid the blocking of the Input/Output operations. It provides us with a handler that is associated with I/O operations. When the I/O requests are to be generated, they get submitted to a demultiplexer, which handles concurrency in avoiding the blocking of the I/O mode and collects the requests in the form of an event and queues those events."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "74. What is tracing in NodeJS?",
+      "paragraphs": [
+        "The Tracing Objects are used for a set of categories to enable and disable the tracing. When tracing events are created then tracing objects is disabled by calling tracing.enable() method and then categories are added to the set of enabled trace and can be accessed by calling tracing.categories.",
+        "Practice Quiz Questions:"
+      ],
+      "lists": [
+        [
+          "Quiz | Set-1",
+          "Quiz | Set-2",
+          "Quiz | Set-3"
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    }
+  ]
+}

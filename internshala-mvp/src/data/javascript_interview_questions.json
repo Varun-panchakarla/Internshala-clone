@@ -1,0 +1,1156 @@
+{
+  "title": "JavaScript Interview Questions and Answers",
+  "url": "https://www.geeksforgeeks.org/javascript/javascript-interview-questions/",
+  "sections": [
+    {
+      "heading": "Basics",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "1. What is the difference between == and === in JavaScript?",
+      "paragraphs": [
+        "In JavaScript, == is the loose equality operator, which compares two values for equality after performing type coercion if necessary. This means it converts the operands to the same type before comparing.",
+        "=== is the strict equality operator, which compares both the values and their types, without performing type conversion."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "2. What would be the result of 3+2+\"7\"?",
+      "paragraphs": [
+        "Output:"
+      ],
+      "lists": [
+        [
+          "3 + 2 is evaluated first, and since both are numbers, it results in 5.",
+          "Then, 5 + \"7\" is calculated. Since one of the operands is a string (\"7\"), JavaScript converts the number 5 to a string and concatenates it with \"7\", resulting in \"57\"."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "let result = 3 + 2 + \"7\";\nconsole.log(result);",
+        "57"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "3. What’s new in ECMAScript 2025 (ES2025)?",
+      "paragraphs": [
+        "ECMAScript 2025 (ES2025) Key Features"
+      ],
+      "lists": [
+        [
+          "Promise.withResolvers() → Returns a promise with its resolve and reject, simplifying async control.",
+          "Immutable Array Methods → New methods like findLast(), toReversed(), and toSorted() return new arrays instead of mutating originals.",
+          "RegExp v flag → Adds better Unicode handling in regular expressions.",
+          "Hashbang grammar → Officially allows #! at the start of JS files for CLI scripts."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "4. Is JavaScript compiled or interpreted?",
+      "paragraphs": [
+        "JavaScript is mostly interpreted, but modern browsers also compile it just-in-time (JIT) to make it faster."
+      ],
+      "lists": [
+        [
+          "The browser reads your JavaScript code line by line and runs it directly.",
+          "Modern browsers (like Chrome’s V8 engine) first translate parts of your code into machine code while running it, so the computer can execute it much faster."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "5. Are JavaScript and Java related?",
+      "paragraphs": [
+        "No, their names sound similar but they are not related in any terms, below are some key differences:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Java",
+            "JavaScript"
+          ],
+          "rows": [
+            [
+              "Java is a strongly typed language and variables must be declared first to use in the program. In Java, the type of a variable is checked at compile-time.",
+              "JavaScript is a loosely typed language and has a more relaxed syntax and rules."
+            ],
+            [
+              "Java is an object-oriented programming language primarily used for developing complex enterprise applications.",
+              "JavaScript is a scripting language used for creating interactive and dynamic web pages."
+            ],
+            [
+              "Java applications can run in any virtual machine(JVM) or browser.",
+              "JavaScript code used to run only in the browser, but now it can run on the server via Node.js."
+            ],
+            [
+              "Objects of Java are class-based even we can't make any program in java without creating a class.",
+              "JavaScript Objects are prototype-based."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "6. How many ways an HTML element can be accessed in JavaScript code?",
+      "paragraphs": [
+        "There are four possible ways to access HTML elements in JavaScript which are:"
+      ],
+      "lists": [
+        [
+          "getElementById() Method: It is used to get the element by its id name.",
+          "getElementsByClass() Method: It is used to get all the elements that have the given classname.",
+          "getElementsByTagName() Method: It is used to get all the elements that have the given tag name.",
+          "querySelector() Method: This function takes CSS style selector and returns the first selected element."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "7. What’s the return-value difference between x++ and ++x?",
+      "paragraphs": [
+        "Both increment, but return different values."
+      ],
+      "lists": [
+        [
+          "x++: post-increment → returns the old value, then increments.",
+          "++x: pre-increment → increments first, then returns the new value."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "8. What’s the difference between var, let, and const and what is the Temporal Dead Zone?",
+      "paragraphs": [
+        "JavaScript provides three ways to declare variables: `var`, `let`, and `const`, but they differ in scope, hoisting behaviour, and re-assignment rules.",
+        "Temporal Dead Zone (TDZ): It’s the period between entering a scope and the point where a `let` or `const` variable is declared. During this time, accessing the variable causes a ReferenceError, because the variable exists but hasn’t been initialized yet."
+      ],
+      "lists": [
+        [
+          "`var`: Declares variables with function or global scope and allows re-declaration and updates within the same scope.",
+          "`let`: Declares variables with block scope, allowing updates but not re-declaration within the same block.",
+          "`const`: Declares block-scoped variables that cannot be reassigned after their initial assignment."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "// var: function or global scope, can be re-declared and updated\nvar x = 10;\nvar x = 20; // re-declaration allowed\nconsole.log(\"var:\", x); // 20\n\n// let: block scope, can be updated but not re-declared in same block\nlet y = 30;\n// let y = 40; Error (can't re-declare in same block)\ny = 40; // update allowed\nconsole.log(\"let:\", y); // 40\n\n// const: block scope, cannot be reassigned\nconst z = 50;\n// z = 60; Error (can't reassign)\nconsole.log(\"const:\", z); // 50",
+        "// TDZ example\nconsole.log(x);            // ReferenceError (x in TDZ)\nlet x = 10;\n\nconsole.log(y);            // undefined (var is initialized at hoist time)\nvar y = 10;"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "9. What is a Variable Scope in JavaScript?",
+      "paragraphs": [
+        "In JavaScript, we have each variable can be accessed and modified through either one of the given scope:"
+      ],
+      "lists": [
+        [
+          "Global Scope: Outermost level (accessible everywhere).",
+          "Local Scope: Inner functions can access variables from their parent functions due to lexical scoping.",
+          "Function Scope: Variables are confined to the function they are declared in.",
+          "Block Scope: Variables declared with `let` or `const` are confined to the nearest block (loops, conditionals, etc.)."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "10. What the difference between Lexical and Dynamic Scoping?",
+      "paragraphs": [
+        "Lexical Scoping (Static Scoping)",
+        "Dynamic Scoping (Not in JS)"
+      ],
+      "lists": [
+        [
+          "The scope of a variable is determined by its position in the source code at the time of writing.",
+          "JavaScript uses lexical scoping.",
+          "The inner function looks up variables in the outer function where it was defined, not where it was called."
+        ],
+        [
+          "The scope is determined by the call stack at runtime, not where the function is written.",
+          "Languages like older versions of Lisp or Bash use dynamic scoping.",
+          "The function uses variables from the function that called it, even if it was defined else."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "11. What is the use of isNaN, and how is it different from Number.isNaN?",
+      "paragraphs": [
+        "The number isNan function determines whether the passed value is NaN (Not a number) and is of the type \"Number\". In JavaScript, the value NaN is considered a type of number. It returns true if the argument is not a number, else it returns false."
+      ],
+      "lists": [
+        [
+          "Number.`isNaN`(x) → returns trueonly ifx is the NaN value. No coercion.",
+          "`isNaN`(x) → converts x to a number then checks if that result is NaN."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "Number.isNaN(NaN)             // true\nNumber.isNaN(\"foo\")           // false  (string, not NaN)\nisNaN(\"foo\")                 // true   (coerces \"foo\" → NaN)\n\nNumber.isNaN(undefined)     // false\nisNaN(undefined)             // true   (undefined → NaN)\n\nNumber.isNaN(\"\")             // false\nisNaN(\"\")                    // false  (\"\" → 0)\n\nNumber.isNaN(0/0)            // true   (is NaN)\nisNaN(0/0)                   // true"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "12. What does this code log?",
+      "paragraphs": [
+        "Output:",
+        "Explanation: When you assign to arr[10] you create empty slots from index 3 to 9, making the new length one more than the highest index: 10 + 1 = 11."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const arr = [1, 2, 3];\narr[10] = 99;\nconsole.log(arr.length);",
+        "11"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "13. What is negative infinity?",
+      "paragraphs": [
+        "The negative infinity is a constant value represents the lowest available value. It means that no other number is lesser than this value. It can be generated using a self-made function or by an arithmetic operation. JavaScript shows the NEGATIVE_INFINITY value as -Infinity."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "14. Why is typeof null === \"object\"?",
+      "paragraphs": [
+        "It’s a long-standing historical bug in the original `typeof` tag encoding that can’t be fixed without breaking the web."
+      ],
+      "lists": [
+        [
+          "`null` is a primitive, but `typeof` `null` returns \"object\".",
+          "Practical tip: check for `null` using value === `null` or value == `null` (to match `null` or `undefined` intentionally)."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "15. Is it possible to break JavaScript Code into several lines?",
+      "paragraphs": [
+        "Yes, it is possible to break the JavaScript code into several lines in a string statement. It can be broken by using the '\\n' (backslash n).",
+        "Example:",
+        "Line breaks are avoided by JavaScript, which is not preferable."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "console.log(\"A Online Computer Science Portal\\n for Geeks\")",
+        "let gfg= 10, GFG = 5,\nGeeks =\ngfg + GFG;\nconsole.log(Geeks)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "16. What are \"truthy\" and \"falsy\" values in JavaScript",
+      "paragraphs": [],
+      "lists": [
+        [
+          "Falsy: false, 0, \"\" (empty string), `null`, `undefined`, NaN.",
+          "Truthy: Everything else (e.g., any non-empty string, any non-zero number, objects, arrays)."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "17. What are undeclared and undefined variables?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "Undefined: It occurs when a variable is declare but not assign any value. Undefined is not a keyword.",
+          "Undeclared: It occurs when we try to access any variable which is not initialize or declare earlier using the `var` or `const` keyword. If we use '`typeof`' operator  to get the value of an undeclare variable, we will face the runtime error with the return value as \"`undefined`\". The scope of the undeclare variables is always global."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "18. What will be theresult of this expression?",
+      "paragraphs": [
+        "Output:",
+        "Explanation: The nullish coalescing operator ?? returns the right-hand side only if the left is `null` or `undefined`. So:"
+      ],
+      "lists": [
+        [
+          "`null` ?? 'default' → 'default'",
+          "`undefined` ?? 'default' → 'default'",
+          "false ?? 'default' → false (because false is neither `null` nor `undefined`)"
+        ]
+      ],
+      "images": [],
+      "code": [
+        "console.log(null ?? 'default');\nconsole.log(undefined ?? 'default');\nconsole.log(false ?? 'default');",
+        "default\ndefault\nfalse"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "19. Write a JavaScript code for adding newelements dynamically.",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [
+        "<html>\n<head>\n</head>\n<body>\n    <button onclick=\"create()\">\n        Click Here!\n    </button>\n\n    <script>\n        function create() {\n            let geeks = document.createElement('geeks');\n            geeks.textContent = \"Geeksforgeeks\";\n            geeks.setAttribute('class', 'note');\n            document.body.appendChild(geeks);\n        }\n    </script>\n</body>\n</html>"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "20. What are global variables? How are these variables declared, and what are the problems associated with them?",
+      "paragraphs": [
+        "In contrast, global variables are the variables that define outside of functions. These variables have a global scope, so they can be used by any function without passing them to the function as parameters.",
+        "Example:",
+        "It is difficult to debug and test the code that relies on global variables."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "let petName = \"Rocky\"; // Global Variable\nmyFunction();\n\nfunction myFunction() {\n    console.log(\"Inside myFunction - Type of petName:\", typeof petName);\n    console.log(\"Inside myFunction - petName:\", petName);\n}\n\nconsole.log(\"Outside myFunction - Type of petName:\", typeof petName);\nconsole.log(\"Outside myFunction - petName:\", petName);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "21. What do you mean by Null in JavaScript?",
+      "paragraphs": [
+        "The `null` value represents that no value or no object. It is known as empty value/object."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "22. How to delete property-specific values?",
+      "paragraphs": [
+        "The delete keyword deletes the whole property and all the values at once like"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "let gfg={Course: \"DSA\", Duration:30};\ndelete gfg.Course;"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "23. What will be the output of this code?",
+      "paragraphs": [
+        "Output:",
+        "Explanation:"
+      ],
+      "lists": [
+        [
+          "x++ returns the current value (0), then increments → x becomes 1.",
+          "++x increments first (1 → 2), then returns the new value (2)."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "let x = 0;\nconsole.log(x++);\nconsole.log(++x);",
+        "0\n2"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "24. What is the difference between null and undefined in JavaScript?",
+      "paragraphs": [
+        "`undefined`:",
+        "It means: \"value not assigned yet\"",
+        "`null`:"
+      ],
+      "lists": [
+        [
+          "A primitive value automatically assigned to:",
+          "Uninitialized variables",
+          "Missing function arguments",
+          "Missing object properties"
+        ],
+        [
+          "A primitive value that you assign intentionally to represent:",
+          "\"no value\", \"empty\", or \"non-existent\"",
+          "It means: \"value is deliberately empty\""
+        ]
+      ],
+      "images": [],
+      "code": [
+        "let x;\nconsole.log(x); // undefined\n\nfunction foo(a) {\n  console.log(a); // undefined if no argument is passed\n}\nfoo();",
+        "let user = null; // explicit assignment\nconsole.log(user); // null"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "25. What are template literals and when do you use them?",
+      "paragraphs": [
+        "Backtick strings that support interpolation, multi-line text, and tagged processing."
+      ],
+      "lists": [
+        [
+          "${expr} interpolation without manual concatenation.",
+          "Preserve newlines/indentation as written.",
+          "Tagged templates for advanced parsing (e.g., sanitization, i18n)."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "const name = \"Geeks\";\nconst msg = `Hello, ${name}!\nYour total is $${(19.99 * 2).toFixed(2)}.`;"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "26. What is the output of this snippet?",
+      "paragraphs": [
+        "Output:",
+        "Explanation: Arrays are objects and compared by reference. a and b are distinct objects, so both loose (==) and strict (===) comparisons yield false."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const a = [1, 2, 3];\nconst b = [1, 2, 3];\nconsole.log(a == b, a === b);",
+        "false\nfalse"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "27. Can closures leak memory?",
+      "paragraphs": [
+        "JavaScript closures capture variables from their outer scope, but if not managed properly, they can sometimes lead to memory leaks.",
+        "Memory Leak Possibility: Closures can leak memory when they unintentionally keep references to variables or objects that are no longer needed. This prevents the garbage collector from freeing that memory."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "28. Does JavaScript allow multiple inheritance?",
+      "paragraphs": [
+        "JavaScript does not support multiple inheritance in the traditional sense, but it provides ways to reuse and combine functionality."
+      ],
+      "lists": [
+        [
+          "Classes: JavaScript classes only allow single inheritance, meaning a class can extend only one parent class.",
+          "Prototypes: Objects can inherit from one prototype at a time, not multiple.",
+          "Mixins: To achieve similar behavior to multiple inheritance, JavaScript uses mixins—functions or objects that copy properties and methods into a class or object."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "29. Is JavaScript statically typed or dynamically typed?",
+      "paragraphs": [
+        "JavaScript is dynamically typed because we don’t have to tell JavaScript what kind of data (number, text, true/false, etc.) a variable will hold when you create it. The type is decided automatically when the program runs."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "30. Explain the working of timers in JavaScript. Also explain the drawbacks of using the timer, if any.",
+      "paragraphs": [
+        "JavaScript provides timers to schedule tasks after a delay or at regular intervals. These are not part of the JS engine itself, but come from the browser (Web APIs) or Node.js environment.",
+        "1. setTimeout:",
+        "Executes a function once after a specified delay (in milliseconds).",
+        "2. setInterval:",
+        "Executes a function repeatedly at a specified interval until cleared.",
+        "3. clearTimeout / clearInterval:",
+        "Used to stop a scheduled timer.",
+        "Timers in JS (setTimeout, setInterval) `let` you schedule tasks asynchronously. But they are not precise (due to event loop delays), can waste resources if misused, and should be cleared properly to avoid leaks."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "setTimeout(() => {\n  console.log(\"Runs after 2 seconds\");\n}, 2000);",
+        "let count = 0;\nconst intervalId = setInterval(() => {\n  count++;\n  console.log(\"Runs every 1 second\");\n  if (count === 3) clearInterval(intervalId); // stop after 3 runs\n}, 1000);",
+        "const id = setTimeout(() => console.log(\"Won't run\"), 3000);\nclearTimeout(id); // cancels the timer"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "31. What will be logged by this code?",
+      "paragraphs": [
+        "Output:",
+        "Explanation: Using `let` i in the loop gives each callback its own i binding. The timeouts fire after 0ms, 100ms, and 200ms, logging 0, then 1, then 2."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "for (let i = 0; i < 3; i++) {\n  setTimeout(() => console.log(i), i * 100);\n}",
+        "0 1 2"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "32. What is the difference between ViewState and SessionState?",
+      "paragraphs": [],
+      "lists": [
+        [
+          "ViewState: It is specific to a single page in a session.",
+          "SessionState: It is user specific that can access all the data on the web pages."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "33. How to submit a form using JavaScript?",
+      "paragraphs": [
+        "You can use document.form[0].submit() method to submit the form in JavaScript."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "34. Does JavaScript support automatic type conversion?",
+      "paragraphs": [
+        "Yes, JavaScript supports automatic type conversion."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "35. What is a template literal in JavaScript?",
+      "paragraphs": [
+        "A template literal in JavaScript is a way to define strings that allow embedded expressions and multi-line formatting. It uses backticks (`) instead of quotes and supports ${} for embedding variables or expressions inside the string."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "36. What is a higher-order function in JavaScript?",
+      "paragraphs": [
+        "A higher-order function in JavaScript is a function that either takes one or more functions as arguments, or returns a function as its result. These functions allow for more abstract and reusable code, enabling functional programming patterns",
+        "For example, map() and filter() are higher-order functions because they take callback functions as arguments."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "37. What is the difference between call() and apply() methods ?",
+      "paragraphs": [
+        "Both methods are used in a different situation"
+      ],
+      "lists": [
+        [
+          "`call()` Method: It calls the method, taking the owner object as argument. The keyword this refers to the ‘owner’ of the function or the object it belongs to. We can call a method that can be used on different objects.",
+          "`apply()` Method: The `apply()` method is used to write methods, which can be used on different objects. It is different from the function `call()` because it takes arguments as an array."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "38. Is JavaScript single-threaded or multi-threaded",
+      "paragraphs": [
+        "JavaScript is single-threaded, but it uses asynchronous features to handle multiple tasks efficiently."
+      ],
+      "lists": [
+        [
+          "JavaScript runs on a single main thread, meaning it executes one command at a time in a sequence.",
+          "It was designed this way to simplify programming for the browser and avoid issues like race conditions when accessing the DOM."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "39. What is lexical scope in JavaScript?",
+      "paragraphs": [
+        "Lexical scope in JavaScript refers to the way variables are resolved based on their location in the source code. A variable's scope is determined by the position of the code where it is defined, and it is accessible to any nested functions or blocks. This means that functions have access to variables in their own scope and the outer (lexical) scopes, but not to variables in inner scopes.",
+        "In this example, inner() can access the outer variable because of lexical scoping."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "let outer = \"I am outside!\";\nfunction inner() {\n    console.log(outer);\n}\ninner();"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "40. What is the this keyword, and how does the call-site affect it?",
+      "paragraphs": [
+        "JavaScript uses the this keyword as a reference to the object that is currently executing the code, but its value depends on the call-site (how and where the function is invoked)."
+      ],
+      "lists": [
+        [
+          "Global/Function context: In non–strict mode, this refers to the global object (window in browsers). In strict mode, it is `undefined`.",
+          "Object method: When a function is called as a method of an object, this refers to that object.",
+          "Constructor function / class: When used inside a constructor or class, this refers to the newly created instance.",
+          "Explicit binding: Using `call()`, `apply()`, or `bind()`, you can explicitly set what this refers to.",
+          "Arrow functions: Unlike normal functions, arrow functions don’t have their own this; instead, they capture this from their surrounding (lexical) scope."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "41. How does lexical scoping work with the this keyword in JavaScript?",
+      "paragraphs": [
+        "In JavaScript, lexical scoping primarily applies to variable resolution, while the behavior of the this keyword is determined by how a function is called, not by its position in the code. The value of this is dynamically determined at runtime based on the function’s context (e.g., whether it’s called as a method, in a global context, or with call, apply, or bind).",
+        "Here, this refers to obj because the function is called as a method of the object. Lexical scoping affects variable lookups but doesn’t alter how this behaves."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "const obj = {\n    name: \"JavaScript\",\n    greet: function () {\n        console.log(this.name);\n    }\n};\nobj.greet(); // \"JavaScript\""
+      ],
+      "tables": []
+    },
+    {
+      "heading": "42. What is hoisting in JavaScript?",
+      "paragraphs": [
+        "Hoisting in JavaScript is the behavior where variable and function declarations are moved to the top of their containing scope during compilation, before the code is executed.",
+        "This means you can reference variables and functions before they are declared in the code. However, only declarations are hoisted, not initializations.",
+        "In this case, the declaration of a is hoisted, but its value (5) is not assigned until the code execution reaches that line. Hoisting applies differently for `var`, `let`, `const`, and function declarations."
+      ],
+      "lists": [],
+      "images": [
+        {
+          "alt": "hoisting",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20250621150407564983/hoisting-300.webp"
+        }
+      ],
+      "code": [
+        "console.log(a); // undefined\nvar a = 5;"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "43. What are JavaScript modules, and how do you import/export them?",
+      "paragraphs": [
+        "JavaScript modules allow you to split your code into smaller, reusable pieces. They enable the export of variables, functions, or objects from one file and the import of them into another.  To export an element, you use export (either named or default). To import it, you use import.",
+        "Modules help organize code and avoid global namespace pollution. They are natively supported in modern JavaScript through import and export statements."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "// In file1.js\nexport const greet = () => \"Hello\";\n\n// In file2.js\nimport { greet } from './file1';\nconsole.log(greet());"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "44. Explain the concept of memoization in JavaScript?",
+      "paragraphs": [
+        "Memoization in JavaScript is an optimization technique that stores the results of expensive function calls and reuses them when the same inputs occur again. This reduces the number of computations by caching the results.",
+        "Memoization is typically implemented using an object or a map to store function arguments and their corresponding results. When the function is called with the same arguments, the cached result is returned instead of recalculating it. This improves performance, especially for functions with repeated calls and expensive computations."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "45. How do call, apply, and bind change this?",
+      "paragraphs": [
+        "JavaScript lets you control this using call, apply, and bind. They set what this points to when a function runs, and differ in when they run and how they accept arguments."
+      ],
+      "lists": [
+        [
+          "call: Invokes the function immediately, setting this to the first argument; remaining arguments are passed one-by-one.",
+          "apply: Invokes the function immediately, like call, but takes the arguments as a single array.",
+          "bind: Does not run immediately; returns a new function with this permanently set (and optionally some arguments pre-filled).JavaScript lets you control this using call, apply, and bind. They set what this points to when a function runs, and differ in when they run and how they accept arguments."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "46. What is the ‘Strict’ mode in JavaScript and how can it be enabled?",
+      "paragraphs": [
+        "Strict Mode is a new feature in ECMAScript 5 that allows you to place a program or a function in a “strict” operating context. This strict context prevents certain actions from being taken and throws more exceptions. The statement “use strict” instructs the browser to use the Strict mode, which is a reduced and safer feature set of JavaScript."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "47. Explain the concept of promises and how they work.",
+      "paragraphs": [
+        "A Promise in JavaScript is an object that represents the result of an asynchronous operation. It can be in one of three states: pending, fulfilled (resolved), or rejected.",
+        "You create a promise using new Promise(), passing an executor function with resolve and reject callbacks. When the operation succeeds, resolve() is called; if it fails, reject() is used. Promises are handled with .then() for success and .catch() for failure. They can be chained to handle sequences of asynchronous tasks in a more readable way."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "48. How to explain closures in JavaScript and when to use it?",
+      "paragraphs": [
+        "The closure is created when a child functions to keep the environment of the parent’s scope even after the parent’s function has already executed. The Closure is a locally declared variable related to a function. The closure will provide better control over the code when using them."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "function foo() { \n    let b = 1; \n    function inner() { \n        return b; \n    } \n    return inner; \n} \nlet get_func_inner = foo(); \n\nconsole.log(get_func_inner()); \nconsole.log(get_func_inner()); \nconsole.log(get_func_inner());"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "49. What is the unshift method in JavaScript?",
+      "paragraphs": [
+        "The `unshift()` method adds one or more elements to the beginning of an array and returns the new array length. It modifies the original array.",
+        "For example:",
+        "Unlike push() (adds to the end), `unshift()` shifts existing elements to higher indices. It’s less performant for large arrays due to this shifting."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "let array = [2, 3, 4];\narray.unshift(0, 1); // Adds 0 and 1\nconsole.log(array); // Output: [0, 1, 2, 3, 4]\nconsole.log(array.length); // Output: 5"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "50. What is the difference between substring() and substr() in JavaScript?",
+      "paragraphs": [
+        "`substring()` takes a start and end index to grab a piece of a string, while `substr()` takes a start index and how many characters to take. `substring()` is more common; `substr()` is older and less used now.",
+        "Example:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "letstr='Hello World';",
+        "console.log(str.substring(6, 11));",
+        "console.log(str.substr(6, 5));"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "51. How do you count the number of words in a string?",
+      "paragraphs": [
+        "To count words, use match() with a pattern that finds sequences of letters or numbers, ignoring spaces and punctuation. The length of the resulting array is the word count. This works well for sentences.",
+        "Example:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "letsentence='Hello world, welcome to JavaScript!';",
+        "letwordCount=sentence.match(/\\b\\w+\\b/g).length;",
+        "console.log(wordCount);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "52. How do you find the longest word in a string?",
+      "paragraphs": [
+        "Split the string into words with split(), then use reduce() to keep track of the word with the most letters. This is useful for analyzing text, like finding the biggest word in a sentence.",
+        "Example:"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "letsentence='JavaScript is awesome';",
+        "letlongest=sentence.split(' ').reduce((longest, word) =>word.length>longest.length?word : longest, '');",
+        "console.log(longest);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "Advance",
+      "paragraphs": [],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "53. What are all the looping structures in JavaScript?",
+      "paragraphs": [
+        "JavaScript provides several looping structures to execute a block of code repeatedly based on a condition. The main looping structures are:",
+        "Additionally, JavaScript supports for...in (for iterating over object properties) and for...of (for iterating over iterable objects like arrays) loops, though they are specialized for specific use cases."
+      ],
+      "lists": [
+        [
+          "while loop: This loop executes a block of code as long as a specified condition evaluates to true. It checks the condition before executing the code, making it an entry-controlled loop. If the condition is false initially, the loop body may never execute."
+        ],
+        [
+          "for loop: The for loop is a concise way to iterate, combining initialization, condition, and increment/decrement in a single line. It’s ideal for scenarios where the number of iterations is known."
+        ],
+        [
+          "do-while loop: Similar to the while loop, but it checks the condition after executing the code block, ensuring the loop body runs at least once. It’s an exit-controlled loop."
+        ]
+      ],
+      "images": [
+        {
+          "alt": "while",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20250621150943114152/while.png"
+        },
+        {
+          "alt": "ForLoop",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20250621151144258152/ForLoop.png"
+        },
+        {
+          "alt": "DoWhile",
+          "src": "https://media.geeksforgeeks.org/wp-content/uploads/20250621151358362200/DoWhile.png"
+        }
+      ],
+      "code": [
+        "let i = 0;while (i < 5) {    console.log(i); // Outputs: 0, 1, 2, 3, 4    i++;}",
+        "for (let i = 0; i < 5; i++) {    console.log(i); // Outputs: 0, 1, 2, 3, 4}",
+        "let i = 0;do {    console.log(i); // Outputs: 0, 1, 2, 3, 4    i++;} while (i < 5);"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "54. How can the style/class of an element be changed?",
+      "paragraphs": [
+        "To modify the style or class of an HTML element in JavaScript, you can use the document.getElementById() method to select the element and then update its style or className properties.",
+        "Using classList is preferred for class manipulation as it’s safer and more flexible."
+      ],
+      "lists": [
+        [
+          "Changing Style: The style property allows you to directly modify inline CSS properties of an element. For example:document.getElementById(\"myText\").style.fontSize = \"16px\";document.getElementById(\"myText\").style.color = \"blue\";This approach applies inline styles, which override external CSS unless !important is used.",
+          "Changing Class: The className property replaces the entire class attribute of an element with a new class.document.getElementById(\"myText\").className = \"newClass\";To add or remove classes without overwriting existing ones, use the classList API:document.getElementById(\"myText\").classList.add(\"newClass\");document.getElementById(\"myText\").classList.remove(\"oldClass\");document.getElementById(\"myText\").classList.toggle(\"active\");"
+        ]
+      ],
+      "images": [],
+      "code": [
+        "document.getElementById(\"myText\").style.fontSize = \"16px\";document.getElementById(\"myText\").style.color = \"blue\";",
+        "document.getElementById(\"myText\").className = \"newClass\";",
+        "document.getElementById(\"myText\").classList.add(\"newClass\");document.getElementById(\"myText\").classList.remove(\"oldClass\");document.getElementById(\"myText\").classList.toggle(\"active\");"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "55. How to convert the string of any base to an integer in JavaScript?",
+      "paragraphs": [
+        "The parseInt() function converts a string to an integer in a specified base (radix). It takes two arguments: the string to parse and the base (2 to 36).",
+        "For example:",
+        "If the string is invalid or doesn’t match the base, parseInt() returns NaN:",
+        "Always specify the radix to avoid inconsistent behavior across browsers, especially for strings like \"08\" (which older browsers might interpret as octal)."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "console.log(parseInt(\"1010\", 2)); // Outputs: 10 (binary to decimal)\nconsole.log(parseInt(\"FF\", 16)); // Outputs: 255 (hexadecimal to decimal)console.log(parseInt(\"123\", 10)); // Outputs: 123 (decimal)",
+        "console.log(parseInt(\"hello\", 10)); // Outputs: NaN"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "56. What is the difference between an alert box and a confirmation box?",
+      "paragraphs": [
+        "The key difference is that alert is for notifications, while confirm is for decision-making."
+      ],
+      "lists": [
+        [
+          "Alert Box: Displays a message with a single OK button. It’s used to inform the user without requiring a decision."
+        ],
+        [
+          "Confirmation Box: Displays a message with OK and Cancel buttons, allowing the user to make a choice. It returns a boolean (true for OK, false for Cancel)."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "alert(\"Operation completed successfully!\");",
+        "let result = confirm(\"Are you sure you want to delete?\");\nconsole.log(result ? \"Deleted\" : \"Canceled\");"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "57. What is the disadvantage of using innerHTML in JavaScript?",
+      "paragraphs": [
+        "Using innerHTML to manipulate the DOM has several disadvantages:",
+        "For safer alternatives, use textContent for plain text or DOM methods like createElement(), appendChild() for structured content."
+      ],
+      "lists": [
+        [
+          "Security Risks: Setting innerHTML with user input can lead to Cross-Site Scripting (XSS) attacks if the input isn’t sanitized. Malicious scripts can be injected and executed."
+        ],
+        [
+          "Performance: Replacing innerHTML re-parses and re-renders the entire DOM subtree, which can be slower than using specific DOM methods like appendChild() or textContent for simple updates"
+        ],
+        [
+          "Event Handlers: Setting innerHTML overwrites existing event handlers attached to elements unless they’re managed externally (e.g., via event delegation)."
+        ],
+        [
+          "Unintended Overwrites: Using innerHTML += to append content re-parses the existing content, causing performance issues and potentially breaking dynamic behavior."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "// Unsafe usagedocument.getElementById(\"myDiv\").innerHTML = userInput; // Risky if userInput contains <script>alert('XSS');</script>",
+        "document.getElementById(\"myDiv\").innerHTML = \"New content\"; // Removes existing event listeners",
+        "document.getElementById(\"myDiv\").innerHTML += \"More\"; // Inefficient re-parsing"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "58. What is the use of void(0)?",
+      "paragraphs": [
+        "The void(0) expression evaluates to `undefined` and is often used in href attributes to prevent the browser from navigating to a new page when a link is clicked. It’s commonly seen in JavaScript-driven links that trigger functions instead of loading a new URL.",
+        "For example:",
+        "Here, void(0) ensures the link navigation doesn’t occur. However, modern practices favor:",
+        "void(0) is still used but is considered less readable and outdated compared to modern event handling."
+      ],
+      "lists": [
+        [
+          "Using event.preventDefault() in event handlers:"
+        ],
+        [
+          "Or using addEventListener:"
+        ]
+      ],
+      "images": [],
+      "code": [
+        "Click me\n\n<script>\nfunction myFunction() {\n    alert(\"Function triggered!\");\n}\n</script>",
+        "document.querySelector(\"a\").addEventListener(\"click\", (e) => {\n    e.preventDefault();\n    myFunction();\n});"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "59. What are JavaScript Cookies?",
+      "paragraphs": [
+        "Cookies are small key-value pairs stored on a user’s browser by a website. They are used to store user-specific data, such as preferences, authentication tokens, or tracking information. Cookies are sent with HTTP requests to the server, allowing websites to maintain state across sessions.",
+        "Key points:",
+        "Example use case: Remembering a user’s theme preference (e.g., dark/light mode)."
+      ],
+      "lists": [
+        [
+          "Purpose: Store data like language preferences, shopping cart items, or session IDs.",
+          "Size Limit: Typically ~4KB per cookie.",
+          "Expiration: Cookies can be set to expire at a specific date or persist until the browser is cleared.",
+          "Access: Accessible by the server (via HTTP headers) and client (via document.cookie)."
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "60. How to create a cookie using JavaScript?",
+      "paragraphs": [
+        "To create a cookie, assign a string to document.cookie with the format name=value; expires=date; path=/.",
+        "For example:",
+        "The expires attribute sets the cookie’s lifespan, and path=/ makes it accessible across the site."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "function setCookie(name, value, days) {\n    let expires = \"\";\n    if (days) {\n        let date = new Date();\n        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));\n        expires = \"; expires=\" + date.toUTCString();\n    }\n    document.cookie = name + \"=\" + value + expires + \"; path=/\";\n}\nsetCookie(\"username\", \"JohnDoe\", 7); // Sets cookie for 7 days"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "61. How to read a cookie using JavaScript?",
+      "paragraphs": [
+        "To read cookies, access document.cookie, which returns a semicolon-separated string of all cookies. Parse the string to extract specific cookies.",
+        "For example:",
+        "Libraries like js-cookie simplify cookie management for complex scenarios."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "function getCookie(name) {\n    let nameEQ = name + \"=\";\n    let cookies = document.cookie.split(';');\n    for (let cookie of cookies) {\n        cookie = cookie.trim();\n        if (cookie.startsWith(nameEQ)) {\n            return cookie.substring(nameEQ.length, cookie.length);\n        }\n    }\n    return null;\n}\nconsole.log(getCookie(\"username\")); // Outputs: \"JohnDoe\" if exists"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "62. How to delete a cookie using JavaScript?",
+      "paragraphs": [
+        "To delete a cookie, set its expires date to a past time, effectively marking it for removal. Ensure the same path and domain are used as when the cookie was created.",
+        "For example:",
+        "Setting max-age=0 is another alternative to expire the cookie immediately. Verify the path matches to avoid issues with undeleted cookies, as explained in JavaScript Cookies."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "function deleteCookie(name) {\n    document.cookie = name + \"=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/\";\n}\ndeleteCookie(\"username\");"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "63. What are escape characters and escape() function?",
+      "paragraphs": [
+        "Common escape sequences include:",
+        "Use encodeURIComponent() or encodeURI() for modern URL encoding needs."
+      ],
+      "lists": [
+        [
+          "Escape Characters: These are special characters preceded by a backslash (\\) to treat them as literals, ignoring their special meaning. They’re used to include characters like quotes or backslashes in strings, as described in JavaScript Strings. For example:"
+        ],
+        [
+          "\\\": Double quote",
+          "\\': Single quote",
+          "\\\\: Backslash",
+          "\\n: Newline",
+          "\\t: Tab",
+          "escape() function: This function encodes a string into ASCII-compatible format for transmission across networks. It’s deprecated and rarely used in modern JavaScript, replaced by encodeURIComponent() for URI-safe encoding."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "console.log(\"GeeksforGeeks: \\\"A Computer Science Portal\\\"\");\n// Outputs: GeeksforGeeks: \"A Computer Science Portal\"\nconsole.log(\"Path: C:\\\\folder\\\\\");\n// Outputs: Path: C:\\folder\\",
+        "console.log(escape(\"Hello World!\")); // Outputs: Hello%20World%21\nconsole.log(encodeURIComponent(\"Hello World!\")); // Outputs: Hello%20World%21"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "64. How can generic objects be created in JavaScript?",
+      "paragraphs": [
+        "Generic objects can be created in several ways:",
+        "1. Object Constructor:",
+        "2. Object Literal (preferred):",
+        "3. Object.create:",
+        "Object literals are the most concise and commonly used method. Object.create is useful for custom prototyping."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "let obj = new Object();\nobj.name = \"John\";\nobj.age = 25;",
+        "let obj = {    name: \"John\",    age: 25};",
+        "let obj = Object.create(null); // No \nprototypeobj.name = \"John\";\nobj.age = 25;"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "65. Which keywords are used to handle exceptions?",
+      "paragraphs": [
+        "JavaScript uses exception handling to manage runtime errors with the following keywords:",
+        "For example:",
+        "This structure ensures graceful error handling and cleanup."
+      ],
+      "lists": [
+        [
+          "try: Wraps code that might throw an error.",
+          "catch: Handles the error if one occurs.",
+          "finally: Executes code after try/catch, regardless of the outcome.",
+          "throw: Creates custom errors."
+        ]
+      ],
+      "images": [],
+      "code": [
+        "try {\n    let result = riskyFunction();\n    console.log(result);\n} catch (error) {\n    console.error(\"Error:\", error.message);\n} finally {\n    console.log(\"Cleanup done\");\n}\n\nfunction riskyFunction() {\n    throw new Error(\"Something went wrong\");\n}"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "66. What is the use of the blur function?",
+      "paragraphs": [
+        "The blur() method removes focus from an element, triggering a blur event. It’s useful for programmatically shifting focus or validating input fields.",
+        "For example:",
+        "You can also listen for blur events:",
+        "Use blur() for form validation or UI interactions."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "document.getElementById(\"myInput\").focus();\nsetTimeout(() => {\n    document.getElementById(\"myInput\").blur(); // Removes focus after 2s\n}, 2000);",
+        "document.getElementById(\"myInput\").addEventListener(\"blur\", () => {\n    console.log(\"Input lost focus\");\n});"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "67. Explain how to read and write a file using JavaScript?",
+      "paragraphs": [
+        "The readFile() functions is used for reading operation.",
+        "The writeFile() functions is used for writing operation."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "readFile( Path, Options, Callback)",
+        "writeFile( Path, Data, Callback)"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "68. What is called Variable typing in JavaScript?",
+      "paragraphs": [
+        "The variable typing is the type of variable used to store a number and using that same variable to assign a “string”."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [
+        "Geeks = 42;\nGeeks = \"GeeksforGeeks\";"
+      ],
+      "tables": []
+    },
+    {
+      "heading": "69. Explain how to detect the operating system on the client machine?",
+      "paragraphs": [
+        "To detect the operating system on the client machine, one can simply use navigator.appVersion or navigator.userAgent property. The Navigator appVersion property is a read-only property and it returns the string that represents the version information of the browser."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "70. What are the types of Pop up boxes available in JavaScript?",
+      "paragraphs": [
+        "There are three types of pop boxes available in JavaScript."
+      ],
+      "lists": [
+        [
+          "Alert",
+          "Confirm",
+          "Prompt"
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "Also Check",
+      "paragraphs": [],
+      "lists": [
+        [
+          "this Operator Interview Questions",
+          "String Interview Questions",
+          "Array Interview Questions",
+          "Object Interview Questions",
+          "JavaScript Output Based Interview Questions"
+        ]
+      ],
+      "images": [],
+      "code": [],
+      "tables": []
+    }
+  ]
+}
