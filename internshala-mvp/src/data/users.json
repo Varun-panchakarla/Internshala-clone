@@ -10,7 +10,13 @@
       "profilePhoto": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
       "college": "Stanford University",
       "degree": "B.S. Computer Science",
-      "skills": ["React", "JavaScript", "Tailwind CSS", "Node.js", "Python"],
+      "skills": [
+        "React",
+        "JavaScript",
+        "Tailwind CSS",
+        "Node.js",
+        "Python"
+      ],
       "experience": "1 year",
       "preferredRole": "Frontend Developer",
       "preferredLocation": "San Francisco, CA",

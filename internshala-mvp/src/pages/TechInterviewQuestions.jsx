@@ -236,6 +236,26 @@ const TechInterviewQuestions = () => {
   // Safe formatting parser for standard markdown bolds and code tokens
   const renderFormattedText = (text) => {
     if (!text) return null;
+    if (typeof text === 'string' && text.startsWith('```') && text.endsWith('```')) {
+      const rawCode = text.slice(3, -3).trim();
+      const firstLineBreak = rawCode.indexOf('\n');
+      let lang = techId;
+      let cleanCode = rawCode;
+      if (firstLineBreak !== -1) {
+        const potentialLang = rawCode.slice(0, firstLineBreak).trim();
+        if (/^[a-zA-Z0-9+#-]+$/.test(potentialLang)) {
+          lang = potentialLang;
+          cleanCode = rawCode.slice(firstLineBreak + 1);
+        }
+      }
+      const highlighted = highlightCode(cleanCode, lang);
+      return (
+        <span 
+          className="block bg-slate-900/90 dark:bg-slate-950 p-4 font-mono text-[11px] text-slate-200 overflow-x-auto leading-relaxed rounded-xl my-2 border border-slate-200/80 dark:border-slate-800 whitespace-pre"
+          dangerouslySetInnerHTML={{ __html: highlighted }}
+        />
+      );
+    }
     const parts = text.split(/(\*\*.*?\*\*|`.*?`)/g);
     return parts.map((part, index) => {
       if (part.startsWith('**') && part.endsWith('**')) {
@@ -287,7 +307,7 @@ const TechInterviewQuestions = () => {
             {error || 'This technology content is not yet available in the database.'}
           </p>
         </div>
-        <Link to="/interview-prep">
+        <Link to="/interview-prep/technical">
           <button className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer">
             <FiChevronLeft className="w-4 h-4" /> Back to Tech Guides
           </button>
@@ -385,7 +405,7 @@ const TechInterviewQuestions = () => {
 
       {/* Page Header */}
       <div className="flex flex-col gap-4">
-        <Link to="/interview-prep" className="flex items-center text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 w-fit gap-1 hover:underline">
+        <Link to="/interview-prep/technical" className="flex items-center text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 w-fit gap-1 hover:underline">
           <FiChevronLeft className="w-3.5 h-3.5" /> Back to Tech Guides
         </Link>
         <div>
@@ -394,7 +414,7 @@ const TechInterviewQuestions = () => {
             {data.title}
           </h1>
           <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold mt-1">
-            {questionsList.length} Questions Curated • {data.url ? <a href={data.url} target="_blank" rel="noopener noreferrer" className="hover:underline text-brand-500">Source Material</a> : 'Interactive Guide'}
+            {questionsList.length} Questions Curated
           </p>
         </div>
       </div>

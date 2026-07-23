@@ -1,0 +1,497 @@
+{
+  "title": "Data Structures Interview Questions and Answers",
+  "url": "https://www.geeksforgeeks.org/dsa/commonly-asked-data-structure-interview-questions-set-1/",
+  "sections": [
+    {
+      "heading": "1. What is a Data Structure and why is it useful?",
+      "paragraphs": [
+        "A data structure is a logical or mathematical model of organizing, managing, and storing data in a computer system so that it can be accessed and modified efficiently. Without structured organization, processing massive datasets would result in excessive computation times and memory overhead.",
+        "Why Data Structures are Useful:",
+        "• **Efficiency**: Choosing the right structure reduces time complexity (processing speed) and space complexity (memory usage).",
+        "• **Reusability**: Standard structures provide clean abstractions for representing real-world relationships.",
+        "• **Searchability**: Organized data enables algorithms like Binary Search to run in logarithmic time O(log n)."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "2. What is the difference between Linear and Non-Linear Data Structures?",
+      "paragraphs": [
+        "Data structures are broadly categorized based on how elements are arranged and linked together.",
+        "• **Linear Data Structure**: Elements are arranged sequentially or linearly, where each element is connected to its previous and next adjacent elements (e.g., Array, Stack, Queue, Linked List).",
+        "• **Non-Linear Data Structure**: Elements are arranged in a hierarchical or interconnected manner, where relationships are non-sequential (e.g., Tree, Graph)."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Feature",
+            "Linear Data Structures",
+            "Non-Linear Data Structures"
+          ],
+          "rows": [
+            [
+              "Traversal",
+              "Elements can be traversed in a single run.",
+              "Requires multiple runs or recursion to traverse completely."
+            ],
+            [
+              "Memory Layout",
+              "Elements are stored consecutively or linearly.",
+              "Stored randomly in memory, linked via pointers."
+            ],
+            [
+              "Complexity",
+              "Simple to design and implement.",
+              "Complex topological relationships."
+            ],
+            [
+              "Examples",
+              "Arrays, Linked Lists, Stacks, Queues",
+              "Trees, Graphs, Heaps, Tries"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "3. What is an Array and how is it represented in memory?",
+      "paragraphs": [
+        "An Array is a linear data structure containing a collection of elements of the same data type stored in contiguous memory locations. Accessing an element takes constant time O(1) using its index because the address of any element can be computed directly using a mathematical formula:",
+        "`Address = BaseAddress + Index * SizeOfElement`",
+        "Example of array representation and access in C++:",
+        "```cpp\n#include <iostream>\nusing namespace std;\n\nint main() {\n    int arr[5] = {10, 20, 30, 40, 50};\n    \n    // Accessing elements directly in O(1) time\n    cout << \"First element: \" << arr[0] << endl;\n    cout << \"Third element: \" << arr[2] << endl;\n    return 0;\n}\n```"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "4. What is a Linked List and what are its advantages over an Array?",
+      "paragraphs": [
+        "A Linked List is a linear data structure where elements (nodes) are not stored in contiguous memory locations. Instead, each node consists of two parts: data and a pointer (reference) pointing to the next node in the sequence.",
+        "Advantages of Linked Lists over Arrays:",
+        "• **Dynamic Size**: Unlike arrays, linked lists can grow or shrink in size dynamically at runtime.",
+        "• **Insertion/Deletion Efficiency**: Inserting or deleting a node at a known pointer location takes O(1) time, as it only requires modifying adjacent pointers rather than shifting elements."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Operation / Property",
+            "Array (Contiguous Layout)",
+            "Linked List (Node Layout)"
+          ],
+          "rows": [
+            [
+              "Access Time",
+              "O(1) random access",
+              "O(n) sequential search"
+            ],
+            [
+              "Insertion/Deletion (at end)",
+              "O(1) if capacity remains, else O(n)",
+              "O(n) if tail is unknown, O(1) with tail reference"
+            ],
+            [
+              "Insertion/Deletion (at head)",
+              "O(n) due to shifting elements",
+              "O(1) constant pointer updates"
+            ],
+            [
+              "Memory Utilization",
+              "Static memory pre-allocated",
+              "Dynamic allocation per node (includes pointer overhead)"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "5. How do you implement a Singly Linked List insertion at the head?",
+      "paragraphs": [
+        "Inserting a node at the head (beginning) of a Singly Linked List involves: creating a new node, setting its next pointer to point to the current head, and updating the head pointer to point to the new node.",
+        "Implementation in C++:",
+        "```cpp\n#include <iostream>\nusing namespace std;\n\nstruct Node {\n    int data;\n    Node* next;\n    Node(int val) : data(val), next(nullptr) {}\n};\n\nvoid insertAtHead(Node*& head, int val) {\n    Node* newNode = new Node(val);\n    newNode->next = head;\n    head = newNode;\n}\n\nvoid printList(Node* head) {\n    while (head != nullptr) {\n        cout << head->data << \" -> \";\n        head = head->next;\n    }\n    cout << \"NULL\" << endl;\n}\n\nint main() {\n    Node* head = nullptr;\n    insertAtHead(head, 30);\n    insertAtHead(head, 20);\n    insertAtHead(head, 10);\n    \n    printList(head); // Output: 10 -> 20 -> 30 -> NULL\n    return 0;\n}\n```"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "6. What is a Doubly Linked List and how does it differ from a Singly Linked List?",
+      "paragraphs": [
+        "A Doubly Linked List (DLL) contains nodes that have two pointers: a next pointer pointing to the succeeding node, and a prev pointer pointing to the preceding node in the sequence.",
+        "Key Differences:",
+        "• **Bidirectional Traversal**: DLL nodes can be traversed in both forward and backward directions.",
+        "• **Deletion Convenience**: Deleting a node in a DLL is easier because the node itself already holds pointers to both its neighbors, avoiding the need to traverse and find the parent node."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Feature",
+            "Singly Linked List",
+            "Doubly Linked List"
+          ],
+          "rows": [
+            [
+              "Pointers Per Node",
+              "1 pointer (next)",
+              "2 pointers (prev, next)"
+            ],
+            [
+              "Memory Overhead",
+              "Lower memory consumption",
+              "Higher memory consumption due to extra prev pointer"
+            ],
+            [
+              "Traversal",
+              "Forward direction only",
+              "Forward and backward directions"
+            ],
+            [
+              "Implementation",
+              "Simpler pointer management",
+              "Complex pointer updates during insertions and deletions"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "7. What is a Stack and what are its primary operations?",
+      "paragraphs": [
+        "A Stack is a linear data structure that follows the **Last In First Out (LIFO)** principle. The last element added to the stack is the first one to be removed. Think of a stack of plates: you place plates on top and retrieve them from the top.",
+        "Primary Stack Operations (all taking O(1) time):",
+        "• **push**: Inserts an element onto the top of the stack.",
+        "• **pop**: Removes and returns the top element of the stack.",
+        "• **peek / top**: Returns the top element without removing it.",
+        "• **isEmpty**: Checks whether the stack contains elements.",
+        "Array Implementation of Stack in C++:",
+        "```cpp\n#include <iostream>\n#define MAX 100\nusing namespace std;\n\nclass Stack {\n    int top;\n    int arr[MAX];\npublic:\n    Stack() { top = -1; }\n    \n    bool push(int x) {\n        if (top >= (MAX - 1)) return false; // Stack overflow\n        arr[++top] = x;\n        return true;\n    }\n    \n    int pop() {\n        if (top < 0) return -1; // Stack underflow\n        return arr[top--];\n    }\n    \n    int peek() {\n        if (top < 0) return -1;\n        return arr[top];\n    }\n};\n\nint main() {\n    Stack s;\n    s.push(10);\n    s.push(20);\n    cout << \"Top element: \" << s.peek() << endl; // Output: 20\n    cout << \"Popped element: \" << s.pop() << endl; // Output: 20\n    return 0;\n}\n```"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "8. What is a Queue and how does it follow the FIFO principle?",
+      "paragraphs": [
+        "A Queue is a linear data structure that follows the **First In First Out (FIFO)** principle. The first element inserted into the queue is the first one to be removed, resembling a real-world checkout line.",
+        "Primary Queue Operations (all taking O(1) time):",
+        "• **enqueue**: Appends an element to the rear (end) of the queue.",
+        "• **dequeue**: Removes the element from the front (beginning) of the queue.",
+        "• **front**: Returns the element at the front without removing it.",
+        "Array Implementation of Queue in C++:",
+        "```cpp\n#include <iostream>\n#define SIZE 5\nusing namespace std;\n\nclass Queue {\n    int arr[SIZE];\n    int front, rear;\npublic:\n    Queue() { front = 0; rear = 0; }\n    \n    bool enqueue(int x) {\n        if (rear == SIZE) return false; // Queue full\n        arr[rear++] = x;\n        return true;\n    }\n    \n    int dequeue() {\n        if (front == rear) return -1; // Queue empty\n        return arr[front++];\n    }\n};\n\nint main() {\n    Queue q;\n    q.enqueue(10);\n    q.enqueue(20);\n    cout << \"Dequeued: \" << q.dequeue() << endl; // Output: 10\n    return 0;\n}\n```"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "9. What is a Circular Queue and how does it resolve memory wastage in a standard Queue?",
+      "paragraphs": [
+        "In a standard linear queue, once elements are dequeued, the empty spots at the front of the array cannot be reused because the rear index pointer only moves forward. This leads to memory wastage.",
+        "A **Circular Queue** links the last position back to the first position, making the storage wrap around in a circle. Insertion and index traversal use modular arithmetic:",
+        "`rear = (rear + 1) % size`",
+        "This allows the queue to fully utilize all slots in the array as long as the total number of active elements does not exceed the array capacity."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "10. What is Hashing and how do hash collisions occur?",
+      "paragraphs": [
+        "Hashing is a technique used to map data keys of arbitrary sizes into fixed-size values or indices using a mathematical function called a **Hash Function**. This maps keys directly into an array (Hash Table) for average constant time search, insertion, and deletion O(1).",
+        "How Hash Collisions Occur:",
+        "A hash collision occurs when two distinct keys produce the exact same hash index from the hash function (`hash(key1) == hash(key2)`). Since an array index can hold only one key-value pair directly, the hash table must apply collision resolution strategies to store both keys safely."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "11. What are the different collision resolution techniques in Hashing?",
+      "paragraphs": [
+        "There are two main strategies for resolving hash collisions in hash tables:",
+        "• **Separate Chaining (Open Hashing)**: Each slot in the hash table array points to a linked list (or dynamic bucket) of all keys that hash to that index.",
+        "• **Open Addressing (Closed Hashing)**: All elements are stored directly inside the hash table array. If a collision occurs, the table probes subsequent slots in a structured pattern (Linear, Quadratic, or Double Hashing) until an empty cell is found."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Feature",
+            "Separate Chaining (Chained lists)",
+            "Open Addressing (Probing slots)"
+          ],
+          "rows": [
+            [
+              "Storage Location",
+              "Outside the table in linked list nodes.",
+              "Directly inside the table array slots."
+            ],
+            [
+              "Performance under load",
+              "Degrades gracefully; table size can exceed slot count.",
+              "Performance degrades rapidly as table fills up."
+            ],
+            [
+              "Space Complexity",
+              "Consumes extra memory for node pointers.",
+              "Saves pointer memory; requires a larger base array size."
+            ],
+            [
+              "Deletion Operation",
+              "Easy to implement by deleting from linked list.",
+              "Requires markers (TOMBSTONES) to avoid breaking probe paths."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "12. What is a Binary Tree and what are its properties?",
+      "paragraphs": [
+        "A Binary Tree is a non-linear hierarchical data structure in which each node can have at most two children, commonly referred to as the left child and the right child.",
+        "Key Properties of Binary Trees:",
+        "• **Maximum Nodes at Level L**: The maximum number of nodes at level `L` is `2^L` (where root is level 0).",
+        "• **Maximum Nodes in Height H**: The maximum number of nodes in a binary tree of height `H` is `2^(H+1) - 1`.",
+        "• **Leaf Nodes count**: In a binary tree where every node has either 0 or 2 children, the number of leaf nodes (L) is always one more than the number of nodes with two children (I): `L = I + 1`."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "13. What is a Binary Search Tree (BST)?",
+      "paragraphs": [
+        "A Binary Search Tree (BST) is a binary tree that satisfies the following ordering properties for every node:",
+        "• The left subtree of a node contains only nodes with values **less than** the node's value.",
+        "• The right subtree of a node contains only nodes with values **greater than** the node's value.",
+        "• Left and right subtrees must also be binary search trees.",
+        "Search implementation in C++ (runs in average O(log n) time):",
+        "```cpp\nstruct Node {\n    int data;\n    Node* left;\n    Node* right;\n    Node(int val) : data(val), left(nullptr), right(nullptr) {}\n};\n\nNode* search(Node* root, int key) {\n    // Base Cases: root is null or key is present at root\n    if (root == nullptr || root->data == key)\n        return root;\n        \n    // Key is smaller than root's key\n    if (root->data > key)\n        return search(root->left, key);\n        \n    // Key is greater than root's key\n    return search(root->right, key);\n}\n```"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "14. What are the different Tree Traversal techniques (Inorder, Preorder, Postorder)?",
+      "paragraphs": [
+        "Tree traversal refers to the process of visiting every node in a tree structure exactly once in a specific order.",
+        "Depth-First Traversals:",
+        "• **Inorder (Left, Root, Right)**: Traverses a BST in ascending sorted order.",
+        "• **Preorder (Root, Left, Right)**: Useful for creating copies of tree topologies.",
+        "• **Postorder (Left, Right, Root)**: Useful for deleting trees or calculating space sizes.",
+        "Recursive Traversal implementations in C++:",
+        "```cpp\n#include <iostream>\nusing namespace std;\n\nstruct Node {\n    int data;\n    Node *left, *right;\n    Node(int val) : data(val), left(nullptr), right(nullptr) {}\n};\n\nvoid inorder(Node* root) {\n    if (root == nullptr) return;\n    inorder(root->left);\n    cout << root->data << \" \";\n    inorder(root->right);\n}\n\nvoid preorder(Node* root) {\n    if (root == nullptr) return;\n    cout << root->data << \" \";\n    preorder(root->left);\n    preorder(root->right);\n}\n\nvoid postorder(Node* root) {\n    if (root == nullptr) return;\n    postorder(root->left);\n    postorder(root->right);\n    cout << root->data << \" \";\n}\n```"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "15. What is an AVL Tree and how does it maintain self-balancing?",
+      "paragraphs": [
+        "An AVL Tree is a self-balancing Binary Search Tree (BST) where the height difference (Balance Factor) between the left and right subtrees of any node cannot be more than 1.",
+        "`Balance Factor = Height(Left Subtree) - Height(Right Subtree)`",
+        "If an insertion or deletion causes the Balance Factor of any node to become greater than 1 or less than -1, the tree performs **rotations** to restore balance:",
+        "• **Single Rotations**: Left-Left (LL) rotation and Right-Right (RR) rotation.",
+        "• **Double Rotations**: Left-Right (LR) rotation and Right-Left (RL) rotation."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "16. What is a Heap Data Structure (Min-Heap / Max-Heap)?",
+      "paragraphs": [
+        "A Heap is a special tree-based non-linear data structure that satisfies two properties: it is a **Complete Binary Tree** (all levels are filled completely except possibly the last level, which is filled from left to right), and it satisfies the **Heap Property**.",
+        "Types of Heaps:",
+        "• **Max-Heap**: The value of the parent node is greater than or equal to the values of its children, keeping the maximum element at the root.",
+        "• **Min-Heap**: The value of the parent node is less than or equal to the values of its children, keeping the minimum element at the root.",
+        "Heaps are commonly implemented inside flat arrays, where child indices of node `i` are found at `2*i + 1` (left) and `2*i + 2` (right)."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "17. What is a Graph and how can it be represented in memory?",
+      "paragraphs": [
+        "A Graph is a non-linear data structure consisting of a finite set of vertices (nodes) connected by a set of edges. Graphs can be directed (one-way edges) or undirected (bidirectional edges).",
+        "Two Main Memory Representations of Graphs:",
+        "• **Adjacency Matrix**: A 2D array of size `V x V` where cell `[i][j]` is 1 if there is an edge between vertex `i` and `j`, else 0.",
+        "• **Adjacency List**: An array of linked lists or vectors of size `V`, where each list index `i` contains all vertices adjacent to vertex `i`.",
+        "C++ code representing both options:",
+        "```cpp\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int V = 4;\n    \n    // 1. Adjacency Matrix Representation\n    int adjMatrix[4][4] = {0};\n    adjMatrix[0][1] = 1; // Edge from 0 to 1\n    adjMatrix[1][2] = 1; // Edge from 1 to 2\n    \n    // 2. Adjacency List Representation\n    vector<int> adjList[4];\n    adjList[0].push_back(1);\n    adjList[1].push_back(2);\n    \n    return 0;\n}\n```"
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "18. What is the difference between Breadth-First Search (BFS) and Depth-First Search (DFS) in a Graph?",
+      "paragraphs": [
+        "BFS and DFS are fundamental graph traversal algorithms used to visit all vertices of a graph systematically.",
+        "• **BFS (Breadth-First Search)**: Explores all neighbor vertices at the current level before moving to vertices at the next depth level. It uses a **Queue** internally (FIFO) and is ideal for finding the shortest path on unweighted graphs.",
+        "• **DFS (Depth-First Search)**: Explores as deep as possible along each branch before backtracking. It uses a **Stack** internally (LIFO, or recursion) and is ideal for cycle detection and topological sorting."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Feature",
+            "Breadth-First Search (BFS)",
+            "Depth-First Search (DFS)"
+          ],
+          "rows": [
+            [
+              "Internal Structure",
+              "Queue (FIFO)",
+              "Stack (LIFO / Recursion)"
+            ],
+            [
+              "Traversal Style",
+              "Level-by-level exploration.",
+              "Branch-by-branch deep dive."
+            ],
+            [
+              "Shortest Path",
+              "Finds the shortest path on unweighted graphs.",
+              "Not guaranteed to find shortest path."
+            ],
+            [
+              "Backtracking",
+              "No backtracking required.",
+              "Backtracks when a dead-end vertex is met."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "19. What is a Trie (Prefix Tree) and what are its real-world use cases?",
+      "paragraphs": [
+        "A Trie (pronounced 'try') is an advanced tree-like non-linear data structure used to store a dynamic set of associative key strings, where keys are usually strings. Unlike binary trees, nodes in a Trie do not store their associated key directly. Instead, a node's position in the tree defines its key value.",
+        "Real-World Use Cases:",
+        "• **Autocomplete & Search Suggestions**: Instantly suggests completed phrases by traversing down prefix branches.",
+        "• **Spell Checkers**: Fast validation of vocabulary words.",
+        "• **IP Routing Tables**: Finds the longest prefix match on routing subnets."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": []
+    },
+    {
+      "heading": "20. What is the difference between Stack and Queue data structures?",
+      "paragraphs": [
+        "Stacks and Queues are both linear data structures, but they differ fundamentally in how items are accessed and removed."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Feature",
+            "Stack (Plate Stack model)",
+            "Queue (Checkout Line model)"
+          ],
+          "rows": [
+            [
+              "Working Principle",
+              "LIFO (Last In First Out)",
+              "FIFO (First In First Out)"
+            ],
+            [
+              "End of Operations",
+              "Single end (top) handles both push and pop.",
+              "Two ends: front handles dequeue, rear handles enqueue."
+            ],
+            [
+              "Primary Methods",
+              "push(), pop(), peek()",
+              "enqueue(), dequeue(), front()"
+            ],
+            [
+              "Real-world Use Case",
+              "Backtrack paths (Ctrl+Z undo, browser back).",
+              "Job scheduling (printer queue, CPU tasks)."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "21. What is the difference between Array and Linked List?",
+      "paragraphs": [
+        "Arrays and Linked Lists are the two fundamental ways to store sequential lists of elements in memory."
+      ],
+      "lists": [],
+      "images": [],
+      "code": [],
+      "tables": [
+        {
+          "headers": [
+            "Feature",
+            "Array",
+            "Linked List"
+          ],
+          "rows": [
+            [
+              "Memory allocation",
+              "Static: pre-allocated size at compile time.",
+              "Dynamic: allocated as nodes are added at runtime."
+            ],
+            [
+              "Memory arrangement",
+              "Contiguous: elements are next to each other.",
+              "Non-contiguous: nodes are scattered, linked by pointers."
+            ],
+            [
+              "Random access",
+              "O(1) direct access by index.",
+              "O(n) search from head node."
+            ],
+            [
+              "Insertion / Deletion",
+              "O(n) due to shifting subsequent elements.",
+              "O(1) constant pointer swaps once node is located."
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

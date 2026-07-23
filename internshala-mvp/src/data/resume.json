@@ -31,5 +31,14 @@
       "description": "Designed a modern shop frontend utilizing responsive grid designs, fluid scroll behaviors, and local cart management utilities."
     }
   ],
-  "skills": ["React", "JavaScript", "Tailwind CSS", "Node.js", "Python", "TypeScript", "Git", "REST APIs"]
+  "skills": [
+    "React",
+    "JavaScript",
+    "Tailwind CSS",
+    "Node.js",
+    "Python",
+    "TypeScript",
+    "Git",
+    "REST APIs"
+  ]
 }

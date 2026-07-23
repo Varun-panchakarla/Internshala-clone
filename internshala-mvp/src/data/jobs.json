@@ -9,7 +9,13 @@
     "salary": "₹50,000 / month",
     "experience": "Fresher",
     "employmentType": "Internship",
-    "skills": ["React", "JavaScript", "CSS", "HTML", "TypeScript"],
+    "skills": [
+      "React",
+      "JavaScript",
+      "CSS",
+      "HTML",
+      "TypeScript"
+    ],
     "description": "Join Google's Frontend team to build accessible, beautiful, and high-performance interfaces. You will work alongside senior engineers to design and implement core search features.",
     "responsibilities": [
       "Develop responsive and user-friendly web features using React and TypeScript.",
@@ -37,7 +43,13 @@
     "salary": "₹15,00,000 - ₹22,00,000 / year",
     "experience": "1-3 years",
     "employmentType": "Full-time",
-    "skills": ["React", "Tailwind CSS", "JavaScript", "Redux", "GraphQL"],
+    "skills": [
+      "React",
+      "Tailwind CSS",
+      "JavaScript",
+      "Redux",
+      "GraphQL"
+    ],
     "description": "Stripe is looking for a React Developer to join our dashboard team. You will be responsible for creating highly secure, robust, and clean payment interfaces for millions of businesses worldwide.",
     "responsibilities": [
       "Build modular, reusable frontend component libraries.",
@@ -64,7 +76,13 @@
     "salary": "₹8,00,000 - ₹12,00,000 / year",
     "experience": "1-3 years",
     "employmentType": "Full-time",
-    "skills": ["Figma", "CSS", "React", "Tailwind CSS", "Framer Motion"],
+    "skills": [
+      "Figma",
+      "CSS",
+      "React",
+      "Tailwind CSS",
+      "Framer Motion"
+    ],
     "description": "At Canva, we empower everyone to design. We are looking for a UI/UX Developer who bridges the gap between design and technology, creating smooth, interactive, and beautiful experiences.",
     "responsibilities": [
       "Develop interactive web animations using Framer Motion and CSS transitions.",
@@ -91,7 +109,13 @@
     "salary": "₹18,00,000 - ₹26,00,000 / year",
     "experience": "3+ years",
     "employmentType": "Full-time",
-    "skills": ["React", "Node.js", "Express", "MongoDB", "Tailwind CSS"],
+    "skills": [
+      "React",
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "Tailwind CSS"
+    ],
     "description": "Airbnb is redefining travel. We need a Full Stack Developer to build search and booking engines for local experiences. You will own features end-to-end.",
     "responsibilities": [
       "Design database models in MongoDB and write efficient backend queries.",
@@ -118,7 +142,12 @@
     "salary": "₹35,000 / month",
     "experience": "Fresher",
     "employmentType": "Internship",
-    "skills": ["JavaScript", "React", "Node.js", "Git"],
+    "skills": [
+      "JavaScript",
+      "React",
+      "Node.js",
+      "Git"
+    ],
     "description": "Join Slack's Core Workflow team. You will help build and polish internal tools that power integration pipelines for thousands of applications.",
     "responsibilities": [
       "Fix bugs and implement minor user requests on Slack's admin dashboards.",
@@ -146,7 +175,12 @@
     "salary": "₹20,00,000 - ₹30,00,000 / year",
     "experience": "3+ years",
     "employmentType": "Full-time",
-    "skills": ["React Native", "JavaScript", "TypeScript", "Redux"],
+    "skills": [
+      "React Native",
+      "JavaScript",
+      "TypeScript",
+      "Redux"
+    ],
     "description": "Spotify wants an expert Mobile App Developer to enhance the podcast delivery interface. You will focus on smooth audio rendering and offline downloads management.",
     "responsibilities": [
       "Write cross-platform code optimized for iOS and Android.",
@@ -173,7 +207,13 @@
     "salary": "₹60,000 / month",
     "experience": "Fresher",
     "employmentType": "Internship",
-    "skills": ["Node.js", "Python", "SQL", "Git", "Docker"],
+    "skills": [
+      "Node.js",
+      "Python",
+      "SQL",
+      "Git",
+      "Docker"
+    ],
     "description": "Netflix is seeking a Backend Engineering Intern to join our personalization team. Help build backend algorithms that serve movie recommendations to 200M+ viewers.",
     "responsibilities": [
       "Write clean, performant API endpoints in Node.js.",
@@ -201,7 +241,13 @@
     "salary": "₹45,00,000 - ₹60,00,000 / year",
     "experience": "5+ years",
     "employmentType": "Full-time",
-    "skills": ["React", "TypeScript", "GraphQL", "Web Performance", "System Design"],
+    "skills": [
+      "React",
+      "TypeScript",
+      "GraphQL",
+      "Web Performance",
+      "System Design"
+    ],
     "description": "Meta is looking for a Frontend Architect to drive core scalability for next-generation advertising dashboard interfaces. Help shape the future of business analytics.",
     "responsibilities": [
       "Define standard project templates and lint parameters for 100+ developers.",
@@ -228,7 +274,12 @@
     "salary": "₹20,000 / month",
     "experience": "Fresher",
     "employmentType": "Part-time",
-    "skills": ["React", "CSS", "WordPress", "JavaScript"],
+    "skills": [
+      "React",
+      "CSS",
+      "WordPress",
+      "JavaScript"
+    ],
     "description": "Looking for a flexible part-time developer to build landing pages and update portfolio sites for incubating tech startups. Ideal for students.",
     "responsibilities": [
       "Create aesthetic landing pages for early stage startups.",
@@ -255,7 +306,12 @@
     "salary": "₹1,50,000 / month",
     "experience": "3+ years",
     "employmentType": "Contract",
-    "skills": ["React", "TypeScript", "CSS", "Tailwind CSS"],
+    "skills": [
+      "React",
+      "TypeScript",
+      "CSS",
+      "Tailwind CSS"
+    ],
     "description": "Figma is looking for a UI Developer on a 6-month contract basis to help implement custom collaborative features inside Figma design spaces.",
     "responsibilities": [
       "Build interactive dashboard components under strict design system guidelines.",
