@@ -88,8 +88,9 @@ router.get('/stats', async (req, res) => {
     console.error('[Admin Stats Detail Error] SELECT users ORDER BY created_at DESC LIMIT 5 failed:', err.message);
   }
 
-    // Recent job postings
-    const recentJobs = await pool.query(
+  let recentJobsList = [];
+  try {
+    const r = await pool.query(
       'SELECT id, title, company, location, employment_type, company_logo as "companyLogo", created_at FROM jobs ORDER BY created_at DESC LIMIT 5'
     );
     recentJobsList = r.rows;
