@@ -3,8 +3,8 @@ services:
     name: incuxai-careers
     runtime: node
     plan: free
-    buildCommand: npm install && cd backend && npm install && cd .. && npm run build
-    startCommand: cd backend && node server.js
+    buildCommand: cd internshala-mvp && npm install && cd backend && npm install && cd .. && npm run build
+    startCommand: cd internshala-mvp/backend && node server.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
