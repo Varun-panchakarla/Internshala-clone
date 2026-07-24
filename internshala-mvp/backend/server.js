@@ -17,12 +17,18 @@ const PORT = process.env.PORT || 4000;
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://yourdomain.com']
+    ? [process.env.FRONTEND_URL || 'https://incuxai-careers.onrender.com']
     : ['http://localhost:5173', 'http://127.0.0.1:5173'],
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
+
+// Serve built frontend in production
+const distPath = path.join(__dirname, '..', 'dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+}
 
 // Routes
 const { router: authRouter } = require('./routes/auth.js');
@@ -55,6 +61,16 @@ app.post('/api/scrape', async (req, res) => {
     res.json({ message: 'Scraping complete', count: jobs.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// SPA catch-all: serve index.html for any non-API route (client-side routing)
+app.get('*', (req, res) => {
+  const indexPath = path.join(distPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).json({ error: 'Frontend not built. Run "npm run build" first.' });
   }
 });
 
