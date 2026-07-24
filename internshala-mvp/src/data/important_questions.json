@@ -1,0 +1,379 @@
+[
+  {
+    "id": 1,
+    "title": "Check Prime or Not",
+    "shortStatement": "Check if a given number is prime or not.",
+    "statement": "Given an integer n, write a program to check if it is prime. A prime number is a number greater than 1 that has no positive divisors other than 1 and itself.",
+    "sampleInput": "5",
+    "sampleOutput": "Prime",
+    "solutions": {
+      "cpp": "#include <iostream>\nusing namespace std;\n\nstring isPrime(int n) {\n    if (n <= 1) return \"Not Prime\";\n    for (int i = 2; i * i <= n; i++) {\n        if (n % i == 0) return \"Not Prime\";\n    }\n    return \"Prime\";\n}\n\nint main() {\n    int n;\n    if (cin >> n) {\n        cout << isPrime(n);\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static String isPrime(int n) {\n        if (n <= 1) return \"Not Prime\";\n        for (int i = 2; i * i <= n; i++) {\n            if (n % i == 0) return \"Not Prime\";\n        }\n        return \"Prime\";\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            System.out.println(isPrime(n));\n        }\n    }\n}",
+      "python": "def prime(n):\n    if n <= 1:\n        return 'Not Prime'\n    for i in range(2, n):\n        if n%i == 0:\n            return 'Not Prime'\n    return 'Prime'\n\nn = 5\nprint(prime(n))"
+    }
+  },
+  {
+    "id": 2,
+    "title": "Check Even or Odd",
+    "shortStatement": "Determine if a given number is even or odd.",
+    "statement": "Write a program to check if a given number is even or odd.",
+    "sampleInput": "3",
+    "sampleOutput": "odd",
+    "solutions": {
+      "cpp": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    if (cin >> n) {\n        if (n % 2 == 0) cout << \"even\";\n        else cout << \"odd\";\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            if (n % 2 == 0) System.out.println(\"even\");\n            else System.out.println(\"odd\");\n        }\n    }\n}",
+      "python": "def eve_odd(n):\n    if n % 2 == 0:\n        return 'even'\n    else:\n        return 'odd'\n\nn = 3\nprint(eve_odd(n))"
+    }
+  },
+  {
+    "id": 3,
+    "title": "Factorial of a Number",
+    "shortStatement": "Calculate the factorial of a given integer.",
+    "statement": "Write a program to calculate the factorial of a given number n. Factorial of n (notated as n!) is the product of all positive integers less than or equal to n.",
+    "sampleInput": "5",
+    "sampleOutput": "120",
+    "solutions": {
+      "cpp": "#include <iostream>\nusing namespace std;\n\nlong long factorial(int n) {\n    long long fact = 1;\n    for (int i = 1; i <= n; i++) {\n        fact *= i;\n    }\n    return fact;\n}\n\nint main() {\n    int n;\n    if (cin >> n) {\n        cout << factorial(n);\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static long factorial(int n) {\n        long fact = 1;\n        for (int i = 1; i <= n; i++) {\n            fact *= i;\n        }\n        return fact;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            System.out.println(factorial(n));\n        }\n    }\n}",
+      "python": "def factorial(n):\n    fact = 1\n    for i in range(1, n+1):\n        fact = fact * i\n    return fact\n    \nn = 5\nprint(factorial(n))"
+    }
+  },
+  {
+    "id": 4,
+    "title": "Fibonacci Series",
+    "shortStatement": "Find the n-th Fibonacci number.",
+    "statement": "Write a program to find the n-th Fibonacci number. The Fibonacci sequence is defined as F(0) = 0, F(1) = 1, and F(i) = F(i-1) + F(i-2) for i >= 2.",
+    "sampleInput": "6",
+    "sampleOutput": "8",
+    "solutions": {
+      "cpp": "#include <iostream>\nusing namespace std;\n\nlong long fibonacci(int n) {\n    if (n <= 0) return 0;\n    if (n == 1) return 1;\n    long long a = 0, b = 1;\n    for (int i = 0; i < n - 1; i++) {\n        long long temp = b;\n        b = a + b;\n        a = temp;\n    }\n    return b;\n}\n\nint main() {\n    int n;\n    if (cin >> n) {\n        cout << fibonacci(n);\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static long fibonacci(int n) {\n        if (n <= 0) return 0;\n        if (n == 1) return 1;\n        long a = 0, b = 1;\n        for (int i = 0; i < n - 1; i++) {\n            long temp = b;\n            b = a + b;\n            a = temp;\n        }\n        return b;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            System.out.println(fibonacci(n));\n        }\n    }\n}",
+      "python": "def fibonacci(n):\n    if n <= 0: return 0\n    if n == 1: return 1\n    \n    a, b = 0, 1\n    for _ in range(n - 1):\n        a, b = b, a + b\n    return b\n\nn = 6\nprint(fibonacci(n))"
+    }
+  },
+  {
+    "id": 5,
+    "title": "Reverse a Number",
+    "shortStatement": "Reverse the digits of a given integer.",
+    "statement": "Write a program to reverse the digits of an integer n.",
+    "sampleInput": "1234",
+    "sampleOutput": "4321",
+    "solutions": {
+      "cpp": "#include <iostream>\nusing namespace std;\n\nint rev(int n) {\n    int summ = 0;\n    while (n > 0) {\n        summ = summ * 10 + n % 10;\n        n = n / 10;\n    }\n    return summ;\n}\n\nint main() {\n    int n;\n    if (cin >> n) {\n        cout << rev(n);\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static int rev(int n) {\n        int summ = 0;\n        while (n > 0) {\n            summ = summ * 10 + n % 10;\n            n = n / 10;\n        }\n        return summ;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            System.out.println(rev(n));\n        }\n    }\n}",
+      "python": "def rev(n):\n    summ = 0\n    while n > 0:\n        summ = summ * 10 + n % 10  \n        n = n // 10\n    return summ\n\nprint(rev(1234))"
+    }
+  },
+  {
+    "id": 6,
+    "title": "Check Palindrome Number",
+    "shortStatement": "Verify if a given number is a palindrome.",
+    "statement": "Write a program to check if an integer n is a palindrome. A number is a palindrome if it reads the same backward as forward.",
+    "sampleInput": "1234",
+    "sampleOutput": "Not palindrome",
+    "solutions": {
+      "cpp": "#include <iostream>\nusing namespace std;\n\nstring isPalindrome(int n) {\n    int reve = 0;\n    int temp = n;\n    while (n > 0) {\n        reve = reve * 10 + n % 10;\n        n = n / 10;\n    }\n    if (reve == temp) return \"Palindrome\";\n    else return \"Not palindrome\";\n}\n\nint main() {\n    int n;\n    if (cin >> n) {\n        cout << isPalindrome(n);\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static String isPalindrome(int n) {\n        int reve = 0;\n        int temp = n;\n        while (n > 0) {\n            reve = reve * 10 + n % 10;\n            n = n / 10;\n        }\n        if (reve == temp) return \"Palindrome\";\n        else return \"Not palindrome\";\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            System.out.println(isPalindrome(n));\n        }\n    }\n}",
+      "python": "def rev(n):\n    reve = 0\n    temp = n\n    while n > 0:\n        reve = reve * 10 + n % 10  \n        n = n // 10\n    if reve == temp:\n        return 'Palindrome'\n    else:\n        return 'Not palindrome'\n        \nprint(rev(1234))"
+    }
+  },
+  {
+    "id": 7,
+    "title": "Armstrong Number",
+    "shortStatement": "Check if a number is an Armstrong number.",
+    "statement": "Write a program to check if an integer is an Armstrong number. An Armstrong number is a number that is equal to the sum of its own digits raised to the power of the number of digits.",
+    "sampleInput": "153",
+    "sampleOutput": "True",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <string>\n#include <cmath>\nusing namespace std; \n\nbool isArmstrong(int num) {\n    string s = to_string(num);\n    int n = s.length();\n    int sum = 0;\n    for (char c : s) {\n        sum += pow(c - '0', n);\n    }\n    return sum == num;\n}\n\nint main() {\n    int num;\n    if (cin >> num) {\n        cout << (isArmstrong(num) ? \"True\" : \"False\");\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static boolean isArmstrong(int num) {\n        String s = String.valueOf(num);\n        int n = s.length();\n        int sum = 0;\n        for (int i = 0; i < n; i++) {\n            sum += Math.pow(s.charAt(i) - '0', n);\n        }\n        return sum == num;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int num = sc.nextInt();\n            System.out.println(isArmstrong(num) ? \"True\" : \"False\");\n        }\n    }\n}",
+      "python": "def is_armstrong(num):\n    s = str(num)\n    n = len(s)\n    return sum(int(digit) ** n for digit in s) == num\n\nprint(is_armstrong(153))"
+    }
+  },
+  {
+    "id": 8,
+    "title": "Armstrong Number Check (123)",
+    "shortStatement": "Armstrong checker sample returning False.",
+    "statement": "Identify if integer 123 is an Armstrong number.",
+    "sampleInput": "123",
+    "sampleOutput": "False",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <string>\n#include <cmath>\nusing namespace std; \n\nbool isArmstrong(int num) {\n    string s = to_string(num);\n    int n = s.length();\n    int sum = 0;\n    for (char c : s) {\n        sum += pow(c - '0', n);\n    }\n    return sum == num;\n}\n\nint main() {\n    int num;\n    if (cin >> num) {\n        cout << (isArmstrong(num) ? \"True\" : \"False\");\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static boolean isArmstrong(int num) {\n        String s = String.valueOf(num);\n        int n = s.length();\n        int sum = 0;\n        for (int i = 0; i < n; i++) {\n            sum += Math.pow(s.charAt(i) - '0', n);\n        }\n        return sum == num;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int num = sc.nextInt();\n            System.out.println(isArmstrong(num) ? \"True\" : \"False\");\n        }\n    }\n}",
+      "python": "def is_armstrong(num):\n    s = str(num)\n    n = len(s)\n    return sum(int(digit) ** n for digit in s) == num\n\nprint(is_armstrong(123))"
+    }
+  },
+  {
+    "id": 9,
+    "title": "Sum of Digits",
+    "shortStatement": "Calculate the sum of the digits of a given number.",
+    "statement": "Write a program to find the sum of all digits of a given integer n.",
+    "sampleInput": "1234",
+    "sampleOutput": "10",
+    "solutions": {
+      "cpp": "#include <iostream>\nusing namespace std;\n\nint getSum(int n) {\n    int sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n /= 10;\n    }\n    return sum;\n}\n\nint main() {\n    int n;\n    if (cin >> n) {\n        cout << getSum(n);\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static int getSum(int n) {\n        int sum = 0;\n        while (n > 0) {\n            sum += n % 10;\n            n /= 10;\n        }\n        return sum;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            System.out.println(getSum(n));\n        }\n    }\n}",
+      "python": "def get_sum(n):\n    summ = 0\n    while n > 0:\n        digit = n % 10\n        summ += digit\n        n = n // 10\n    return summ\n\nprint(get_sum(1234))"
+    }
+  },
+  {
+    "id": 10,
+    "title": "Largest of Three Numbers",
+    "shortStatement": "Find the maximum value among three numbers.",
+    "statement": "Write a program to find the largest of three given numbers a, b, and c.",
+    "sampleInput": "10\n9\n100",
+    "sampleOutput": "100",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n    int a, b, c;\n    if (cin >> a >> b >> c) {\n        cout << max({a, b, c});\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int a = sc.nextInt();\n            int b = sc.nextInt();\n            int c = sc.nextInt();\n            System.out.println(Math.max(a, Math.max(b, c)));\n        }\n    }\n}",
+      "python": "def largest(a,b,c):\n    Largest = max(a,b,c)\n    return Largest\n\na = 10\nb = 9\nc = 100\nprint(largest(a,b,c))"
+    }
+  },
+  {
+    "id": 11,
+    "title": "GCD of Two Numbers",
+    "shortStatement": "Calculate the Greatest Common Divisor (GCD) of two integers.",
+    "statement": "Write a program to find the Greatest Common Divisor (GCD) of two numbers a and b.",
+    "sampleInput": "5\n10",
+    "sampleOutput": "5",
+    "solutions": {
+      "cpp": "#include <iostream>\nusing namespace std;\n\nint GCD(int a, int b) {\n    while (b != 0) {\n        int temp = b;\n        b = a % b;\n        a = temp;\n    }\n    return a;\n}\n\nint main() {\n    int a, b;\n    if (cin >> a >> b) {\n        cout << GCD(a, b);\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static int GCD(int a, int b) {\n        while (b != 0) {\n            int temp = b;\n            b = a % b;\n            a = temp;\n        }\n        return a;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int a = sc.nextInt();\n            int b = sc.nextInt();\n            System.out.println(GCD(a, b));\n        }\n    }\n}",
+      "python": "def GCD(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a\n\na = 5 \nb = 10\nprint(GCD(a, b))"
+    }
+  },
+  {
+    "id": 12,
+    "title": "LCM of Two Numbers",
+    "shortStatement": "Calculate the Least Common Multiple (LCM) of two integers.",
+    "statement": "Write a program to find the Least Common Multiple (LCM) of two numbers a and b.",
+    "sampleInput": "15\n20",
+    "sampleOutput": "60",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <cmath>\nusing namespace std;\n\nint GCD(int a, int b) {\n    while (b != 0) {\n        int temp = b;\n        b = a % b;\n        a = temp;\n    }\n    return a;\n}\n\nint LCM(int a, int b) {\n    return abs(a * b) / GCD(a, b);\n}\n\nint main() {\n    int a, b;\n    if (cin >> a >> b) {\n        cout << LCM(a, b);\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static int GCD(int a, int b) {\n        while (b != 0) {\n            int temp = b;\n            b = a % b;\n            a = temp;\n        }\n        return a;\n    }\n\n    public static int LCM(int a, int b) {\n        return Math.abs(a * b) / GCD(a, b);\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int a = sc.nextInt();\n            int b = sc.nextInt();\n            System.out.println(LCM(a, b));\n        }\n    }\n}",
+      "python": "def GCD(a, b):\n    while b:\n        a, b = b, a % b\n    return a\n\ndef LCM(a, b):\n    return abs(a * b) // GCD(a, b)\n\na, b = 15, 20\nprint(LCM(a, b))"
+    }
+  },
+  {
+    "id": 13,
+    "title": "Check Leap Year",
+    "shortStatement": "Verify if a given year is a leap year.",
+    "statement": "Write a program to check if a year n is a leap year. A year is a leap year if it is divisible by 4, but not divisible by 100 unless it is also divisible by 400.",
+    "sampleInput": "2004",
+    "sampleOutput": "Leap Year",
+    "solutions": {
+      "cpp": "#include <iostream>\nusing namespace std;\n\nstring isLeapYear(int n) {\n    if ((n % 4 == 0 && n % 100 != 0) || (n % 400 == 0)) {\n        return \"Leap Year\";\n    } else {\n        return \"Not Leap Year\";\n    }\n}\n\nint main() {\n    int n;\n    if (cin >> n) {\n        cout << isLeapYear(n);\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static String isLeapYear(int n) {\n        if ((n % 4 == 0 && n % 100 != 0) || (n % 400 == 0)) {\n            return \"Leap Year\";\n        } else {\n            return \"Not Leap Year\";\n        }\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            System.out.println(isLeapYear(n));\n        }\n    }\n}",
+      "python": "def LeapYear(n):\n    if n%4 == 0 and n%100 != 0 or n%400 == 0:\n        return 'Leap Year'\n    else:\n        return 'Not Leap Year'\n\nn = 2004\nprint(LeapYear(n))"
+    }
+  },
+  {
+    "id": 14,
+    "title": "Count Vowels and Consonants",
+    "shortStatement": "Count the number of vowels and consonants in a string.",
+    "statement": "Write a program to count the number of vowels and consonants in a given string s.",
+    "sampleInput": "varun",
+    "sampleOutput": "vowels: 2, consonants: 3",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <string>\n#include <cctype>\nusing namespace std;\n\nint main() {\n    string s;\n    if (cin >> s) {\n        int vowels = 0, consonants = 0;\n        for (char i : s) {\n            char lower = tolower(i);\n            if (lower == 'a' || lower == 'e' || lower == 'i' || lower == 'o' || lower == 'u') {\n                vowels++;\n            } else if (isalpha(lower)) {\n                consonants++;\n            } // check spaces or other chars ignored\n        }\n        cout << \"vowels: \" << vowels << \", consonants: \" << consonants;\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNext()) {\n            String s = sc.next();\n            int vowels = 0, consonants = 0;\n            for (int k = 0; k < s.length(); k++) {\n                char i = Character.toLowerCase(s.charAt(k));\n                if (i == 'a' || i == 'e' || i == 'i' || i == 'o' || i == 'u') {\n                    vowels++;\n                } else if (Character.isLetter(i)) {\n                    consonants++;\n                }\n            }\n            System.out.println(\"vowels: \" + vowels + \", consonants: \" + consonants);\n        }\n    }\n}",
+      "python": "def Count(s):\n    vowels = 0\n    consonants = 0\n    for i in s.lower():\n        if i in 'aeiou':\n            vowels += 1\n        elif i.isalpha(): \n            consonants += 1\n    return vowels, consonants\n\ns = 'varun'\nv, c = Count(s)\nprint(f\"vowels: {v}, consonants: {c}\")"
+    }
+  },
+  {
+    "id": 15,
+    "title": "Reverse a String",
+    "shortStatement": "Reverse the order of characters in a string.",
+    "statement": "Write a program to reverse a given string s.",
+    "sampleInput": "varun",
+    "sampleOutput": "nurav",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n    string s;\n    if (cin >> s) {\n        reverse(s.begin(), s.end());\n        cout << s;\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNext()) {\n            String s = sc.next();\n            StringBuilder sb = new StringBuilder(s);\n            System.out.println(sb.reverse().toString());\n        }\n    }\n}",
+      "python": "s = \"varun\"\nreversed_s = s[::-1]\nprint(reversed_s)"
+    }
+  },
+  {
+    "id": 16,
+    "title": "Check Anagram",
+    "shortStatement": "Check if two strings are anagrams of each other.",
+    "statement": "Write a program to check if two strings s1 and s2 are anagrams of each other. Two strings are anagrams if they contain the same characters in a different order (case-insensitive).",
+    "sampleInput": "Listen\nSilent",
+    "sampleOutput": "True",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\nbool isAnagram(string s1, string s2) {\n    s1.erase(remove(s1.begin(), s1.end(), ' '), s1.end());\n    s2.erase(remove(s2.begin(), s2.end(), ' '), s2.end());\n    transform(s1.begin(), s1.end(), s1.begin(), ::tolower);\n    transform(s2.begin(), s2.end(), s2.begin(), ::tolower);\n    sort(s1.begin(), s1.end());\n    sort(s2.begin(), s2.end());\n    return s1 == s2;\n}\n\nint main() {\n    string s1, s2;\n    if (cin >> s1 >> s2) {\n        cout << (isAnagram(s1, s2) ? \"True\" : \"False\");\n    }\n    return 0;\n}",
+      "java": "import java.util.*;\n\nclass Main {\n    public static boolean isAnagram(String s1, String s2) {\n        s1 = s1.replace(\" \", \"\").toLowerCase();\n        s2 = s2.replace(\" \", \"\").toLowerCase();\n        char[] c1 = s1.toCharArray();\n        char[] c2 = s2.toCharArray();\n        Arrays.sort(c1);\n        Arrays.sort(c2);\n        return Arrays.equals(c1, c2);\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNext()) {\n            String s1 = sc.next();\n            String s2 = sc.next();\n            System.out.println(isAnagram(s1, s2) ? \"True\" : \"False\");\n        }\n    }\n}",
+      "python": "def is_anagram(s1, s2):\n    s1 = s1.replace(\" \", \"\").lower()\n    s2 = s2.replace(\" \", \"\").lower()\n    return sorted(s1) == sorted(s2)\n\nprint(is_anagram(\"Listen\", \"Silent\"))"
+    }
+  },
+  {
+    "id": 17,
+    "title": "Remove Duplicates from String",
+    "shortStatement": "Remove repeating characters from a string.",
+    "statement": "Write a program to remove duplicate characters from a given string s, keeping only the first occurrence of each character.",
+    "sampleInput": "chandra",
+    "sampleOutput": "chandr",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <string>\n#include <unordered_set>\nusing namespace std;\n\nstring remDupli(string s) {\n    unordered_set<char> seen;\n    string result = \"\";\n    for (char i : s) {\n        if (seen.find(i) == seen.end()) {\n            seen.insert(i);\n            result += i;\n        }\n    }\n    return result;\n}\n\nint main() {\n    string s;\n    if (cin >> s) {\n        cout << remDupli(s);\n    }\n    return 0;\n}",
+      "java": "import java.util.*;\n\nclass Main {\n    public static String remDupli(String s) {\n        Set<Character> seen = new LinkedHashSet<>();\n        for (char i : s.toCharArray()) {\n            seen.add(i);\n        }\n        StringBuilder sb = new StringBuilder();\n        for (char i : seen) {\n            sb.append(i);\n        }\n        return sb.toString();\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNext()) {\n            String s = sc.next();\n            System.out.println(remDupli(s));\n        }\n    }\n}",
+      "python": "def rem_dupli(s):\n    seen = set()\n    result = []\n    for i in s:\n        if  i not in seen:\n            seen.add(i)\n            result.append(i)\n    return \"\".join(result)\n\ns = 'chandra'\nprint(rem_dupli(s))"
+    }
+  },
+  {
+    "id": 18,
+    "title": "Find Second Largest in Array",
+    "shortStatement": "Identify the second largest integer in an array.",
+    "statement": "Write a program to find the second largest integer in an array.",
+    "sampleInput": "5\n2 7 10 3 22",
+    "sampleOutput": "10",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <vector>\n#include <climits>\nusing namespace std; \n\nint secondLargest(vector<int>& arr) {\n    if (arr.size() < 2) return -1;\n    int largest = INT_MIN, second = INT_MIN;\n    for (int num : arr) {\n        if (num > largest) {\n            second = largest;\n            largest = num;\n        } else if (num > second && num != largest) {\n            second = num;\n        }\n    }\n    return second;\n}\n\nint main() {\n    int n;\n    if (cin >> n) {\n        vector<int> arr(n);\n        for (int i = 0; i < n; i++) cin >> arr[i];\n        cout << secondLargest(arr);\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static int secondLargest(int[] arr) {\n        if (arr.length < 2) return -1;\n        int largest = Integer.MIN_VALUE, second = Integer.MIN_VALUE;\n        for (int num : arr) {\n            if (num > largest) {\n                second = largest;\n                largest = num;\n            } else if (num > second && num != largest) {\n                second = num;\n            }\n        }\n        return second;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            int[] arr = new int[n];\n            for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n            System.out.println(secondLargest(arr));\n        }\n    }\n}",
+      "python": "def second_largest(arr):\n    if len(arr) < 2:\n        return None\n    largest = float('-inf')\n    second = float('-inf')\n    for num in arr:\n        if num > largest:\n            second = largest\n            largest = num\n        elif num > second and num != largest:\n            second = num\n    return second\n\narr = [2, 7, 10, 3, 22]\nprint(second_largest(arr))"
+    }
+  },
+  {
+    "id": 19,
+    "title": "Linear Search",
+    "shortStatement": "Search for a target value in an array sequentially.",
+    "statement": "Write a program to search for a target value in an array sequentially (Linear Search).",
+    "sampleInput": "5\n2 4 7 10 11\n10",
+    "sampleOutput": "True",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <vector>\nusing namespace std; \n\nbool linearSearch(vector<int>& arr, int target) {\n    for (int num : arr) {\n        if (num == target) return true;\n    }\n    return false;\n}\n\nint main() {\n    int n, target;\n    if (cin >> n) {\n        vector<int> arr(n);\n        for (int i = 0; i < n; i++) cin >> arr[i];\n        cin >> target;\n        cout << (linearSearch(arr, target) ? \"True\" : \"False\");\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static boolean linearSearch(int[] arr, int target) {\n        for (int num : arr) {\n            if (num == target) return true;\n        }\n        return false;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            int[] arr = new int[n];\n            for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n            int target = sc.nextInt();\n            System.out.println(linearSearch(arr, target) ? \"True\" : \"False\");\n        }\n    }\n}",
+      "python": "def linear_search(arr, target):\n    if target in arr:\n        return True\n    else:\n        return False\n\narr = [2,4,7,10,11]\ntarget = 10\nprint(linear_search(arr, target))"
+    }
+  },
+  {
+    "id": 20,
+    "title": "Binary Search",
+    "shortStatement": "Find target element index using binary search on a sorted array.",
+    "statement": "Write a program to find the index of a target element in a sorted array using Binary Search. Return the index if present, or -1 otherwise.",
+    "sampleInput": "5\n2 3 4 10 40\n10",
+    "sampleOutput": "Element is present at index 3",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <vector>\nusing namespace std; \n\nint binarySearch(vector<int>& arr, int x) {\n    int low = 0, high = arr.size() - 1;\n    while (low <= high) {\n        int mid = low + (high - low) / 2;\n        if (arr[mid] == x) return mid;\n        else if (arr[mid] < x) low = mid + 1;\n        else high = mid - 1;\n    }\n    return -1;\n}\n\nint main() {\n    int n, x;\n    if (cin >> n) {\n        vector<int> arr(n);\n        for (int i = 0; i < n; i++) cin >> arr[i];\n        cin >> x;\n        int result = binarySearch(arr, x);\n        if (result != -1) cout << \"Element is present at index \" << result;\n        else cout << \"Element is not present in array\";\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static int binarySearch(int[] arr, int x) {\n        int low = 0, high = arr.length - 1;\n        while (low <= high) {\n            int mid = low + (high - low) / 2;\n            if (arr[mid] == x) return mid;\n            else if (arr[mid] < x) low = mid + 1;\n            else high = mid - 1;\n        } \n        return -1;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            int[] arr = new int[n];\n            for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n            int x = sc.nextInt();\n            int result = binarySearch(arr, x);\n            if (result != -1) System.out.println(\"Element is present at index \" + result);\n            else System.out.println(\"Element is not present in array\");\n        }\n    }\n}",
+      "python": "def binary_search(arr,x):\n    low = 0\n    high = len(arr) - 1\n    while low <= high:\n        mid = low + (high - low) // 2\n        if arr[mid] == x:\n            return mid\n        elif arr[mid] < x:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1\n\narr = [2, 3, 4, 10, 40]\nx = 10\nresult = binary_search(arr, x)\nif result != -1:\n    print(\"Element is present at index\", result)\nelse:\n    print(\"Element is not present in array\")"
+    }
+  },
+  {
+    "id": 21,
+    "title": "Count words in a string",
+    "shortStatement": "Count total words in a sentence space separated.",
+    "statement": "Write a program to count total number of space-separated words in a string.",
+    "sampleInput": "varun is good boy",
+    "sampleOutput": "4",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <string>\n#include <sstream>\nusing namespace std;\n\nint main() {\n    string s;\n    if (getline(cin, s)) {\n        stringstream ss(s);\n        string word;\n        int count = 0;\n        while (ss >> word) {\n            count++;\n        }\n        cout << count;\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextLine()) {\n            String s = sc.nextLine();\n            String[] words = s.trim().split(\"\\\\s+\");\n            if (s.trim().isEmpty()) {\n                System.out.println(0);\n            } else {\n                System.out.println(words.length);\n            }\n        }\n    }\n}",
+      "python": "def count(s):\n    s = s.split(' ')\n    count = 0\n    for i in s:\n        if i:\n            count += 1\n    return count \n\ns = 'varun is good boy'\nprint(count(s))"
+    }
+  },
+  {
+    "id": 22,
+    "title": "Remove all spaces from a string",
+    "shortStatement": "Strip all spaces from a text string.",
+    "statement": "Write a program to strip all whitespace characters from a string.",
+    "sampleInput": "Varun is good boy",
+    "sampleOutput": "Varunisgoodboy",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n    string s;\n    if (getline(cin, s)) {\n        s.erase(remove(s.begin(), s.end(), ' '), s.end());\n        cout << s;\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextLine()) {\n            String s = sc.nextLine();\n            System.out.println(s.replace(\" \", \"\"));\n        }\n    }\n}",
+      "python": "def rem_spaces(s):\n    s = s.replace(' ', '')\n    return s\n\ns = 'Varun is good boy'\nprint(rem_spaces(s))"
+    }
+  },
+  {
+    "id": 23,
+    "title": "Find Duplicate elements in a Array",
+    "shortStatement": "Identify duplicate values in an array.",
+    "statement": "Write a program to identify duplicate values in an array.",
+    "sampleInput": "6\n2 2 4 5 6 7",
+    "sampleOutput": "2",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <vector>\n#include <unordered_set>\nusing namespace std;\n\nint main() {\n    int n;\n    if (cin >> n) {\n        vector<int> arr(n);\n        for (int i = 0; i < n; i++) cin >> arr[i];\n        unordered_set<int> s;\n        vector<int> seen;\n        for (int i : arr) {\n            if (s.find(i) == s.end()) {\n                s.insert(i);\n            } else {\n                seen.push_back(i);\n            }\n        }\n        for (int i = 0; i < seen.size(); i++) {\n            cout << seen[i] << (i == seen.size() - 1 ? \"\" : \" \");\n        }\n    }\n    return 0;\n}",
+      "java": "import java.util.*;\n\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            int[] arr = new int[n];\n            for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n            Set<Integer> s = new HashSet<>();\n            List<Integer> seen = new ArrayList<>();\n            for (int i : arr) {\n                if (!s.contains(i)) {\n                    s.add(i);\n                } else {\n                    seen.add(i);\n                }\n            }\n            for (int i = 0; i < seen.size(); i++) {\n                System.out.print(seen.get(i) + (i == seen.size() - 1 ? \"\" : \" \"));\n            }\n        }\n    }\n}",
+      "python": "def duplicates(arr):\n    s = set()\n    seen = []\n    for i in arr:\n        if i not in s:\n            s.add(i)\n        else:\n            seen.append(i)\n    return seen\n\narr = [2,2,4,5,6,7]\nprint(duplicates(arr))"
+    }
+  },
+  {
+    "id": 24,
+    "title": "Move all zeroes to end",
+    "shortStatement": "Shift all 0 values to the end of the array in-place.",
+    "statement": "Write a program to shift all 0 values to the end of the array in-place while keeping relative order of non-zero elements.",
+    "sampleInput": "6\n0 1 2 0 4 5",
+    "sampleOutput": "1 2 4 5 0 0",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n;\n    if (cin >> n) {\n        vector<int> arr(n);\n        for (int i = 0; i < n; i++) cin >> arr[i];\n        int pos = 0;\n        for (int i = 0; i < n; i++) {\n            if (arr[i] != 0) {\n                swap(arr[pos++], arr[i]);\n            }\n        }\n        for (int i = 0; i < n; i++) {\n            cout << arr[i] << (i == n - 1 ? \"\" : \" \");\n        }\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static void main(String[] args) { \n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            int[] arr = new int[n];\n            for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n            int pos = 0;\n            for (int i = 0; i < n; i++) {\n                if (arr[i] != 0) {\n                    int temp = arr[pos];\n                    arr[pos] = arr[i];\n                    arr[i] = temp;\n                    pos++;\n                }\n            }\n            for (int i = 0; i < n; i++) {\n                System.out.print(arr[i] + (i == n - 1 ? \"\" : \" \"));\n            }\n        }\n    }\n}",
+      "python": "def zeroes_end(arr):\n    pos = 0\n    for i in range(len(arr)):\n        if arr[i] != 0:\n            arr[pos], arr[i] = arr[i], arr[pos]\n            pos += 1\n    return arr\n\narr = [0,1,2,0,4,5]\nprint(zeroes_end(arr))"
+    }
+  },
+  {
+    "id": 25,
+    "title": "Check Palindrome String",
+    "shortStatement": "Check if a string is a palindrome.",
+    "statement": "Write a program to check if a string s is a palindrome.",
+    "sampleInput": "varun",
+    "sampleOutput": "Not Palindrome",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\nstring palin(string s) {\n    string temp = s;\n    reverse(s.begin(), s.end());\n    if (s == temp) return \"palindrome\";\n    else return \"Not Palindrome\";\n}\n\nint main() {\n    string s;\n    if (cin >> s) {\n        cout << palin(s);\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static String palin(String s) {\n        String temp = s;\n        String rev = new StringBuilder(s).reverse().toString();\n        if (rev.equals(temp)) return \"palindrome\";\n        else return \"Not Palindrome\";\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNext()) {\n            String s = sc.next();\n            System.out.println(palin(s));\n        }\n    }\n}",
+      "python": "def palin(s):\n    temp = s\n    rev = s[::-1]\n    if rev == temp:\n        return 'palindrome'\n    else:\n        return 'Not Palindrome'\n\ns = 'varun'\nprint(palin(s))"
+    }
+  },
+  {
+    "id": 26,
+    "title": "Count number of Digits",
+    "shortStatement": "Count total digits in an integer.",
+    "statement": "Write a program to count total number of digits in an integer n.",
+    "sampleInput": "12345",
+    "sampleOutput": "5",
+    "solutions": {
+      "cpp": "#include <iostream>\nusing namespace std;\n\nint countDigits(int n) {\n    int count = 0;\n    while (n != 0) {\n        n /= 10;\n        count++;\n    }\n    return count;\n}\n\nint main() {\n    int n;\n    if (cin >> n) {\n        cout << countDigits(n);\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static int countDigits(int n) {\n        int count = 0;\n        while (n != 0) {\n            n /= 10;\n            count++;\n        }\n        return count;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            System.out.println(countDigits(n));\n        }\n    }\n}",
+      "python": "def count_digits(n):\n    count = 0\n    while n != 0:\n        n //= 10\n        count += 1\n    return count\n\nn = 12345\nprint(count_digits(n))"
+    }
+  },
+  {
+    "id": 27,
+    "title": "Sum of elements in a array",
+    "shortStatement": "Find the sum of all elements in an array.",
+    "statement": "Write a program to sum up all elements in an array.",
+    "sampleInput": "6\n1 2 3 4 5 100",
+    "sampleOutput": "115",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n;\n    if (cin >> n) {\n        vector<int> arr(n);\n        int sum = 0;\n        for (int i = 0; i < n; i++) {\n            cin >> arr[i];\n            sum += arr[i];\n        }\n        cout << sum;\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            int[] arr = new int[n];\n            int sum = 0;\n            for (int i = 0; i < n; i++) {\n                arr[i] = sc.nextInt();\n                sum += arr[i];\n            }\n            System.out.println(sum);\n        }\n    }\n}",
+      "python": "def summ(arr):\n    summ = 0\n    for i in arr:\n        summ = summ + i\n    return summ\n\narr = [1,2,3,4,5,100]\nprint(summ(arr))"
+    }
+  },
+  {
+    "id": 28,
+    "title": "Find Minimum element in an array",
+    "shortStatement": "Find the minimum value in an integer array.",
+    "statement": "Write a program to find the minimum value in an integer array.",
+    "sampleInput": "5\n200 12 134 1 145",
+    "sampleOutput": "1",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std; \n\nint main() {\n    int n;\n    if (cin >> n) {\n        vector<int> arr(n);\n        for (int i = 0; i < n; i++) cin >> arr[i];\n        cout << *min_element(arr.begin(), arr.end());\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            int[] arr = new int[n];\n            for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n            int min = arr[0];\n            for (int i = 1; i < n; i++) {\n                if (arr[i] < min) min = arr[i];\n            }\n            System.out.println(min);\n        }\n    }\n}",
+      "python": "def mini(arr):\n    minimum = arr[0]\n    for i in range(1,len(arr)):\n        if arr[i] < minimum:\n            minimum = arr[i]\n    return minimum\n\narr = [200,12,134,1,145]\nprint(mini(arr))"
+    }
+  },
+  {
+    "id": 29,
+    "title": "Count Even or Odd Numbers in array",
+    "shortStatement": "Count total even and odd integers in an array.",
+    "statement": "Write a program to count total number of even and odd integers in a given array.",
+    "sampleInput": "7\n2 5 3 1 8 9 10",
+    "sampleOutput": "even count: 3, odd count: 4",
+    "solutions": {
+      "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n;\n    if (cin >> n) {\n        vector<int> arr(n);\n        int even = 0, odd = 0;\n        for (int i = 0; i < n; i++) {\n            cin >> arr[i];\n            if (arr[i] % 2 == 0) even++;\n            else odd++;\n        }\n        cout << \"even count: \" << even << \", odd count: \" << odd;\n    }\n    return 0;\n}",
+      "java": "import java.util.Scanner;\n\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if (sc.hasNextInt()) {\n            int n = sc.nextInt();\n            int[] arr = new int[n];\n            int even = 0, odd = 0;\n            for (int i = 0; i < n; i++) {\n                arr[i] = sc.nextInt();\n                if (arr[i] % 2 == 0) even++;\n                else odd++;\n            }\n            System.out.println(\"even count: \" + even + \", odd count: \" + odd);\n        }\n    }\n}",
+      "python": "def count_even_odd(arr):\n    even = 0\n    odd = 0\n    for i in arr:\n        if i%2 == 0:\n            even += 1\n        else:\n            odd += 1\n    return even, odd\n\narr = [2,5,3,1,8,9,10]\neven, odd = count_even_odd(arr)\nprint(f\"even count: {even}, odd count: {odd}\")"
+    }
+  }
+]
