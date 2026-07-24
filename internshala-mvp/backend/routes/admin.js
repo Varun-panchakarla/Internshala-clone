@@ -107,90 +107,24 @@ router.get('/stats', async (req, res) => {
     console.error("[Admin Stats Detail Error] SELECT COUNT(*) FROM applied_jobs WHERE status = 'Pending' failed:", err.message);
   }
 
-  // 2. Connect to MongoDB to query application counts
+  // 2. PostgreSQL application counts grouped by month
   let totalApps = 0;
   let appCounts = {};
-  let mongoClient;
   try {
-    const { MongoClient } = require('mongodb');
-    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/internshala';
-    mongoClient = new MongoClient(mongoUri, { 
-      serverSelectionTimeoutMS: 2000,
-      connectTimeoutMS: 2000 
+    const appsResult = await pool.query(`
+      SELECT 
+        TO_CHAR(created_at, 'YYYY-MM') AS month_key,
+        COUNT(*)::int AS count
+      FROM applied_jobs
+      GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+    `);
+    appsResult.rows.forEach(row => {
+      appCounts[row.month_key] = row.count;
+      totalApps += row.count;
     });
-    
-    await mongoClient.connect();
-    const db = mongoClient.db();
-    
-    // Dynamically query available collections to resolve collection name issues
-    const collections = await db.listCollections().toArray();
-    const colNames = collections.map(c => c.name);
-    console.log('[Admin Stats Mongo Info] Available collections:', colNames);
-    
-    let collectionName = 'applications';
-    if (colNames.includes('applications')) {
-      collectionName = 'applications';
-    } else if (colNames.includes('applied_jobs')) {
-      collectionName = 'applied_jobs';
-    } else if (colNames.includes('job_applications')) {
-      collectionName = 'job_applications';
-    } else if (colNames.includes('applies')) {
-      collectionName = 'applies';
-    } else if (colNames.length > 0) {
-      collectionName = colNames[0];
-    }
-    
-    console.log(`[Admin Stats Mongo Info] Using MongoDB collection: "${collectionName}"`);
-    const collection = db.collection(collectionName);
-    totalApps = await collection.countDocuments();
-    
-    // Aggregation pipeline to group job applications by month (resilient date fields)
-    const pipeline = [
-      {
-        $project: {
-          dateField: { 
-            $ifNull: [
-              "$createdAt", 
-              { $ifNull: ["$appliedAt", { $ifNull: ["$date", "$applied_at"] }] }
-            ] 
-          }
-        }
-      },
-      {
-        $project: {
-          month: {
-            $dateToString: {
-              format: "%Y-%m",
-              date: { $toDate: "$dateField" }
-            }
-          }
-        }
-      },
-      {
-        $group: {
-          _id: "$month",
-          count: { $sum: 1 }
-        }
-      }
-    ];
-    
-    const results = await collection.aggregate(pipeline).toArray();
-    results.forEach(r => {
-      if (r._id) {
-        appCounts[r._id] = r.count;
-      }
-    });
-    console.log('[Admin Stats Mongo Success] Retrieved monthly applications:', appCounts);
-  } catch (mongoErr) {
-    console.error('[Admin Stats Mongo Error] Failed to connect or query MongoDB:', mongoErr.message);
-  } finally {
-    if (mongoClient) {
-      try {
-        await mongoClient.close();
-      } catch (closeErr) {
-        console.error('[Admin Stats Mongo Error] Failed to close client:', closeErr.message);
-      }
-    }
+    console.log('[Admin Stats PG Success] Grouped application counts:', appCounts);
+  } catch (pgErr) {
+    console.error('[Admin Stats PG Error] Grouped applications query failed:', pgErr.message);
   }
 
   // 3. PostgreSQL grouped users query
@@ -224,7 +158,7 @@ router.get('/stats', async (req, res) => {
       growthData.push({
         month: monthLabel,
         users: userCounts[monthKey] || 0,
-        applications: appCounts[monthKey] || (pgAppsCount > 0 ? Math.round(pgAppsCount / 6) : 0) // Fallback estimates if MongoDB application collection has no items
+        applications: appCounts[monthKey] || 0
       });
     }
   }
