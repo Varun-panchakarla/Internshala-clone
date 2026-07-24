@@ -155,7 +155,7 @@ const ReportIssue = () => {
     setErrors({});
     setIsSubmitting(true);
 
-    axios.post('/api/issues', {
+    axios.post(`${import.meta.env.VITE_API_URL || ''}/api/issues`, {
       fullName,
       email,
       contactNumber,

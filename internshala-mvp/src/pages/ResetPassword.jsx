@@ -38,7 +38,7 @@ const ResetPassword = () => {
 
     const verifyToken = async () => {
       try {
-        const res = await fetch(`/api/auth/verify-reset-token?token=${encodeURIComponent(token)}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/verify-reset-token?token=${encodeURIComponent(token)}`);
         const data = await res.json();
 
         setVerifying(false);
@@ -86,7 +86,7 @@ const ResetPassword = () => {
     setErrors({});
 
     try {
-      const res = await fetch('/api/auth/reset-password', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, newPassword }),
