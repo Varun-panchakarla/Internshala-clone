@@ -255,9 +255,23 @@ html.dark .disabled\:text-slate-400:disabled { color: #475569 !important; }
 }
 
 /* Force Google Sign-In button container and iframe to be 100% full-width */
-.google-signin-wrapper,
+.google-signin-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 44px !important;
+  overflow: hidden !important;
+  border-radius: 12px !important;
+}
+
 .google-signin-wrapper > div,
 .google-signin-wrapper iframe {
   width: 100% !important;
   max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: block !important;
+  border-radius: 12px !important;
 }
