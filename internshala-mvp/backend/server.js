@@ -147,16 +147,23 @@ async function initDb() {
     try { await pool.query(sql); } catch { /* column may already exist */ }
   }
   try { await seedJobs(); } catch (err) { console.error('[DB] Seed error:', err.message); }
-  // Reset sequences to match current max IDs (fixes gaps after DELETE)
-  try {
-    const seqReset = [
-      "SELECT setval('users_id_seq', COALESCE((SELECT MAX(id) FROM users), 0) + 1, false)",
-      "SELECT setval('profiles_id_seq', COALESCE((SELECT MAX(id) FROM profiles), 0) + 1, false)",
-    ];
-    for (const sql of seqReset) {
-      await pool.query(sql);
+  // Reset sequences to match current max IDs (fixes gaps after DELETE or TRUNCATE)
+  const seqReset = [
+    ['users_id_seq', 'users'],
+    ['profiles_id_seq', 'profiles'],
+    ['saved_jobs_id_seq', 'saved_jobs'],
+    ['applied_jobs_id_seq', 'applied_jobs'],
+    ['issue_reports_id_seq', 'issue_reports'],
+    ['password_resets_id_seq', 'password_resets'],
+    ['email_log_id_seq', 'email_log']
+  ];
+  for (const [seq, tbl] of seqReset) {
+    try {
+      await pool.query(`SELECT setval('${seq}', COALESCE((SELECT MAX(id) FROM ${tbl}), 0) + 1, false)`);
+    } catch {
+      // Ignore if table/sequence doesn't exist
     }
-  } catch { /* sequences may not exist */ }
+  }
 }
 
 // Check if jobs table is empty -> trigger scrape
