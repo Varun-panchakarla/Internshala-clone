@@ -14,6 +14,22 @@ import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import ProgressBar from '../components/common/ProgressBar';
 
+const normalizeLookingFor = (val) => {
+  if (!val) return '';
+  const clean = val.trim().toLowerCase();
+  if (clean.includes('job')) return 'Job';
+  if (clean.includes('intern')) return 'Internship';
+  return val;
+};
+
+const normalizeWorkMode = (val) => {
+  if (!val) return '';
+  const clean = val.trim().toLowerCase();
+  if (clean.includes('office')) return 'In-office';
+  if (clean.includes('home')) return 'Work From Home';
+  return val;
+};
+
 const Profile = () => {
   const { currentUser, updateProfile, profileCompletion } = useAuth();
   const { addToast } = useToast();
@@ -632,16 +648,26 @@ const Profile = () => {
                 <Input
                   label="Looking For"
                   id="lookingFor"
-                  placeholder="e.g. Jobs, Internships"
-                  value={formData.lookingFor}
+                  type="select"
+                  placeholder="Select Looking For"
+                  options={[
+                    { label: 'Job', value: 'Job' },
+                    { label: 'Internship', value: 'Internship' }
+                  ]}
+                  value={normalizeLookingFor(formData.lookingFor)}
                   onChange={(e) => handleInputChange('lookingFor', e.target.value)}
                 />
 
                 <Input
                   label="Preferred Work Mode"
                   id="workModes"
-                  placeholder="e.g. Remote, In-office, Hybrid"
-                  value={formData.workModes}
+                  type="select"
+                  placeholder="Select Preferred Work Mode"
+                  options={[
+                    { label: 'In-office', value: 'In-office' },
+                    { label: 'Work From Home', value: 'Work From Home' }
+                  ]}
+                  value={normalizeWorkMode(formData.workModes)}
                   onChange={(e) => handleInputChange('workModes', e.target.value)}
                 />
               </div>
@@ -871,16 +897,26 @@ const Profile = () => {
                   <Input
                     label="Looking For"
                     id="lookingFor"
-                    placeholder="e.g. Jobs, Internships"
-                    value={formData.lookingFor}
+                    type="select"
+                    placeholder="Select Looking For"
+                    options={[
+                      { label: 'Job', value: 'Job' },
+                      { label: 'Internship', value: 'Internship' }
+                    ]}
+                    value={normalizeLookingFor(formData.lookingFor)}
                     onChange={(e) => handleInputChange('lookingFor', e.target.value)}
                   />
 
                   <Input
                     label="Preferred Work Mode"
                     id="workModes"
-                    placeholder="e.g. Remote, In-office, Hybrid"
-                    value={formData.workModes}
+                    type="select"
+                    placeholder="Select Preferred Work Mode"
+                    options={[
+                      { label: 'In-office', value: 'In-office' },
+                      { label: 'Work From Home', value: 'Work From Home' }
+                    ]}
+                    value={normalizeWorkMode(formData.workModes)}
                     onChange={(e) => handleInputChange('workModes', e.target.value)}
                   />
                 </div>
