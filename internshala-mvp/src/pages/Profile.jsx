@@ -30,6 +30,15 @@ const normalizeWorkMode = (val) => {
   return val;
 };
 
+const normalizeGender = (val) => {
+  if (!val) return '';
+  const clean = val.trim().toLowerCase();
+  if (clean === 'male') return 'Male';
+  if (clean === 'female') return 'Female';
+  if (clean === 'prefer not to say' || clean.includes('say') || clean.includes('prefer')) return 'Prefer not to say';
+  return val;
+};
+
 const Profile = () => {
   const { currentUser, updateProfile, profileCompletion } = useAuth();
   const { addToast } = useToast();
@@ -528,8 +537,14 @@ const Profile = () => {
                 <Input
                   label="Gender"
                   id="gender"
-                  placeholder="e.g. Female, Male"
-                  value={formData.gender}
+                  type="select"
+                  placeholder="Select Gender"
+                  options={[
+                    { label: 'Male', value: 'Male' },
+                    { label: 'Female', value: 'Female' },
+                    { label: 'Prefer not to say', value: 'Prefer not to say' }
+                  ]}
+                  value={normalizeGender(formData.gender)}
                   onChange={(e) => handleInputChange('gender', e.target.value)}
                 />
 
@@ -863,7 +878,14 @@ const Profile = () => {
                   <Input
                     label="Gender"
                     id="gender"
-                    value={formData.gender}
+                    type="select"
+                    placeholder="Select Gender"
+                    options={[
+                      { label: 'Male', value: 'Male' },
+                      { label: 'Female', value: 'Female' },
+                      { label: 'Prefer not to say', value: 'Prefer not to say' }
+                    ]}
+                    value={normalizeGender(formData.gender)}
                     onChange={(e) => handleInputChange('gender', e.target.value)}
                   />
                 </div>
