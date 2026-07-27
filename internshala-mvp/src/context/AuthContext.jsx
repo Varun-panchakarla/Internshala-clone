@@ -162,6 +162,9 @@ export const AuthProvider = ({ children }) => {
     ? calculateProfileCompletion(currentUser)
     : 0;
 
+  console.log('[AuthContext] currentUser:', currentUser);
+  console.log('[AuthContext] profileCompletion:', profileCompletion);
+
   const refreshResumeInfo = (resumeInfo) => {
     setCurrentUser(prev => {
       if (!prev) return null;

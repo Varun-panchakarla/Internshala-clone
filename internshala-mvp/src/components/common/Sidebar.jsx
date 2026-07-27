@@ -19,6 +19,9 @@ const Sidebar = () => {
   const hasResume = !!(resumeInfo?.fileName);
   const effectiveAtsScore = resumeInfo?.atsScore ?? builderScore;
 
+  console.log('[Sidebar] profileCompletion:', profileCompletion);
+  console.log('[Sidebar] resumeCompletion:', resumeCompletion);
+
   if (!isAuthenticated) return null;
 
   const links = [
