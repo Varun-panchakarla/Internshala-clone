@@ -144,6 +144,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const deleteAccount = async () => {
+    setLoading(true);
+    try {
+      await authService.deleteAccount();
+      setCurrentUser(null);
+    } catch (err) {
+      console.error('Account deletion failed', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const profileCompletion = currentUser?.profileData
     ? calculateProfileCompletion(currentUser.profileData)
     : 0;
@@ -159,6 +172,7 @@ export const AuthProvider = ({ children }) => {
     googleLogin,
     logout,
     updateProfile,
+    deleteAccount,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
