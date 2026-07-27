@@ -13,6 +13,10 @@ import TopProgressBar from './components/common/TopProgressBar';
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
+
+
+
+
 function App() {
   return (
     <GoogleOAuthProvider clientId={googleClientId}>

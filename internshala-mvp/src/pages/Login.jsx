@@ -144,17 +144,19 @@ const Login = () => {
               </div>
             )}
 
-            <div className="w-full overflow-hidden rounded-lg [&>div]:w-full">
-              <GoogleLogin
-                theme="outline"
-                size="large"
-                width="100%"
-                text="continue_with"
-                shape="rectangular"
-                onSuccess={handleGoogleSuccess}
-                onError={() => addToast('Google sign-in failed.', 'error')}
-              />
-            </div>
+            {!googleUserError && (
+              <div className="w-full overflow-hidden rounded-lg [&>div]:w-full">
+                <GoogleLogin
+                  theme="outline"
+                  size="large"
+                  width="100%"
+                  text="continue_with"
+                  shape="rectangular"
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => addToast('Google sign-in failed.', 'error')}
+                />
+              </div>
+            )}
 
             {!googleScriptLoaded && (
               <p className="text-[11px] text-slate-500 font-semibold text-center leading-normal bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
