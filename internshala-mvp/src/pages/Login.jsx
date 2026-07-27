@@ -130,7 +130,7 @@ const Login = () => {
                 <p className="text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed">
                   This account is configured to use Google Sign-in. Please use the button below to log in.
                 </p>
-                <div className="w-full overflow-hidden rounded-lg [&>div]:w-full">
+                <div className="google-signin-wrapper w-full overflow-hidden rounded-lg [&>div]:w-full">
                   <GoogleLogin
                     theme="filled_blue"
                     size="large"
@@ -145,7 +145,7 @@ const Login = () => {
             )}
 
             {!googleUserError && (
-              <div className="w-full overflow-hidden rounded-lg [&>div]:w-full">
+              <div className="google-signin-wrapper w-full overflow-hidden rounded-lg [&>div]:w-full">
                 <GoogleLogin
                   theme="outline"
                   size="large"

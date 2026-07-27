@@ -174,7 +174,7 @@ const Register = () => {
 
           {!showEmailForm ? (
             <div className="flex flex-col gap-4">
-              <div className="w-full overflow-hidden rounded-lg [&>div]:w-full">
+              <div className="google-signin-wrapper w-full overflow-hidden rounded-lg [&>div]:w-full">
                 <GoogleLogin
                   theme="outline"
                   size="large"

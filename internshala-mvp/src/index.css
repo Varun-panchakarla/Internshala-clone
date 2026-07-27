@@ -253,3 +253,11 @@ html.dark .disabled\:text-slate-400:disabled { color: #475569 !important; }
 #nprogress .peg {
   box-shadow: 0 0 10px var(--color-brand-600), 0 0 5px var(--color-brand-600) !important;
 }
+
+/* Force Google Sign-In button container and iframe to be 100% full-width */
+.google-signin-wrapper,
+.google-signin-wrapper > div,
+.google-signin-wrapper iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+}
