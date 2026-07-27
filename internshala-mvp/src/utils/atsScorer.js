@@ -506,3 +506,34 @@ export const calculateProfileCompletion = (profileData) => {
 
   return completion;
 };
+
+/**
+ * Computes profile completion score by merging the user's database profile and onboarding data.
+ */
+export const getProfileCompletion = (currentUser) => {
+  if (!currentUser) return 0;
+  const p = currentUser.profileData || {};
+  const ob = currentUser.onboardingData || {};
+
+  const initialFirstName = currentUser.name ? currentUser.name.split(' ')[0] : '';
+  const initialLastName = currentUser.name ? currentUser.name.split(' ').slice(1).join(' ') : '';
+  const computedFullName = p.fullName || (initialFirstName ? `${initialFirstName} ${initialLastName}`.trim() : currentUser.name || '');
+
+  const skills = Array.isArray(p.skills) && p.skills.length > 0
+    ? p.skills
+    : (Array.isArray(ob.interests) ? ob.interests : []);
+
+  const merged = {
+    fullName: computedFullName,
+    profilePhoto: p.profilePhoto || '',
+    college: p.college || ob.collegeName || ob.schoolName || '',
+    degree: p.degree || ob.course || ob.schoolStandard || '',
+    skills,
+    experience: p.experience || (ob.experienceYears === '0' || !ob.experienceYears ? 'Fresher' : `${ob.experienceYears} years`) || 'Fresher',
+    preferredRole: p.preferredRole || (Array.isArray(ob.interests) ? ob.interests[0] : '') || '',
+    preferredLocation: p.preferredLocation || ob.currentCity || '',
+    employmentType: p.employmentType || (Array.isArray(ob.lookingFor) && ob.lookingFor.includes('Internships') ? 'Internship' : 'Full-time'),
+  };
+
+  return calculateProfileCompletion(merged);
+};

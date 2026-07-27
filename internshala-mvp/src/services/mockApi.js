@@ -16,6 +16,7 @@ export const authService = {
   getCurrentUser: () => api.get('/auth/me'),
   getProfile: () => api.get('/profile'),
   updateProfile: (profileData) => api.put('/profile', profileData),
+  deleteAccount: () => api.delete('/auth/account'),
 };
 
 export const jobService = {

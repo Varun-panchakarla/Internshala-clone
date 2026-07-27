@@ -14,6 +14,31 @@ import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import ProgressBar from '../components/common/ProgressBar';
 
+const normalizeLookingFor = (val) => {
+  if (!val) return '';
+  const clean = val.trim().toLowerCase();
+  if (clean.includes('job')) return 'Job';
+  if (clean.includes('intern')) return 'Internship';
+  return val;
+};
+
+const normalizeWorkMode = (val) => {
+  if (!val) return '';
+  const clean = val.trim().toLowerCase();
+  if (clean.includes('office')) return 'In-office';
+  if (clean.includes('home')) return 'Work From Home';
+  return val;
+};
+
+const normalizeGender = (val) => {
+  if (!val) return '';
+  const clean = val.trim().toLowerCase();
+  if (clean === 'male') return 'Male';
+  if (clean === 'female') return 'Female';
+  if (clean === 'prefer not to say' || clean.includes('say') || clean.includes('prefer')) return 'Prefer not to say';
+  return val;
+};
+
 const Profile = () => {
   const { currentUser, updateProfile, profileCompletion } = useAuth();
   const { addToast } = useToast();
@@ -512,8 +537,14 @@ const Profile = () => {
                 <Input
                   label="Gender"
                   id="gender"
-                  placeholder="e.g. Female, Male"
-                  value={formData.gender}
+                  type="select"
+                  placeholder="Select Gender"
+                  options={[
+                    { label: 'Male', value: 'Male' },
+                    { label: 'Female', value: 'Female' },
+                    { label: 'Prefer not to say', value: 'Prefer not to say' }
+                  ]}
+                  value={normalizeGender(formData.gender)}
                   onChange={(e) => handleInputChange('gender', e.target.value)}
                 />
 
@@ -632,16 +663,26 @@ const Profile = () => {
                 <Input
                   label="Looking For"
                   id="lookingFor"
-                  placeholder="e.g. Jobs, Internships"
-                  value={formData.lookingFor}
+                  type="select"
+                  placeholder="Select Looking For"
+                  options={[
+                    { label: 'Job', value: 'Job' },
+                    { label: 'Internship', value: 'Internship' }
+                  ]}
+                  value={normalizeLookingFor(formData.lookingFor)}
                   onChange={(e) => handleInputChange('lookingFor', e.target.value)}
                 />
 
                 <Input
                   label="Preferred Work Mode"
                   id="workModes"
-                  placeholder="e.g. Remote, In-office, Hybrid"
-                  value={formData.workModes}
+                  type="select"
+                  placeholder="Select Preferred Work Mode"
+                  options={[
+                    { label: 'In-office', value: 'In-office' },
+                    { label: 'Work From Home', value: 'Work From Home' }
+                  ]}
+                  value={normalizeWorkMode(formData.workModes)}
                   onChange={(e) => handleInputChange('workModes', e.target.value)}
                 />
               </div>
@@ -728,9 +769,9 @@ const Profile = () => {
           <div className="w-full text-left bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col gap-2">
             <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
               <span>Profile Completed</span>
-              <span className="text-brand-600 dark:text-brand-400">{profileCompletion}%</span>
+              <span className="text-brand-600 dark:text-brand-400">{dynamicCompleteness}%</span>
             </div>
-            <ProgressBar value={profileCompletion} showPercentage={false} size="sm" />
+            <ProgressBar value={dynamicCompleteness} showPercentage={false} size="sm" />
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium leading-relaxed">
               Your profile is fully verified. Recruiters can search and view your matches.
             </p>
@@ -837,7 +878,14 @@ const Profile = () => {
                   <Input
                     label="Gender"
                     id="gender"
-                    value={formData.gender}
+                    type="select"
+                    placeholder="Select Gender"
+                    options={[
+                      { label: 'Male', value: 'Male' },
+                      { label: 'Female', value: 'Female' },
+                      { label: 'Prefer not to say', value: 'Prefer not to say' }
+                    ]}
+                    value={normalizeGender(formData.gender)}
                     onChange={(e) => handleInputChange('gender', e.target.value)}
                   />
                 </div>
@@ -871,16 +919,26 @@ const Profile = () => {
                   <Input
                     label="Looking For"
                     id="lookingFor"
-                    placeholder="e.g. Jobs, Internships"
-                    value={formData.lookingFor}
+                    type="select"
+                    placeholder="Select Looking For"
+                    options={[
+                      { label: 'Job', value: 'Job' },
+                      { label: 'Internship', value: 'Internship' }
+                    ]}
+                    value={normalizeLookingFor(formData.lookingFor)}
                     onChange={(e) => handleInputChange('lookingFor', e.target.value)}
                   />
 
                   <Input
                     label="Preferred Work Mode"
                     id="workModes"
-                    placeholder="e.g. Remote, In-office, Hybrid"
-                    value={formData.workModes}
+                    type="select"
+                    placeholder="Select Preferred Work Mode"
+                    options={[
+                      { label: 'In-office', value: 'In-office' },
+                      { label: 'Work From Home', value: 'Work From Home' }
+                    ]}
+                    value={normalizeWorkMode(formData.workModes)}
                     onChange={(e) => handleInputChange('workModes', e.target.value)}
                   />
                 </div>

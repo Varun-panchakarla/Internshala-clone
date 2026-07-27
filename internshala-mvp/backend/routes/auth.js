@@ -238,6 +238,24 @@ router.post('/logout', (req, res) => {
   res.json({ message: 'Logged out.' });
 });
 
+// DELETE /api/auth/account — permanently delete authenticated user account
+router.delete('/account', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [userId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    res.clearCookie('token', COOKIE_OPTIONS);
+    res.json({ message: 'Account deleted successfully.' });
+  } catch (err) {
+    console.error('[Auth] Account deletion error:', err.message);
+    res.status(500).json({ error: 'Failed to delete account. Please try again.' });
+  }
+});
+
 // GET /api/auth/me — restore session from cookie
 router.get('/me', authMiddleware, async (req, res) => {
   try {
