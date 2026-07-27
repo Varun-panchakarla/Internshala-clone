@@ -275,3 +275,19 @@ html.dark .disabled\:text-slate-400:disabled { color: #475569 !important; }
   display: block !important;
   border-radius: 12px !important;
 }
+
+/* Custom Google Sign-In transparent overlay rules */
+.google-signin-overlay {
+  display: block !important;
+  opacity: 0 !important;
+}
+
+.google-signin-overlay > div,
+.google-signin-overlay iframe {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  opacity: 0 !important;
+  cursor: pointer !important;
+}
