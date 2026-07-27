@@ -157,7 +157,7 @@ const Sidebar = () => {
               collapsed ? 'opacity-0 max-h-0 overflow-hidden pointer-events-none' : 'opacity-100 max-h-36'
             }`}
           >
-            <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.12em] px-0.5 mb-2 whitespace-nowrap">Resume Stats</p>
+            <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.12em] px-0.5 mb-2 whitespace-nowrap">Profile & Resume</p>
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-2.5 text-center">
                 <p className={`text-base font-black leading-none ${effectiveAtsScore >= 80 ? 'text-emerald-600' : effectiveAtsScore >= 50 ? 'text-amber-500' : 'text-rose-500'}`}>
@@ -168,8 +168,8 @@ const Sidebar = () => {
                 </p>
               </div>
               <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-2.5 text-center">
-                <p className="text-base font-black text-brand-600 dark:text-brand-400 leading-none">{resumeCompletion}%</p>
-                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5 uppercase tracking-wide truncate">Complete</p>
+                <p className="text-base font-black text-brand-600 dark:text-brand-400 leading-none">{profileCompletion}%</p>
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5 uppercase tracking-wide truncate">Profile</p>
               </div>
             </div>
           </div>
