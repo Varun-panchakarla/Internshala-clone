@@ -8,7 +8,7 @@ import Input from '../components/common/Input';
 import Modal from '../components/common/Modal';
 
 const ManageAccount = () => {
-  const { logout, currentUser } = useAuth();
+  const { logout, currentUser, deleteAccount } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -65,22 +65,28 @@ const ManageAccount = () => {
     }, 800);
   };
 
-  // Account deletion simulation
-  const handleDeleteAccount = () => {
+  // Real account deletion
+  const handleDeleteAccount = async () => {
     setLoading(true);
-    setTimeout(async () => {
-      setLoading(false);
-      setDeleteModalOpen(false);
-      
+    try {
+      const userId = currentUser?.id;
+      const userEmail = currentUser?.email;
+
+      await deleteAccount();
+
       // Clear onboarding completed flags for the deleted account
-      localStorage.removeItem(`onboarding_completed_${currentUser?.id}`);
-      localStorage.removeItem(`onboarding_completed_${currentUser?.email}`);
-      
-      // Wipe session and log out
-      await logout();
+      if (userId) localStorage.removeItem(`onboarding_completed_${userId}`);
+      if (userEmail) localStorage.removeItem(`onboarding_completed_${userEmail}`);
+
+      setDeleteModalOpen(false);
       addToast('Your account and all associated data have been permanently deleted.', 'success');
       navigate('/');
-    }, 1000);
+    } catch (err) {
+      console.error('Failed to delete account:', err);
+      addToast(err.response?.data?.error || 'Failed to delete account. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
