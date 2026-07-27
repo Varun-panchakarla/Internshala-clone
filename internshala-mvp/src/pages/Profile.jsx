@@ -754,9 +754,9 @@ const Profile = () => {
           <div className="w-full text-left bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col gap-2">
             <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
               <span>Profile Completed</span>
-              <span className="text-brand-600 dark:text-brand-400">{profileCompletion}%</span>
+              <span className="text-brand-600 dark:text-brand-400">{dynamicCompleteness}%</span>
             </div>
-            <ProgressBar value={profileCompletion} showPercentage={false} size="sm" />
+            <ProgressBar value={dynamicCompleteness} showPercentage={false} size="sm" />
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium leading-relaxed">
               Your profile is fully verified. Recruiters can search and view your matches.
             </p>
