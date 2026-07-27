@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
@@ -29,6 +29,28 @@ const Register = () => {
   const [errors, setErrors] = useState({});
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [googleScriptLoaded, setGoogleScriptLoaded] = useState(true);
+
+  const googleContainerRef = useRef(null);
+  const [googleButtonWidth, setGoogleButtonWidth] = useState(380);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (googleContainerRef.current) {
+        // Clamp between 200 and 400 as per Google's SDK requirements
+        const width = Math.min(400, Math.max(200, googleContainerRef.current.offsetWidth));
+        setGoogleButtonWidth(width);
+      }
+    };
+
+    // Delay measurement slightly to ensure initial layout is completed
+    const timer = setTimeout(handleResize, 100);
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -174,11 +196,11 @@ const Register = () => {
 
           {!showEmailForm ? (
             <div className="flex flex-col gap-4">
-              <div className="google-signin-wrapper w-full overflow-hidden rounded-lg [&>div]:w-full">
+              <div ref={googleContainerRef} className="google-signin-wrapper w-full overflow-hidden rounded-lg [&>div]:w-full">
                 <GoogleLogin
                   theme="outline"
                   size="large"
-                  width="100%"
+                  width={googleButtonWidth}
                   text="continue_with"
                   shape="rectangular"
                   onSuccess={handleGoogleSuccess}
