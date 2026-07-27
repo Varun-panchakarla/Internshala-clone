@@ -28,9 +28,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
 // Serve built frontend in production
-const distPath = path.join(__dirname, '..', 'dist');
+const distPath = path.resolve(__dirname, '..', 'dist');
 if (fs.existsSync(distPath)) {
+  console.log(`[Server] Serving static files from: ${distPath}`);
   app.use(express.static(distPath));
+} else {
+  console.warn(`[Server Warning] Static files directory not found at: ${distPath}`);
 }
 
 // Routes
@@ -69,10 +72,12 @@ app.post('/api/scrape', async (req, res) => {
 
 // SPA catch-all: serve index.html for any non-API route (client-side routing)
 app.get('*', (req, res) => {
-  const indexPath = path.join(distPath, 'index.html');
+  const indexPath = path.resolve(distPath, 'index.html');
+  console.log(`[SPA Catch-all] Request URL: ${req.originalUrl || req.url}. Serving index.html from: ${indexPath}`);
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
+    console.error(`[SPA Catch-all Error] index.html not found at: ${indexPath}`);
     res.status(404).json({ error: 'Frontend not built. Run "npm run build" first.' });
   }
 });
