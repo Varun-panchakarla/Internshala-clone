@@ -27,13 +27,29 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
-// Serve built frontend in production
-const distPath = path.resolve(__dirname, '..', 'dist');
+// Serve built frontend in production with robust fallback paths
+const possibleDistPaths = [
+  path.resolve(__dirname, '..', 'dist'), // Standard: backend/../dist
+  path.resolve(__dirname, '..', '..', 'dist'), // Nested: backend/../../dist
+  path.resolve(process.cwd(), 'dist'), // Cwd-based check
+  path.resolve(process.cwd(), 'internshala-mvp', 'dist'), // Root-based check
+];
+
+let distPath = possibleDistPaths[0];
+for (const p of possibleDistPaths) {
+  const checkPath = path.join(p, 'index.html');
+  if (fs.existsSync(checkPath)) {
+    distPath = p;
+    console.log(`[Server] Found valid frontend build assets at: ${distPath}`);
+    break;
+  }
+}
+
 if (fs.existsSync(distPath)) {
   console.log(`[Server] Serving static files from: ${distPath}`);
   app.use(express.static(distPath));
 } else {
-  console.warn(`[Server Warning] Static files directory not found at: ${distPath}`);
+  console.warn(`[Server Warning] Static files directory not found. Checked paths: ${JSON.stringify(possibleDistPaths)}`);
 }
 
 // Routes
