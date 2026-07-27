@@ -10,7 +10,7 @@ const SALT_ROUNDS = 12;
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: 'lax',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   secure: process.env.NODE_ENV === 'production',
   path: '/',
 };
@@ -45,14 +45,14 @@ async function authMiddleware(req, res, next) {
     // Verify user actually exists in the database (e.g. in case of DB resets)
     const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [decoded.userId]);
     if (userCheck.rows.length === 0) {
-      res.clearCookie('token', { path: '/' });
+      res.clearCookie('token', COOKIE_OPTIONS);
       return res.status(401).json({ error: 'User session is invalid or user was deleted.' });
     }
 
     req.user = decoded;
     next();
   } catch (err) {
-    res.clearCookie('token', { path: '/' });
+    res.clearCookie('token', COOKIE_OPTIONS);
     return res.status(401).json({ error: 'Invalid or expired token.' });
   }
 }
@@ -234,7 +234,7 @@ router.post('/google', async (req, res) => {
 
 // POST /api/auth/logout
 router.post('/logout', (req, res) => {
-  res.clearCookie('token', { path: '/' });
+  res.clearCookie('token', COOKIE_OPTIONS);
   res.json({ message: 'Logged out.' });
 });
 
@@ -247,7 +247,7 @@ router.get('/me', authMiddleware, async (req, res) => {
     );
 
     if (userResult.rows.length === 0) {
-      res.clearCookie('token', { path: '/' });
+      res.clearCookie('token', COOKIE_OPTIONS);
       return res.status(401).json({ error: 'User not found.' });
     }
 

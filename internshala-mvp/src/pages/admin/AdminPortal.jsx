@@ -4,9 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../components/common/Toast';
 import axios from 'axios';
-import CompanyLogo from '../../components/common/CompanyLogo';
-
 axios.defaults.withCredentials = true;
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';
+import CompanyLogo from '../../components/common/CompanyLogo';
 import {
   FiUsers, FiBriefcase, FiFolder, FiFileText, FiTrendingUp, FiActivity,
   FiBell, FiSettings, FiLogOut, FiPlus, FiTrash2, FiEdit, FiSearch,
@@ -201,10 +201,10 @@ const AdminPortal = () => {
   const fetchStats = async () => {
     try {
       const res = await axios.get('/api/admin/stats');
-      setStats(res.data.stats);
-      setGrowthData(res.data.growthData);
-      setRecentRegs(res.data.recentRegistrations);
-      setRecentJobs(res.data.recentJobs);
+      setStats(res.data?.stats || null);
+      setGrowthData(res.data?.growthData || []);
+      setRecentRegs(res.data?.recentRegistrations || []);
+      setRecentJobs(res.data?.recentJobs || []);
     } catch (err) {
       addToast('Failed to fetch dashboard metrics.', 'error');
     }
@@ -216,8 +216,8 @@ const AdminPortal = () => {
       const res = await axios.get('/api/admin/users', {
         params: { search: usersSearch, role: usersRoleFilter, page: usersPage, limit: 8 }
       });
-      setUsers(res.data.users);
-      setUsersTotal(res.data.total);
+      setUsers(res.data?.users || []);
+      setUsersTotal(res.data?.total || 0);
     } catch (err) {
       addToast('Failed to load users list.', 'error');
     }
@@ -229,8 +229,8 @@ const AdminPortal = () => {
       const res = await axios.get('/api/admin/jobs', {
         params: { search: jobsSearch, page: jobsPage, limit: 8 }
       });
-      setJobs(res.data.jobs);
-      setJobsTotal(res.data.total);
+      setJobs(res.data?.jobs || []);
+      setJobsTotal(res.data?.total || 0);
     } catch (err) {
       addToast('Failed to load jobs list.', 'error');
     }
@@ -242,8 +242,8 @@ const AdminPortal = () => {
       const res = await axios.get('/api/admin/applications', {
         params: { search: appsSearch, status: appsStatusFilter, page: appsPage, limit: 8 }
       });
-      setApplications(res.data.applications);
-      setAppsTotal(res.data.total);
+      setApplications(res.data?.applications || []);
+      setAppsTotal(res.data?.total || 0);
     } catch (err) {
       addToast('Failed to load applications.', 'error');
     }
@@ -253,7 +253,7 @@ const AdminPortal = () => {
   const fetchCompanies = async () => {
     try {
       const res = await axios.get('/api/admin/companies');
-      setCompanies(res.data.companies);
+      setCompanies(res.data?.companies || []);
     } catch (err) {
       addToast('Failed to load companies.', 'error');
     }
@@ -264,7 +264,7 @@ const AdminPortal = () => {
     setAnalyticsLoading(true);
     try {
       const res = await axios.get('/api/admin/analytics');
-      setAnalyticsData(res.data.signups || []);
+      setAnalyticsData(res.data?.signups || []);
     } catch (err) {
       addToast('Failed to load platform analytics.', 'error');
     } finally {
@@ -287,9 +287,9 @@ const AdminPortal = () => {
           limit: 8
         }
       });
-      setReports(res.data.reports);
-      setReportsTotal(res.data.total);
-      setReportsCounts(res.data.counts);
+      setReports(res.data?.reports || []);
+      setReportsTotal(res.data?.total || 0);
+      setReportsCounts(res.data?.counts || { open: 0, inProgress: 0, resolved: 0, closed: 0, totalReports: 0 });
     } catch (err) {
       addToast('Failed to load issue reports.', 'error');
     } finally {
@@ -336,7 +336,7 @@ const AdminPortal = () => {
     setAdminTemplatesLoading(true);
     try {
       const res = await axios.get('/api/admin/templates');
-      setAdminTemplates(res.data.templates || []);
+      setAdminTemplates(res.data?.templates || []);
     } catch (err) {
       addToast('Failed to fetch templates.', 'error');
     } finally {
@@ -445,10 +445,10 @@ const AdminPortal = () => {
         // Fetch silently without setting full page loading screen
         axios.get('/api/admin/stats')
           .then(res => {
-            setStats(res.data.stats);
-            setGrowthData(res.data.growthData);
-            setRecentRegs(res.data.recentRegistrations);
-            setRecentJobs(res.data.recentJobs);
+            setStats(res.data?.stats || null);
+            setGrowthData(res.data?.growthData || []);
+            setRecentRegs(res.data?.recentRegistrations || []);
+            setRecentJobs(res.data?.recentJobs || []);
           })
           .catch(() => {});
       }, 10000);

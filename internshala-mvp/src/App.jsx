@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ToastProvider } from './components/common/Toast';
 import { ThemeProvider } from './context/ThemeContext';
@@ -16,7 +16,7 @@ const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 function App() {
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
-      <BrowserRouter>
+      <HashRouter>
         <TopProgressBar />
         <ScrollToTop />
         <ToastProvider>
@@ -32,7 +32,7 @@ function App() {
             </AuthProvider>
           </ThemeProvider>
         </ToastProvider>
-      </BrowserRouter>
+      </HashRouter>
     </GoogleOAuthProvider>
   );
 }
