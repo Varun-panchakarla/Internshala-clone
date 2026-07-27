@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { authService } from '../services/mockApi';
-import { getProfileCompletion } from '../utils/atsScorer';
+import { calculateProfileCompletion } from '../utils/atsScorer';
 
 const AuthContext = createContext();
 
@@ -159,7 +159,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const profileCompletion = currentUser
-    ? getProfileCompletion(currentUser)
+    ? calculateProfileCompletion(currentUser)
     : 0;
 
   const refreshResumeInfo = (resumeInfo) => {

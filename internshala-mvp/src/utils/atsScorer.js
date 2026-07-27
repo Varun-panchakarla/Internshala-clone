@@ -488,36 +488,17 @@ export const calculateTextAtsScore = (text, profileSkills = []) => {
  * - preferredRole (10%)
  * - preferredLocation / employmentType (10%)
  */
-export const calculateProfileCompletion = (profileData) => {
-  if (!profileData) return 0;
-  let completion = 0;
+export const calculateProfileCompletion = (userOrProfile) => {
+  if (!userOrProfile) return 0;
 
-  if (profileData.fullName        && profileData.fullName.trim())        completion += 15;
-  if (profileData.profilePhoto    && profileData.profilePhoto.trim())    completion += 10;
-  if (profileData.college         && profileData.college.trim())         completion += 15;
-  if (profileData.degree          && profileData.degree.trim())          completion += 15;
-  if (profileData.skills          && profileData.skills.length > 0)      completion += 15;
-  if (profileData.experience      && profileData.experience.trim())      completion += 10;
-  if (profileData.preferredRole   && profileData.preferredRole.trim())   completion += 10;
-  if ((profileData.preferredLocation && profileData.preferredLocation.trim()) ||
-      (profileData.employmentType    && profileData.employmentType.trim())) {
-    completion += 10;
-  }
+  // Resolve profileData (p) and onboardingData (ob)
+  // If it's a currentUser object (which has profileData)
+  const p = userOrProfile.profileData || userOrProfile || {};
+  const ob = p.resumeInfo?.onboardingData || userOrProfile.onboardingData || {};
 
-  return completion;
-};
-
-/**
- * Computes profile completion score by merging the user's database profile and onboarding data.
- */
-export const getProfileCompletion = (currentUser) => {
-  if (!currentUser) return 0;
-  const p = currentUser.profileData || {};
-  const ob = currentUser.onboardingData || {};
-
-  const initialFirstName = currentUser.name ? currentUser.name.split(' ')[0] : '';
-  const initialLastName = currentUser.name ? currentUser.name.split(' ').slice(1).join(' ') : '';
-  const computedFullName = p.fullName || (initialFirstName ? `${initialFirstName} ${initialLastName}`.trim() : currentUser.name || '');
+  const initialFirstName = userOrProfile.name ? userOrProfile.name.split(' ')[0] : '';
+  const initialLastName = userOrProfile.name ? userOrProfile.name.split(' ').slice(1).join(' ') : '';
+  const computedFullName = p.fullName || (initialFirstName ? `${initialFirstName} ${initialLastName}`.trim() : userOrProfile.name || '');
 
   const skills = Array.isArray(p.skills) && p.skills.length > 0
     ? p.skills
@@ -535,5 +516,39 @@ export const getProfileCompletion = (currentUser) => {
     employmentType: p.employmentType || (Array.isArray(ob.lookingFor) && ob.lookingFor.includes('Internships') ? 'Internship' : 'Full-time'),
   };
 
-  return calculateProfileCompletion(merged);
+  let completion = 0;
+
+  const fName = !!(merged.fullName && merged.fullName.trim());
+  const pPhoto = !!(merged.profilePhoto && merged.profilePhoto.trim());
+  const coll = !!(merged.college && merged.college.trim());
+  const deg = !!(merged.degree && merged.degree.trim());
+  const sk = !!(merged.skills && (Array.isArray(merged.skills) ? merged.skills.length > 0 : typeof merged.skills === 'string' && merged.skills.trim().length > 0));
+  const exp = !!(merged.experience && merged.experience.trim());
+  const prefRole = !!(merged.preferredRole && merged.preferredRole.trim());
+  const prefLoc = !!((merged.preferredLocation && merged.preferredLocation.trim()) ||
+      (merged.employmentType && merged.employmentType.trim()));
+
+  if (fName) completion += 15;
+  if (pPhoto) completion += 10;
+  if (coll) completion += 15;
+  if (deg) completion += 15;
+  if (sk) completion += 15;
+  if (exp) completion += 10;
+  if (prefRole) completion += 10;
+  if (prefLoc) completion += 10;
+
+  console.log('[calculateProfileCompletion]', {
+    fullName: merged.fullName, fName,
+    profilePhoto: merged.profilePhoto, pPhoto,
+    college: merged.college, coll,
+    degree: merged.degree, deg,
+    skills: merged.skills, sk,
+    experience: merged.experience, exp,
+    preferredRole: merged.preferredRole, prefRole,
+    preferredLocation: merged.preferredLocation,
+    employmentType: merged.employmentType, prefLoc,
+    completion
+  });
+
+  return completion;
 };
