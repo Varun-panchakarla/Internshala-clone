@@ -6,7 +6,7 @@
   "scripts": {
     "predev": "kill-port 4000 5173",
     "dev": "concurrently \"vite\" \"node backend/server.js\"",
-    "build": "vite build",
+    "build": "vite build && npm install --prefix backend",
     "start": "cd backend && node server.js",
     "lint": "oxlint",
     "preview": "vite preview"

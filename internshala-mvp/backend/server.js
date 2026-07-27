@@ -17,17 +17,39 @@ const PORT = process.env.PORT || 4000;
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL || 'https://incuxai-careers.onrender.com']
+    ? [
+        process.env.FRONTEND_URL || 'https://incuxai-careers.onrender.com',
+        'https://incuxai-careers-2tv2.onrender.com'
+      ]
     : ['http://localhost:5173', 'http://127.0.0.1:5173'],
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
-// Serve built frontend in production
-const distPath = path.join(__dirname, '..', 'dist');
+// Serve built frontend in production with robust fallback paths
+const possibleDistPaths = [
+  path.resolve(__dirname, '..', 'dist'), // Standard: backend/../dist
+  path.resolve(__dirname, '..', '..', 'dist'), // Nested: backend/../../dist
+  path.resolve(process.cwd(), 'dist'), // Cwd-based check
+  path.resolve(process.cwd(), 'internshala-mvp', 'dist'), // Root-based check
+];
+
+let distPath = possibleDistPaths[0];
+for (const p of possibleDistPaths) {
+  const checkPath = path.join(p, 'index.html');
+  if (fs.existsSync(checkPath)) {
+    distPath = p;
+    console.log(`[Server] Found valid frontend build assets at: ${distPath}`);
+    break;
+  }
+}
+
 if (fs.existsSync(distPath)) {
+  console.log(`[Server] Serving static files from: ${distPath}`);
   app.use(express.static(distPath));
+} else {
+  console.warn(`[Server Warning] Static files directory not found. Checked paths: ${JSON.stringify(possibleDistPaths)}`);
 }
 
 // Routes
@@ -66,10 +88,12 @@ app.post('/api/scrape', async (req, res) => {
 
 // SPA catch-all: serve index.html for any non-API route (client-side routing)
 app.get('*', (req, res) => {
-  const indexPath = path.join(distPath, 'index.html');
+  const indexPath = path.resolve(distPath, 'index.html');
+  console.log(`[SPA Catch-all] Request URL: ${req.originalUrl || req.url}. Serving index.html from: ${indexPath}`);
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
+    console.error(`[SPA Catch-all Error] index.html not found at: ${indexPath}`);
     res.status(404).json({ error: 'Frontend not built. Run "npm run build" first.' });
   }
 });
