@@ -17,7 +17,10 @@ const PORT = process.env.PORT || 4000;
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL || 'https://incuxai-careers.onrender.com']
+    ? [
+        process.env.FRONTEND_URL || 'https://incuxai-careers.onrender.com',
+        'https://incuxai-careers-2tv2.onrender.com'
+      ]
     : ['http://localhost:5173', 'http://127.0.0.1:5173'],
   credentials: true,
 }));
