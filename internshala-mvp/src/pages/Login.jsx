@@ -22,24 +22,34 @@ const Login = () => {
 
   const googleContainerRef = useRef(null);
   const [googleButtonWidth, setGoogleButtonWidth] = useState(380);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (googleContainerRef.current) {
+    if (!googleContainerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
         // Clamp between 200 and 400 as per Google's SDK requirements
-        const width = Math.min(400, Math.max(200, googleContainerRef.current.offsetWidth));
+        const width = Math.min(400, Math.max(200, Math.floor(entry.contentRect.width)));
         setGoogleButtonWidth(width);
       }
+    });
+
+    resizeObserver.observe(googleContainerRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setIsDarkMode(isDark);
     };
 
-    // Delay measurement slightly to ensure initial layout is completed
-    const timer = setTimeout(handleResize, 100);
+    checkDarkMode();
 
-    window.addEventListener('resize', handleResize);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', handleResize);
-    };
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
   }, []);
 
   React.useEffect(() => {
@@ -134,7 +144,7 @@ const Login = () => {
           <span>Back</span>
         </button>
 
-        <div className="max-w-md w-full flex flex-col gap-8 pt-10 sm:pt-14 my-auto">
+        <div className="max-w-md w-full flex flex-col gap-5 pt-10 sm:pt-14 my-auto">
           
           {/* Logo Heading */}
           <div className="flex items-center">
@@ -169,7 +179,7 @@ const Login = () => {
             {!googleUserError && (
               <div ref={googleContainerRef} className="google-signin-wrapper w-full overflow-hidden rounded-xl [&>div]:w-full">
                 <GoogleLogin
-                  theme="outline"
+                  theme={isDarkMode ? "filled_black" : "outline"}
                   size="large"
                   width={googleButtonWidth}
                   text="continue_with"
