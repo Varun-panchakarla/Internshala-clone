@@ -88,9 +88,10 @@ router.post('/send', authMiddleware, async (req, res) => {
         console.log(`[OTP] Sent to ${cleanPhone}`);
       } catch (twilioErr) {
         console.error('[OTP] Twilio error:', twilioErr.message);
-        // In dev mode, return OTP in response for testing
-        if (process.env.NODE_ENV !== 'production') {
-          return res.json({ message: 'OTP sent (dev mode).', otp: code });
+        // Trial accounts: return OTP in response so testers can verify manually
+        if (twilioErr.code === 21215 || twilioErr.code === 21211 || twilioErr.status === 400) {
+          console.log(`[OTP] Twilio trial restriction — OTP for ${cleanPhone}: ${code}`);
+          return res.json({ message: 'OTP generated (Twilio trial mode). Check server logs for code.', otp: code });
         }
         return res.status(500).json({ error: 'Failed to send SMS. Please try again.' });
       }

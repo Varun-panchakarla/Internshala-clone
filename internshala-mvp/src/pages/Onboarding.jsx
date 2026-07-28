@@ -67,6 +67,7 @@ const Onboarding = () => {
   const [sendingPhoneOtp, setSendingPhoneOtp] = useState(false);
   const [verifyingPhoneOtp, setVerifyingPhoneOtp] = useState(false);
   const [otpError, setOtpError] = useState('');
+  const [devOtp, setDevOtp] = useState('');
 
   // Years generation lists
   const currentYear = new Date().getFullYear();
@@ -171,9 +172,15 @@ const Onboarding = () => {
 
     setSendingPhoneOtp(true);
     setOtpError('');
+    setDevOtp('');
     try {
-      await authService.sendPhoneOtp(cleanPhone);
-      addToast('Verification code sent to your phone number.', 'success');
+      const res = await authService.sendPhoneOtp(cleanPhone);
+      if (res.data?.otp) {
+        setDevOtp(res.data.otp);
+        addToast('SMS delivery restricted (Twilio trial). Use the code shown below.', 'info');
+      } else {
+        addToast('Verification code sent to your phone number.', 'success');
+      }
       setOtpSent(true);
       setPhoneTimer(60);
     } catch (err) {
@@ -189,9 +196,15 @@ const Onboarding = () => {
     
     setSendingPhoneOtp(true);
     setOtpError('');
+    setDevOtp('');
     try {
-      await authService.resendPhoneOtp(cleanPhone);
-      addToast('A new verification code has been sent to your phone.', 'success');
+      const res = await authService.resendPhoneOtp(cleanPhone);
+      if (res.data?.otp) {
+        setDevOtp(res.data.otp);
+        addToast('SMS delivery restricted (Twilio trial). Use the code shown below.', 'info');
+      } else {
+        addToast('A new verification code has been sent to your phone.', 'success');
+      }
       setPhoneTimer(60);
       setPhoneOtp('');
     } catch (err) {
@@ -328,10 +341,6 @@ const Onboarding = () => {
       if (!schoolName.trim()) tempErrors.schoolName = 'School name is required.';
     }
 
-    if (!phoneVerified) {
-      tempErrors.contactNumber = 'Please verify your phone number with OTP.';
-    }
-
     if (isSubmitting) {
       setErrors(tempErrors);
     }
@@ -378,9 +387,8 @@ const Onboarding = () => {
 
   // Form validity check for disabled state of button
   const isFormFilled = () => {
-    if (!phoneVerified) return false;
     const courseValue = customCourseActive ? customCourse.trim() : course;
-    const personalFilled = firstName.trim() && lastName.trim() && contactNumber.trim() && currentCity.trim() && gender && phoneVerified;
+    const personalFilled = firstName.trim() && lastName.trim() && contactNumber.trim() && currentCity.trim() && gender;
     
     if (!personalFilled) return false;
 
@@ -483,6 +491,7 @@ const Onboarding = () => {
                 <label htmlFor="contactNumber" className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center">
                   Contact Number
                   <span className="text-rose-500 ml-0.5">*</span>
+                  {!phoneVerified && <span className="ml-2 text-[10px] font-medium text-slate-400 dark:text-slate-500">(Verify for better reach)</span>}
                 </label>
                 <div className="flex gap-3 items-center">
                   <input
@@ -562,6 +571,13 @@ const Onboarding = () => {
                       <span className="text-xs text-rose-500 font-bold animate-fade-in">
                         {otpError}
                       </span>
+                    )}
+
+                    {devOtp && (
+                      <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl animate-fade-in">
+                        <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">Twilio Trial — Your OTP Code</p>
+                        <p className="font-mono text-2xl font-black text-amber-700 dark:text-amber-300 tracking-[0.3em]">{devOtp}</p>
+                      </div>
                     )}
 
                     <div className="flex items-center gap-3">

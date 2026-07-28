@@ -68,10 +68,36 @@ router.post('/send-phone-otp', authMiddleware, async (req, res) => {
       [userId, cleanPhone, otpHash]
     );
 
-    // Log the SMS OTP to the console for dev testing
-    console.log(`\n==========================================`);
-    console.log(`[LOCAL DEV SMS] Phone: ${cleanPhone}, OTP: ${otp}`);
-    console.log(`==========================================\n`);
+    // Send SMS via Twilio
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+    const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+
+    if (accountSid && authToken && (messagingSid || fromNumber)) {
+      try {
+        const twilio = require('twilio')(accountSid, authToken);
+        const msgPayload = {
+          body: `Your IncuXAI Careers verification code is: ${otp}. It expires in 10 minutes.`,
+          to: cleanPhone,
+        };
+        if (messagingSid) {
+          msgPayload.messagingServiceSid = messagingSid;
+        } else {
+          msgPayload.from = fromNumber;
+        }
+        await twilio.messages.create(msgPayload);
+        console.log(`[Onboarding SMS] Sent to ${cleanPhone}`);
+      } catch (twilioErr) {
+        console.error('[Onboarding SMS] Twilio error:', twilioErr.message);
+        // Trial accounts can only send to verified numbers — return OTP in response as fallback
+        console.log(`[Onboarding SMS] OTP for ${cleanPhone}: ${otp}`);
+        return res.json({ message: 'OTP generated (SMS delivery restricted). Use the code below.', otp });
+      }
+    } else {
+      console.warn('[Onboarding SMS] Twilio not configured. Returning OTP in response.');
+      return res.json({ message: 'OTP generated (SMS not configured).', otp });
+    }
 
     res.json({ message: 'Verification OTP sent successfully.' });
   } catch (err) {
@@ -122,10 +148,35 @@ router.post('/resend-phone-otp', authMiddleware, async (req, res) => {
       [userId, cleanPhone, otpHash]
     );
 
-    // Log the SMS OTP to the console
-    console.log(`\n==========================================`);
-    console.log(`[LOCAL DEV SMS] Phone: ${cleanPhone}, OTP: ${otp}`);
-    console.log(`==========================================\n`);
+    // Send SMS via Twilio
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+    const messagingSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+
+    if (accountSid && authToken && (messagingSid || fromNumber)) {
+      try {
+        const twilio = require('twilio')(accountSid, authToken);
+        const msgPayload = {
+          body: `Your IncuXAI Careers verification code is: ${otp}. It expires in 10 minutes.`,
+          to: cleanPhone,
+        };
+        if (messagingSid) {
+          msgPayload.messagingServiceSid = messagingSid;
+        } else {
+          msgPayload.from = fromNumber;
+        }
+        await twilio.messages.create(msgPayload);
+        console.log(`[Onboarding SMS] Resent to ${cleanPhone}`);
+      } catch (twilioErr) {
+        console.error('[Onboarding SMS] Twilio resend error:', twilioErr.message);
+        console.log(`[Onboarding SMS] OTP for ${cleanPhone}: ${otp}`);
+        return res.json({ message: 'OTP regenerated (SMS delivery restricted). Use the code below.', otp });
+      }
+    } else {
+      console.warn('[Onboarding SMS] Twilio not configured. Returning OTP in response.');
+      return res.json({ message: 'OTP generated (SMS not configured).', otp });
+    }
 
     res.json({ message: 'A new verification OTP has been sent to your phone.' });
   } catch (err) {
