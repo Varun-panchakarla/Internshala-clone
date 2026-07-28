@@ -167,6 +167,10 @@ router.post('/login', async (req, res) => {
 
     const user = result.rows[0];
 
+    if (!user.email_verified) {
+      return res.status(403).json({ error: 'Please verify your email before logging in.', email: user.email });
+    }
+
     if (!user.password_hash) {
       return res.status(401).json({ error: 'This account uses Google sign-in.' });
     }
@@ -174,10 +178,6 @@ router.post('/login', async (req, res) => {
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
       return res.status(401).json({ error: 'Invalid email or password.' });
-    }
-
-    if (!user.email_verified) {
-      return res.status(403).json({ error: 'Email not verified.', email: user.email });
     }
 
     const profileResult = await pool.query('SELECT * FROM profiles WHERE user_id = $1', [user.id]);

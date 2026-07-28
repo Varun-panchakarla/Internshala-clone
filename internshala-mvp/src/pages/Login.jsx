@@ -85,8 +85,8 @@ const Login = () => {
       if (errMsg === 'This account uses Google sign-in.') {
         setGoogleUserError(true);
         addToast(errMsg, 'warning');
-      } else if (status === 403 || errMsg === 'Email not verified.') {
-        addToast('Email not verified. Redirecting to verification page.', 'info');
+      } else if (status === 403 || errMsg === 'Email not verified.' || errMsg?.includes('verify your email')) {
+        addToast(errMsg || 'Please verify your email before logging in.', 'info');
         navigate('/verify-otp', { state: { email } });
       } else {
         addToast(errMsg || 'Login failed. Please check credentials.', 'error');
