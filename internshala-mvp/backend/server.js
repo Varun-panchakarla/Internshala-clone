@@ -27,31 +27,10 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
-// Serve built frontend in production with robust fallback paths
-const possibleDistPaths = [
-  path.resolve(__dirname, '..', 'dist'), // Standard: backend/../dist
-  path.resolve(__dirname, '..', '..', 'dist'), // Nested: backend/../../dist
-  path.resolve(process.cwd(), 'dist'), // Cwd-based check
-  path.resolve(process.cwd(), 'internshala-mvp', 'dist'), // Root-based check
-];
-
-// Register express.static for all possible dist paths
-possibleDistPaths.forEach(p => {
-  app.use(express.static(p));
-});
-
-// Determine distPath for the catch-all SPA route
-let distPath = possibleDistPaths[0];
-for (const p of possibleDistPaths) {
-  if (fs.existsSync(path.join(p, 'index.html'))) {
-    distPath = p;
-    console.log(`[Server] Found valid frontend build assets at: ${distPath}`);
-    break;
-  }
-}
-if (!fs.existsSync(path.join(distPath, 'index.html'))) {
-  console.warn(`[Server Warning] Static files directory or index.html not found. Checked paths: ${JSON.stringify(possibleDistPaths)}`);
-}
+// Serve built frontend in production
+const distPath = path.resolve(__dirname, '..', 'dist');
+app.use(express.static(distPath));
+console.log(`[Server] Serving frontend from: ${distPath}`);
 
 // Routes
 const { router: authRouter } = require('./routes/auth.js');
@@ -89,22 +68,13 @@ app.post('/api/scrape', async (req, res) => {
   }
 });
 
-// SPA catch-all: serve index.html for any non-API route (client-side routing)
+// SPA catch-all: serve index.html for any non-API route
 app.get('*', (req, res) => {
-  // Find which path contains index.html dynamically on request
-  let activeDistPath = possibleDistPaths[0];
-  for (const p of possibleDistPaths) {
-    if (fs.existsSync(path.join(p, 'index.html'))) {
-      activeDistPath = p;
-      break;
-    }
-  }
-  const indexPath = path.resolve(activeDistPath, 'index.html');
-  console.log(`[SPA Catch-all] Request URL: ${req.originalUrl || req.url}. Serving index.html from: ${indexPath}`);
+  const indexPath = path.resolve(distPath, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
-    console.error(`[SPA Catch-all Error] index.html not found at: ${indexPath}`);
+    console.error(`[SPA Error] index.html not found at: ${indexPath}`);
     res.status(404).json({ error: 'Frontend not built. Run "npm run build" first.' });
   }
 });
