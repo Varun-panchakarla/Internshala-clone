@@ -168,7 +168,7 @@ router.post('/verify-phone-otp', authMiddleware, async (req, res) => {
     // Check expiry
     const expiry = new Date(verification.expires_at);
     if (expiry < new Date()) {
-      return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
+      return res.status(400).json({ error: 'OTP expired. Please resend OTP.' });
     }
 
     // Compare OTP via bcrypt
@@ -181,7 +181,7 @@ router.post('/verify-phone-otp', authMiddleware, async (req, res) => {
       if (remaining <= 0) {
         return res.status(400).json({ error: 'Maximum attempts exceeded. Please request a new OTP.' });
       }
-      return res.status(400).json({ error: `Invalid OTP. ${remaining} attempts remaining.` });
+      return res.status(400).json({ error: 'Invalid OTP. Please try again.' });
     }
 
     // Success! Update profile
