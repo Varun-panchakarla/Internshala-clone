@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 const Input = ({
   label,
@@ -15,9 +16,13 @@ const Input = ({
   options = [], // For select dropdown
   icon: Icon
 }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPasswordType = type === 'password';
+  const inputType = isPasswordType ? (showPassword ? 'text' : 'password') : type;
+
   const baseInputStyle = `w-full px-4 py-2.5 rounded-xl border bg-white text-slate-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 disabled:bg-slate-50 disabled:text-slate-400 text-sm dark:bg-gray-800 dark:text-slate-100 dark:disabled:bg-gray-700 dark:disabled:text-slate-500 ${
     error ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500 dark:border-rose-700' : 'border-slate-200 dark:border-slate-600'
-  } ${Icon ? 'pl-10' : ''}`;
+  } ${Icon ? 'pl-10' : ''} ${isPasswordType ? 'pr-10' : ''}`;
 
   return (
     <div className={`flex flex-col gap-1.5 w-full ${className}`}>
@@ -62,13 +67,23 @@ const Input = ({
         ) : (
           <input
             id={id}
-            type={type}
+            type={inputType}
             placeholder={placeholder}
             value={value}
             onChange={onChange}
             disabled={disabled}
             className={baseInputStyle}
           />
+        )}
+
+        {isPasswordType && (
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3.5 text-slate-400 hover:text-slate-650 dark:text-slate-500 dark:hover:text-slate-350 transition-colors focus:outline-none cursor-pointer flex items-center justify-center"
+          >
+            {showPassword ? <FiEyeOff className="w-4.5 h-4.5" /> : <FiEye className="w-4.5 h-4.5" />}
+          </button>
         )}
       </div>
       {error && <span className="text-xs text-rose-500 dark:text-rose-400 font-medium mt-0.5">{error}</span>}

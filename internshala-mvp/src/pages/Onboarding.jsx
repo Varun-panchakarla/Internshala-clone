@@ -286,7 +286,7 @@ const Onboarding = () => {
     if (!lastName.trim()) tempErrors.lastName = 'Last name is required.';
     
     // Contact Validation
-    const cleanPhone = contactNumber.replace(/[\s\-\(\)]/g, '');
+    const cleanPhone = contactNumber.replace(/[\s\-()]/g, '');
     if (!contactNumber.trim()) {
       tempErrors.contactNumber = 'Contact number is required.';
     } else if (!/^\+?\d{8,15}$/.test(cleanPhone)) {
@@ -326,6 +326,10 @@ const Onboarding = () => {
     } else if (currentStatus === 'School Student') {
       if (!schoolStandard) tempErrors.schoolStandard = 'Standard is required.';
       if (!schoolName.trim()) tempErrors.schoolName = 'School name is required.';
+    }
+
+    if (!phoneVerified) {
+      tempErrors.contactNumber = 'Please verify your phone number with OTP.';
     }
 
     if (isSubmitting) {
@@ -376,7 +380,7 @@ const Onboarding = () => {
   const isFormFilled = () => {
     if (!phoneVerified) return false;
     const courseValue = customCourseActive ? customCourse.trim() : course;
-    const personalFilled = firstName.trim() && lastName.trim() && contactNumber.trim() && currentCity.trim() && gender;
+    const personalFilled = firstName.trim() && lastName.trim() && contactNumber.trim() && currentCity.trim() && gender && phoneVerified;
     
     if (!personalFilled) return false;
 
