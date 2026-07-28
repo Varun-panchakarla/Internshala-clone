@@ -563,6 +563,7 @@ function mapProfile(row) {
     interests: row.interests || [],
     lookingFor: row.looking_for || [],
     workModes: row.work_modes || [],
+    phoneVerified: row.phone_verified || false,
   };
 }
 

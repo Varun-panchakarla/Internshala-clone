@@ -62,6 +62,7 @@ const appliedRouter = require('./routes/applied.js');
 const resumeRouter = require('./routes/resume.js');
 const adminRouter = require('./routes/admin.js');
 const issuesRouter = require('./routes/issues.js');
+const otpRouter = require('./routes/otp.js');
 
 app.use('/api/auth', authRouter);
 app.use('/api/profile', profileRouter);
@@ -71,6 +72,7 @@ app.use('/api/applied', appliedRouter);
 app.use('/api/resume', resumeRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/issues', issuesRouter);
+app.use('/api/otp', otpRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -151,6 +153,7 @@ async function initDb() {
       sent_at TIMESTAMP DEFAULT NOW(),
       UNIQUE(user_id, email_type, DATE(sent_at))
     )`,
+    'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN DEFAULT FALSE',
   ];
   for (const sql of migrations) {
     try { await pool.query(sql); } catch { /* column may already exist */ }

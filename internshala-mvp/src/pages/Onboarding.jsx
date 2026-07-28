@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
-import { FiArrowRight, FiCheck, FiPlus, FiX } from 'react-icons/fi';
+import { FiArrowRight, FiCheck, FiPlus, FiX, FiShield } from 'react-icons/fi';
+import axios from 'axios';
 
 const Onboarding = () => {
   const { currentUser } = useAuth();
@@ -57,6 +58,15 @@ const Onboarding = () => {
   // Inline Validation Errors State
   const [errors, setErrors] = useState({});
 
+  // Phone verification OTP state
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [otpResendTimer, setOtpResendTimer] = useState(0);
+
   // Years generation lists
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 25 }, (_, i) => String(currentYear - 10 + i));
@@ -94,6 +104,76 @@ const Onboarding = () => {
       }
     }
   }, [currentUser]);
+
+  // OTP resend countdown timer
+  useEffect(() => {
+    if (otpResendTimer <= 0) return;
+    const interval = setInterval(() => {
+      setOtpResendTimer(prev => {
+        if (prev <= 1) { clearInterval(interval); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [otpResendTimer]);
+
+  // Reset phone verification when phone number changes (skip initial mount)
+  const prevPhoneRef = React.useRef(contactNumber);
+  useEffect(() => {
+    if (prevPhoneRef.current !== contactNumber && phoneVerified) {
+      setPhoneVerified(false);
+      setOtpSent(false);
+      setOtpCode('');
+      setOtpError('');
+    }
+    prevPhoneRef.current = contactNumber;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contactNumber]);
+
+  const handleSendOtp = async () => {
+    const cleanPhone = contactNumber.replace(/[\s\-()]/g, '');
+    if (!/^\+?\d{8,15}$/.test(cleanPhone)) {
+      setErrors(prev => ({ ...prev, contactNumber: 'Enter a valid phone number before requesting OTP.' }));
+      return;
+    }
+    setOtpLoading(true);
+    setOtpError('');
+    try {
+      const formattedPhone = cleanPhone.startsWith('+') ? cleanPhone : cleanPhone.length === 10 ? '+91' + cleanPhone : '+' + cleanPhone;
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      await axios.post(`${baseUrl}/api/otp/send`, { phone: formattedPhone }, { withCredentials: true });
+      setOtpSent(true);
+      setOtpResendTimer(60);
+      addToast('OTP sent to your phone number.', 'success');
+    } catch (err) {
+      setOtpError(err.response?.data?.error || 'Failed to send OTP.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode.trim() || otpCode.trim().length !== 6) {
+      setOtpError('Please enter the 6-digit OTP.');
+      return;
+    }
+    setOtpVerifying(true);
+    setOtpError('');
+    try {
+      const cleanPhone = contactNumber.replace(/[\s\-()]/g, '');
+      const formattedPhone = cleanPhone.startsWith('+') ? cleanPhone : cleanPhone.length === 10 ? '+91' + cleanPhone : '+' + cleanPhone;
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      await axios.post(`${baseUrl}/api/otp/verify`, { phone: formattedPhone, code: otpCode.trim() }, { withCredentials: true });
+      setPhoneVerified(true);
+      setOtpSent(false);
+      setOtpCode('');
+      addToast('Phone number verified successfully!', 'success');
+    } catch (err) {
+      setOtpError(err.response?.data?.error || 'Verification failed.');
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
 
   // Handle Dynamic Course toggle
   const toggleCustomCourse = (active) => {
@@ -144,7 +224,7 @@ const Onboarding = () => {
     if (!lastName.trim()) tempErrors.lastName = 'Last name is required.';
     
     // Contact Validation
-    const cleanPhone = contactNumber.replace(/[\s\-\(\)]/g, '');
+    const cleanPhone = contactNumber.replace(/[\s\-()]/g, '');
     if (!contactNumber.trim()) {
       tempErrors.contactNumber = 'Contact number is required.';
     } else if (!/^\+?\d{8,15}$/.test(cleanPhone)) {
@@ -184,6 +264,10 @@ const Onboarding = () => {
     } else if (currentStatus === 'School Student') {
       if (!schoolStandard) tempErrors.schoolStandard = 'Standard is required.';
       if (!schoolName.trim()) tempErrors.schoolName = 'School name is required.';
+    }
+
+    if (!phoneVerified) {
+      tempErrors.contactNumber = 'Please verify your phone number with OTP.';
     }
 
     if (isSubmitting) {
@@ -233,7 +317,7 @@ const Onboarding = () => {
   // Form validity check for disabled state of button
   const isFormFilled = () => {
     const courseValue = customCourseActive ? customCourse.trim() : course;
-    const personalFilled = firstName.trim() && lastName.trim() && contactNumber.trim() && currentCity.trim() && gender;
+    const personalFilled = firstName.trim() && lastName.trim() && contactNumber.trim() && currentCity.trim() && gender && phoneVerified;
     
     if (!personalFilled) return false;
 
@@ -332,16 +416,72 @@ const Onboarding = () => {
                 disabled
                 required
               />
-              <Input 
-                label="Contact Number" 
-                id="contactNumber"
-                type="tel"
-                placeholder="e.g. +91 9999999999"
-                value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value)}
-                error={errors.contactNumber}
-                required
-              />
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1">
+                    <Input 
+                      label="Contact Number" 
+                      id="contactNumber"
+                      type="tel"
+                      placeholder="e.g. +91 9999999999"
+                      value={contactNumber}
+                      onChange={(e) => setContactNumber(e.target.value)}
+                      error={errors.contactNumber}
+                      disabled={phoneVerified}
+                      required
+                    />
+                  </div>
+                  {!phoneVerified && (
+                    <Button
+                      type="button"
+                      variant={otpSent ? 'outline' : 'primary'}
+                      className="h-11 px-4 rounded-xl text-xs font-bold whitespace-nowrap shrink-0"
+                      onClick={handleSendOtp}
+                      disabled={otpLoading || otpResendTimer > 0 || !contactNumber.trim()}
+                      loading={otpLoading}
+                    >
+                      {otpSent ? (otpResendTimer > 0 ? `${otpResendTimer}s` : 'Resend') : 'Send OTP'}
+                    </Button>
+                  )}
+                  {phoneVerified && (
+                    <div className="flex items-center gap-1.5 px-3 py-2.5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 whitespace-nowrap shrink-0">
+                      <FiShield className="w-4 h-4" /> Verified
+                    </div>
+                  )}
+                </div>
+
+                {otpSent && !phoneVerified && (
+                  <div className="flex flex-col gap-2 animate-slide-up">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                      Enter the 6-digit code sent to your phone
+                    </p>
+                    <div className="flex gap-2 items-end">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="000000"
+                        value={otpCode}
+                        onChange={(e) => { setOtpCode(e.target.value.replace(/\D/g, '')); setOtpError(''); }}
+                        className="flex-1 h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-lg font-mono tracking-[0.3em] text-center focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                      />
+                      <Button
+                        type="button"
+                        variant="primary"
+                        className="h-11 px-5 rounded-xl text-xs font-bold"
+                        onClick={handleVerifyOtp}
+                        disabled={otpVerifying || otpCode.length !== 6}
+                        loading={otpVerifying}
+                      >
+                        Verify
+                      </Button>
+                    </div>
+                    {otpError && (
+                      <p className="text-xs text-rose-500 dark:text-rose-400 font-medium">{otpError}</p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             <Input 
