@@ -78,11 +78,9 @@ const Register = () => {
 
     setLoading(true);
     try {
-      const user = await register(name.trim(), email, password);
-      addToast('Account created successfully! Welcome to the portal.', 'success');
-      localStorage.removeItem(`onboarding_completed_${user?.id}`);
-      localStorage.removeItem(`onboarding_completed_${email}`);
-      navigate('/onboarding');
+      const data = await register(name.trim(), email, password);
+      addToast(data.message || 'Registration successful! Verification code sent to your email.', 'success');
+      navigate('/verify-otp', { state: { email } });
     } catch (err) {
       addToast(err.response?.data?.error || 'Registration failed. Email might already exist.', 'error');
     } finally {

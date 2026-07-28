@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
-const { sendWelcomeEmail, sendPasswordResetEmail } = require('../utils/email');
+const { sendWelcomeEmail, sendPasswordResetEmail, sendOtpEmail } = require('../utils/email');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-dev-secret';
@@ -81,31 +81,63 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 6 characters.' });
     }
 
-    const existing = await pool.query('SELECT id FROM users WHERE email = $1', [cleanEmail]);
+    const existing = await pool.query('SELECT id, email_verified FROM users WHERE email = $1', [cleanEmail]);
+    let userId;
+    
     if (existing.rows.length > 0) {
-      return res.status(409).json({ error: 'An account with this email already exists.' });
+      const existingUser = existing.rows[0];
+      if (existingUser.email_verified) {
+        return res.status(409).json({ error: 'An account with this email already exists.' });
+      }
+      
+      // Update existing unverified user with new name and password hash
+      const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+      await pool.query(
+        `UPDATE users SET name = $1, password_hash = $2 WHERE id = $3`,
+        [cleanName, passwordHash, existingUser.id]
+      );
+      // Also update the profile name
+      await pool.query(
+        `UPDATE profiles SET full_name = $1 WHERE user_id = $2`,
+        [cleanName, existingUser.id]
+      );
+      userId = existingUser.id;
+    } else {
+      // Create new user (default email_verified = false)
+      const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+      const userResult = await pool.query(
+        `INSERT INTO users (email, password_hash, name, email_verified) VALUES ($1, $2, $3, false) RETURNING id`,
+        [cleanEmail, passwordHash, cleanName]
+      );
+      userId = userResult.rows[0].id;
+
+      await pool.query(
+        `INSERT INTO profiles (user_id, full_name, experience, employment_type) VALUES ($1, $2, $3, $4)`,
+        [userId, cleanName, 'Fresher', 'Full-time']
+      );
     }
 
-    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-    const userResult = await pool.query(
-      `INSERT INTO users (email, password_hash, name) VALUES ($1, $2, $3) RETURNING id, email, name, role, created_at`,
-      [cleanEmail, passwordHash, cleanName]
+    // Generate secure 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpHash = await bcrypt.hash(otp, SALT_ROUNDS);
+    
+    // Store OTP in database with 10 minutes expiry
+    await pool.query(
+      `UPDATE users SET 
+        otp_code = $1, 
+        otp_expires_at = NOW() + INTERVAL '10 minutes', 
+        otp_attempts = 0, 
+        last_otp_sent_at = NOW() 
+       WHERE id = $2`,
+      [otpHash, userId]
     );
-    const user = userResult.rows[0];
 
-    const profileResult = await pool.query(
-      `INSERT INTO profiles (user_id, full_name, experience, employment_type) VALUES ($1, $2, $3, $4) RETURNING *`,
-      [user.id, cleanName, 'Fresher', 'Full-time']
-    );
-
-    const token = signToken(user.id, user.email);
-    setCookie(res, token);
-
-    sendWelcomeEmail({ email: cleanEmail, name: cleanName });
+    // Send OTP email (welcome email will be sent on OTP verification success)
+    await sendOtpEmail({ email: cleanEmail, name: cleanName, otp });
 
     res.status(201).json({
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
-      profile: mapProfile(profileResult.rows[0]),
+      email: cleanEmail,
+      message: 'Verification OTP sent to your email. Please verify to activate your account.'
     });
   } catch (err) {
     console.error('[Auth] Register error:', err.message);
@@ -125,7 +157,7 @@ router.post('/login', async (req, res) => {
     const cleanEmail = typeof email === 'string' ? email.trim().toLowerCase().slice(0, MAX_EMAIL_LENGTH) : '';
 
     const result = await pool.query(
-      'SELECT id, email, name, password_hash, role FROM users WHERE email = $1',
+      'SELECT id, email, name, password_hash, role, email_verified FROM users WHERE email = $1',
       [cleanEmail]
     );
 
@@ -142,6 +174,10 @@ router.post('/login', async (req, res) => {
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
       return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+
+    if (!user.email_verified) {
+      return res.status(403).json({ error: 'Email not verified.', email: user.email });
     }
 
     const profileResult = await pool.query('SELECT * FROM profiles WHERE user_id = $1', [user.id]);
@@ -195,13 +231,14 @@ router.post('/google', async (req, res) => {
     let isNewUser = false;
     if (existing.rows.length > 0) {
       user = existing.rows[0];
-      if (!user.google_id) {
-        await pool.query('UPDATE users SET google_id = $1 WHERE id = $2', [googleId, user.id]);
-      }
+      await pool.query(
+        'UPDATE users SET google_id = COALESCE(google_id, $1), email_verified = true WHERE id = $2',
+        [googleId, user.id]
+      );
     } else {
       isNewUser = true;
       const result = await pool.query(
-        `INSERT INTO users (email, name, google_id) VALUES ($1, $2, $3) RETURNING id, email, name, role`,
+        `INSERT INTO users (email, name, google_id, email_verified) VALUES ($1, $2, $3, true) RETURNING id, email, name, role`,
         [email, name, googleId]
       );
       user = result.rows[0];
@@ -535,6 +572,155 @@ router.post('/change-password', authMiddleware, async (req, res) => {
     return res.status(500).json({ 
       error: `Server error changing password: ${err.message || err}` 
     });
+  }
+});
+
+// POST /api/auth/verify-otp
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ error: 'Email and OTP are required.' });
+    }
+
+    const cleanEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    const cleanOtp = typeof otp === 'string' ? otp.trim() : String(otp).trim();
+
+    if (cleanOtp.length !== 6 || !/^\d+$/.test(cleanOtp)) {
+      return res.status(400).json({ error: 'OTP must be a 6-digit number.' });
+    }
+
+    const result = await pool.query(
+      'SELECT id, email, name, role, email_verified, otp_code, otp_expires_at, otp_attempts FROM users WHERE email = $1',
+      [cleanEmail]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Account not found.' });
+    }
+
+    const user = result.rows[0];
+
+    if (user.email_verified) {
+      return res.status(400).json({ error: 'Email is already verified.' });
+    }
+
+    if (!user.otp_code || !user.otp_expires_at) {
+      return res.status(400).json({ error: 'No verification code found. Please request a new OTP.' });
+    }
+
+    if (user.otp_attempts >= 5) {
+      return res.status(400).json({ error: 'Maximum verification attempts exceeded. Please resend a new OTP.' });
+    }
+
+    const expiry = new Date(user.otp_expires_at);
+    if (expiry < new Date()) {
+      return res.status(400).json({ error: 'OTP has expired. Please request a new code.' });
+    }
+
+    const valid = await bcrypt.compare(cleanOtp, user.otp_code);
+    if (!valid) {
+      const newAttempts = user.otp_attempts + 1;
+      await pool.query('UPDATE users SET otp_attempts = $1 WHERE id = $2', [newAttempts, user.id]);
+      
+      const remaining = 5 - newAttempts;
+      if (remaining <= 0) {
+        return res.status(400).json({ error: 'Maximum attempts exceeded. Please request a new OTP.' });
+      }
+      return res.status(400).json({ error: `Invalid OTP. ${remaining} attempts remaining.` });
+    }
+
+    // OTP is valid! Mark verified, clear OTP details, log user in
+    await pool.query(
+      `UPDATE users SET 
+        email_verified = true, 
+        otp_code = NULL, 
+        otp_expires_at = NULL, 
+        otp_attempts = 0 
+       WHERE id = $1`,
+      [user.id]
+    );
+
+    const profileResult = await pool.query('SELECT * FROM profiles WHERE user_id = $1', [user.id]);
+    const profile = profileResult.rows[0] || {};
+
+    // Send actual welcome email now
+    sendWelcomeEmail({ email: user.email, name: user.name });
+
+    const token = signToken(user.id, user.email);
+    setCookie(res, token);
+
+    res.json({
+      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      profile: mapProfile(profile),
+      message: 'Email verified successfully.'
+    });
+  } catch (err) {
+    console.error('[Auth] Verify OTP error:', err.message);
+    res.status(500).json({ error: 'Failed to verify OTP.' });
+  }
+});
+
+// POST /api/auth/resend-otp
+router.post('/resend-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required.' });
+    }
+
+    const cleanEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+
+    const result = await pool.query(
+      'SELECT id, name, email_verified, last_otp_sent_at FROM users WHERE email = $1',
+      [cleanEmail]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Account not found.' });
+    }
+
+    const user = result.rows[0];
+
+    if (user.email_verified) {
+      return res.status(400).json({ error: 'Email is already verified.' });
+    }
+
+    // Cooldown check (60 seconds)
+    if (user.last_otp_sent_at) {
+      const lastSent = new Date(user.last_otp_sent_at);
+      const diffSeconds = Math.floor((new Date() - lastSent) / 1000);
+      if (diffSeconds < 60) {
+        const remaining = 60 - diffSeconds;
+        return res.status(429).json({ 
+          error: `Please wait ${remaining} seconds before requesting another code.`,
+          remainingSeconds: remaining
+        });
+      }
+    }
+
+    // Generate and store new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpHash = await bcrypt.hash(otp, SALT_ROUNDS);
+
+    await pool.query(
+      `UPDATE users SET 
+        otp_code = $1, 
+        otp_expires_at = NOW() + INTERVAL '10 minutes', 
+        otp_attempts = 0, 
+        last_otp_sent_at = NOW() 
+       WHERE id = $2`,
+      [otpHash, user.id]
+    );
+
+    await sendOtpEmail({ email: cleanEmail, name: user.name, otp });
+
+    res.json({ message: 'A new verification OTP has been sent to your email.' });
+  } catch (err) {
+    console.error('[Auth] Resend OTP error:', err.message);
+    res.status(500).json({ error: 'Failed to resend OTP.' });
   }
 });
 
