@@ -80,10 +80,14 @@ const Login = () => {
         navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
       }
     } catch (err) {
+      const status = err.response?.status;
       const errMsg = err.response?.data?.error;
       if (errMsg === 'This account uses Google sign-in.') {
         setGoogleUserError(true);
         addToast(errMsg, 'warning');
+      } else if (status === 403 || errMsg === 'Email not verified.') {
+        addToast('Email not verified. Redirecting to verification page.', 'info');
+        navigate('/verify-otp', { state: { email } });
       } else {
         addToast(errMsg || 'Login failed. Please check credentials.', 'error');
       }
@@ -93,30 +97,22 @@ const Login = () => {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    console.log('[DEBUG] handleGoogleSuccess called with:', credentialResponse);
     if (!credentialResponse?.credential) {
-      console.warn('[DEBUG] No credential found in response');
       addToast('Google authentication failed.', 'error');
       return;
     }
     setLoading(true);
     try {
-      console.log('[DEBUG] Triggering googleLogin()...');
       const user = await googleLogin(credentialResponse.credential);
-      console.log('[DEBUG] googleLogin() returned user:', user);
       addToast('Logged in successfully!', 'success');
       
       if (['admin', 'super_admin'].includes(user?.role)) {
-        console.log('[DEBUG] Redirecting to /admin');
         navigate('/admin');
       } else {
         const onboardingCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`) === 'true';
-        const targetPath = onboardingCompleted ? '/dashboard' : '/onboarding';
-        console.log('[DEBUG] Redirecting to:', targetPath, '(onboardingCompleted =', onboardingCompleted, ')');
-        navigate(targetPath);
+        navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
       }
     } catch (err) {
-      console.error('[DEBUG] Error during googleLogin():', err);
       addToast(err.response?.data?.error || 'Google sign-in failed.', 'error');
     } finally {
       setLoading(false);

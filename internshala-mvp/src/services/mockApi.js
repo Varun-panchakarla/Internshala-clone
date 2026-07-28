@@ -17,6 +17,8 @@ export const authService = {
   getProfile: () => api.get('/profile'),
   updateProfile: (profileData) => api.put('/profile', profileData),
   deleteAccount: () => api.delete('/auth/account'),
+  verifyOtp: (email, otp) => api.post('/auth/verify-otp', { email, otp }),
+  resendOtp: (email) => api.post('/auth/resend-otp', { email }),
 };
 
 export const jobService = {

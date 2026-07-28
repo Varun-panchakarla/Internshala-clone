@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 // Pages lazy-like imports (or direct imports)
 import Login from '../pages/Login';
 import Register from '../pages/Register';
+import VerifyOtp from '../pages/VerifyOtp';
 import Dashboard from '../pages/Dashboard';
 import JobsPage from '../pages/JobsPage';
 import JobDetails from '../pages/JobDetails';
@@ -59,27 +60,21 @@ const AdminRoute = ({ children }) => {
 // Protected Route Wrapper
 const ProtectedRoute = ({ children, allowOnboardingIncomplete = false, hideSidebar = false }) => {
   const { isAuthenticated, loading, currentUser } = useAuth();
-  console.log('[DEBUG] ProtectedRoute render:', { isAuthenticated, loading, userId: currentUser?.id, path: window.location.pathname });
 
   if (loading) {
-    console.log('[DEBUG] ProtectedRoute loading, rendering spinner');
     return <LoadingSpinner fullPage text="Securing session..." />;
   }
 
   if (!isAuthenticated) {
-    console.warn('[DEBUG] ProtectedRoute not authenticated! Redirecting to /login');
     return <Navigate to="/login" replace />;
   }
 
   const onboardingCompleted = localStorage.getItem(`onboarding_completed_${currentUser?.id}`) === 'true';
-  console.log('[DEBUG] ProtectedRoute check onboardingCompleted:', onboardingCompleted);
 
   if (!onboardingCompleted && !allowOnboardingIncomplete) {
-    console.warn('[DEBUG] ProtectedRoute onboarding incomplete! Redirecting to /onboarding');
     return <Navigate to="/onboarding" replace />;
   }
 
-  console.log('[DEBUG] ProtectedRoute checks passed! Rendering content');
   return <MainLayout hideSidebar={hideSidebar}>{children}</MainLayout>;
 };
 
@@ -123,6 +118,14 @@ const AppRoutes = () => {
         element={
           <PublicRoute useLayout={false}>
             <Register />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/verify-otp"
+        element={
+          <PublicRoute useLayout={false}>
+            <VerifyOtp />
           </PublicRoute>
         }
       />
