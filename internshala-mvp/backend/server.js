@@ -35,12 +35,23 @@ const possibleDistPaths = [
   path.resolve(process.cwd(), 'internshala-mvp', 'dist'), // Root-based check
 ];
 
-// Register static serving for all possible dist paths unconditionally.
-// Express checks directories in order and ignores missing ones at request time.
-possibleDistPaths.forEach((p) => {
-  console.log(`[Server] Registering static files path: ${p}`);
+// Register express.static for all possible dist paths
+possibleDistPaths.forEach(p => {
   app.use(express.static(p));
 });
+
+// Determine distPath for the catch-all SPA route
+let distPath = possibleDistPaths[0];
+for (const p of possibleDistPaths) {
+  if (fs.existsSync(path.join(p, 'index.html'))) {
+    distPath = p;
+    console.log(`[Server] Found valid frontend build assets at: ${distPath}`);
+    break;
+  }
+}
+if (!fs.existsSync(path.join(distPath, 'index.html'))) {
+  console.warn(`[Server Warning] Static files directory or index.html not found. Checked paths: ${JSON.stringify(possibleDistPaths)}`);
+}
 
 // Routes
 const { router: authRouter } = require('./routes/auth.js');

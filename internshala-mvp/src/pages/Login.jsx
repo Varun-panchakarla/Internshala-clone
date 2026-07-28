@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +19,22 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [googleUserError, setGoogleUserError] = useState(false);
   const [googleScriptLoaded, setGoogleScriptLoaded] = useState(true);
+
+  const googleContainerRef = useRef(null);
+  const [googleButtonWidth, setGoogleButtonWidth] = useState(null);
+
+  useEffect(() => {
+    const measureWidth = () => {
+      if (googleContainerRef.current) {
+        const width = Math.min(400, Math.max(200, googleContainerRef.current.offsetWidth));
+        setGoogleButtonWidth(width);
+      }
+    };
+    const timer = setTimeout(measureWidth, 150);
+    return () => clearTimeout(timer);
+  }, []);
+
+
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -77,21 +93,30 @@ const Login = () => {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
+    console.log('[DEBUG] handleGoogleSuccess called with:', credentialResponse);
     if (!credentialResponse?.credential) {
+      console.warn('[DEBUG] No credential found in response');
       addToast('Google authentication failed.', 'error');
       return;
     }
     setLoading(true);
     try {
+      console.log('[DEBUG] Triggering googleLogin()...');
       const user = await googleLogin(credentialResponse.credential);
-      addToast('Signed in with Google!', 'success');
+      console.log('[DEBUG] googleLogin() returned user:', user);
+      addToast('Logged in successfully!', 'success');
+      
       if (['admin', 'super_admin'].includes(user?.role)) {
+        console.log('[DEBUG] Redirecting to /admin');
         navigate('/admin');
       } else {
         const onboardingCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`) === 'true';
-        navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
+        const targetPath = onboardingCompleted ? '/dashboard' : '/onboarding';
+        console.log('[DEBUG] Redirecting to:', targetPath, '(onboardingCompleted =', onboardingCompleted, ')');
+        navigate(targetPath);
       }
     } catch (err) {
+      console.error('[DEBUG] Error during googleLogin():', err);
       addToast(err.response?.data?.error || 'Google sign-in failed.', 'error');
     } finally {
       setLoading(false);
@@ -112,7 +137,7 @@ const Login = () => {
           <span>Back</span>
         </button>
 
-        <div className="max-w-md w-full flex flex-col gap-8 pt-10 sm:pt-14 my-auto">
+        <div className="max-w-md w-full flex flex-col gap-5 pt-10 sm:pt-14 my-auto">
           
           {/* Logo Heading */}
           <div className="flex items-center">
@@ -130,31 +155,39 @@ const Login = () => {
                 <p className="text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed">
                   This account is configured to use Google Sign-in. Please use the button below to log in.
                 </p>
-                <div className="w-full overflow-hidden rounded-lg [&>div]:w-full">
-                  <GoogleLogin
-                    theme="filled_blue"
-                    size="large"
-                    width="100%"
-                    text="continue_with"
-                    shape="rectangular"
-                    onSuccess={handleGoogleSuccess}
-                    onError={() => addToast('Google sign-in failed.', 'error')}
-                  />
+                <div ref={googleContainerRef} className="google-signin-wrapper w-full overflow-hidden rounded-xl">
+                  {googleButtonWidth ? (
+                    <GoogleLogin
+                      theme="outline"
+                      size="large"
+                      width={googleButtonWidth}
+                      text="continue_with"
+                      shape="rectangular"
+                      onSuccess={handleGoogleSuccess}
+                      onError={() => addToast('Google sign-in failed.', 'error')}
+                    />
+                  ) : (
+                    <div className="w-full h-[44px] bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800 animate-pulse" />
+                  )}
                 </div>
               </div>
             )}
 
             {!googleUserError && (
-              <div className="w-full overflow-hidden rounded-lg [&>div]:w-full">
-                <GoogleLogin
-                  theme="outline"
-                  size="large"
-                  width="100%"
-                  text="continue_with"
-                  shape="rectangular"
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => addToast('Google sign-in failed.', 'error')}
-                />
+              <div ref={googleContainerRef} className="google-signin-wrapper w-full overflow-hidden rounded-xl">
+                {googleButtonWidth ? (
+                  <GoogleLogin
+                    theme="outline"
+                    size="large"
+                    width={googleButtonWidth}
+                    text="continue_with"
+                    shape="rectangular"
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => addToast('Google sign-in failed.', 'error')}
+                  />
+                ) : (
+                  <div className="w-full h-[44px] bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800 animate-pulse" />
+                )}
               </div>
             )}
 
