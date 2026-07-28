@@ -98,14 +98,20 @@ export const AuthProvider = ({ children }) => {
   };
 
   const googleLogin = async (credential) => {
+    console.log('[DEBUG] AuthContext.googleLogin() started');
     setLoading(true);
     setError(null);
     try {
+      console.log('[DEBUG] Calling authService.googleAuth()...');
       const res = await authService.googleAuth(credential);
+      console.log('[DEBUG] authService.googleAuth() responded with:', res.data);
       const user = normalizeUser(res.data);
+      console.log('[DEBUG] Normalized user details:', user);
       setCurrentUser(user);
+      console.log('[DEBUG] Set currentUser in state');
       return user;
     } catch (err) {
+      console.error('[DEBUG] googleAuth() error:', err);
       setError(err.response?.data?.error || err.message);
       throw err;
     } finally {
