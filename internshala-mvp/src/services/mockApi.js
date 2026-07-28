@@ -19,6 +19,9 @@ export const authService = {
   deleteAccount: () => api.delete('/auth/account'),
   verifyOtp: (email, otp) => api.post('/auth/verify-otp', { email, otp }),
   resendOtp: (email) => api.post('/auth/resend-otp', { email }),
+  sendPhoneOtp: (phoneNumber) => api.post('/onboarding/send-phone-otp', { phoneNumber }),
+  resendPhoneOtp: (phoneNumber) => api.post('/onboarding/resend-phone-otp', { phoneNumber }),
+  verifyPhoneOtp: (otp) => api.post('/onboarding/verify-phone-otp', { otp }),
 };
 
 export const jobService = {

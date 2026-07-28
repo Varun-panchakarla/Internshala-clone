@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
-import { FiArrowRight, FiCheck, FiPlus, FiX } from 'react-icons/fi';
+import { FiArrowRight, FiCheck, FiPlus, FiX, FiCheckCircle, FiClock } from 'react-icons/fi';
+import { authService } from '../services/mockApi';
 
 const Onboarding = () => {
   const { currentUser } = useAuth();
@@ -57,6 +58,15 @@ const Onboarding = () => {
   // Inline Validation Errors State
   const [errors, setErrors] = useState({});
 
+  // Phone Verification States
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [verifiedNumber, setVerifiedNumber] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [phoneOtp, setPhoneOtp] = useState('');
+  const [phoneTimer, setPhoneTimer] = useState(0);
+  const [sendingPhoneOtp, setSendingPhoneOtp] = useState(false);
+  const [verifyingPhoneOtp, setVerifyingPhoneOtp] = useState(false);
+
   // Years generation lists
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 25 }, (_, i) => String(currentYear - 10 + i));
@@ -65,12 +75,16 @@ const Onboarding = () => {
   useEffect(() => {
     const dataKey = currentUser?.id ? `onboarding_step1_${currentUser.id}` : 'onboarding_step1_guest';
     const saved = localStorage.getItem(dataKey);
+    let loadedContactNumber = '';
     if (saved) {
       try {
         const d = JSON.parse(saved);
         if (d.firstName) setFirstName(d.firstName);
         if (d.lastName) setLastName(d.lastName);
-        if (d.contactNumber) setContactNumber(d.contactNumber);
+        if (d.contactNumber) {
+          setContactNumber(d.contactNumber);
+          loadedContactNumber = d.contactNumber;
+        }
         if (d.currentCity) setCurrentCity(d.currentCity);
         if (d.gender) setGender(d.gender);
         if (Array.isArray(d.selectedLanguages)) setSelectedLanguages(d.selectedLanguages);
@@ -93,7 +107,116 @@ const Onboarding = () => {
         }
       }
     }
+
+    if (currentUser?.profileData) {
+      const isVerified = currentUser.profileData.phoneVerified === true;
+      const dbContact = currentUser.profileData.contactNumber || '';
+      
+      if (loadedContactNumber) {
+        if (isVerified && loadedContactNumber === dbContact) {
+          setPhoneVerified(true);
+          setVerifiedNumber(dbContact);
+        } else {
+          setPhoneVerified(false);
+        }
+      } else {
+        setPhoneVerified(isVerified);
+        if (isVerified) {
+          setVerifiedNumber(dbContact);
+          setContactNumber(dbContact);
+        }
+      }
+    }
   }, [currentUser]);
+
+  // Handle phoneTimer countdown
+  useEffect(() => {
+    if (phoneTimer <= 0) return;
+    const interval = setInterval(() => {
+      setPhoneTimer(prev => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [phoneTimer]);
+
+  const handlePhoneChange = (val) => {
+    setContactNumber(val);
+    if (val !== verifiedNumber) {
+      setPhoneVerified(false);
+      setOtpSent(false);
+    } else {
+      setPhoneVerified(true);
+    }
+  };
+
+  const handleSendPhoneOtp = async () => {
+    const cleanPhone = contactNumber.replace(/[\s\-\(\)]/g, '');
+    if (!/^\+?\d{8,15}$/.test(cleanPhone)) {
+      addToast('Please enter a valid phone number (minimum 8 digits).', 'error');
+      return;
+    }
+
+    setSendingPhoneOtp(true);
+    try {
+      await authService.sendPhoneOtp(cleanPhone);
+      addToast('Verification code sent to your phone number.', 'success');
+      setOtpSent(true);
+      setPhoneTimer(60);
+    } catch (err) {
+      addToast(err.response?.data?.error || 'Failed to send verification code.', 'error');
+    } finally {
+      setSendingPhoneOtp(false);
+    }
+  };
+
+  const handleResendPhoneOtp = async () => {
+    if (phoneTimer > 0) return;
+    const cleanPhone = contactNumber.replace(/[\s\-\(\)]/g, '');
+    
+    setSendingPhoneOtp(true);
+    try {
+      await authService.resendPhoneOtp(cleanPhone);
+      addToast('A new verification code has been sent to your phone.', 'success');
+      setPhoneTimer(60);
+      setPhoneOtp('');
+    } catch (err) {
+      addToast(err.response?.data?.error || 'Failed to resend verification code.', 'error');
+    } finally {
+      setSendingPhoneOtp(false);
+    }
+  };
+
+  const handleVerifyPhoneOtp = async () => {
+    if (phoneOtp.length !== 6) {
+      addToast('OTP must be a 6-digit number.', 'warning');
+      return;
+    }
+
+    setVerifyingPhoneOtp(true);
+    try {
+      const res = await authService.verifyPhoneOtp(phoneOtp);
+      addToast('Phone number verified successfully!', 'success');
+      setPhoneVerified(true);
+      setVerifiedNumber(contactNumber);
+      setOtpSent(false);
+      
+      // Update local storage step 1 data
+      const dataKey = currentUser?.id ? `onboarding_step1_${currentUser.id}` : 'onboarding_step1_guest';
+      const saved = localStorage.getItem(dataKey);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          parsed.contactNumber = contactNumber;
+          localStorage.setItem(dataKey, JSON.stringify(parsed));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    } catch (err) {
+      addToast(err.response?.data?.error || 'Invalid verification code.', 'error');
+    } finally {
+      setVerifyingPhoneOtp(false);
+    }
+  };
 
   // Handle Dynamic Course toggle
   const toggleCustomCourse = (active) => {
@@ -232,6 +355,7 @@ const Onboarding = () => {
 
   // Form validity check for disabled state of button
   const isFormFilled = () => {
+    if (!phoneVerified) return false;
     const courseValue = customCourseActive ? customCourse.trim() : course;
     const personalFilled = firstName.trim() && lastName.trim() && contactNumber.trim() && currentCity.trim() && gender;
     
@@ -332,16 +456,92 @@ const Onboarding = () => {
                 disabled
                 required
               />
-              <Input 
-                label="Contact Number" 
-                id="contactNumber"
-                type="tel"
-                placeholder="e.g. +91 9999999999"
-                value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value)}
-                error={errors.contactNumber}
-                required
-              />
+              <div>
+                <Input 
+                  label="Contact Number" 
+                  id="contactNumber"
+                  type="tel"
+                  placeholder="e.g. +91 9999999999"
+                  value={contactNumber}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  error={errors.contactNumber}
+                  required
+                />
+                
+                {/* Phone OTP Verification Section */}
+                <div className="flex flex-col gap-2 mt-2">
+                  {phoneVerified ? (
+                    <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-950/20 px-3 py-1.5 rounded-xl border border-emerald-100 dark:border-emerald-900/30 w-fit">
+                      <FiCheckCircle className="w-4 h-4" /> Phone Number Verified
+                    </div>
+                  ) : (
+                    <>
+                      {!otpSent ? (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={handleSendPhoneOtp}
+                          disabled={sendingPhoneOtp || !/^\+?\d{8,15}$/.test(contactNumber.replace(/[\s\-\(\)]/g, ''))}
+                          isLoading={sendingPhoneOtp}
+                          className="w-fit font-bold rounded-lg text-xs"
+                        >
+                          Send OTP to Verify
+                        </Button>
+                      ) : (
+                        <div className="flex flex-col gap-3 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl animate-fade-in">
+                          <div className="flex flex-col gap-1.5">
+                            <label htmlFor="phone-otp-input" className="text-[10px] font-black text-slate-700 dark:text-slate-400 uppercase tracking-wider">
+                              Enter 6-Digit Phone OTP
+                            </label>
+                            <div className="flex gap-2 items-center">
+                              <input
+                                id="phone-otp-input"
+                                type="text"
+                                maxLength={6}
+                                placeholder="000000"
+                                value={phoneOtp}
+                                onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, ''))}
+                                className="text-center font-mono tracking-widest text-lg font-bold w-36 px-3 py-2 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-brand-600 focus:outline-none dark:bg-slate-950 text-slate-850 dark:text-slate-200"
+                                disabled={verifyingPhoneOtp}
+                              />
+                              <Button
+                                type="button"
+                                variant="primary"
+                                size="sm"
+                                onClick={handleVerifyPhoneOtp}
+                                disabled={verifyingPhoneOtp || phoneOtp.length !== 6}
+                                isLoading={verifyingPhoneOtp}
+                                className="font-bold rounded-xl text-xs py-2.5 px-4"
+                              >
+                                Verify OTP
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            {phoneTimer > 0 ? (
+                              <span className="text-[11px] text-slate-400 dark:text-slate-500 font-bold flex items-center gap-1">
+                                <FiClock className="w-3.5 h-3.5" />
+                                Resend OTP in {phoneTimer}s
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={handleResendPhoneOtp}
+                                disabled={sendingPhoneOtp}
+                                className="text-[11px] font-extrabold text-brand-600 dark:text-brand-400 hover:text-brand-700 transition-colors cursor-pointer underline hover:no-underline"
+                              >
+                                {sendingPhoneOtp ? 'Sending...' : 'Resend Verification Code'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
 
             <Input 

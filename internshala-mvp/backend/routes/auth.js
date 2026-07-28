@@ -112,7 +112,7 @@ router.post('/register', async (req, res) => {
       userId = userResult.rows[0].id;
 
       await pool.query(
-        `INSERT INTO profiles (user_id, full_name, experience, employment_type) VALUES ($1, $2, $3, $4)`,
+        `INSERT INTO profiles (user_id, full_name, experience, employment_type, phone_verified) VALUES ($1, $2, $3, $4, false)`,
         [userId, cleanName, 'Fresher', 'Full-time']
       );
     }
@@ -244,7 +244,7 @@ router.post('/google', async (req, res) => {
       user = result.rows[0];
 
       await pool.query(
-        `INSERT INTO profiles (user_id, full_name, experience, employment_type) VALUES ($1, $2, $3, $4)`,
+        `INSERT INTO profiles (user_id, full_name, experience, employment_type, phone_verified) VALUES ($1, $2, $3, $4, false)`,
         [user.id, name, 'Fresher', 'Full-time']
       );
     }
@@ -749,6 +749,7 @@ function mapProfile(row) {
     interests: row.interests || [],
     lookingFor: row.looking_for || [],
     workModes: row.work_modes || [],
+    phoneVerified: row.phone_verified || false,
   };
 }
 

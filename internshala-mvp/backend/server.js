@@ -62,6 +62,7 @@ const appliedRouter = require('./routes/applied.js');
 const resumeRouter = require('./routes/resume.js');
 const adminRouter = require('./routes/admin.js');
 const issuesRouter = require('./routes/issues.js');
+const onboardingRouter = require('./routes/onboarding.js');
 
 app.use('/api/auth', authRouter);
 app.use('/api/profile', profileRouter);
@@ -71,6 +72,7 @@ app.use('/api/applied', appliedRouter);
 app.use('/api/resume', resumeRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/issues', issuesRouter);
+app.use('/api/onboarding', onboardingRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -147,7 +149,18 @@ async function initDb() {
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_code VARCHAR(255)",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_expires_at TIMESTAMPTZ",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_attempts INTEGER DEFAULT 0",
-    "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_otp_sent_at TIMESTAMPTZ"
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_otp_sent_at TIMESTAMPTZ",
+    "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN DEFAULT true",
+    `CREATE TABLE IF NOT EXISTS phone_otps (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+      phone_number VARCHAR(20) NOT NULL,
+      otp_code VARCHAR(255) NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      attempts INTEGER DEFAULT 0,
+      last_sent_at TIMESTAMPTZ DEFAULT NOW(),
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`
   ];
   for (const sql of migrations) {
     try { await pool.query(sql); } catch { /* column may already exist */ }
