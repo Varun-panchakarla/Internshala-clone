@@ -31,35 +31,17 @@ const Register = () => {
   const [googleScriptLoaded, setGoogleScriptLoaded] = useState(true);
 
   const googleContainerRef = useRef(null);
-  const [googleButtonWidth, setGoogleButtonWidth] = useState(380);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [googleButtonWidth, setGoogleButtonWidth] = useState(null);
 
   useEffect(() => {
-    if (!googleContainerRef.current) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        // Clamp between 200 and 400 as per Google's SDK requirements
-        const width = Math.min(400, Math.max(200, Math.floor(entry.contentRect.width)));
+    const measureWidth = () => {
+      if (googleContainerRef.current) {
+        const width = Math.min(400, Math.max(200, googleContainerRef.current.offsetWidth));
         setGoogleButtonWidth(width);
       }
-    });
-
-    resizeObserver.observe(googleContainerRef.current);
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const checkDarkMode = () => {
-      const isDark = document.documentElement.classList.contains('dark');
-      setIsDarkMode(isDark);
     };
-
-    checkDarkMode();
-
-    const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
+    const timer = setTimeout(measureWidth, 150);
+    return () => clearTimeout(timer);
   }, []);
 
   React.useEffect(() => {
@@ -115,13 +97,20 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      const user = await googleLogin(credentialResponse.credential);
-      addToast('Signed in with Google!', 'success');
-      localStorage.removeItem(`onboarding_completed_${user?.id}`);
-      localStorage.removeItem(`onboarding_completed_${user?.email}`);
-      navigate('/onboarding');
+      const { credential } = credentialResponse;
+      const res = await googleLogin(credential);
+      if (res.success) {
+        addToast('Signed up successfully!', 'success');
+        
+        const onboardingCompleted = localStorage.getItem(`onboarding_completed_${res.user.id}`) === 'true';
+        if (onboardingCompleted) {
+          navigate('/dashboard');
+        } else {
+          navigate('/onboarding');
+        }
+      }
     } catch (err) {
-      addToast(err.response?.data?.error || 'Google sign-in failed.', 'error');
+      addToast(err.response?.data?.error || 'Google sign-up failed.', 'error');
     } finally {
       setLoading(false);
     }
@@ -129,44 +118,50 @@ const Register = () => {
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-slate-50 font-sans">
-      {/* Left Column: Testimonials & Features */}
-      <div className="hidden lg:col-span-7 bg-gradient-to-br from-slate-900 via-indigo-900 to-brand-700 lg:flex flex-col justify-between p-16 text-white relative overflow-hidden">
-        {/* Decorative Grid Light */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-3xl -translate-x-1/4 translate-x-1/4"></div>
+      {/* Left Column: Visual Brand / Info */}
+      <div className="lg:col-span-7 hidden lg:flex flex-col justify-between p-12 bg-brand-600 text-white relative overflow-hidden mesh-bg">
+        <div className="absolute inset-0 bg-gradient-to-tr from-brand-700/50 to-purple-800/30 mix-blend-multiply" />
+        
+        {/* Animated ambient circles */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] aspect-square rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] aspect-square rounded-full bg-purple-500/10 blur-3xl" />
 
-        {/* Empty placeholder to match layout header alignment */}
-        <div />
+        <div className="relative z-10">
+          <Logo className="h-10 w-auto text-white" mode="dark" />
+        </div>
 
-        <div className="max-w-xl">
-          <h2 className="text-4xl font-extrabold tracking-tight leading-tight mb-8">
-            Create an Account and Fast-Track Your Career.
+        <div className="max-w-xl my-auto relative z-10 pt-16">
+          <h2 className="text-4xl font-extrabold tracking-tight leading-tight">
+            Start Your Professional Journey Today.
           </h2>
+          <p className="mt-4 text-base text-slate-100 font-light leading-relaxed">
+            Create an account to build your professional resume, practice standard interview questions, and apply to top startups and companies.
+          </p>
 
-          <div className="space-y-6">
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-xl bg-brand-500/20 flex items-center justify-center text-brand-300 shrink-0">
-                <FiCheckCircle className="w-5 h-5" />
+          <div className="mt-12 space-y-6">
+            <div className="flex items-start gap-4">
+              <div className="p-2.5 bg-white/10 rounded-xl">
+                <FiCheckCircle className="w-5 h-5 text-emerald-300" />
               </div>
               <div>
-                <h4 className="text-base font-bold">Calculate Skill Match Percentages</h4>
-                <p className="text-sm text-slate-300 font-light mt-1">Our AI match engine compares job requirements to your resume keywords instantly.</p>
+                <h4 className="text-base font-bold">Personalized Onboarding</h4>
+                <p className="text-sm text-slate-300 font-light mt-1">Configure your search preferences and receive matching job recommendations daily.</p>
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-xl bg-brand-500/20 flex items-center justify-center text-brand-300 shrink-0">
-                <FiCheckCircle className="w-5 h-5" />
+            <div className="flex items-start gap-4">
+              <div className="p-2.5 bg-white/10 rounded-xl">
+                <FiCheckCircle className="w-5 h-5 text-emerald-300" />
               </div>
               <div>
-                <h4 className="text-base font-bold">Interactive ATS Resume Scorer</h4>
-                <p className="text-sm text-slate-300 font-light mt-1">Build standard professional resume layouts and audit styling and keyword density in real-time.</p>
+                <h4 className="text-base font-bold">Curated Interview Kits</h4>
+                <p className="text-sm text-slate-300 font-light mt-1">Access detailed Q&As for standard technical, coding, and HR rounds.</p>
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-xl bg-brand-500/20 flex items-center justify-center text-brand-300 shrink-0">
-                <FiCheckCircle className="w-5 h-5" />
+            <div className="flex items-start gap-4">
+              <div className="p-2.5 bg-white/10 rounded-xl">
+                <FiCheckCircle className="w-5 h-5 text-emerald-300" />
               </div>
               <div>
                 <h4 className="text-base font-bold">1-Click Fast Job Applications</h4>
@@ -174,10 +169,6 @@ const Register = () => {
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="text-xs text-white/50 font-semibold border-t border-white/10 pt-6">
-          <span>Supported by 10,000+ top startups and companies worldwide</span>
         </div>
       </div>
 
@@ -207,15 +198,19 @@ const Register = () => {
           {!showEmailForm ? (
             <div className="flex flex-col gap-4">
               <div ref={googleContainerRef} className="google-signin-wrapper w-full overflow-hidden rounded-xl">
-                <GoogleLogin
-                  theme={isDarkMode ? "filled_black" : "outline"}
-                  size="large"
-                  width={googleButtonWidth}
-                  text="continue_with"
-                  shape="rectangular"
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => addToast('Google sign-in failed.', 'error')}
-                />
+                {googleButtonWidth ? (
+                  <GoogleLogin
+                    theme="outline"
+                    size="large"
+                    width={googleButtonWidth}
+                    text="continue_with"
+                    shape="rectangular"
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => addToast('Google sign-in failed.', 'error')}
+                  />
+                ) : (
+                  <div className="w-full h-[44px] bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800 animate-pulse" />
+                )}
               </div>
 
               {!googleScriptLoaded && (
