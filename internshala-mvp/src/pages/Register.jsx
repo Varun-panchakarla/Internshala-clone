@@ -97,17 +97,14 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      const { credential } = credentialResponse;
-      const res = await googleLogin(credential);
-      if (res.success) {
-        addToast('Signed up successfully!', 'success');
-        
-        const onboardingCompleted = localStorage.getItem(`onboarding_completed_${res.user.id}`) === 'true';
-        if (onboardingCompleted) {
-          navigate('/dashboard');
-        } else {
-          navigate('/onboarding');
-        }
+      const user = await googleLogin(credentialResponse.credential);
+      addToast('Registered successfully!', 'success');
+      
+      if (['admin', 'super_admin'].includes(user?.role)) {
+        navigate('/admin');
+      } else {
+        const onboardingCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`) === 'true';
+        navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
       }
     } catch (err) {
       addToast(err.response?.data?.error || 'Google sign-up failed.', 'error');
