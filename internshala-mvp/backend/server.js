@@ -35,22 +35,12 @@ const possibleDistPaths = [
   path.resolve(process.cwd(), 'internshala-mvp', 'dist'), // Root-based check
 ];
 
-let distPath = possibleDistPaths[0];
-for (const p of possibleDistPaths) {
-  const checkPath = path.join(p, 'index.html');
-  if (fs.existsSync(checkPath)) {
-    distPath = p;
-    console.log(`[Server] Found valid frontend build assets at: ${distPath}`);
-    break;
-  }
-}
-
-if (fs.existsSync(distPath)) {
-  console.log(`[Server] Serving static files from: ${distPath}`);
-  app.use(express.static(distPath));
-} else {
-  console.warn(`[Server Warning] Static files directory not found. Checked paths: ${JSON.stringify(possibleDistPaths)}`);
-}
+// Register static serving for all possible dist paths unconditionally.
+// Express checks directories in order and ignores missing ones at request time.
+possibleDistPaths.forEach((p) => {
+  console.log(`[Server] Registering static files path: ${p}`);
+  app.use(express.static(p));
+});
 
 // Routes
 const { router: authRouter } = require('./routes/auth.js');
@@ -88,7 +78,15 @@ app.post('/api/scrape', async (req, res) => {
 
 // SPA catch-all: serve index.html for any non-API route (client-side routing)
 app.get('*', (req, res) => {
-  const indexPath = path.resolve(distPath, 'index.html');
+  // Find which path contains index.html dynamically on request
+  let activeDistPath = possibleDistPaths[0];
+  for (const p of possibleDistPaths) {
+    if (fs.existsSync(path.join(p, 'index.html'))) {
+      activeDistPath = p;
+      break;
+    }
+  }
+  const indexPath = path.resolve(activeDistPath, 'index.html');
   console.log(`[SPA Catch-all] Request URL: ${req.originalUrl || req.url}. Serving index.html from: ${indexPath}`);
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
