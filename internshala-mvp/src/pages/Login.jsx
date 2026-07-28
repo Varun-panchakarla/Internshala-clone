@@ -93,19 +93,20 @@ const Login = () => {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
+    if (!credentialResponse?.credential) {
+      addToast('Google authentication failed.', 'error');
+      return;
+    }
     setLoading(true);
     try {
-      const { credential } = credentialResponse;
-      const res = await googleLogin(credential);
-      if (res.success) {
-        addToast('Logged in successfully!', 'success');
-        
-        const onboardingCompleted = localStorage.getItem(`onboarding_completed_${res.user.id}`) === 'true';
-        if (onboardingCompleted) {
-          navigate('/dashboard');
-        } else {
-          navigate('/onboarding');
-        }
+      const user = await googleLogin(credentialResponse.credential);
+      addToast('Logged in successfully!', 'success');
+      
+      if (['admin', 'super_admin'].includes(user?.role)) {
+        navigate('/admin');
+      } else {
+        const onboardingCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`) === 'true';
+        navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
       }
     } catch (err) {
       addToast(err.response?.data?.error || 'Google sign-in failed.', 'error');
