@@ -89,7 +89,15 @@ app.post('/api/scrape', async (req, res) => {
 
 // SPA catch-all: serve index.html for any non-API route (client-side routing)
 app.get('*', (req, res) => {
-  const indexPath = path.resolve(distPath, 'index.html');
+  // Find which path contains index.html dynamically on request
+  let activeDistPath = possibleDistPaths[0];
+  for (const p of possibleDistPaths) {
+    if (fs.existsSync(path.join(p, 'index.html'))) {
+      activeDistPath = p;
+      break;
+    }
+  }
+  const indexPath = path.resolve(activeDistPath, 'index.html');
   console.log(`[SPA Catch-all] Request URL: ${req.originalUrl || req.url}. Serving index.html from: ${indexPath}`);
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
