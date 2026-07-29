@@ -199,28 +199,43 @@ router.post('/login', async (req, res) => {
 // POST /api/auth/google
 router.post('/google', async (req, res) => {
   try {
-    const { credential } = req.body;
-    if (!credential) {
-      return res.status(400).json({ error: 'Google credential is required.' });
+    const { credential, access_token } = req.body;
+    if (!credential && !access_token) {
+      return res.status(400).json({ error: 'Google credential or access token is required.' });
     }
 
-    const { OAuth2Client } = require('google-auth-library');
-    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    let googleId, email, name;
 
-    let ticket;
-    try {
-      ticket = await client.verifyIdToken({
-        idToken: credential,
-        audience: process.env.GOOGLE_CLIENT_ID,
-      });
-    } catch {
-      return res.status(401).json({ error: 'Invalid Google credential.' });
+    if (access_token) {
+      const axios = require('axios');
+      try {
+        const userInfoRes = await axios.get(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`);
+        const payload = userInfoRes.data;
+        googleId = payload.sub;
+        email = payload.email;
+        name = payload.name || email.split('@')[0];
+      } catch (err) {
+        return res.status(401).json({ error: 'Invalid Google access token.' });
+      }
+    } else {
+      const { OAuth2Client } = require('google-auth-library');
+      const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+      let ticket;
+      try {
+        ticket = await client.verifyIdToken({
+          idToken: credential,
+          audience: process.env.GOOGLE_CLIENT_ID,
+        });
+      } catch (err) {
+        return res.status(401).json({ error: 'Invalid Google credential.' });
+      }
+
+      const payload = ticket.getPayload();
+      googleId = payload.sub;
+      email = payload.email;
+      name = payload.name || email.split('@')[0];
     }
-
-    const payload = ticket.getPayload();
-    const googleId = payload.sub;
-    const email = payload.email;
-    const name = payload.name || email.split('@')[0];
 
     const existing = await pool.query(
       'SELECT id, email, name, role FROM users WHERE google_id = $1 OR email = $2',
