@@ -185,15 +185,17 @@ router.get('/stats', async (req, res) => {
 // GET /api/admin/analytics - Real-time candidate sign-ups growth grouped by month
 router.get('/analytics', async (req, res) => {
   try {
-    // 1. Candidate monthly trend
+    // 1. Candidate monthly trend (Total and Fresher)
     const monthlyResult = await pool.query(`
       SELECT 
-        TO_CHAR(created_at, 'YYYY-MM') AS month_key,
-        TO_CHAR(created_at, 'Mon') AS month_label,
-        COUNT(*)::int AS count
-      FROM users
-      WHERE role = 'candidate'
-      GROUP BY TO_CHAR(created_at, 'YYYY-MM'), TO_CHAR(created_at, 'Mon')
+        TO_CHAR(u.created_at, 'YYYY-MM') AS month_key,
+        TO_CHAR(u.created_at, 'Mon') AS month_label,
+        COUNT(*)::int AS total_count,
+        COUNT(CASE WHEN COALESCE(p.experience, '') = 'Fresher' OR (p.resume_info->'onboardingData'->>'experienceYears') = '0' OR p.id IS NULL THEN 1 END)::int AS fresher_count
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE u.role = 'candidate'
+      GROUP BY TO_CHAR(u.created_at, 'YYYY-MM'), TO_CHAR(u.created_at, 'Mon')
       ORDER BY month_key ASC
     `);
 
@@ -218,7 +220,8 @@ router.get('/analytics', async (req, res) => {
         list.push({
           monthKey: key,
           month: label,
-          count: existingRow ? existingRow.count : 0
+          count: existingRow ? existingRow.total_count : 0,
+          fresherCount: existingRow ? existingRow.fresher_count : 0
         });
         currentDate.setMonth(currentDate.getMonth() + 1);
       }
@@ -227,34 +230,7 @@ router.get('/analytics', async (req, res) => {
 
     const signups = fillMonthlyData(monthlyResult.rows);
 
-    // 2. Freshers vs Experienced Cohorts
-    const cohortRes = await pool.query(`
-      SELECT 
-        CASE 
-          WHEN COALESCE(p.experience, '') = 'Fresher' OR (p.resume_info->'onboardingData'->>'experienceYears') = '0' OR p.id IS NULL THEN 'Freshers'
-          ELSE 'Experienced'
-        END AS cohort,
-        COUNT(*)::int AS count
-      FROM users u
-      LEFT JOIN profiles p ON u.id = p.user_id
-      WHERE u.role = 'candidate'
-      GROUP BY 1
-    `);
-
-    const cohortCategories = ['Freshers', 'Experienced'];
-    const cohorts = cohortCategories.map(c => {
-      const existing = cohortRes.rows.find(r => r.cohort === c);
-      return {
-        cohort: c,
-        count: existing ? existing.count : 0
-      };
-    });
-    const totalCohortCount = cohorts.reduce((acc, c) => acc + c.count, 0);
-    cohorts.forEach(c => {
-      c.percentage = totalCohortCount > 0 ? parseFloat(((c.count / totalCohortCount) * 100).toFixed(1)) : 0;
-    });
-
-    // 3. Student Experience Distribution Categories
+    // 2. Student Experience Distribution Categories
     const expRes = await pool.query(`
       SELECT 
         category,
@@ -284,7 +260,7 @@ router.get('/analytics', async (req, res) => {
       };
     });
 
-    // 4. Student Registration Trend (Daily for the last 30 days)
+    // 3. Student Registration Trend (Daily for the last 30 days)
     const dailyRes = await pool.query(`
       SELECT 
         TO_CHAR(d.day, 'YYYY-MM-DD') AS date_key,
@@ -308,7 +284,6 @@ router.get('/analytics', async (req, res) => {
 
     res.json({
       signups,
-      cohorts,
       experienceDistribution,
       dailyTrend
     });
