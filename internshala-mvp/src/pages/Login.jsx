@@ -136,11 +136,12 @@ const Login = () => {
                  <p className="text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed text-center">
                    This account is configured to use Google Sign-in. Please use the button below to log in.
                  </p>
-                 <button
+                 <Button
                    type="button"
+                   variant="outline"
                    onClick={handleGoogleLoginClick}
                    disabled={loading}
-                   className="w-full h-[56px] inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none active:scale-[0.97] border border-slate-200 dark:border-slate-800 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-200 hover:border-slate-350 dark:hover:border-slate-700 shadow-sm hover:shadow-md cursor-pointer relative"
+                   className="w-full h-[56px] relative text-slate-700 dark:text-slate-250 border-slate-200 dark:border-slate-800 !rounded-2xl font-bold bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 hover:border-slate-350 dark:hover:border-slate-700 shadow-sm hover:shadow-md cursor-pointer"
                  >
                    <div className="absolute left-6 flex items-center">
                      <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
@@ -162,17 +163,18 @@ const Login = () => {
                        />
                      </svg>
                    </div>
-                   <span className="text-slate-700 dark:text-slate-200">Continue with Google</span>
-                 </button>
+                   <span>Continue with Google</span>
+                 </Button>
                </div>
              )}
 
              {!googleUserError && (
-               <button
+               <Button
                  type="button"
+                 variant="outline"
                  onClick={handleGoogleLoginClick}
                  disabled={loading}
-                 className="w-full h-[56px] inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none active:scale-[0.97] border border-slate-200 dark:border-slate-800 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-200 hover:border-slate-350 dark:hover:border-slate-700 shadow-sm hover:shadow-md cursor-pointer relative"
+                 className="w-full h-[56px] relative text-slate-700 dark:text-slate-250 border-slate-200 dark:border-slate-800 !rounded-2xl font-bold bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 hover:border-slate-350 dark:hover:border-slate-700 shadow-sm hover:shadow-md cursor-pointer"
                >
                  <div className="absolute left-6 flex items-center">
                    <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
@@ -194,8 +196,8 @@ const Login = () => {
                      />
                    </svg>
                  </div>
-                 <span className="text-slate-700 dark:text-slate-200">Continue with Google</span>
-               </button>
+                 <span>Continue with Google</span>
+               </Button>
              )}
 
             {!googleScriptLoaded && (
@@ -246,7 +248,7 @@ const Login = () => {
             <Button
               type="submit"
               variant="primary"
-              className="w-full h-[56px]"
+              className="w-full h-[56px] !rounded-2xl"
               loading={loading}
             >
               Sign In <FiChevronRight className="ml-1.5 w-4 h-4" />
