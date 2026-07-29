@@ -185,6 +185,7 @@ router.get('/stats', async (req, res) => {
 // GET /api/admin/analytics - Real-time candidate sign-ups growth grouped by month
 router.get('/analytics', async (req, res) => {
   try {
+    // 1. Candidate monthly trend
     const result = await pool.query(`
       SELECT 
         TO_CHAR(created_at, 'YYYY-MM') AS month_key,
@@ -195,39 +196,125 @@ router.get('/analytics', async (req, res) => {
       GROUP BY TO_CHAR(created_at, 'YYYY-MM'), TO_CHAR(created_at, 'Mon')
       ORDER BY month_key ASC
     `);
-    
-    if (result.rows.length === 0) {
-      return res.json({ signups: [] });
+
+    // Define date boundaries
+    let minDateStr = new Date().toISOString().substring(0, 7) + '-01';
+    let maxDateStr = minDateStr;
+    if (result.rows.length > 0) {
+      minDateStr = result.rows[0].month_key + '-01';
+      maxDateStr = result.rows[result.rows.length - 1].month_key + '-01';
     }
 
-    const rows = result.rows;
-    const signups = [];
-    
-    const minDateStr = rows[0].month_key + '-01';
-    const maxDateStr = rows[rows.length - 1].month_key + '-01';
-    
-    let currentDate = new Date(minDateStr);
-    const maxDate = new Date(maxDateStr);
-    
-    while (currentDate <= maxDate) {
-      const year = currentDate.getFullYear();
-      const monthNum = String(currentDate.getMonth() + 1).padStart(2, '0');
-      const key = `${year}-${monthNum}`;
-      
-      const label = currentDate.toLocaleString('default', { month: 'short' });
-      const existingRow = rows.find(r => r.month_key === key);
-      
-      signups.push({
-        monthKey: key,
-        month: label,
-        count: existingRow ? existingRow.count : 0
-      });
-      
-      // Safe increment to avoid timezone overflow issues
-      currentDate.setMonth(currentDate.getMonth() + 1);
-    }
-    
-    res.json({ signups });
+    const fillMonthlyData = (rows) => {
+      const list = [];
+      let currentDate = new Date(minDateStr);
+      const maxDate = new Date(maxDateStr);
+      while (currentDate <= maxDate) {
+        const year = currentDate.getFullYear();
+        const monthNum = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const key = `${year}-${monthNum}`;
+        const label = currentDate.toLocaleString('default', { month: 'short' });
+        const existingRow = rows.find(r => r.month_key === key);
+        list.push({
+          monthKey: key,
+          month: label,
+          count: existingRow ? existingRow.count : 0
+        });
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
+      return list;
+    };
+
+    const signups = fillMonthlyData(result.rows);
+
+    // 2. Total Candidate count
+    const totalCandRes = await pool.query("SELECT COUNT(*)::int FROM users WHERE role = 'candidate'");
+    const totalCandidates = totalCandRes.rows[0].count || 0;
+
+    // 3. Fresher SQL Query
+    const fresherQuery = `
+      SELECT 
+        COUNT(*)::int as total,
+        COUNT(CASE WHEN p.id IS NOT NULL THEN 1 END)::int as completed_profile,
+        COUNT(CASE WHEN p.resume_info IS NOT NULL THEN 1 END)::int as has_resume,
+        COUNT(DISTINCT CASE WHEN aj.id IS NOT NULL THEN u.id END)::int as applied
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.user_id
+      LEFT JOIN applied_jobs aj ON u.id = aj.user_id
+      WHERE u.role = 'candidate'
+        AND COALESCE(p.experience, CASE WHEN (p.resume_info->'onboardingData'->>'experienceYears') IS NOT NULL AND (p.resume_info->'onboardingData'->>'experienceYears') <> '0' THEN 'Experienced' ELSE 'Fresher' END) = 'Fresher'
+    `;
+    const fresherRes = await pool.query(fresherQuery);
+    const fresherMetrics = fresherRes.rows[0];
+
+    // 4. Experienced SQL Query
+    const expQuery = `
+      SELECT 
+        COUNT(*)::int as total,
+        COUNT(CASE WHEN p.id IS NOT NULL THEN 1 END)::int as completed_profile,
+        COUNT(CASE WHEN p.resume_info IS NOT NULL THEN 1 END)::int as has_resume,
+        COUNT(DISTINCT CASE WHEN aj.id IS NOT NULL THEN u.id END)::int as applied
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.user_id
+      LEFT JOIN applied_jobs aj ON u.id = aj.user_id
+      WHERE u.role = 'candidate'
+        AND COALESCE(p.experience, CASE WHEN (p.resume_info->'onboardingData'->>'experienceYears') IS NOT NULL AND (p.resume_info->'onboardingData'->>'experienceYears') <> '0' THEN 'Experienced' ELSE 'Fresher' END) <> 'Fresher'
+    `;
+    const expRes = await pool.query(expQuery);
+    const expMetrics = expRes.rows[0];
+
+    // 5. Fresher monthly growth
+    const fresherMonthlyResult = await pool.query(`
+      SELECT 
+        TO_CHAR(u.created_at, 'YYYY-MM') AS month_key,
+        TO_CHAR(u.created_at, 'Mon') AS month_label,
+        COUNT(*)::int AS count
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE u.role = 'candidate'
+        AND COALESCE(p.experience, CASE WHEN (p.resume_info->'onboardingData'->>'experienceYears') IS NOT NULL AND (p.resume_info->'onboardingData'->>'experienceYears') <> '0' THEN 'Experienced' ELSE 'Fresher' END) = 'Fresher'
+      GROUP BY TO_CHAR(u.created_at, 'YYYY-MM'), TO_CHAR(u.created_at, 'Mon')
+      ORDER BY month_key ASC
+    `);
+    const fresherMonthly = fillMonthlyData(fresherMonthlyResult.rows);
+
+    // 6. Experienced monthly growth
+    const expMonthlyResult = await pool.query(`
+      SELECT 
+        TO_CHAR(u.created_at, 'YYYY-MM') AS month_key,
+        TO_CHAR(u.created_at, 'Mon') AS month_label,
+        COUNT(*)::int AS count
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE u.role = 'candidate'
+        AND COALESCE(p.experience, CASE WHEN (p.resume_info->'onboardingData'->>'experienceYears') IS NOT NULL AND (p.resume_info->'onboardingData'->>'experienceYears') <> '0' THEN 'Experienced' ELSE 'Fresher' END) <> 'Fresher'
+      GROUP BY TO_CHAR(u.created_at, 'YYYY-MM'), TO_CHAR(u.created_at, 'Mon')
+      ORDER BY month_key ASC
+    `);
+    const experiencedMonthly = fillMonthlyData(expMonthlyResult.rows);
+
+    const fresherPercentage = totalCandidates > 0 ? parseFloat(((fresherMetrics.total / totalCandidates) * 100).toFixed(1)) : 0;
+    const experiencedPercentage = totalCandidates > 0 ? parseFloat(((expMetrics.total / totalCandidates) * 100).toFixed(1)) : 0;
+
+    res.json({
+      signups,
+      fresher: {
+        total: fresherMetrics.total,
+        completedProfile: fresherMetrics.completed_profile,
+        hasResume: fresherMetrics.has_resume,
+        applied: fresherMetrics.applied,
+        percentage: fresherPercentage,
+        monthly: fresherMonthly
+      },
+      experienced: {
+        total: expMetrics.total,
+        completedProfile: expMetrics.completed_profile,
+        hasResume: expMetrics.has_resume,
+        applied: expMetrics.applied,
+        percentage: experiencedPercentage,
+        monthly: experiencedMonthly
+      }
+    });
   } catch (err) {
     console.error('[Admin Analytics Route] Error:', err.message);
     res.status(500).json({ error: 'Failed to fetch analytics data.' });

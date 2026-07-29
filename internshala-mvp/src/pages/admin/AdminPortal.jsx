@@ -82,6 +82,8 @@ const AdminPortal = () => {
   // Accordion & Analytics states
   const [expandedSection, setExpandedSection] = useState(null);
   const [analyticsData, setAnalyticsData] = useState([]);
+  const [fresherAnalytics, setFresherAnalytics] = useState(null);
+  const [experiencedAnalytics, setExperiencedAnalytics] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
   // Reports states
@@ -270,8 +272,12 @@ const AdminPortal = () => {
     setAnalyticsLoading(true);
     try {
       const res = await axios.get('/api/admin/analytics');
+      console.log('[Frontend fetchAnalytics] API response:', res.data);
       setAnalyticsData(res.data?.signups || []);
+      setFresherAnalytics(res.data?.fresher || null);
+      setExperiencedAnalytics(res.data?.experienced || null);
     } catch (err) {
+      console.error('[Frontend fetchAnalytics] Error:', err);
       addToast('Failed to load platform analytics.', 'error');
     } finally {
       setAnalyticsLoading(false);
@@ -1946,34 +1952,155 @@ const AdminPortal = () => {
                       <p className="font-bold text-sm">No student registrations exist in the database.</p>
                     </div>
                   ) : (
-                    <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800 p-6 rounded-2xl flex flex-col gap-6">
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">Student Sign-up Growth</h4>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1">Monthly registration volume of candidate accounts</p>
-                      </div>
-                      
-                      <div className="h-64 flex items-end justify-center gap-8 px-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-                        {(() => {
-                          const maxCount = Math.max(...analyticsData.map(d => d.count), 1);
-                          return analyticsData.map((data) => (
-                            <div key={data.monthKey} className="w-16 flex flex-col items-center gap-2 group relative">
-                              <div className="absolute bottom-[calc(100%-8px)] mb-2 bg-slate-900 dark:bg-slate-950 border border-slate-700 dark:border-slate-800 text-[10px] font-black text-white dark:text-brand-400 px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-xl z-10 whitespace-nowrap">
-                                {data.count} {data.count === 1 ? 'student' : 'students'}
+                    <div className="flex flex-col gap-8 animate-slide-up">
+                      {/* Section 1: Candidate Sign-up Trend */}
+                      <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800 p-6 rounded-2xl flex flex-col gap-6">
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">Student Sign-up Growth</h4>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1">Monthly registration volume of candidate accounts</p>
+                        </div>
+                        
+                        <div className="h-64 flex items-end justify-center gap-8 px-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+                          {(() => {
+                            const maxCount = Math.max(...analyticsData.map(d => d.count), 1);
+                            return analyticsData.map((data) => (
+                              <div key={data.monthKey} className="w-16 flex flex-col items-center gap-2 group relative">
+                                <div className="absolute bottom-[calc(100%-8px)] mb-2 bg-slate-900 dark:bg-slate-950 border border-slate-700 dark:border-slate-800 text-[10px] font-black text-white dark:text-brand-400 px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-xl z-10 whitespace-nowrap">
+                                  {data.count} {data.count === 1 ? 'student' : 'students'}
+                                </div>
+                                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-bold group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">{data.count}</span>
+                                <div
+                                  style={{ height: `${(data.count / maxCount) * 160}px` }}
+                                  className="w-full min-h-[6px] bg-gradient-to-t from-brand-600 via-brand-500 to-indigo-500 rounded-t-xl shadow-md group-hover:from-brand-500 group-hover:to-brand-400 transition-all duration-200"
+                                ></div>
                               </div>
-                              <span className="text-[10px] text-slate-600 dark:text-slate-400 font-bold group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">{data.count}</span>
-                              <div
-                                style={{ height: `${(data.count / maxCount) * 160}px` }}
-                                className="w-full min-h-[6px] bg-gradient-to-t from-brand-600 via-brand-500 to-indigo-500 rounded-t-xl shadow-md group-hover:from-brand-500 group-hover:to-brand-400 transition-all duration-200"
-                              ></div>
-                            </div>
-                          ));
-                        })()}
+                            ));
+                          })()}
+                        </div>
+                        
+                        <div className="flex justify-center gap-8 text-[10px] text-slate-500 dark:text-slate-400 font-bold px-4">
+                          {analyticsData.map(d => (
+                            <span key={d.monthKey} className="w-16 text-center">{d.month}</span>
+                          ))}
+                        </div>
                       </div>
-                      
-                      <div className="flex justify-center gap-8 text-[10px] text-slate-500 dark:text-slate-400 font-bold px-4">
-                        {analyticsData.map(d => (
-                          <span key={d.monthKey} className="w-16 text-center">{d.month}</span>
-                        ))}
+
+                      {/* Section 2: Fresher Analytics */}
+                      <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800 p-6 rounded-2xl flex flex-col gap-6">
+                        <div className="flex items-center justify-between border-b border-slate-200/50 dark:border-slate-800 pb-3">
+                          <div>
+                            <h4 className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">FRESHER ANALYTICS</h4>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1">Metrics and monthly registration volume for freshers</p>
+                          </div>
+                          <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2.5 py-1 rounded-full uppercase">
+                            {fresherAnalytics?.percentage || 0}% of candidates
+                          </span>
+                        </div>
+
+                        {/* Stats grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="p-4 bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-850 rounded-2xl flex flex-col gap-1 shadow-2xs">
+                            <span className="text-[9px] font-black text-slate-500 dark:text-slate-450 uppercase tracking-wider">Total Freshers</span>
+                            <span className="text-xl font-black text-slate-900 dark:text-white">{fresherAnalytics?.total || 0}</span>
+                          </div>
+                          <div className="p-4 bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-850 rounded-2xl flex flex-col gap-1 shadow-2xs">
+                            <span className="text-[9px] font-black text-slate-500 dark:text-slate-450 uppercase tracking-wider">Completed Profiles</span>
+                            <span className="text-xl font-black text-slate-900 dark:text-white">{fresherAnalytics?.completedProfile || 0}</span>
+                          </div>
+                          <div className="p-4 bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-850 rounded-2xl flex flex-col gap-1 shadow-2xs">
+                            <span className="text-[9px] font-black text-slate-500 dark:text-slate-450 uppercase tracking-wider">Uploaded Resumes</span>
+                            <span className="text-xl font-black text-slate-900 dark:text-white">{fresherAnalytics?.hasResume || 0}</span>
+                          </div>
+                          <div className="p-4 bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-850 rounded-2xl flex flex-col gap-1 shadow-2xs">
+                            <span className="text-[9px] font-black text-slate-500 dark:text-slate-450 uppercase tracking-wider">Applied for Jobs</span>
+                            <span className="text-xl font-black text-slate-900 dark:text-white">{fresherAnalytics?.applied || 0}</span>
+                          </div>
+                        </div>
+
+                        {/* Chart */}
+                        <div className="h-64 flex items-end justify-center gap-8 px-4 border-b border-slate-200 dark:border-slate-800 pb-3 mt-4">
+                          {(() => {
+                            const monthlyData = fresherAnalytics?.monthly || [];
+                            const maxCount = Math.max(...monthlyData.map(d => d.count), 1);
+                            return monthlyData.map((data) => (
+                              <div key={data.monthKey} className="w-16 flex flex-col items-center gap-2 group relative">
+                                <div className="absolute bottom-[calc(100%-8px)] mb-2 bg-slate-900 dark:bg-slate-950 border border-slate-700 dark:border-slate-800 text-[10px] font-black text-white dark:text-brand-400 px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-xl z-10 whitespace-nowrap">
+                                  {data.count} {data.count === 1 ? 'registration' : 'registrations'}
+                                </div>
+                                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-bold group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">{data.count}</span>
+                                <div
+                                  style={{ height: `${(data.count / maxCount) * 160}px` }}
+                                  className="w-full min-h-[6px] bg-gradient-to-t from-emerald-600 via-emerald-500 to-teal-500 rounded-t-xl shadow-md group-hover:from-emerald-500 group-hover:to-emerald-400 transition-all duration-200"
+                                ></div>
+                              </div>
+                            ));
+                          })()}
+                        </div>
+                        
+                        <div className="flex justify-center gap-8 text-[10px] text-slate-500 dark:text-slate-400 font-bold px-4">
+                          {(fresherAnalytics?.monthly || []).map(d => (
+                            <span key={d.monthKey} className="w-16 text-center">{d.month}</span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Section 3: Experienced Analytics */}
+                      <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800 p-6 rounded-2xl flex flex-col gap-6">
+                        <div className="flex items-center justify-between border-b border-slate-200/50 dark:border-slate-800 pb-3">
+                          <div>
+                            <h4 className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">EXPERIENCED ANALYTICS</h4>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1">Metrics and monthly registration volume for experienced candidates</p>
+                          </div>
+                          <span className="text-[10px] font-black text-rose-600 dark:text-rose-450 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 px-2.5 py-1 rounded-full uppercase">
+                            {experiencedAnalytics?.percentage || 0}% of candidates
+                          </span>
+                        </div>
+
+                        {/* Stats grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="p-4 bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-850 rounded-2xl flex flex-col gap-1 shadow-2xs">
+                            <span className="text-[9px] font-black text-slate-500 dark:text-slate-450 uppercase tracking-wider">Total Experienced</span>
+                            <span className="text-xl font-black text-slate-900 dark:text-white">{experiencedAnalytics?.total || 0}</span>
+                          </div>
+                          <div className="p-4 bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-850 rounded-2xl flex flex-col gap-1 shadow-2xs">
+                            <span className="text-[9px] font-black text-slate-500 dark:text-slate-450 uppercase tracking-wider">Completed Profiles</span>
+                            <span className="text-xl font-black text-slate-900 dark:text-white">{experiencedAnalytics?.completedProfile || 0}</span>
+                          </div>
+                          <div className="p-4 bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-850 rounded-2xl flex flex-col gap-1 shadow-2xs">
+                            <span className="text-[9px] font-black text-slate-500 dark:text-slate-450 uppercase tracking-wider">Uploaded Resumes</span>
+                            <span className="text-xl font-black text-slate-900 dark:text-white">{experiencedAnalytics?.hasResume || 0}</span>
+                          </div>
+                          <div className="p-4 bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-850 rounded-2xl flex flex-col gap-1 shadow-2xs">
+                            <span className="text-[9px] font-black text-slate-500 dark:text-slate-450 uppercase tracking-wider">Applied for Jobs</span>
+                            <span className="text-xl font-black text-slate-900 dark:text-white">{experiencedAnalytics?.applied || 0}</span>
+                          </div>
+                        </div>
+
+                        {/* Chart */}
+                        <div className="h-64 flex items-end justify-center gap-8 px-4 border-b border-slate-200 dark:border-slate-800 pb-3 mt-4">
+                          {(() => {
+                            const monthlyData = experiencedAnalytics?.monthly || [];
+                            const maxCount = Math.max(...monthlyData.map(d => d.count), 1);
+                            return monthlyData.map((data) => (
+                              <div key={data.monthKey} className="w-16 flex flex-col items-center gap-2 group relative">
+                                <div className="absolute bottom-[calc(100%-8px)] mb-2 bg-slate-900 dark:bg-slate-950 border border-slate-700 dark:border-slate-800 text-[10px] font-black text-white dark:text-brand-400 px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-xl z-10 whitespace-nowrap">
+                                  {data.count} {data.count === 1 ? 'registration' : 'registrations'}
+                                </div>
+                                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-bold group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">{data.count}</span>
+                                <div
+                                  style={{ height: `${(data.count / maxCount) * 160}px` }}
+                                  className="w-full min-h-[6px] bg-gradient-to-t from-rose-600 via-rose-500 to-orange-500 rounded-t-xl shadow-md group-hover:from-rose-500 group-hover:to-rose-400 transition-all duration-200"
+                                ></div>
+                              </div>
+                            ));
+                          })()}
+                        </div>
+                        
+                        <div className="flex justify-center gap-8 text-[10px] text-slate-500 dark:text-slate-400 font-bold px-4">
+                          {(experiencedAnalytics?.monthly || []).map(d => (
+                            <span key={d.monthKey} className="w-16 text-center">{d.month}</span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
