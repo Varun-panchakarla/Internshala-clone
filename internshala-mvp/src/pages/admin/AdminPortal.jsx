@@ -216,9 +216,12 @@ const AdminPortal = () => {
       const res = await axios.get('/api/admin/users', {
         params: { search: usersSearch, role: usersRoleFilter, page: usersPage, limit: 8 }
       });
+      console.log('[Frontend fetchUsers] API response data:', res.data);
+      console.log('[Frontend fetchUsers] Setting users array:', res.data?.users);
       setUsers(res.data?.users || []);
       setUsersTotal(res.data?.total || 0);
     } catch (err) {
+      console.error('[Frontend fetchUsers] Error:', err);
       addToast('Failed to load users list.', 'error');
     }
   };
@@ -229,9 +232,12 @@ const AdminPortal = () => {
       const res = await axios.get('/api/admin/jobs', {
         params: { search: jobsSearch, page: jobsPage, limit: 8 }
       });
+      console.log('[Frontend fetchJobs] API response data:', res.data);
+      console.log('[Frontend fetchJobs] Setting jobs array:', res.data?.jobs);
       setJobs(res.data?.jobs || []);
       setJobsTotal(res.data?.total || 0);
     } catch (err) {
+      console.error('[Frontend fetchJobs] Error:', err);
       addToast('Failed to load jobs list.', 'error');
     }
   };
@@ -463,25 +469,25 @@ const AdminPortal = () => {
     if (currentView === 'users' || currentView === 'recruiters') {
       fetchUsers();
     }
-  }, [usersPage, usersSearch, usersRoleFilter]);
+  }, [currentView, usersPage, usersSearch, usersRoleFilter]);
 
   useEffect(() => {
     if (currentView === 'jobs') {
       fetchJobs();
     }
-  }, [jobsPage, jobsSearch]);
+  }, [currentView, jobsPage, jobsSearch]);
 
   useEffect(() => {
     if (currentView === 'applications') {
       fetchApplications();
     }
-  }, [appsPage, appsSearch, appsStatusFilter]);
+  }, [currentView, appsPage, appsSearch, appsStatusFilter]);
 
   useEffect(() => {
     if (currentView === 'reports') {
       fetchReports();
     }
-  }, [reportsPage, reportsSearch, reportsStatusFilter, reportsPriorityFilter, reportsCategoryFilter, reportsSort]);
+  }, [currentView, reportsPage, reportsSearch, reportsStatusFilter, reportsPriorityFilter, reportsCategoryFilter, reportsSort]);
 
   // CRUD - User save (Create / Update)
   const handleUserSubmit = async (e) => {

@@ -270,9 +270,21 @@ router.get('/users', async (req, res) => {
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 
-    const dataRes = await pool.query(usersQuery, [...params, parseInt(limit), offset]);
+    console.log('[Backend GET /users] Executing SQL Query:', usersQuery);
+    console.log('[Backend GET /users] Query params:', [...params, parseInt(limit), offset]);
 
-    res.json({ users: dataRes.rows, total, page: parseInt(page), limit: parseInt(limit) });
+    const dataRes = await pool.query(usersQuery, [...params, parseInt(limit), offset]);
+    console.log('[Backend GET /users] Rows returned:', dataRes.rows.length);
+
+    const users = dataRes.rows.map(row => ({
+      ...row,
+      academicBackground: row.college ? `${row.college} (${row.degree || 'N/A'})` : 'No academic data'
+    }));
+
+    const responsePayload = { users, total, page: parseInt(page), limit: parseInt(limit) };
+    console.log('[Backend GET /users] Sending response payload:', responsePayload);
+
+    res.json(responsePayload);
   } catch (err) {
     console.error('[Admin Users List] Error:', err.message);
     res.status(500).json({ error: 'Failed to fetch users.' });
@@ -393,19 +405,31 @@ router.get('/jobs', async (req, res) => {
 
     const jobsQuery = `
       SELECT id, title, company, location, employment_type, experience,
-             salary_min, salary_max, description, skills, source,
+             salary, description, skills, source,
              company_logo as "companyLogo", logo_color as "logoColor", logo_text as "logoText",
-             match_score as "matchScore", is_featured as "isFeatured",
-             created_at, updated_at
+             match_score as "matchScore", false as "isFeatured",
+             created_at, created_at as updated_at
       FROM jobs
       ${whereClause}
       ORDER BY created_at DESC
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 
-    const dataRes = await pool.query(jobsQuery, [...params, parseInt(limit), offset]);
+    console.log('[Backend GET /jobs] Executing SQL Query:', jobsQuery);
+    console.log('[Backend GET /jobs] Query params:', [...params, parseInt(limit), offset]);
 
-    res.json({ jobs: dataRes.rows, total, page: parseInt(page), limit: parseInt(limit) });
+    const dataRes = await pool.query(jobsQuery, [...params, parseInt(limit), offset]);
+    console.log('[Backend GET /jobs] Rows returned:', dataRes.rows.length);
+
+    const jobs = dataRes.rows.map(row => ({
+      ...row,
+      status: 'active'
+    }));
+
+    const responsePayload = { jobs, total, page: parseInt(page), limit: parseInt(limit) };
+    console.log('[Backend GET /jobs] Sending response payload:', responsePayload);
+
+    res.json(responsePayload);
   } catch (err) {
     console.error('[Admin Jobs List] Error:', err.message);
     res.status(500).json({ error: 'Failed to fetch jobs.' });
