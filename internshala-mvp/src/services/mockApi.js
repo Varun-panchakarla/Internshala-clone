@@ -11,7 +11,7 @@ const api = axios.create({
 export const authService = {
   login: (email, password) => api.post('/auth/login', { email, password }),
   register: (name, email, password) => api.post('/auth/register', { name, email, password }),
-  googleAuth: (credential) => api.post('/auth/google', { credential }),
+  googleAuth: (payload) => api.post('/auth/google', typeof payload === 'string' ? { credential: payload } : payload),
   logout: () => api.post('/auth/logout'),
   getCurrentUser: () => api.get('/auth/me'),
   getProfile: () => api.get('/profile'),
