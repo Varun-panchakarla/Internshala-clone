@@ -29,8 +29,25 @@ app.use(cookieParser());
 
 // Serve built frontend in production
 const distPath = path.resolve(__dirname, '..', 'dist');
+const indexPath = path.resolve(distPath, 'index.html');
+
+// Auto-build frontend if dist doesn't exist — handles Render build config mismatches
+if (!fs.existsSync(indexPath)) {
+  console.log('[Server] dist/index.html not found. Running build...');
+  const { execSync } = require('child_process');
+  try {
+    execSync('npm run build', { cwd: path.resolve(__dirname, '..'), stdio: 'inherit', timeout: 120000 });
+  } catch (buildErr) {
+    console.error('[Server] Auto-build failed:', buildErr.message);
+  }
+}
+
+if (!fs.existsSync(indexPath)) {
+  console.warn(`[Server Warning] Frontend build not found at: ${distPath}`);
+} else {
+  console.log(`[Server] Serving frontend from: ${distPath}`);
+}
 app.use(express.static(distPath));
-console.log(`[Server] Serving frontend from: ${distPath}`);
 
 // Routes
 const { router: authRouter } = require('./routes/auth.js');
@@ -72,7 +89,6 @@ app.post('/api/scrape', async (req, res) => {
 
 // SPA catch-all: serve index.html for any non-API route
 app.get('*', (req, res) => {
-  const indexPath = path.resolve(distPath, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
