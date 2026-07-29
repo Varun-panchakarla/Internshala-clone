@@ -170,12 +170,11 @@ const Register = () => {
 
            {!showEmailForm ? (
              <div className="flex flex-col gap-4">
-               <Button
+               <button
                  type="button"
-                 variant="outline"
                  onClick={handleGoogleLoginClick}
                  disabled={loading}
-                 className="w-full h-[56px] relative text-slate-700 dark:text-slate-250 border-slate-200 dark:border-slate-800 !rounded-2xl font-bold bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 hover:border-slate-350 dark:hover:border-slate-700 shadow-sm hover:shadow-md cursor-pointer"
+                 className="w-full h-[56px] inline-flex items-center justify-center font-bold text-sm !rounded-2xl transition-all duration-200 focus:outline-none active:scale-[0.97] border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300 shadow-sm hover:shadow-md cursor-pointer relative"
                >
                  <div className="absolute left-6 flex items-center">
                    <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
@@ -197,8 +196,8 @@ const Register = () => {
                      />
                    </svg>
                  </div>
-                 <span>Continue with Google</span>
-               </Button>
+                 <span className="text-slate-700">Continue with Google</span>
+               </button>
 
                {!googleScriptLoaded && (
                  <p className="text-[11px] text-slate-500 font-semibold text-center leading-normal bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
