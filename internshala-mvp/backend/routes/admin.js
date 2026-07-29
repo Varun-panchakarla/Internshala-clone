@@ -185,8 +185,8 @@ router.get('/stats', async (req, res) => {
 // GET /api/admin/analytics - Real-time candidate sign-ups growth grouped by month
 router.get('/analytics', async (req, res) => {
   try {
-    // 1. Candidate monthly trend from PostgreSQL
-    const result = await pool.query(`
+    // 1. Candidate monthly trend
+    const monthlyResult = await pool.query(`
       SELECT 
         TO_CHAR(created_at, 'YYYY-MM') AS month_key,
         TO_CHAR(created_at, 'Mon') AS month_label,
@@ -197,12 +197,12 @@ router.get('/analytics', async (req, res) => {
       ORDER BY month_key ASC
     `);
 
-    // Define date boundaries to populate months with zero registrations if they have no registrations
+    // Define date boundaries
     let minDateStr = new Date().toISOString().substring(0, 7) + '-01';
     let maxDateStr = minDateStr;
-    if (result.rows.length > 0) {
-      minDateStr = result.rows[0].month_key + '-01';
-      maxDateStr = result.rows[result.rows.length - 1].month_key + '-01';
+    if (monthlyResult.rows.length > 0) {
+      minDateStr = monthlyResult.rows[0].month_key + '-01';
+      maxDateStr = monthlyResult.rows[monthlyResult.rows.length - 1].month_key + '-01';
     }
 
     const fillMonthlyData = (rows) => {
@@ -225,10 +225,92 @@ router.get('/analytics', async (req, res) => {
       return list;
     };
 
-    const signups = fillMonthlyData(result.rows);
+    const signups = fillMonthlyData(monthlyResult.rows);
+
+    // 2. Freshers vs Experienced Cohorts
+    const cohortRes = await pool.query(`
+      SELECT 
+        CASE 
+          WHEN COALESCE(p.experience, '') = 'Fresher' OR (p.resume_info->'onboardingData'->>'experienceYears') = '0' OR p.id IS NULL THEN 'Freshers'
+          ELSE 'Experienced'
+        END AS cohort,
+        COUNT(*)::int AS count
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE u.role = 'candidate'
+      GROUP BY 1
+    `);
+
+    const cohortCategories = ['Freshers', 'Experienced'];
+    const cohorts = cohortCategories.map(c => {
+      const existing = cohortRes.rows.find(r => r.cohort === c);
+      return {
+        cohort: c,
+        count: existing ? existing.count : 0
+      };
+    });
+    const totalCohortCount = cohorts.reduce((acc, c) => acc + c.count, 0);
+    cohorts.forEach(c => {
+      c.percentage = totalCohortCount > 0 ? parseFloat(((c.count / totalCohortCount) * 100).toFixed(1)) : 0;
+    });
+
+    // 3. Student Experience Distribution Categories
+    const expRes = await pool.query(`
+      SELECT 
+        category,
+        COUNT(*)::int AS count
+      FROM (
+        SELECT 
+          CASE 
+            WHEN COALESCE(p.experience, '') = 'Fresher' OR (p.resume_info->'onboardingData'->>'experienceYears') = '0' OR p.id IS NULL THEN 'Freshers'
+            WHEN COALESCE(p.experience, '') IN ('0-1 Years', '0-1 years') OR (p.resume_info->'onboardingData'->>'experienceYears') = '1' THEN '0-1 Years'
+            WHEN COALESCE(p.experience, '') IN ('1-3 Years', '1-3 years') OR (p.resume_info->'onboardingData'->>'experienceYears') IN ('2', '3') THEN '1-3 Years'
+            WHEN COALESCE(p.experience, '') IN ('3-5 Years', '3-5 years', '3+ Years', '3+ years') OR (p.resume_info->'onboardingData'->>'experienceYears') IN ('4', '5') THEN '3-5 Years'
+            ELSE '5+ Years'
+          END AS category
+        FROM users u
+        LEFT JOIN profiles p ON u.id = p.user_id
+        WHERE u.role = 'candidate'
+      ) sub
+      GROUP BY category
+    `);
+
+    const expCategories = ['Freshers', '0-1 Years', '1-3 Years', '3-5 Years', '5+ Years'];
+    const experienceDistribution = expCategories.map(c => {
+      const existing = expRes.rows.find(r => r.category === c);
+      return {
+        category: c,
+        count: existing ? existing.count : 0
+      };
+    });
+
+    // 4. Student Registration Trend (Daily for the last 30 days)
+    const dailyRes = await pool.query(`
+      SELECT 
+        TO_CHAR(d.day, 'YYYY-MM-DD') AS date_key,
+        TO_CHAR(d.day, 'DD Mon') AS date_label,
+        COALESCE(COUNT(u.id), 0)::int AS count
+      FROM generate_series(
+        CURRENT_DATE - INTERVAL '29 days',
+        CURRENT_DATE,
+        '1 day'::interval
+      ) d(day)
+      LEFT JOIN users u ON DATE(u.created_at) = DATE(d.day) AND u.role = 'candidate'
+      GROUP BY d.day
+      ORDER BY d.day ASC
+    `);
+
+    const dailyTrend = dailyRes.rows.map(r => ({
+      dateKey: r.date_key,
+      label: r.date_label,
+      count: r.count
+    }));
 
     res.json({
-      signups
+      signups,
+      cohorts,
+      experienceDistribution,
+      dailyTrend
     });
   } catch (err) {
     console.error('[Admin Analytics Route] Error:', err.message);

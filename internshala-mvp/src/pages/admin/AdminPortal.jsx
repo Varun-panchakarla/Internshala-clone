@@ -82,6 +82,9 @@ const AdminPortal = () => {
   // Accordion & Analytics states
   const [expandedSection, setExpandedSection] = useState(null);
   const [analyticsData, setAnalyticsData] = useState([]);
+  const [cohortsData, setCohortsData] = useState([]);
+  const [expDistributionData, setExpDistributionData] = useState([]);
+  const [dailyTrendData, setDailyTrendData] = useState([]);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
   // Reports states
@@ -272,6 +275,9 @@ const AdminPortal = () => {
       const res = await axios.get('/api/admin/analytics');
       console.log('[Frontend fetchAnalytics] API response:', res.data);
       setAnalyticsData(res.data?.signups || []);
+      setCohortsData(res.data?.cohorts || []);
+      setExpDistributionData(res.data?.experienceDistribution || []);
+      setDailyTrendData(res.data?.dailyTrend || []);
     } catch (err) {
       console.error('[Frontend fetchAnalytics] Error:', err);
       addToast('Failed to load platform analytics.', 'error');
@@ -1932,54 +1938,317 @@ const AdminPortal = () => {
                  VIEW: ANALYTICS
               ────────────────────────────────────────────────────────────── */}
               {currentView === 'analytics' && (
-                <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
-                  <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3 flex items-center justify-between">
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Platform Analytics</h3>
-                    <span className="text-[10px] font-black text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 px-2.5 py-1 rounded-full uppercase">Real-Time Student Metrics</span>
+                <div className="flex flex-col gap-8">
+                  {/* Page Title */}
+                  <div className="flex flex-col gap-1">
+                    <h2 className="text-xl font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">Platform Insights</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Real-time candidate metrics and registration trends aggregated from the database</p>
                   </div>
 
                   {analyticsLoading ? (
-                    <div className="flex items-center justify-center h-64">
-                      <LoadingSpinner text="Analyzing student sign-up metrics..." />
-                    </div>
-                  ) : analyticsData.length === 0 ? (
-                    <div className="text-center py-20 text-slate-500 border border-dashed border-slate-200 dark:border-slate-800/60 rounded-2xl">
-                      <FiUsers className="w-12 h-12 mx-auto mb-4 opacity-25 text-slate-400 dark:text-slate-650" />
-                      <p className="font-bold text-sm">No student registrations exist in the database.</p>
+                    <div className="flex items-center justify-center bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-24 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg">
+                      <LoadingSpinner text="Aggregating database insights..." />
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-8 animate-slide-up">
-                      {/* Section 1: Candidate Sign-up Trend */}
-                      <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200/70 dark:border-slate-800 p-6 rounded-2xl flex flex-col gap-6">
-                        <div>
-                          <h4 className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">Student Sign-up Growth</h4>
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 animate-slide-up">
+                      
+                      {/* Chart 1: Student Sign-up Growth */}
+                      <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
+                        <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                          <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-300">Student Sign-up Growth</h3>
                           <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1">Monthly registration volume of candidate accounts</p>
                         </div>
                         
-                        <div className="h-64 flex items-end justify-center gap-8 px-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-                          {(() => {
-                            const maxCount = Math.max(...analyticsData.map(d => d.count), 1);
-                            return analyticsData.map((data) => (
-                              <div key={data.monthKey} className="w-16 flex flex-col items-center gap-2 group relative">
-                                <div className="absolute bottom-[calc(100%-8px)] mb-2 bg-slate-900 dark:bg-slate-950 border border-slate-700 dark:border-slate-800 text-[10px] font-black text-white dark:text-brand-400 px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-xl z-10 whitespace-nowrap">
-                                  {data.count} {data.count === 1 ? 'student' : 'students'}
-                                </div>
-                                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-bold group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">{data.count}</span>
-                                <div
-                                  style={{ height: `${(data.count / maxCount) * 160}px` }}
-                                  className="w-full min-h-[6px] bg-gradient-to-t from-brand-600 via-brand-500 to-indigo-500 rounded-t-xl shadow-md group-hover:from-brand-500 group-hover:to-brand-400 transition-all duration-200"
-                                ></div>
-                              </div>
-                            ));
-                          })()}
-                        </div>
-                        
-                        <div className="flex justify-center gap-8 text-[10px] text-slate-500 dark:text-slate-400 font-bold px-4">
-                          {analyticsData.map(d => (
-                            <span key={d.monthKey} className="w-16 text-center">{d.month}</span>
-                          ))}
-                        </div>
+                        {analyticsData.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center h-64 border border-dashed border-slate-200 dark:border-slate-800/60 rounded-xl">
+                            <span className="text-xs font-bold text-slate-400 dark:text-slate-500">No Data Available</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-4">
+                            <div className="h-64 flex items-end justify-center gap-6 px-4 border-b border-slate-200 dark:border-slate-800 pb-3 pt-6 overflow-x-auto">
+                              {(() => {
+                                const maxCount = Math.max(...analyticsData.map(d => d.count), 1);
+                                return analyticsData.map((data) => (
+                                  <div key={data.monthKey} className="w-12 flex flex-col items-center gap-2 group relative min-w-[32px]">
+                                    <div className="absolute bottom-[calc(100%-8px)] mb-2 bg-slate-900 dark:bg-slate-950 border border-slate-700 dark:border-slate-800 text-[10px] font-black text-white dark:text-brand-400 px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-xl z-10 whitespace-nowrap">
+                                      {data.count} {data.count === 1 ? 'student' : 'students'}
+                                    </div>
+                                    <span className="text-[9px] text-slate-650 dark:text-slate-400 font-black group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors leading-none">{data.count}</span>
+                                    <div
+                                      style={{ height: `${(data.count / maxCount) * 160}px` }}
+                                      className="w-full min-h-[6px] bg-gradient-to-t from-brand-600 via-brand-500 to-indigo-500 rounded-t-lg shadow-md group-hover:from-brand-500 group-hover:to-brand-400 transition-all duration-200"
+                                    ></div>
+                                  </div>
+                                ));
+                              })()}
+                            </div>
+                            <div className="flex justify-center gap-6 text-[9px] text-slate-500 dark:text-slate-400 font-bold px-4">
+                              {analyticsData.map(d => (
+                                <span key={d.monthKey} className="w-12 text-center truncate">{d.month}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
+
+                      {/* Chart 2: Freshers vs Experienced Donut */}
+                      <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
+                        <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                          <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-300">Freshers vs Experienced</h3>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1">Candidate segmentation based on career track</p>
+                        </div>
+
+                        {cohortsData.length === 0 || cohortsData.every(c => c.count === 0) ? (
+                          <div className="flex flex-col items-center justify-center h-64 border border-dashed border-slate-200 dark:border-slate-800/60 rounded-xl">
+                            <span className="text-xs font-bold text-slate-400 dark:text-slate-500">No Data Available</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 h-64">
+                            {/* Donut SVG */}
+                            {(() => {
+                              const total = cohortsData.reduce((sum, item) => sum + item.count, 0);
+                              const fresherObj = cohortsData.find(c => c.cohort === 'Freshers') || { count: 0, percentage: 0 };
+                              const fresherPct = fresherObj.percentage;
+                              const radius = 50;
+                              const circumference = 2 * Math.PI * radius; // 314.16
+                              const fresherOffset = circumference - (fresherPct / 100) * circumference;
+
+                              return (
+                                <div className="relative flex items-center justify-center">
+                                  <svg viewBox="0 0 160 160" className="w-44 h-44 drop-shadow-md">
+                                    {/* Background circle (Experienced segment) */}
+                                    <circle
+                                      cx="80"
+                                      cy="80"
+                                      r="50"
+                                      fill="transparent"
+                                      stroke="url(#exp-donut-gradient)"
+                                      strokeWidth="14"
+                                    />
+                                    {/* Freshers Segment */}
+                                    <circle
+                                      cx="80"
+                                      cy="80"
+                                      r="50"
+                                      fill="transparent"
+                                      stroke="url(#fresher-donut-gradient)"
+                                      strokeWidth="14"
+                                      strokeDasharray={circumference}
+                                      strokeDashoffset={fresherOffset}
+                                      transform="rotate(-90 80 80)"
+                                    />
+                                    {/* Center Text */}
+                                    <text x="80" y="76" textAnchor="middle" className="fill-slate-900 dark:fill-white font-black text-base">
+                                      {total}
+                                    </text>
+                                    <text x="80" y="94" textAnchor="middle" className="fill-slate-400 font-bold text-[8px] uppercase tracking-widest">
+                                      Students
+                                    </text>
+                                    <defs>
+                                      <linearGradient id="fresher-donut-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#10b981" />
+                                        <stop offset="100%" stopColor="#14b8a6" />
+                                      </linearGradient>
+                                      <linearGradient id="exp-donut-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#f43f5e" />
+                                        <stop offset="100%" stopColor="#fb923c" />
+                                      </linearGradient>
+                                    </defs>
+                                  </svg>
+                                </div>
+                              );
+                            })()}
+
+                            {/* Legend details */}
+                            <div className="flex flex-col gap-4">
+                              {cohortsData.map((cohort, index) => {
+                                const isFresher = cohort.cohort === 'Freshers';
+                                return (
+                                  <div key={cohort.cohort} className="flex items-center gap-3">
+                                    <span className={`w-3 h-3 rounded-full ${isFresher ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                                    <div className="flex flex-col leading-none">
+                                      <span className="text-xs font-bold text-slate-800 dark:text-slate-300">{cohort.cohort}</span>
+                                      <span className="text-[10px] font-bold text-slate-400 mt-1">
+                                        {cohort.count} candidates ({cohort.percentage}%)
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Chart 3: Experience Distribution */}
+                      <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
+                        <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                          <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-300">Experience Distribution</h3>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1">Classification breakdown of student job experience levels</p>
+                        </div>
+
+                        {expDistributionData.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center h-64 border border-dashed border-slate-200 dark:border-slate-800/60 rounded-xl">
+                            <span className="text-xs font-bold text-slate-400 dark:text-slate-500">No Data Available</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-4">
+                            <div className="h-64 flex items-end justify-center gap-8 px-4 border-b border-slate-200 dark:border-slate-800 pb-3 pt-6 overflow-x-auto">
+                              {(() => {
+                                const maxCount = Math.max(...expDistributionData.map(d => d.count), 1);
+                                return expDistributionData.map((data) => (
+                                  <div key={data.category} className="w-14 flex flex-col items-center gap-2 group relative min-w-[36px]">
+                                    <div className="absolute bottom-[calc(100%-8px)] mb-2 bg-slate-900 dark:bg-slate-955 border border-slate-700 dark:border-slate-800 text-[10px] font-black text-white dark:text-emerald-400 px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-xl z-10 whitespace-nowrap">
+                                      {data.count} {data.count === 1 ? 'candidate' : 'candidates'}
+                                    </div>
+                                    <span className="text-[9px] text-slate-650 dark:text-slate-400 font-black group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors leading-none">{data.count}</span>
+                                    <div
+                                      style={{ height: `${(data.count / maxCount) * 160}px` }}
+                                      className="w-full min-h-[6px] bg-gradient-to-t from-emerald-500 via-emerald-450 to-teal-400 rounded-t-lg shadow-md group-hover:from-emerald-450 group-hover:to-emerald-350 transition-all duration-200"
+                                    ></div>
+                                  </div>
+                                ));
+                              })()}
+                            </div>
+                            <div className="flex justify-center gap-8 text-[9px] text-slate-550 dark:text-slate-400 font-bold px-4">
+                              {expDistributionData.map(d => (
+                                <span key={d.category} className="w-14 text-center truncate">{d.category}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Chart 4: Student Registration Trend (Line Chart) */}
+                      <div className="bg-white dark:bg-[#0a1222] border border-slate-200/90 dark:border-slate-800/80 rounded-2xl p-6 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] dark:shadow-lg flex flex-col gap-6">
+                        <div className="border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                          <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-300">Daily Registration Trend</h3>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1">Daily candidate sign-ups volume during the last 30 days</p>
+                        </div>
+
+                        {dailyTrendData.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center h-64 border border-dashed border-slate-200 dark:border-slate-800/60 rounded-xl">
+                            <span className="text-xs font-bold text-slate-400 dark:text-slate-500">No Data Available</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-2">
+                            <div className="h-60 relative w-full pt-4">
+                              {(() => {
+                                const chartWidth = 500;
+                                const chartHeight = 200;
+                                const paddingLeft = 32;
+                                const paddingRight = 16;
+                                const paddingTop = 16;
+                                const paddingBottom = 24;
+
+                                const trendMax = Math.max(...dailyTrendData.map(d => d.count), 1);
+                                const points = dailyTrendData.map((d, index) => {
+                                  const x = paddingLeft + (index / (dailyTrendData.length - 1)) * (chartWidth - paddingLeft - paddingRight);
+                                  const y = chartHeight - paddingBottom - (d.count / trendMax) * (chartHeight - paddingTop - paddingBottom);
+                                  return { x, y, data: d };
+                                });
+
+                                const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                const areaD = points.length > 0
+                                  ? `${pathD} L ${points[points.length - 1].x} ${chartHeight - paddingBottom} L ${points[0].x} ${chartHeight - paddingBottom} Z`
+                                  : '';
+
+                                return (
+                                  <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-full overflow-visible select-none">
+                                    <defs>
+                                      <linearGradient id="line-area-gradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#6366f1" stopOpacity="0.3" />
+                                        <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                                      </linearGradient>
+                                    </defs>
+
+                                    {/* Grid Lines */}
+                                    {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+                                      const y = chartHeight - paddingBottom - ratio * (chartHeight - paddingTop - paddingBottom);
+                                      return (
+                                        <line
+                                          key={idx}
+                                          x1={paddingLeft}
+                                          y1={y}
+                                          x2={chartWidth - paddingRight}
+                                          y2={y}
+                                          className="stroke-slate-100 dark:stroke-slate-800/40"
+                                          strokeDasharray="3 3"
+                                        />
+                                      );
+                                    })}
+
+                                    {/* Area Fill */}
+                                    <path d={areaD} fill="url(#line-area-gradient)" />
+
+                                    {/* Trend Line */}
+                                    <path
+                                      d={pathD}
+                                      fill="none"
+                                      stroke="#6366f1"
+                                      strokeWidth="2.5"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+
+                                    {/* Data Points / Interaction Dots */}
+                                    {points.map((p, index) => {
+                                      const showLabel = p.data.count > 0;
+                                      return (
+                                        <g key={index} className="group/dot cursor-pointer">
+                                          <circle
+                                            cx={p.x}
+                                            cy={p.y}
+                                            r="4"
+                                            className="fill-indigo-500 stroke-white dark:stroke-slate-900 stroke-2 group-hover/dot:r-6 transition-all"
+                                          />
+                                          {/* Custom Tooltip */}
+                                          <title>{`${p.data.label}: ${p.data.count} registrations`}</title>
+                                          {showLabel && (
+                                            <text
+                                              x={p.x}
+                                              y={p.y - 8}
+                                              textAnchor="middle"
+                                              className="fill-indigo-600 dark:fill-indigo-400 text-[8px] font-black leading-none"
+                                            >
+                                              {p.data.count}
+                                            </text>
+                                          )}
+                                        </g>
+                                      );
+                                    })}
+
+                                    {/* Y Axis line */}
+                                    <line
+                                      x1={paddingLeft}
+                                      y1={paddingTop}
+                                      x2={paddingLeft}
+                                      y2={chartHeight - paddingBottom}
+                                      className="stroke-slate-200 dark:stroke-slate-800"
+                                    />
+
+                                    {/* X Axis line */}
+                                    <line
+                                      x1={paddingLeft}
+                                      y1={chartHeight - paddingBottom}
+                                      x2={chartWidth - paddingRight}
+                                      y2={chartHeight - paddingBottom}
+                                      className="stroke-slate-200 dark:stroke-slate-800"
+                                    />
+                                  </svg>
+                                );
+                              })()}
+                            </div>
+                            {/* X-Axis labels for line chart */}
+                            <div className="flex justify-between text-[8px] text-slate-400 dark:text-slate-500 font-bold px-8 mt-1">
+                              <span>{dailyTrendData[0]?.label}</span>
+                              <span>{dailyTrendData[Math.floor(dailyTrendData.length / 2)]?.label}</span>
+                              <span>{dailyTrendData[dailyTrendData.length - 1]?.label}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
                     </div>
                   )}
                 </div>
