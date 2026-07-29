@@ -6,6 +6,7 @@ import { FiMail, FiClock, FiArrowLeft } from 'react-icons/fi';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Logo from '../../components/common/Logo';
+import ThemeToggle from '../../components/common/ThemeToggle';
 import { employerService } from '../../services/mockApi';
 
 const EmployerVerifyEmail = () => {
@@ -85,6 +86,9 @@ const EmployerVerifyEmail = () => {
         >
           <FiArrowLeft /> Back
         </button>
+
+        {/* Theme Toggle */}
+        <ThemeToggle className="absolute top-6 right-6 sm:top-8 sm:right-8 z-20" />
 
         <div className="flex flex-col items-center gap-6 mt-6">
           <Logo className="h-10 w-auto" mode="light" />

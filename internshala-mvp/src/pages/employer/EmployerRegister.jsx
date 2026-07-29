@@ -6,6 +6,7 @@ import { FiUser, FiBriefcase, FiMail, FiPhone, FiGlobe, FiLock, FiArrowLeft } fr
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Logo from '../../components/common/Logo';
+import ThemeToggle from '../../components/common/ThemeToggle';
 
 const EmployerRegister = () => {
   const { register } = useEmployerAuth();
@@ -96,6 +97,9 @@ const EmployerRegister = () => {
           <FiArrowLeft className="w-4 h-4" />
           <span>Back to Login</span>
         </button>
+
+        {/* Theme Toggle */}
+        <ThemeToggle className="absolute top-6 right-6 sm:top-8 sm:right-8 z-20" />
 
         <div className="max-w-md w-full flex flex-col gap-4 pt-12 sm:pt-16 my-auto">
           {/* Logo Heading */}

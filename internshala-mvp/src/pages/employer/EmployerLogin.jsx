@@ -6,6 +6,7 @@ import { FiMail, FiLock, FiArrowLeft, FiBriefcase } from 'react-icons/fi';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Logo from '../../components/common/Logo';
+import ThemeToggle from '../../components/common/ThemeToggle';
 
 const EmployerLogin = () => {
   const { login } = useEmployerAuth();
@@ -69,6 +70,9 @@ const EmployerLogin = () => {
           <FiArrowLeft className="w-4 h-4" />
           <span>Back</span>
         </button>
+
+        {/* Theme Toggle */}
+        <ThemeToggle className="absolute top-6 right-6 sm:top-8 sm:right-8 z-20" />
 
         <div className="max-w-md w-full flex flex-col gap-5 pt-10 sm:pt-14 my-auto">
           {/* Logo Heading */}

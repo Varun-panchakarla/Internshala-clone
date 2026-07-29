@@ -6,6 +6,7 @@ import { FiBriefcase, FiMapPin, FiUser, FiArrowLeft, FiArrowRight, FiCheck } fro
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Logo from '../../components/common/Logo';
+import ThemeToggle from '../../components/common/ThemeToggle';
 
 const EmployerOnboarding = () => {
   const { currentEmployer, updateEmployerProfile, logout } = useEmployerAuth();
@@ -135,16 +136,19 @@ const EmployerOnboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-955 font-sans flex flex-col transition-colors duration-200">
       {/* Top Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
+      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-50">
         <Logo className="h-10 w-auto" mode="light" />
-        <button
-          onClick={logout}
-          className="text-xs font-bold text-slate-400 hover:text-slate-655 transition-colors cursor-pointer"
-        >
-          Sign Out
-        </button>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <button
+            onClick={logout}
+            className="text-xs font-bold text-slate-400 hover:text-rose-600 transition-colors bg-slate-50 hover:bg-rose-50 dark:bg-slate-850 dark:hover:bg-rose-955/20 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800 cursor-pointer"
+          >
+            Sign Out
+          </button>
+        </div>
       </header>
 
       {/* Main Container */}
@@ -152,14 +156,14 @@ const EmployerOnboarding = () => {
         
         {/* Title */}
         <div className="text-center">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Onboard Your Company</h1>
-          <p className="text-sm text-slate-500 font-medium mt-1">Complete these details to set up your Recruiter Profile.</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Onboard Your Company</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">Complete these details to set up your Recruiter Profile.</p>
         </div>
 
         {/* Progress Tracker */}
-        <div className="flex justify-between items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+        <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
           {/* Progress bar background line */}
-          <div className="absolute top-[44px] left-[15%] right-[15%] h-0.5 bg-slate-100 z-0 hidden sm:block" />
+          <div className="absolute top-[44px] left-[15%] right-[15%] h-0.5 bg-slate-100 dark:bg-slate-800 z-0 hidden sm:block" />
           {/* Active progress fill */}
           <div
             className="absolute top-[44px] left-[15%] h-0.5 bg-sky-600 transition-all duration-300 z-0 hidden sm:block"
@@ -170,11 +174,11 @@ const EmployerOnboarding = () => {
             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all ${
               step >= 1
                 ? 'bg-sky-600 border-sky-600 text-white'
-                : 'bg-white border-slate-200 text-slate-400'
+                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500'
             }`}>
               {step > 1 ? <FiCheck className="w-5 h-5" /> : '1'}
             </div>
-            <span className={`text-[11px] font-black uppercase tracking-wider ${step === 1 ? 'text-sky-600' : 'text-slate-400'}`}>
+            <span className={`text-[11px] font-black uppercase tracking-wider ${step === 1 ? 'text-sky-600' : 'text-slate-400 dark:text-slate-500'}`}>
               Company Details
             </span>
           </div>
@@ -183,11 +187,11 @@ const EmployerOnboarding = () => {
             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all ${
               step >= 2
                 ? 'bg-sky-600 border-sky-600 text-white'
-                : 'bg-white border-slate-200 text-slate-400'
+                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500'
             }`}>
               {step > 2 ? <FiCheck className="w-5 h-5" /> : '2'}
             </div>
-            <span className={`text-[11px] font-black uppercase tracking-wider ${step === 2 ? 'text-sky-600' : 'text-slate-400'}`}>
+            <span className={`text-[11px] font-black uppercase tracking-wider ${step === 2 ? 'text-sky-600' : 'text-slate-400 dark:text-slate-500'}`}>
               Offices & Culture
             </span>
           </div>
@@ -196,25 +200,25 @@ const EmployerOnboarding = () => {
             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all ${
               step === 3
                 ? 'bg-sky-600 border-sky-600 text-white'
-                : 'bg-white border-slate-200 text-slate-400'
+                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500'
             }`}>
               '3'
             </div>
-            <span className={`text-[11px] font-black uppercase tracking-wider ${step === 3 ? 'text-sky-600' : 'text-slate-400'}`}>
+            <span className={`text-[11px] font-black uppercase tracking-wider ${step === 3 ? 'text-sky-600' : 'text-slate-400 dark:text-slate-500'}`}>
               Recruiter Info
             </span>
           </div>
         </div>
 
         {/* Form Box */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-md p-6 sm:p-8">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-md p-6 sm:p-8">
           
           {/* STEP 1: COMPANY BASICS */}
           {step === 1 && (
             <div className="flex flex-col gap-5 animate-fade-in">
-              <div className="flex items-center gap-2 text-sky-600 border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2 text-sky-600 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <FiBriefcase className="w-5 h-5" />
-                <h2 className="font-extrabold text-slate-900">Company Overview</h2>
+                <h2 className="font-extrabold text-slate-900 dark:text-white">Company Overview</h2>
               </div>
 
               <Input
@@ -245,7 +249,7 @@ const EmployerOnboarding = () => {
                     id="industry"
                     value={industry}
                     onChange={(e) => setIndustry(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                   >
                     <option value="">Select Industry</option>
                     <option value="IT & Software">IT & Software</option>
@@ -267,7 +271,7 @@ const EmployerOnboarding = () => {
                     id="companySize"
                     value={companySize}
                     onChange={(e) => setCompanySize(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                   >
                     <option value="">Select Company Size</option>
                     <option value="1-10 employees">1-10 employees</option>
@@ -324,9 +328,9 @@ const EmployerOnboarding = () => {
           {/* STEP 2: OFFICES & CULTURE */}
           {step === 2 && (
             <div className="flex flex-col gap-5 animate-fade-in">
-              <div className="flex items-center gap-2 text-sky-600 border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2 text-sky-600 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <FiMapPin className="w-5 h-5" />
-                <h2 className="font-extrabold text-slate-900">Offices & Locations</h2>
+                <h2 className="font-extrabold text-slate-900 dark:text-white">Offices & Locations</h2>
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -339,7 +343,7 @@ const EmployerOnboarding = () => {
                   placeholder="Tell candidates about your company mission, tech stack, and values..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 font-sans"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 font-sans"
                 />
                 {errors.description && <span className="text-xs text-rose-500 font-medium">{errors.description}</span>}
               </div>
@@ -380,7 +384,7 @@ const EmployerOnboarding = () => {
                   id="workMode"
                   value={workMode}
                   onChange={(e) => setWorkMode(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                 >
                   <option value="Remote">Remote</option>
                   <option value="Hybrid">Hybrid</option>
@@ -410,9 +414,9 @@ const EmployerOnboarding = () => {
           {/* STEP 3: RECRUITER INFO */}
           {step === 3 && (
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 animate-fade-in">
-              <div className="flex items-center gap-2 text-sky-600 border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2 text-sky-600 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <FiUser className="w-5 h-5" />
-                <h2 className="font-extrabold text-slate-900">Recruiter Information</h2>
+                <h2 className="font-extrabold text-slate-900 dark:text-white">Recruiter Information</h2>
               </div>
 
               <Input
