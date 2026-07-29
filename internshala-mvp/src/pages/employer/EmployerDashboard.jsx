@@ -618,6 +618,433 @@ const EmployerDashboard = () => {
         </div>
 
       </main>
+
+      {/* 1. JOB FORM MODAL (CREATE / EDIT) */}
+      {isJobModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto flex flex-col p-6 animate-scale-in">
+            {/* Header */}
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="font-extrabold text-slate-800 dark:text-white text-base">
+                {jobModalMode === 'create' ? 'Create New Job Listing' : 'Edit Job Listing'}
+              </h3>
+              <button
+                onClick={() => setIsJobModalOpen(false)}
+                className="text-slate-450 hover:text-slate-650 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer border-none bg-transparent"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleJobSubmit} className="space-y-4 pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Job Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={jobForm.title}
+                    onChange={e => setJobForm({ ...jobForm, title: e.target.value })}
+                    placeholder="e.g. Frontend Engineer"
+                    className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Company Name</label>
+                  <input
+                    type="text"
+                    value={jobForm.companyName}
+                    onChange={e => setJobForm({ ...jobForm, companyName: e.target.value })}
+                    placeholder="Company Name"
+                    className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-850 dark:text-slate-200 font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Location *</label>
+                  <input
+                    type="text"
+                    required
+                    value={jobForm.location}
+                    onChange={e => setJobForm({ ...jobForm, location: e.target.value })}
+                    placeholder="e.g. Bangalore, Remote"
+                    className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Salary Range</label>
+                  <input
+                    type="text"
+                    value={jobForm.salaryRange}
+                    onChange={e => setJobForm({ ...jobForm, salaryRange: e.target.value })}
+                    placeholder="e.g. $80k - $100k"
+                    className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Experience Required</label>
+                  <input
+                    type="text"
+                    value={jobForm.experienceRequired}
+                    onChange={e => setJobForm({ ...jobForm, experienceRequired: e.target.value })}
+                    placeholder="e.g. 1-3 years"
+                    className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Employment Type</label>
+                  <select
+                    value={jobForm.employmentType}
+                    onChange={e => setJobForm({ ...jobForm, employmentType: e.target.value })}
+                    className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-850 dark:text-slate-100 font-semibold"
+                  >
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Contract">Contract</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Skills (Comma-separated)</label>
+                <input
+                  type="text"
+                  value={jobForm.skills}
+                  onChange={e => setJobForm({ ...jobForm, skills: e.target.value })}
+                  placeholder="React, Tailwind, Node.js"
+                  className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Job Description</label>
+                <textarea
+                  rows={4}
+                  value={jobForm.description}
+                  onChange={e => setJobForm({ ...jobForm, description: e.target.value })}
+                  placeholder="Provide a detailed description of the role responsibilities..."
+                  className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100 font-sans"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsJobModalOpen(false)}
+                  className="px-4 py-2 font-bold text-xs rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="px-4 py-2 font-bold text-xs rounded-xl cursor-pointer"
+                >
+                  {jobModalMode === 'create' ? 'Post Job' : 'Save Changes'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 2. APPLICANTS LIST MODAL */}
+      {isApplicantsModalOpen && activeJobForApplicants && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-md w-full flex flex-col p-6 animate-scale-in">
+            {/* Header */}
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div>
+                <h3 className="font-extrabold text-slate-800 dark:text-white text-base">Applicants</h3>
+                <p className="text-[10px] text-slate-450 dark:text-slate-500 font-semibold">{activeJobForApplicants.title} ({activeJobForApplicants.type})</p>
+              </div>
+              <button
+                onClick={() => setIsApplicantsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-655 dark:hover:text-slate-200 cursor-pointer border-none bg-transparent"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* List */}
+            <div className="divide-y divide-slate-100 dark:divide-slate-800/60 max-h-[50vh] overflow-y-auto mt-4">
+              {activeJobForApplicants.title.includes('Frontend') ? (
+                <>
+                  <div className="py-3 flex justify-between items-center">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-750 flex items-center justify-center font-bold text-xs">RS</div>
+                      <div>
+                        <span className="font-bold text-slate-850 dark:text-slate-100 text-xs block">Rahul Sharma</span>
+                        <span className="text-[9px] text-slate-450 dark:text-slate-500 font-semibold">Applied 12 mins ago</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setIsApplicantsModalOpen(false);
+                        handleViewProfile('Rahul Sharma');
+                      }}
+                      className="px-2.5 py-1 text-[10px] font-bold text-sky-655 bg-sky-50 dark:bg-sky-955/20 rounded-lg hover:underline cursor-pointer border-none"
+                    >
+                      View Profile
+                    </button>
+                  </div>
+                  <div className="py-3 flex justify-between items-center">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-750 flex items-center justify-center font-bold text-xs">JD</div>
+                      <div>
+                        <span className="font-bold text-slate-850 dark:text-slate-100 text-xs block">Jane Doe</span>
+                        <span className="text-[9px] text-slate-450 dark:text-slate-500 font-semibold">Applied 1 day ago</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setIsApplicantsModalOpen(false);
+                        handleViewProfile('Jane Doe');
+                      }}
+                      className="px-2.5 py-1 text-[10px] font-bold text-sky-655 bg-sky-50 dark:bg-sky-955/20 rounded-lg hover:underline cursor-pointer border-none"
+                    >
+                      View Profile
+                    </button>
+                  </div>
+                </>
+              ) : activeJobForApplicants.title.includes('Backend') ? (
+                <div className="py-3 flex justify-between items-center">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-750 flex items-center justify-center font-bold text-xs">PP</div>
+                    <div>
+                      <span className="font-bold text-slate-850 dark:text-slate-100 text-xs block">Priya Patel</span>
+                      <span className="text-[9px] text-slate-450 dark:text-slate-500 font-semibold">Applied 1 hour ago</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsApplicantsModalOpen(false);
+                      handleViewProfile('Priya Patel');
+                    }}
+                    className="px-2.5 py-1 text-[10px] font-bold text-sky-655 bg-sky-50 dark:bg-sky-955/20 rounded-lg hover:underline cursor-pointer border-none"
+                  >
+                    View Profile
+                  </button>
+                </div>
+              ) : (
+                <div className="py-3 flex justify-between items-center">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-sky-100 text-sky-750 flex items-center justify-center font-bold text-xs">DD</div>
+                    <div>
+                      <span className="font-bold text-slate-850 dark:text-slate-100 text-xs block">Dev Dixit</span>
+                      <span className="text-[9px] text-slate-450 dark:text-slate-500 font-semibold">Applied 3 hours ago</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsApplicantsModalOpen(false);
+                      handleViewProfile('Dev Dixit');
+                    }}
+                    className="px-2.5 py-1 text-[10px] font-bold text-sky-655 bg-sky-50 dark:bg-sky-955/20 rounded-lg hover:underline cursor-pointer border-none"
+                  >
+                    View Profile
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <Button
+                onClick={() => setIsApplicantsModalOpen(false)}
+                variant="outline"
+                className="px-4 py-1.5 font-bold text-xs rounded-xl cursor-pointer"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. CANDIDATE PROFILE & RESUME MODAL */}
+      {selectedCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto flex flex-col p-6 animate-scale-in">
+            {/* Header */}
+            <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-sky-100 dark:bg-sky-955/30 text-sky-650 dark:text-sky-400 flex items-center justify-center font-black text-base shadow-sm">
+                  {selectedCandidate.name.split(' ').map(n => n.charAt(0)).join('')}
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 dark:text-white text-base leading-tight">
+                    {selectedCandidate.name}
+                  </h3>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-[10px] text-slate-450 dark:text-slate-500 font-bold">
+                    <span className="flex items-center gap-1"><FiMail /> {selectedCandidate.email}</span>
+                    <span className="flex items-center gap-1"><FiPhone /> {selectedCandidate.phone}</span>
+                    <span className="flex items-center gap-1"><FiMapPin /> {selectedCandidate.location}</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedCandidate(null)}
+                className="text-slate-450 hover:text-slate-655 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer border-none bg-transparent"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Profile Content */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-4">
+              {/* Profile Details (Left) */}
+              <div className="md:col-span-7 space-y-4">
+                {/* Experience */}
+                <div className="space-y-1 bg-slate-50/50 dark:bg-slate-850/20 border border-slate-100 dark:border-slate-800 p-3 rounded-xl">
+                  <span className="text-[10px] font-black uppercase text-sky-600 dark:text-sky-400 tracking-wider flex items-center gap-1">
+                    <FiBriefcase className="w-3 h-3" /> Experience
+                  </span>
+                  <p className="text-xs text-slate-700 dark:text-slate-200 font-bold leading-relaxed">
+                    {selectedCandidate.experience}
+                  </p>
+                </div>
+
+                {/* Skills */}
+                <div className="space-y-1 bg-slate-50/50 dark:bg-slate-850/20 border border-slate-100 dark:border-slate-800 p-3 rounded-xl">
+                  <span className="text-[10px] font-black uppercase text-sky-600 dark:text-sky-400 tracking-wider flex items-center gap-1">
+                    <FiLayers className="w-3 h-3" /> Skills
+                  </span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {selectedCandidate.skills.split(',').map((skill, sIdx) => (
+                      <span key={sIdx} className="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-[10px] text-slate-750 dark:text-slate-300 font-bold">
+                        {skill.trim()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Education */}
+                <div className="space-y-1 bg-slate-50/50 dark:bg-slate-850/20 border border-slate-100 dark:border-slate-800 p-3 rounded-xl">
+                  <span className="text-[10px] font-black uppercase text-sky-600 dark:text-sky-400 tracking-wider flex items-center gap-1">
+                    <FiBookOpen className="w-3 h-3" /> Education
+                  </span>
+                  <p className="text-xs text-slate-700 dark:text-slate-200 font-bold">
+                    {selectedCandidate.education}
+                  </p>
+                </div>
+
+                {/* Projects */}
+                <div className="space-y-1 bg-slate-50/50 dark:bg-slate-850/20 border border-slate-100 dark:border-slate-800 p-3 rounded-xl">
+                  <span className="text-[10px] font-black uppercase text-sky-600 dark:text-sky-400 tracking-wider flex items-center gap-1">
+                    <FiGlobe className="w-3 h-3" /> Key Projects
+                  </span>
+                  <p className="text-xs text-slate-700 dark:text-slate-200 font-bold">
+                    {selectedCandidate.projects}
+                  </p>
+                </div>
+
+                {/* Certifications */}
+                <div className="space-y-1 bg-slate-50/50 dark:bg-slate-850/20 border border-slate-100 dark:border-slate-800 p-3 rounded-xl">
+                  <span className="text-[10px] font-black uppercase text-sky-600 dark:text-sky-400 tracking-wider flex items-center gap-1">
+                    <FiAward className="w-3 h-3" /> Certifications & Achievements
+                  </span>
+                  <p className="text-xs text-slate-700 dark:text-slate-200 font-bold">
+                    {selectedCandidate.certifications}
+                  </p>
+                </div>
+              </div>
+
+              {/* Resume Preview & Recruiter Actions (Right) */}
+              <div className="md:col-span-5 flex flex-col gap-4">
+                {/* Resume Preview Section */}
+                <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 bg-slate-50 dark:bg-slate-955/40">
+                  <FiFileText className="w-12 h-12 text-slate-350 dark:text-slate-500" />
+                  <div>
+                    <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100 block">
+                      {selectedCandidate.resumeUrl}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-bold block mt-0.5">
+                      PDF Document (1.2 MB)
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col gap-2 w-full mt-2">
+                    <button
+                      onClick={() => addToast(`Previewing resume in popout for ${selectedCandidate.name}...`, 'success')}
+                      className="w-full py-2 flex items-center justify-center gap-1.5 text-xs font-extrabold text-sky-600 hover:text-sky-700 bg-sky-50 dark:bg-sky-955/20 rounded-xl border border-sky-100 dark:border-sky-900/30 cursor-pointer transition-colors"
+                    >
+                      <FiSearch className="w-3.5 h-3.5" /> Preview Resume
+                    </button>
+                    <button
+                      onClick={() => addToast(`Downloading ${selectedCandidate.resumeUrl}...`, 'success')}
+                      className="w-full py-2 flex items-center justify-center gap-1.5 text-xs font-extrabold text-slate-700 hover:text-slate-900 dark:text-slate-350 dark:hover:text-white bg-slate-100 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer transition-colors"
+                    >
+                      <FiDownload className="w-3.5 h-3.5" /> Download Resume
+                    </button>
+                    <a
+                      href={`/resumes/${selectedCandidate.resumeUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2 flex items-center justify-center gap-1.5 text-xs font-extrabold text-slate-700 hover:text-slate-900 dark:text-slate-350 dark:hover:text-white bg-slate-100 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer transition-colors text-center"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        addToast(`Opening resume in new tab for ${selectedCandidate.name}...`, 'success');
+                      }}
+                    >
+                      <FiExternalLink className="w-3.5 h-3.5" /> Open in New Tab
+                    </a>
+                  </div>
+                </div>
+
+                {/* Recruiter Decision Block */}
+                <div className="flex flex-col gap-2 bg-slate-50 dark:bg-slate-850/45 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <span className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest block mb-1">
+                    Recruiter Actions
+                  </span>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => {
+                        addToast(`${selectedCandidate.name} has been shortlisted!`, 'success');
+                        setSelectedCandidate(null);
+                      }}
+                      className="py-2.5 text-xs font-bold text-emerald-750 hover:text-white bg-emerald-50 dark:bg-emerald-955/20 hover:bg-emerald-600 dark:hover:bg-emerald-600 rounded-xl border border-emerald-250 dark:border-emerald-900/30 transition-all cursor-pointer"
+                    >
+                      Shortlist
+                    </button>
+                    <button
+                      onClick={() => {
+                        addToast(`${selectedCandidate.name} application has been rejected.`, 'warning');
+                        setSelectedCandidate(null);
+                      }}
+                      className="py-2.5 text-xs font-bold text-rose-700 hover:text-white bg-rose-50 dark:bg-rose-955/20 hover:bg-rose-600 dark:hover:bg-rose-600 rounded-xl border border-rose-250 dark:border-rose-900/30 transition-all cursor-pointer"
+                    >
+                      Reject
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => addToast(`Interview scheduler opened for ${selectedCandidate.name}.`, 'success')}
+                    className="w-full py-2.5 text-xs font-bold text-sky-650 dark:text-sky-300 hover:text-white bg-sky-50 dark:bg-sky-955/20 hover:bg-sky-600 dark:hover:bg-sky-600 rounded-xl border border-sky-250 dark:border-sky-900/30 transition-all cursor-pointer mt-1"
+                  >
+                    Schedule Interview
+                  </button>
+
+                  <button
+                    onClick={() => addToast(`Email composer opened for ${selectedCandidate.email}.`, 'success')}
+                    className="w-full py-2.5 text-xs font-bold text-slate-700 dark:text-slate-350 hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-650 dark:hover:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+                  >
+                    Contact Candidate
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
