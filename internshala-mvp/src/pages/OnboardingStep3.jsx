@@ -65,14 +65,6 @@ const OnboardingStep3 = () => {
 
     setLoading(true);
     try {
-      const isVerified = currentUser?.profileData?.phoneVerified === true;
-      if (!isVerified) {
-        addToast('Please verify your phone number in Step 1 before completing onboarding.', 'error');
-        navigate('/onboarding');
-        setLoading(false);
-        return;
-      }
-
       const step1Key = currentUser?.id ? `onboarding_step1_${currentUser.id}` : 'onboarding_step1_guest';
       const step2Key = currentUser?.id ? `onboarding_step2_${currentUser.id}` : 'onboarding_step2_guest';
 
