@@ -23,6 +23,7 @@ import {
 import Logo from '../../components/common/Logo';
 import Button from '../../components/common/Button';
 import ProgressBar from '../../components/common/ProgressBar';
+import ThemeToggle from '../../components/common/ThemeToggle';
 
 const EmployerDashboard = () => {
   const { currentEmployer, logout } = useEmployerAuth();
@@ -68,6 +69,7 @@ const EmployerDashboard = () => {
               </span>
             </div>
           </div>
+          <ThemeToggle />
           <button
             onClick={handleLogout}
             className="flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-rose-600 transition-colors bg-slate-50 hover:bg-rose-50 dark:bg-slate-850 dark:hover:bg-rose-955/20 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800 cursor-pointer"

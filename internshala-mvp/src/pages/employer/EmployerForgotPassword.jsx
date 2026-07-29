@@ -6,6 +6,7 @@ import { FiMail, FiArrowLeft, FiCheckCircle } from 'react-icons/fi';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Logo from '../../components/common/Logo';
+import ThemeToggle from '../../components/common/ThemeToggle';
 
 const EmployerForgotPassword = () => {
   const { forgotPassword } = useEmployerAuth();
@@ -51,8 +52,8 @@ const EmployerForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-slate-50 font-sans p-6">
-      <div className="max-w-md w-full bg-white shadow-xl rounded-2xl p-8 relative">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-slate-50 dark:bg-slate-955 font-sans p-6 transition-colors duration-200">
+      <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-2xl p-8 relative">
         {/* Back Button */}
         <button
           onClick={handleBackClick}
@@ -61,14 +62,17 @@ const EmployerForgotPassword = () => {
           <FiArrowLeft /> Back to Login
         </button>
 
+        {/* Theme Toggle */}
+        <ThemeToggle className="absolute top-6 right-6 sm:top-8 sm:right-8 z-20" />
+
         <div className="flex flex-col items-center gap-6 mt-6">
           <Logo className="h-10 w-auto" mode="light" />
 
           {submitted ? (
             <div className="text-center space-y-4 py-4 animate-fade-in">
               <FiCheckCircle className="w-16 h-16 text-emerald-500 mx-auto" />
-              <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Check Your Inbox</h1>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed">
+              <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Check Your Inbox</h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                 If the email <strong>{email}</strong> is registered as an employer, we have sent a password reset link to it. Please check your inbox and spam folder.
               </p>
               <Button
@@ -82,8 +86,8 @@ const EmployerForgotPassword = () => {
           ) : (
             <>
               <div className="text-center">
-                <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Reset Recruiter Password</h1>
-                <p className="text-sm text-slate-500 font-medium mt-1.5 leading-relaxed">
+                <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Reset Recruiter Password</h1>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1.5 leading-relaxed">
                   Enter your official company email, and we will send you instructions to reset your password.
                 </p>
               </div>

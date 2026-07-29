@@ -6,6 +6,7 @@ import { FiLock, FiCheckCircle } from 'react-icons/fi';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Logo from '../../components/common/Logo';
+import ThemeToggle from '../../components/common/ThemeToggle';
 
 const EmployerResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -58,16 +59,19 @@ const EmployerResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-slate-50 font-sans p-6">
-      <div className="max-w-md w-full bg-white shadow-xl rounded-2xl p-8 relative">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-slate-50 dark:bg-slate-955 font-sans p-6 transition-colors duration-200">
+      <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-2xl p-8 relative">
+        {/* Theme Toggle */}
+        <ThemeToggle className="absolute top-6 right-6 sm:top-8 sm:right-8 z-20" />
+
         <div className="flex flex-col items-center gap-6">
           <Logo className="h-10 w-auto" mode="light" />
 
           {success ? (
             <div className="text-center space-y-4 py-4 animate-fade-in">
               <FiCheckCircle className="w-16 h-16 text-emerald-500 mx-auto" />
-              <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Password Reset Complete</h1>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed">
+              <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Password Reset Complete</h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                 Your new password has been successfully configured. You can now use it to access the Recruiter portal.
               </p>
               <Button
@@ -81,8 +85,8 @@ const EmployerResetPassword = () => {
           ) : (
             <>
               <div className="text-center">
-                <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Set New Password</h1>
-                <p className="text-sm text-slate-500 font-medium mt-1.5 leading-relaxed">
+                <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Set New Password</h1>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1.5 leading-relaxed">
                   Enter your new password below to update your recruiter account security.
                 </p>
               </div>
