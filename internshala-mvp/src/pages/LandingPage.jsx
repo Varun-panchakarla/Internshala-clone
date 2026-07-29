@@ -332,7 +332,7 @@ const LandingPage = () => {
                     <button onClick={() => navigate('/register')} className="px-8 py-3.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-bold text-sm transition-all hover:scale-[1.02] cursor-pointer shadow-lg shadow-sky-600/20">
                       Candidate Sign up
                     </button>
-                    <button onClick={() => addToast('Employer registration coming soon!', 'info')} className="px-8 py-3.5 border-2 border-sky-600 text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/30 rounded-xl font-bold text-sm transition-all cursor-pointer">
+                    <button onClick={() => navigate('/employer/login')} className="px-8 py-3.5 border-2 border-sky-600 text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/30 rounded-xl font-bold text-sm transition-all cursor-pointer">
                       Employer sign up
                     </button>
                   </>
