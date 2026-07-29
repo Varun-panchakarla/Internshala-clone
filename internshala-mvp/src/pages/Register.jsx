@@ -174,7 +174,7 @@ const Register = () => {
                  type="button"
                  onClick={handleGoogleLoginClick}
                  disabled={loading}
-                 className="w-full h-[56px] inline-flex items-center justify-center font-bold text-sm !rounded-2xl transition-all duration-200 focus:outline-none active:scale-[0.97] border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300 shadow-sm hover:shadow-md cursor-pointer relative"
+                 className="w-full h-[56px] inline-flex items-center justify-center font-bold text-sm !rounded-2xl transition-all duration-200 focus:outline-none active:scale-[0.97] border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300 shadow-sm hover:shadow-md cursor-pointer relative light-theme-forced"
                >
                  <div className="absolute left-6 flex items-center">
                    <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
