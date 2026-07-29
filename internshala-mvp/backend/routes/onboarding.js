@@ -1,12 +1,10 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
 const pool = require('../db/pool');
 const { authMiddleware } = require('./auth');
+const sms = require('../utils/sms');
 
 const router = express.Router();
-const SALT_ROUNDS = 10;
 
-// Helper to map profile (matches backend/routes/auth.js structure)
 function mapProfile(row) {
   if (!row) return {};
   return {
@@ -51,27 +49,25 @@ router.post('/send-phone-otp', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Please enter a valid phone number (minimum 8 digits).' });
     }
 
-    // Generate secure 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpHash = await bcrypt.hash(otp, SALT_ROUNDS);
-
-    // Upsert OTP details
+    // Store phone number for this user (MSG91 handles OTP lifecycle)
     await pool.query(
-      `INSERT INTO phone_otps (user_id, phone_number, otp_code, expires_at, attempts, last_sent_at)
-       VALUES ($1, $2, $3, NOW() + INTERVAL '10 minutes', 0, NOW())
+      `INSERT INTO phone_otps (user_id, phone_number, expires_at, attempts, last_sent_at)
+       VALUES ($1, $2, NOW() + INTERVAL '10 minutes', 0, NOW())
        ON CONFLICT (user_id) DO UPDATE SET
          phone_number = EXCLUDED.phone_number,
-         otp_code = EXCLUDED.otp_code,
          expires_at = EXCLUDED.expires_at,
          attempts = 0,
          last_sent_at = EXCLUDED.last_sent_at`,
-      [userId, cleanPhone, otpHash]
+      [userId, cleanPhone]
     );
 
-    // Log the SMS OTP to the console for dev testing
-    console.log(`\n==========================================`);
-    console.log(`[LOCAL DEV SMS] Phone: ${cleanPhone}, OTP: ${otp}`);
-    console.log(`==========================================\n`);
+    try {
+      const msgRes = await sms.sendOtp(cleanPhone);
+      console.log(`[MSG91] OTP sent to ${cleanPhone} — request_id: ${msgRes.request_id}`);
+    } catch (smsErr) {
+      console.error('[MSG91] Send error:', smsErr.message);
+      return res.status(500).json({ error: 'Failed to send SMS. Please try again.' });
+    }
 
     res.json({ message: 'Verification OTP sent successfully.' });
   } catch (err) {
@@ -106,26 +102,25 @@ router.post('/resend-phone-otp', authMiddleware, async (req, res) => {
       }
     }
 
-    // Generate and store new OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpHash = await bcrypt.hash(otp, SALT_ROUNDS);
-
+    // Update sent time
     await pool.query(
-      `INSERT INTO phone_otps (user_id, phone_number, otp_code, expires_at, attempts, last_sent_at)
-       VALUES ($1, $2, $3, NOW() + INTERVAL '10 minutes', 0, NOW())
+      `INSERT INTO phone_otps (user_id, phone_number, expires_at, attempts, last_sent_at)
+       VALUES ($1, $2, NOW() + INTERVAL '10 minutes', 0, NOW())
        ON CONFLICT (user_id) DO UPDATE SET
          phone_number = EXCLUDED.phone_number,
-         otp_code = EXCLUDED.otp_code,
          expires_at = EXCLUDED.expires_at,
          attempts = 0,
          last_sent_at = EXCLUDED.last_sent_at`,
-      [userId, cleanPhone, otpHash]
+      [userId, cleanPhone]
     );
 
-    // Log the SMS OTP to the console
-    console.log(`\n==========================================`);
-    console.log(`[LOCAL DEV SMS] Phone: ${cleanPhone}, OTP: ${otp}`);
-    console.log(`==========================================\n`);
+    try {
+      const msgRes = await sms.retryOtp(cleanPhone);
+      console.log(`[MSG91] OTP resent to ${cleanPhone} — request_id: ${msgRes.request_id}`);
+    } catch (smsErr) {
+      console.error('[MSG91] Resend error:', smsErr.message);
+      return res.status(500).json({ error: 'Failed to resend SMS. Please try again.' });
+    }
 
     res.json({ message: 'A new verification OTP has been sent to your phone.' });
   } catch (err) {
@@ -150,7 +145,7 @@ router.post('/verify-phone-otp', authMiddleware, async (req, res) => {
     }
 
     const result = await pool.query(
-      'SELECT phone_number, otp_code, expires_at, attempts FROM phone_otps WHERE user_id = $1',
+      'SELECT phone_number, expires_at FROM phone_otps WHERE user_id = $1',
       [userId]
     );
 
@@ -158,42 +153,39 @@ router.post('/verify-phone-otp', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'No verification request found. Please request an OTP first.' });
     }
 
-    const verification = result.rows[0];
+    const { phone_number, expires_at } = result.rows[0];
 
-    // Check attempts limit (5)
-    if (verification.attempts >= 5) {
-      return res.status(400).json({ error: 'Maximum attempts exceeded. Please request a new OTP.' });
-    }
-
-    // Check expiry
-    const expiry = new Date(verification.expires_at);
-    if (expiry < new Date()) {
+    // Check expiry on our end
+    if (new Date(expires_at) < new Date()) {
       return res.status(400).json({ error: 'OTP expired. Please resend OTP.' });
     }
 
-    // Compare OTP via bcrypt
-    const valid = await bcrypt.compare(cleanOtp, verification.otp_code);
-    if (!valid) {
-      const newAttempts = verification.attempts + 1;
-      await pool.query('UPDATE phone_otps SET attempts = $1 WHERE user_id = $2', [newAttempts, userId]);
-      
-      const remaining = 5 - newAttempts;
-      if (remaining <= 0) {
-        return res.status(400).json({ error: 'Maximum attempts exceeded. Please request a new OTP.' });
+    // Verify OTP via MSG91
+    let verified = false;
+    try {
+      const verifyRes = await sms.verifyOtp(phone_number, cleanOtp);
+      verified = verifyRes.type === 'success';
+    } catch (verifyErr) {
+      console.error('[MSG91] Verify error:', verifyErr.response?.data || verifyErr.message);
+      // MSG91 returns error type 'error' for invalid OTP
+      if (verifyErr.response?.data?.type === 'error') {
+        return res.status(400).json({ error: 'Invalid OTP. Please try again.' });
       }
+      return res.status(500).json({ error: 'Failed to verify OTP. Please try again.' });
+    }
+
+    if (!verified) {
       return res.status(400).json({ error: 'Invalid OTP. Please try again.' });
     }
 
     // Success! Update profile
     await pool.query(
       'UPDATE profiles SET phone_verified = true, contact_number = $1 WHERE user_id = $2',
-      [verification.phone_number, userId]
+      [phone_number, userId]
     );
 
-    // Delete phone OTP record (single-use)
     await pool.query('DELETE FROM phone_otps WHERE user_id = $1', [userId]);
 
-    // Retrieve updated profile details to return to the frontend
     const profileResult = await pool.query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
     const profile = profileResult.rows[0] || {};
 

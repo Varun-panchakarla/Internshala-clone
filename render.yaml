@@ -3,8 +3,9 @@ services:
     name: incuxai-careers
     runtime: node
     plan: free
-    buildCommand: cd internshala-mvp && npm install && cd backend && npm install && cd .. && npm run build
-    startCommand: cd internshala-mvp/backend && node server.js
+    rootDir: internshala-mvp
+    buildCommand: npm install --include=dev && cd backend && npm install && cd .. && npm run build
+    startCommand: cd backend && node server.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
@@ -31,27 +32,9 @@ services:
         sync: false
       - key: VITE_GOOGLE_CLIENT_ID
         sync: false
-      - key: VITE_API_URL
+      - key: MSG91_AUTH_KEY
         sync: false
-      - key: TWILIO_ACCOUNT_SID
+      - key: MSG91_SENDER_ID
         sync: false
-      - key: TWILIO_AUTH_TOKEN
-        sync: false
-      - key: TWILIO_PHONE_NUMBER
-        sync: false
-      - key: TWILIO_MESSAGING_SERVICE_SID
-        sync: false
-
-  - type: static
-    name: incuxai-careers-static
-    buildCommand: cd internshala-mvp && npm install && npm run build
-    publishPath: internshala-mvp/dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
-      - key: VITE_GOOGLE_CLIENT_ID
-        sync: false
-      - key: VITE_API_URL
+      - key: MSG91_OTP_TEMPLATE_ID
         sync: false

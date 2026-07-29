@@ -328,10 +328,6 @@ const Onboarding = () => {
       if (!schoolName.trim()) tempErrors.schoolName = 'School name is required.';
     }
 
-    if (!phoneVerified) {
-      tempErrors.contactNumber = 'Please verify your phone number with OTP.';
-    }
-
     if (isSubmitting) {
       setErrors(tempErrors);
     }
@@ -378,9 +374,8 @@ const Onboarding = () => {
 
   // Form validity check for disabled state of button
   const isFormFilled = () => {
-    if (!phoneVerified) return false;
     const courseValue = customCourseActive ? customCourse.trim() : course;
-    const personalFilled = firstName.trim() && lastName.trim() && contactNumber.trim() && currentCity.trim() && gender && phoneVerified;
+    const personalFilled = firstName.trim() && lastName.trim() && contactNumber.trim() && currentCity.trim() && gender;
     
     if (!personalFilled) return false;
 
@@ -483,6 +478,7 @@ const Onboarding = () => {
                 <label htmlFor="contactNumber" className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center">
                   Contact Number
                   <span className="text-rose-500 ml-0.5">*</span>
+                  {!phoneVerified && <span className="ml-2 text-[10px] font-medium text-slate-400 dark:text-slate-500">(Verify for better reach)</span>}
                 </label>
                 <div className="flex gap-3 items-center">
                   <input
