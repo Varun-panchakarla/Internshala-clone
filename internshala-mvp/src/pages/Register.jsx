@@ -193,7 +193,7 @@ const Register = () => {
 
           {!showEmailForm ? (
             <div className="flex flex-col gap-4">
-               <div ref={googleContainerRef} className="google-signin-wrapper w-full overflow-hidden rounded-xl">
+               <div ref={googleContainerRef} className="google-signin-wrapper w-full overflow-hidden rounded-xl h-[40px]">
                  {googleButtonWidth ? (
                    <GoogleLogin
                      theme="outline"
@@ -205,7 +205,7 @@ const Register = () => {
                      onError={() => addToast('Google sign-in failed.', 'error')}
                    />
                  ) : (
-                   <div className="w-full h-[44px] bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800 animate-pulse" />
+                   <div className="w-full h-[40px] bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800 animate-pulse" />
                  )}
                </div>
 
@@ -223,7 +223,7 @@ const Register = () => {
 
               <Button
                 variant="primary"
-                className="w-full py-3.5 font-bold"
+                className="w-full py-2.5 font-bold"
                 onClick={() => setShowEmailForm(true)}
               >
                 <FiMail className="mr-2 w-4.5 h-4.5" />
@@ -291,7 +291,7 @@ const Register = () => {
               <Button
                 type="submit"
                 variant="primary"
-                className="w-full py-3 mt-2"
+                className="w-full py-2.5 mt-2"
                 loading={loading}
               >
                 Sign Up <FiChevronRight className="ml-1.5 w-4 h-4" />
