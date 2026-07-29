@@ -63,6 +63,7 @@ const resumeRouter = require('./routes/resume.js');
 const adminRouter = require('./routes/admin.js');
 const issuesRouter = require('./routes/issues.js');
 const onboardingRouter = require('./routes/onboarding.js');
+const { router: employerAuthRouter } = require('./routes/employerAuth.js');
 
 app.use('/api/auth', authRouter);
 app.use('/api/profile', profileRouter);
@@ -73,6 +74,7 @@ app.use('/api/resume', resumeRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/issues', issuesRouter);
 app.use('/api/onboarding', onboardingRouter);
+app.use('/api/employer', employerAuthRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -167,6 +169,51 @@ async function initDb() {
       expires_at TIMESTAMPTZ NOT NULL,
       attempts INTEGER DEFAULT 0,
       last_sent_at TIMESTAMPTZ DEFAULT NOW(),
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS employers (
+      id SERIAL PRIMARY KEY,
+      company_name VARCHAR(255) NOT NULL,
+      recruiter_name VARCHAR(255) NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      phone VARCHAR(20) NOT NULL,
+      website VARCHAR(255),
+      password_hash VARCHAR(255) NOT NULL,
+      email_verified BOOLEAN DEFAULT false,
+      otp_code VARCHAR(255),
+      otp_expires_at TIMESTAMPTZ,
+      otp_attempts INTEGER DEFAULT 0,
+      last_otp_sent_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS employer_profiles (
+      id SERIAL PRIMARY KEY,
+      employer_id INTEGER UNIQUE REFERENCES employers(id) ON DELETE CASCADE,
+      company_logo TEXT,
+      industry VARCHAR(255),
+      company_size VARCHAR(100),
+      founded_year VARCHAR(10),
+      website VARCHAR(255),
+      linkedin VARCHAR(255),
+      description TEXT,
+      headquarters VARCHAR(255),
+      office_locations TEXT,
+      hiring_locations TEXT,
+      work_mode VARCHAR(100),
+      designation VARCHAR(255),
+      department VARCHAR(255),
+      official_phone VARCHAR(20),
+      onboarding_completed BOOLEAN DEFAULT false,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS employer_password_resets (
+      id SERIAL PRIMARY KEY,
+      employer_id INTEGER REFERENCES employers(id) ON DELETE CASCADE,
+      token VARCHAR(255) UNIQUE NOT NULL,
+      used BOOLEAN DEFAULT FALSE,
+      expires_at TIMESTAMPTZ NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )`
   ];

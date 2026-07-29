@@ -24,6 +24,19 @@ export const authService = {
   verifyPhoneOtp: (otp) => api.post('/onboarding/verify-phone-otp', { otp }),
 };
 
+export const employerService = {
+  login: (email, password) => api.post('/employer/auth/login', { email, password }),
+  register: (data) => api.post('/employer/auth/register', data),
+  verifyOtp: (email, otp) => api.post('/employer/auth/verify-email', { email, otp }),
+  resendOtp: (email) => api.post('/employer/auth/resend-otp', { email }),
+  forgotPassword: (email) => api.post('/employer/auth/forgot-password', { email }),
+  resetPassword: (token, password) => api.post('/employer/auth/reset-password', { token, password }),
+  logout: () => api.post('/employer/auth/logout'),
+  getCurrentEmployer: () => api.get('/employer/auth/me'),
+  getProfile: () => api.get('/employer/profile'),
+  updateProfile: (profileData) => api.put('/employer/profile', profileData),
+};
+
 export const jobService = {
   getAllJobs: (params) => api.get('/jobs', { params }),
   getJobById: (id) => api.get(`/jobs/${id}`),
