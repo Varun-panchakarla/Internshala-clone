@@ -131,6 +131,7 @@ async function initDb() {
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_attempts INTEGER DEFAULT 0",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_otp_sent_at TIMESTAMPTZ",
     "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN DEFAULT true",
+    "ALTER TABLE phone_otps ALTER COLUMN otp_code DROP NOT NULL",
     `CREATE TABLE IF NOT EXISTS phone_otps (
       id SERIAL PRIMARY KEY,
       user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
