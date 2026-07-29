@@ -152,7 +152,7 @@ const Login = () => {
                  <p className="text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed">
                    This account is configured to use Google Sign-in. Please use the button below to log in.
                  </p>
-                 <div ref={googleContainerRef} className="google-signin-wrapper w-full overflow-hidden rounded-xl">
+                 <div ref={googleContainerRef} className="google-signin-wrapper w-full overflow-hidden rounded-xl h-[40px]">
                    {googleButtonWidth ? (
                      <GoogleLogin
                        theme="outline"
@@ -164,14 +164,14 @@ const Login = () => {
                        onError={() => addToast('Google sign-in failed.', 'error')}
                      />
                    ) : (
-                     <div className="w-full h-[44px] bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800 animate-pulse" />
+                     <div className="w-full h-[40px] bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800 animate-pulse" />
                    )}
                  </div>
                </div>
              )}
 
              {!googleUserError && (
-               <div ref={googleContainerRef} className="google-signin-wrapper w-full overflow-hidden rounded-xl">
+               <div ref={googleContainerRef} className="google-signin-wrapper w-full overflow-hidden rounded-xl h-[40px]">
                  {googleButtonWidth ? (
                    <GoogleLogin
                      theme="outline"
@@ -183,7 +183,7 @@ const Login = () => {
                      onError={() => addToast('Google sign-in failed.', 'error')}
                    />
                  ) : (
-                   <div className="w-full h-[44px] bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800 animate-pulse" />
+                   <div className="w-full h-[40px] bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800 animate-pulse" />
                  )}
                </div>
              )}
@@ -236,7 +236,7 @@ const Login = () => {
             <Button
               type="submit"
               variant="primary"
-              className="w-full py-3"
+              className="w-full py-2.5"
               loading={loading}
             >
               Sign In <FiChevronRight className="ml-1.5 w-4 h-4" />
