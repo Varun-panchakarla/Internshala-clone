@@ -70,15 +70,12 @@ router.post('/send-phone-otp', authMiddleware, async (req, res) => {
     try {
       const msgRes = await sms.sendOtp(cleanPhone);
       console.log(`[MSG91] OTP sent to ${cleanPhone} — request_id: ${msgRes.request_id}`);
-      // DLT registration may be pending; return OTP so user can still test
-      console.log(`[MSG91] OTP for ${cleanPhone}: ${otp}`);
-      return res.json({ message: 'Verification OTP sent successfully.', otp });
     } catch (smsErr) {
       console.error('[MSG91] Send error:', smsErr.message);
-      // Fallback: log and return OTP
-      console.log(`[MSG91] OTP for ${cleanPhone}: ${otp}`);
-      return res.json({ message: 'OTP generated (MSG91 delivery pending). Use the code below.', otp });
+      return res.status(500).json({ error: 'Failed to send SMS. Please try again.' });
     }
+
+    res.json({ message: 'Verification OTP sent successfully.' });
   } catch (err) {
     console.error('[Onboarding SMS] Send OTP error:', err.message);
     res.status(500).json({ error: 'Failed to send phone verification OTP.' });
@@ -129,13 +126,12 @@ router.post('/resend-phone-otp', authMiddleware, async (req, res) => {
     try {
       const msgRes = await sms.retryOtp(cleanPhone);
       console.log(`[MSG91] OTP resent to ${cleanPhone} — request_id: ${msgRes.request_id}`);
-      console.log(`[MSG91] OTP for ${cleanPhone}: ${otp}`);
-      return res.json({ message: 'A new verification OTP has been sent to your phone.', otp });
     } catch (smsErr) {
       console.error('[MSG91] Resend error:', smsErr.message);
-      console.log(`[MSG91] OTP for ${cleanPhone}: ${otp}`);
-      return res.json({ message: 'OTP regenerated (MSG91 delivery pending). Use the code below.', otp });
+      return res.status(500).json({ error: 'Failed to resend SMS. Please try again.' });
     }
+
+    res.json({ message: 'A new verification OTP has been sent to your phone.' });
   } catch (err) {
     console.error('[Onboarding SMS] Resend OTP error:', err.message);
     res.status(500).json({ error: 'Failed to resend phone verification OTP.' });

@@ -67,7 +67,6 @@ const Onboarding = () => {
   const [sendingPhoneOtp, setSendingPhoneOtp] = useState(false);
   const [verifyingPhoneOtp, setVerifyingPhoneOtp] = useState(false);
   const [otpError, setOtpError] = useState('');
-  const [devOtp, setDevOtp] = useState('');
 
   // Years generation lists
   const currentYear = new Date().getFullYear();
@@ -172,13 +171,9 @@ const Onboarding = () => {
 
     setSendingPhoneOtp(true);
     setOtpError('');
-    setDevOtp('');
     try {
-      const res = await authService.sendPhoneOtp(cleanPhone);
-      if (res.data?.otp) {
-        setDevOtp(res.data.otp);
-      }
-      addToast(res.data?.message || 'Verification code sent.', 'success');
+      await authService.sendPhoneOtp(cleanPhone);
+      addToast('Verification code sent to your phone number.', 'success');
       setOtpSent(true);
       setPhoneTimer(60);
     } catch (err) {
@@ -194,13 +189,9 @@ const Onboarding = () => {
     
     setSendingPhoneOtp(true);
     setOtpError('');
-    setDevOtp('');
     try {
-      const res = await authService.resendPhoneOtp(cleanPhone);
-      if (res.data?.otp) {
-        setDevOtp(res.data.otp);
-      }
-      addToast(res.data?.message || 'A new verification code has been sent.', 'success');
+      await authService.resendPhoneOtp(cleanPhone);
+      addToast('A new verification code has been sent to your phone.', 'success');
       setPhoneTimer(60);
       setPhoneOtp('');
     } catch (err) {
@@ -567,14 +558,6 @@ const Onboarding = () => {
                       <span className="text-xs text-rose-500 font-bold animate-fade-in">
                         {otpError}
                       </span>
-                    )}
-
-                    {devOtp && (
-                      <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl animate-fade-in">
-                        <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">Your OTP Code</p>
-                        <p className="font-mono text-2xl font-black text-amber-700 dark:text-amber-300 tracking-[0.3em]">{devOtp}</p>
-                        <p className="text-[9px] text-amber-500 dark:text-amber-500 mt-1">DLT registration pending — SMS may not arrive. Use this code to verify.</p>
-                      </div>
                     )}
 
                     <div className="flex items-center gap-3">
