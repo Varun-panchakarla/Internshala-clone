@@ -18,7 +18,16 @@ import {
   FiCalendar,
   FiBell,
   FiEdit2,
-  FiSearch
+  FiSearch,
+  FiFileText,
+  FiDownload,
+  FiExternalLink,
+  FiMail,
+  FiPhone,
+  FiX,
+  FiBookOpen,
+  FiAward,
+  FiCheck
 } from 'react-icons/fi';
 import Logo from '../../components/common/Logo';
 import Button from '../../components/common/Button';
@@ -43,6 +52,188 @@ const EmployerDashboard = () => {
   const companyInitial = currentEmployer?.companyName
     ? currentEmployer.companyName.charAt(0).toUpperCase()
     : 'C';
+
+  // --- MOCK CANDIDATES DATA ---
+  const mockCandidates = {
+    'Rahul Sharma': {
+      name: 'Rahul Sharma',
+      email: 'rahul.sharma@example.com',
+      phone: '+91 9876543210',
+      location: 'Bangalore, India',
+      experience: 'Frontend Developer Intern at TechCorp (6 months), Freelance React Dev (1 year)',
+      skills: 'React, Tailwind CSS, JavaScript, TypeScript, Redux, Git',
+      education: 'B.Tech in Computer Science, IIT Bombay (2025)',
+      projects: 'E-commerce Store Front, Personal Portfolio with dark mode',
+      certifications: 'Meta Frontend Developer Professional Certificate',
+      resumeUrl: 'rahul_sharma_resume.pdf'
+    },
+    'Priya Patel': {
+      name: 'Priya Patel',
+      email: 'priya.patel@example.com',
+      phone: '+91 8765432109',
+      location: 'Mumbai, India',
+      experience: 'Backend Intern at DevSolutions (4 months), Open Source Contributor to Node.js',
+      skills: 'Node.js, Express, PostgreSQL, MongoDB, REST APIs, Docker',
+      education: 'B.E. in Information Technology, K.J. Somaiya (2024)',
+      projects: 'Realtime Chat Application, REST API Gateway for microservices',
+      certifications: 'AWS Certified Developer Associate',
+      resumeUrl: 'priya_patel_resume.pdf'
+    },
+    'Dev Dixit': {
+      name: 'Dev Dixit',
+      email: 'dev.dixit@example.com',
+      phone: '+91 7654321098',
+      location: 'Delhi, India',
+      experience: 'Python Intern at DataMetrics (6 months)',
+      skills: 'Python, Django, FastAPI, SQL, Pandas, NumPy, Machine Learning Basics',
+      education: 'M.Sc. in Data Science, Delhi University (2025)',
+      projects: 'Predictive Sales Dashboard, Scraper for Job Boards',
+      certifications: 'Google Advanced Data Analytics Certificate',
+      resumeUrl: 'dev_dixit_resume.pdf'
+    },
+    'Jane Doe': {
+      name: 'Jane Doe',
+      email: 'jane.doe@example.com',
+      phone: '+91 6543210987',
+      location: 'Remote, India',
+      experience: 'Software Intern at IncuxAI (8 months), Web Dev Intern at StartCorp (3 months)',
+      skills: 'React, Node.js, Express, MongoDB, Tailwind CSS, REST APIs',
+      education: 'B.Tech in Computer Engineering, NIT Trichy (2024)',
+      projects: 'AI Interview Prep portal, Company Workspace Dashboard',
+      certifications: 'IncuxAI Hiring Certified Developer',
+      resumeUrl: 'jane_doe_resume.pdf'
+    }
+  };
+
+  // --- CORE STATE ---
+  const [jobs, setJobs] = React.useState([
+    { id: 1, title: 'Frontend Developer', type: 'Full-time', status: 'Active', applicants: 45, views: 320, date: '2 days ago', location: 'Bangalore, India', salary: '$80,000 - $100,000', experience: '1-3 years', skills: 'React, Tailwind CSS, JavaScript', description: 'We are looking for a skilled Frontend Developer to build clean, responsive, and performant web interfaces.' },
+    { id: 2, title: 'Backend Node.js Engineer', type: 'Full-time', status: 'Active', applicants: 29, views: 198, date: '4 days ago', location: 'Remote, India', salary: '$90,000 - $120,000', experience: '3+ years', skills: 'Node.js, Express, PostgreSQL', description: 'Join us to design and scale powerful microservices, data schemas, and API gateways.' },
+    { id: 3, title: 'Product Management Intern', type: 'Internship', status: 'Closed', applicants: 112, views: 840, date: '1 week ago', location: 'Mumbai, India', salary: '$20,000 - $30,000 / month', experience: 'No experience required', skills: 'Product Strategy, Agile, Wireframing', description: 'An internship role for aspiring Product Managers to shadow senior leads, draft product specs, and coordinate sprints.' },
+  ]);
+
+  const [applications, setApplications] = React.useState([
+    { name: 'Rahul Sharma', role: 'Frontend Developer', time: '12 mins ago' },
+    { name: 'Priya Patel', role: 'Backend Engineer', time: '1 hour ago' },
+    { name: 'Dev Dixit', role: 'Python Developer', time: '3 hours ago' }
+  ]);
+
+  // Modals state
+  const [isJobModalOpen, setIsJobModalOpen] = React.useState(false);
+  const [jobModalMode, setJobModalMode] = React.useState('create'); // 'create' or 'edit'
+  const [editingJobId, setEditingJobId] = React.useState(null);
+  
+  // Job Form state
+  const [jobForm, setJobForm] = React.useState({
+    title: '',
+    companyName: currentEmployer?.companyName || '',
+    location: '',
+    salaryRange: '',
+    experienceRequired: '',
+    employmentType: 'Full-time',
+    skills: '',
+    description: ''
+  });
+
+  // Applicants List modal state
+  const [isApplicantsModalOpen, setIsApplicantsModalOpen] = React.useState(false);
+  const [activeJobForApplicants, setActiveJobForApplicants] = React.useState(null);
+
+  // Selected Candidate Profile modal state
+  const [selectedCandidate, setSelectedCandidate] = React.useState(null);
+
+  // --- ACTIONS HANDLERS ---
+  const handleOpenPostJob = () => {
+    setJobForm({
+      title: '',
+      companyName: currentEmployer?.companyName || '',
+      location: '',
+      salaryRange: '',
+      experienceRequired: '',
+      employmentType: 'Full-time',
+      skills: '',
+      description: ''
+    });
+    setJobModalMode('create');
+    setIsJobModalOpen(true);
+  };
+
+  const handleOpenEditJob = (job) => {
+    setJobForm({
+      title: job.title,
+      companyName: currentEmployer?.companyName || '',
+      location: job.location || '',
+      salaryRange: job.salary || '',
+      experienceRequired: job.experience || '',
+      employmentType: job.type || 'Full-time',
+      skills: job.skills || '',
+      description: job.description || ''
+    });
+    setEditingJobId(job.id);
+    setJobModalMode('edit');
+    setIsJobModalOpen(true);
+  };
+
+  const handleJobSubmit = (e) => {
+    e.preventDefault();
+    if (!jobForm.title.trim()) {
+      addToast('Job title is required.', 'error');
+      return;
+    }
+    
+    if (jobModalMode === 'create') {
+      const newJob = {
+        id: Date.now(),
+        title: jobForm.title,
+        type: jobForm.employmentType,
+        status: 'Active',
+        applicants: 0,
+        views: 0,
+        date: 'Just now',
+        location: jobForm.location,
+        salary: jobForm.salaryRange,
+        experience: jobForm.experienceRequired,
+        skills: jobForm.skills,
+        description: jobForm.description
+      };
+      setJobs([newJob, ...jobs]);
+      addToast('Job posting created successfully!', 'success');
+    } else {
+      setJobs(jobs.map(j => j.id === editingJobId ? {
+        ...j,
+        title: jobForm.title,
+        type: jobForm.employmentType,
+        location: jobForm.location,
+        salary: jobForm.salaryRange,
+        experience: jobForm.experienceRequired,
+        skills: jobForm.skills,
+        description: jobForm.description
+      } : j));
+      addToast('Job posting updated successfully!', 'success');
+    }
+    setIsJobModalOpen(false);
+  };
+
+  const handleViewApplicants = (job) => {
+    setActiveJobForApplicants(job);
+    setIsApplicantsModalOpen(true);
+  };
+
+  const handleViewProfile = (candidateName) => {
+    const details = mockCandidates[candidateName] || {
+      name: candidateName,
+      email: `${candidateName.toLowerCase().replace(' ', '.')}@example.com`,
+      phone: '+91 9999999999',
+      location: 'Remote, India',
+      experience: 'Internship or project experience (6 months)',
+      skills: 'React, Node.js, Web Development',
+      education: 'B.Tech in Computer Science',
+      projects: 'Personal Web Project',
+      certifications: 'Standard Developer Certification',
+      resumeUrl: 'sample_resume.pdf'
+    };
+    setSelectedCandidate(details);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-955 font-sans flex flex-col transition-colors duration-200">
@@ -100,7 +291,7 @@ const EmployerDashboard = () => {
               />
             </div>
             <Button
-              onClick={() => addToast('Posting jobs is coming soon in your next developer build!', 'info')}
+              onClick={handleOpenPostJob}
               variant="primary"
               size="sm"
               className="font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1 cursor-pointer shrink-0"
@@ -209,12 +400,8 @@ const EmployerDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-slate-850/40 text-xs">
-                    {[
-                      { title: 'Frontend Developer', type: 'Full-time', status: 'Active', applicants: 45, views: 320, date: '2 days ago' },
-                      { title: 'Backend Node.js Engineer', type: 'Full-time', status: 'Active', applicants: 29, views: 198, date: '4 days ago' },
-                      { title: 'Product Management Intern', type: 'Internship', status: 'Closed', applicants: 112, views: 840, date: '1 week ago' },
-                    ].map((job, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/10 transition-colors">
+                    {jobs.map((job) => (
+                      <tr key={job.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/10 transition-colors">
                         <td className="py-3.5">
                           <span className="font-extrabold text-slate-800 dark:text-slate-100 block">{job.title}</span>
                           <span className="text-[10px] text-slate-400 font-semibold block">{job.type}</span>
@@ -233,13 +420,13 @@ const EmployerDashboard = () => {
                         <td className="py-3.5 text-slate-500 dark:text-slate-400 font-semibold">{job.date}</td>
                         <td className="py-3.5 text-right space-x-2">
                           <button
-                            onClick={() => addToast(`Opening applications pipeline for ${job.title}...`, 'info')}
+                            onClick={() => handleViewApplicants(job)}
                             className="px-2.5 py-1 text-[10px] font-bold text-sky-600 hover:text-sky-700 bg-sky-50 dark:bg-sky-950/20 rounded-lg hover:underline cursor-pointer border-none"
                           >
                             View Applicants
                           </button>
                           <button
-                            onClick={() => addToast(`Opening edit wizard for ${job.title}...`, 'info')}
+                            onClick={() => handleOpenEditJob(job)}
                             className="p-1.5 text-slate-400 hover:text-slate-655 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-850 rounded-lg inline-flex cursor-pointer"
                             title="Edit Listing"
                           >
@@ -340,7 +527,7 @@ const EmployerDashboard = () => {
                 </div>
 
                 <button
-                  onClick={() => addToast("Opening Jane Doe's resume matching dashboard report...", 'success')}
+                  onClick={() => handleViewProfile('Jane Doe')}
                   className="w-full text-center py-2 bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer border-none block"
                 >
                   Quick View Resume
@@ -357,19 +544,23 @@ const EmployerDashboard = () => {
             </div>
             
             <div className="divide-y divide-slate-50 dark:divide-slate-850/40 text-xs space-y-3.5">
-              {[
-                { name: 'Rahul Sharma', role: 'Frontend Developer', time: '12 mins ago' },
-                { name: 'Priya Patel', role: 'Backend Engineer', time: '1 hour ago' },
-                { name: 'Dev Dixit', role: 'Python Developer', time: '3 hours ago' }
-              ].map((app, idx) => (
+              {applications.map((app, idx) => (
                 <div key={idx} className="pt-3.5 flex justify-between items-center first:pt-0">
                   <div className="space-y-0.5">
                     <span className="font-extrabold text-slate-850 dark:text-slate-100 block">{app.name}</span>
                     <span className="text-[10px] text-slate-400 font-semibold block">{app.role}</span>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-850 px-2 py-0.5 rounded-lg border border-slate-100/50 dark:border-slate-800">
-                    {app.time}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-850 px-2 py-0.5 rounded-lg border border-slate-100/50 dark:border-slate-800 hidden sm:inline-block">
+                      {app.time}
+                    </span>
+                    <button
+                      onClick={() => handleViewProfile(app.name)}
+                      className="px-2.5 py-1 text-[10px] font-bold text-sky-600 hover:text-sky-700 bg-sky-50 dark:bg-sky-950/20 rounded-lg hover:underline cursor-pointer border-none"
+                    >
+                      View Profile
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
