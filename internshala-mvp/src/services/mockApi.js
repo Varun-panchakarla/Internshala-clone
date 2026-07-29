@@ -11,7 +11,7 @@ const api = axios.create({
 export const authService = {
   login: (email, password) => api.post('/auth/login', { email, password }),
   register: (name, email, password) => api.post('/auth/register', { name, email, password }),
-  googleAuth: (credential) => api.post('/auth/google', { credential }),
+  googleAuth: (payload) => api.post('/auth/google', typeof payload === 'string' ? { credential: payload } : payload),
   logout: () => api.post('/auth/logout'),
   getCurrentUser: () => api.get('/auth/me'),
   getProfile: () => api.get('/profile'),
@@ -22,6 +22,19 @@ export const authService = {
   sendPhoneOtp: (phoneNumber) => api.post('/onboarding/send-phone-otp', { phoneNumber }),
   resendPhoneOtp: (phoneNumber) => api.post('/onboarding/resend-phone-otp', { phoneNumber }),
   verifyPhoneOtp: (otp) => api.post('/onboarding/verify-phone-otp', { otp }),
+};
+
+export const employerService = {
+  login: (email, password) => api.post('/employer/auth/login', { email, password }),
+  register: (data) => api.post('/employer/auth/register', data),
+  verifyOtp: (email, otp) => api.post('/employer/auth/verify-email', { email, otp }),
+  resendOtp: (email) => api.post('/employer/auth/resend-otp', { email }),
+  forgotPassword: (email) => api.post('/employer/auth/forgot-password', { email }),
+  resetPassword: (token, password) => api.post('/employer/auth/reset-password', { token, password }),
+  logout: () => api.post('/employer/auth/logout'),
+  getCurrentEmployer: () => api.get('/employer/auth/me'),
+  getProfile: () => api.get('/employer/profile'),
+  updateProfile: (profileData) => api.put('/employer/profile', profileData),
 };
 
 export const jobService = {

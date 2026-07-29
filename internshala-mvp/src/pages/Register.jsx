@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
 import { FiMail, FiLock, FiUser, FiChevronRight, FiCheckCircle, FiArrowLeft } from 'react-icons/fi';
@@ -29,29 +29,6 @@ const Register = () => {
   const [errors, setErrors] = useState({});
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [googleScriptLoaded, setGoogleScriptLoaded] = useState(true);
-
-  const googleContainerRef = useRef(null);
-  const [googleButtonWidth, setGoogleButtonWidth] = useState(null);
-
-  useEffect(() => {
-    const measureWidth = () => {
-      if (googleContainerRef.current) {
-        const width = Math.min(400, Math.max(200, googleContainerRef.current.offsetWidth));
-        setGoogleButtonWidth(width);
-      }
-    };
-    const timer = setTimeout(measureWidth, 150);
-    return () => clearTimeout(timer);
-  }, []);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      if (typeof window !== 'undefined' && !window.google) {
-        setGoogleScriptLoaded(false);
-      }
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, []);
 
   const validate = () => {
     const tempErrors = {};
@@ -88,28 +65,29 @@ const Register = () => {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    if (!credentialResponse?.credential) {
-      addToast('Google authentication failed.', 'error');
-      return;
-    }
-    setLoading(true);
-    try {
-      const user = await googleLogin(credentialResponse.credential);
-      addToast('Registered successfully!', 'success');
-      
-      if (['admin', 'super_admin'].includes(user?.role)) {
-        navigate('/admin');
-      } else {
-        const onboardingCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`) === 'true';
-        navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
+  const handleGoogleLoginClick = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setLoading(true);
+      try {
+        const user = await googleLogin({ access_token: tokenResponse.access_token });
+        addToast('Registered successfully!', 'success');
+        
+        if (['admin', 'super_admin'].includes(user?.role)) {
+          navigate('/admin');
+        } else {
+          const onboardingCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`) === 'true';
+          navigate(onboardingCompleted ? '/dashboard' : '/onboarding');
+        }
+      } catch (err) {
+        addToast(err.response?.data?.error || 'Google sign-up failed.', 'error');
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      addToast(err.response?.data?.error || 'Google sign-up failed.', 'error');
-    } finally {
-      setLoading(false);
+    },
+    onError: () => {
+      addToast('Google sign-up failed.', 'error');
     }
-  };
+  });
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-slate-50 font-sans">
@@ -190,44 +168,57 @@ const Register = () => {
             <p className="text-sm text-slate-500 font-medium">Join us today to set up your profile and explore opportunities.</p>
           </div>
 
-          {!showEmailForm ? (
-            <div className="flex flex-col gap-4">
-              <div ref={googleContainerRef} className="google-signin-wrapper w-full overflow-hidden rounded-xl">
-                {googleButtonWidth ? (
-                  <GoogleLogin
-                    theme="outline"
-                    size="large"
-                    width={googleButtonWidth}
-                    text="continue_with"
-                    shape="rectangular"
-                    onSuccess={handleGoogleSuccess}
-                    onError={() => addToast('Google sign-in failed.', 'error')}
-                  />
-                ) : (
-                  <div className="w-full h-[44px] bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800 animate-pulse" />
-                )}
-              </div>
+           {!showEmailForm ? (
+             <div className="flex flex-col gap-4">
+               <button
+                 type="button"
+                 onClick={handleGoogleLoginClick}
+                 disabled={loading}
+                 className="w-full h-[56px] inline-flex items-center justify-center font-bold text-sm !rounded-2xl transition-all duration-200 focus:outline-none active:scale-[0.97] border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300 shadow-sm hover:shadow-md cursor-pointer relative light-theme-forced"
+               >
+                 <div className="absolute left-6 flex items-center">
+                   <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                     <path
+                       fill="#4285F4"
+                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                     />
+                     <path
+                       fill="#34A853"
+                       d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                     />
+                     <path
+                       fill="#FBBC05"
+                       d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                     />
+                     <path
+                       fill="#EA4335"
+                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                     />
+                   </svg>
+                 </div>
+                 <span className="text-slate-700">Continue with Google</span>
+               </button>
 
-              {!googleScriptLoaded && (
-                <p className="text-[11px] text-slate-500 font-semibold text-center leading-normal bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                  Having trouble seeing the Google button? Try disabling any active ad-blockers and refresh the page.
-                </p>
-              )}
+               {!googleScriptLoaded && (
+                 <p className="text-[11px] text-slate-500 font-semibold text-center leading-normal bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                   Having trouble seeing the Google button? Try disabling any active ad-blockers and refresh the page.
+                 </p>
+               )}
 
-              <div className="flex items-center my-2">
-                <div className="flex-grow border-t border-slate-100"></div>
-                <span className="flex-shrink mx-4 text-slate-400 text-xs font-bold uppercase tracking-wider">or</span>
-                <div className="flex-grow border-t border-slate-100"></div>
-              </div>
+               <div className="flex items-center my-2">
+                 <div className="flex-grow border-t border-slate-100"></div>
+                 <span className="flex-shrink mx-4 text-slate-400 text-xs font-bold uppercase tracking-wider">or</span>
+                 <div className="flex-grow border-t border-slate-100"></div>
+               </div>
 
-              <Button
-                variant="primary"
-                className="w-full py-3.5 font-bold"
-                onClick={() => setShowEmailForm(true)}
-              >
-                <FiMail className="mr-2 w-4.5 h-4.5" />
-                Continue with Email
-              </Button>
+               <Button
+                 variant="primary"
+                 className="w-full h-[56px] font-bold !rounded-2xl"
+                 onClick={() => setShowEmailForm(true)}
+               >
+                 <FiMail className="mr-2 w-4.5 h-4.5" />
+                 Continue with Email
+               </Button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -290,7 +281,7 @@ const Register = () => {
               <Button
                 type="submit"
                 variant="primary"
-                className="w-full py-3 mt-2"
+                className="w-full h-[56px] mt-2 !rounded-2xl"
                 loading={loading}
               >
                 Sign Up <FiChevronRight className="ml-1.5 w-4 h-4" />

@@ -185,49 +185,108 @@ router.get('/stats', async (req, res) => {
 // GET /api/admin/analytics - Real-time candidate sign-ups growth grouped by month
 router.get('/analytics', async (req, res) => {
   try {
-    const result = await pool.query(`
+    // 1. Candidate monthly trend (Total and Fresher)
+    const monthlyResult = await pool.query(`
       SELECT 
-        TO_CHAR(created_at, 'YYYY-MM') AS month_key,
-        TO_CHAR(created_at, 'Mon') AS month_label,
-        COUNT(*)::int AS count
-      FROM users
-      WHERE role = 'candidate'
-      GROUP BY TO_CHAR(created_at, 'YYYY-MM'), TO_CHAR(created_at, 'Mon')
+        TO_CHAR(u.created_at, 'YYYY-MM') AS month_key,
+        TO_CHAR(u.created_at, 'Mon') AS month_label,
+        COUNT(*)::int AS total_count,
+        COUNT(CASE WHEN COALESCE(p.experience, '') = 'Fresher' OR (p.resume_info->'onboardingData'->>'experienceYears') = '0' OR p.id IS NULL THEN 1 END)::int AS fresher_count
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.user_id
+      WHERE u.role = 'candidate'
+      GROUP BY TO_CHAR(u.created_at, 'YYYY-MM'), TO_CHAR(u.created_at, 'Mon')
       ORDER BY month_key ASC
     `);
-    
-    if (result.rows.length === 0) {
-      return res.json({ signups: [] });
+
+    // Define date boundaries
+    let minDateStr = new Date().toISOString().substring(0, 7) + '-01';
+    let maxDateStr = minDateStr;
+    if (monthlyResult.rows.length > 0) {
+      minDateStr = monthlyResult.rows[0].month_key + '-01';
+      maxDateStr = monthlyResult.rows[monthlyResult.rows.length - 1].month_key + '-01';
     }
 
-    const rows = result.rows;
-    const signups = [];
-    
-    const minDateStr = rows[0].month_key + '-01';
-    const maxDateStr = rows[rows.length - 1].month_key + '-01';
-    
-    let currentDate = new Date(minDateStr);
-    const maxDate = new Date(maxDateStr);
-    
-    while (currentDate <= maxDate) {
-      const year = currentDate.getFullYear();
-      const monthNum = String(currentDate.getMonth() + 1).padStart(2, '0');
-      const key = `${year}-${monthNum}`;
-      
-      const label = currentDate.toLocaleString('default', { month: 'short' });
-      const existingRow = rows.find(r => r.month_key === key);
-      
-      signups.push({
-        monthKey: key,
-        month: label,
-        count: existingRow ? existingRow.count : 0
-      });
-      
-      // Safe increment to avoid timezone overflow issues
-      currentDate.setMonth(currentDate.getMonth() + 1);
-    }
-    
-    res.json({ signups });
+    const fillMonthlyData = (rows) => {
+      const list = [];
+      let currentDate = new Date(minDateStr);
+      const maxDate = new Date(maxDateStr);
+      while (currentDate <= maxDate) {
+        const year = currentDate.getFullYear();
+        const monthNum = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const key = `${year}-${monthNum}`;
+        const label = currentDate.toLocaleString('default', { month: 'short' });
+        const existingRow = rows.find(r => r.month_key === key);
+        list.push({
+          monthKey: key,
+          month: label,
+          count: existingRow ? existingRow.total_count : 0,
+          fresherCount: existingRow ? existingRow.fresher_count : 0
+        });
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
+      return list;
+    };
+
+    const signups = fillMonthlyData(monthlyResult.rows);
+
+    // 2. Student Experience Distribution Categories
+    const expRes = await pool.query(`
+      SELECT 
+        category,
+        COUNT(*)::int AS count
+      FROM (
+        SELECT 
+          CASE 
+            WHEN COALESCE(p.experience, '') = 'Fresher' OR (p.resume_info->'onboardingData'->>'experienceYears') = '0' OR p.id IS NULL THEN 'Freshers'
+            WHEN COALESCE(p.experience, '') IN ('0-1 Years', '0-1 years') OR (p.resume_info->'onboardingData'->>'experienceYears') = '1' THEN '0-1 Years'
+            WHEN COALESCE(p.experience, '') IN ('1-3 Years', '1-3 years') OR (p.resume_info->'onboardingData'->>'experienceYears') IN ('2', '3') THEN '1-3 Years'
+            WHEN COALESCE(p.experience, '') IN ('3-5 Years', '3-5 years', '3+ Years', '3+ years') OR (p.resume_info->'onboardingData'->>'experienceYears') IN ('4', '5') THEN '3-5 Years'
+            ELSE '5+ Years'
+          END AS category
+        FROM users u
+        LEFT JOIN profiles p ON u.id = p.user_id
+        WHERE u.role = 'candidate'
+      ) sub
+      GROUP BY category
+    `);
+
+    const expCategories = ['Freshers', '0-1 Years', '1-3 Years', '3-5 Years', '5+ Years'];
+    const experienceDistribution = expCategories.map(c => {
+      const existing = expRes.rows.find(r => r.category === c);
+      return {
+        category: c,
+        count: existing ? existing.count : 0
+      };
+    });
+
+    // 3. Student Registration Trend (Daily for the last 30 days)
+    const dailyRes = await pool.query(`
+      SELECT 
+        TO_CHAR(d.day, 'YYYY-MM-DD') AS date_key,
+        TO_CHAR(d.day, 'DD Mon') AS date_label,
+        COALESCE(COUNT(u.id), 0)::int AS count
+      FROM generate_series(
+        CURRENT_DATE - INTERVAL '29 days',
+        CURRENT_DATE,
+        '1 day'::interval
+      ) d(day)
+      LEFT JOIN users u ON DATE(u.created_at) = DATE(d.day) AND u.role = 'candidate'
+      GROUP BY d.day
+      ORDER BY d.day ASC
+    `);
+
+    const dailyTrend = dailyRes.rows.map(r => ({
+      dateKey: r.date_key,
+      label: r.date_label,
+      count: r.count
+    }));
+
+    res.json({
+      signups,
+      experienceDistribution,
+      dailyTrend
+    });
   } catch (err) {
     console.error('[Admin Analytics Route] Error:', err.message);
     res.status(500).json({ error: 'Failed to fetch analytics data.' });
@@ -270,9 +329,21 @@ router.get('/users', async (req, res) => {
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 
-    const dataRes = await pool.query(usersQuery, [...params, parseInt(limit), offset]);
+    console.log('[Backend GET /users] Executing SQL Query:', usersQuery);
+    console.log('[Backend GET /users] Query params:', [...params, parseInt(limit), offset]);
 
-    res.json({ users: dataRes.rows, total, page: parseInt(page), limit: parseInt(limit) });
+    const dataRes = await pool.query(usersQuery, [...params, parseInt(limit), offset]);
+    console.log('[Backend GET /users] Rows returned:', dataRes.rows.length);
+
+    const users = dataRes.rows.map(row => ({
+      ...row,
+      academicBackground: row.college ? `${row.college} (${row.degree || 'N/A'})` : 'No academic data'
+    }));
+
+    const responsePayload = { users, total, page: parseInt(page), limit: parseInt(limit) };
+    console.log('[Backend GET /users] Sending response payload:', responsePayload);
+
+    res.json(responsePayload);
   } catch (err) {
     console.error('[Admin Users List] Error:', err.message);
     res.status(500).json({ error: 'Failed to fetch users.' });
@@ -393,19 +464,31 @@ router.get('/jobs', async (req, res) => {
 
     const jobsQuery = `
       SELECT id, title, company, location, employment_type, experience,
-             salary_min, salary_max, description, skills, source,
+             salary, description, skills, source,
              company_logo as "companyLogo", logo_color as "logoColor", logo_text as "logoText",
-             match_score as "matchScore", is_featured as "isFeatured",
-             created_at, updated_at
+             match_score as "matchScore", false as "isFeatured",
+             created_at, created_at as updated_at
       FROM jobs
       ${whereClause}
       ORDER BY created_at DESC
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 
-    const dataRes = await pool.query(jobsQuery, [...params, parseInt(limit), offset]);
+    console.log('[Backend GET /jobs] Executing SQL Query:', jobsQuery);
+    console.log('[Backend GET /jobs] Query params:', [...params, parseInt(limit), offset]);
 
-    res.json({ jobs: dataRes.rows, total, page: parseInt(page), limit: parseInt(limit) });
+    const dataRes = await pool.query(jobsQuery, [...params, parseInt(limit), offset]);
+    console.log('[Backend GET /jobs] Rows returned:', dataRes.rows.length);
+
+    const jobs = dataRes.rows.map(row => ({
+      ...row,
+      status: 'active'
+    }));
+
+    const responsePayload = { jobs, total, page: parseInt(page), limit: parseInt(limit) };
+    console.log('[Backend GET /jobs] Sending response payload:', responsePayload);
+
+    res.json(responsePayload);
   } catch (err) {
     console.error('[Admin Jobs List] Error:', err.message);
     res.status(500).json({ error: 'Failed to fetch jobs.' });

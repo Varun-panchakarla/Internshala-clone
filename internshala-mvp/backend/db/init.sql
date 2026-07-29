@@ -152,3 +152,58 @@ VALUES
 ('simple-ats', 'Simple ATS', 'Maximum ATS compatibility. Pure text, no formatting issues — guaranteed to parse.', 'ATS Optimized', true, false, false, true, $$["Best ATS Score", "Safe"]$$::jsonb, '#374151', $${"headerBg": "#ffffff", "headerColor": "#111827", "accentBar": "#9ca3af", "bodyFont": "\"Arial\", sans-serif", "sectionColor": "#111827", "chipBg": "#ffffff", "chipBd": "#9ca3af"}$$, true),
 ('corporate', 'Corporate', 'Professional header gradient with structured layout. Great for banking and consulting.', 'Corporate', true, false, false, false, $$["ATS Friendly", "Structured"]$$::jsonb, '#0369a1', $${"headerBg": "#0369a1", "headerColor": "#ffffff", "accentBar": "#0369a1", "bodyFont": "\"Arial\", sans-serif", "sectionColor": "#0369a1", "chipBg": "#e0f2fe", "chipBd": "#7dd3fc"}$$, true)
 ON CONFLICT (id) DO NOTHING;
+
+-- Employers table
+CREATE TABLE IF NOT EXISTS employers (
+  id SERIAL PRIMARY KEY,
+  company_name VARCHAR(255) NOT NULL,
+  recruiter_name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  website VARCHAR(255),
+  password_hash VARCHAR(255) NOT NULL,
+  email_verified BOOLEAN DEFAULT false,
+  otp_code VARCHAR(255),
+  otp_expires_at TIMESTAMPTZ,
+  otp_attempts INTEGER DEFAULT 0,
+  last_otp_sent_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Employer profiles table
+CREATE TABLE IF NOT EXISTS employer_profiles (
+  id SERIAL PRIMARY KEY,
+  employer_id INTEGER UNIQUE REFERENCES employers(id) ON DELETE CASCADE,
+  company_logo TEXT,
+  industry VARCHAR(255),
+  company_size VARCHAR(100),
+  founded_year VARCHAR(10),
+  website VARCHAR(255),
+  linkedin VARCHAR(255),
+  description TEXT,
+  headquarters VARCHAR(255),
+  office_locations TEXT,
+  hiring_locations TEXT,
+  work_mode VARCHAR(100),
+  designation VARCHAR(255),
+  department VARCHAR(255),
+  official_phone VARCHAR(20),
+  onboarding_completed BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Employer password resets table
+CREATE TABLE IF NOT EXISTS employer_password_resets (
+  id SERIAL PRIMARY KEY,
+  employer_id INTEGER REFERENCES employers(id) ON DELETE CASCADE,
+  token VARCHAR(255) UNIQUE NOT NULL,
+  used BOOLEAN DEFAULT FALSE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes for employer lookups
+CREATE INDEX IF NOT EXISTS idx_employers_email ON employers(email);
+CREATE INDEX IF NOT EXISTS idx_employer_password_resets_token ON employer_password_resets(token);

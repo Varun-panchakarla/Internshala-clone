@@ -323,6 +323,27 @@ async function sendOtpEmail({ email, name, otp }) {
   });
 }
 
+async function sendEmployerOtpEmail({ email, name, otp }) {
+  if (process.env.NODE_ENV !== 'production' || !SENDGRID_KEY) {
+    console.log(`\n==========================================`);
+    console.log(`[LOCAL DEV EMPLOYER OTP] Email: ${email}, OTP: ${otp}`);
+    console.log(`==========================================\n`);
+  }
+  return send({
+    to: email,
+    subject: `Verify your email - IncuXAI Recruiter`,
+    html: otpHTML(name, otp)
+  });
+}
+
+async function sendEmployerPasswordResetEmail(employer, resetUrl) {
+  return send({
+    to: employer.email,
+    subject: 'Reset your IncuXAI Recruiter password',
+    html: passwordResetHTML(employer.recruiter_name, resetUrl)
+  });
+}
+
 module.exports = {
   sendWelcomeEmail,
   sendJobAlert,
@@ -332,5 +353,7 @@ module.exports = {
   sendPasswordResetEmail,
   sendIssueReceivedEmail,
   sendIssueResolvedEmail,
-  sendOtpEmail
+  sendOtpEmail,
+  sendEmployerOtpEmail,
+  sendEmployerPasswordResetEmail
 };
