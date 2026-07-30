@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useJobs } from '../context/JobContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
-import { FiChevronLeft, FiMapPin, FiBriefcase, FiClock, FiBookmark, FiCheck, FiCpu, FiAward, FiInfo } from 'react-icons/fi';
+import { FiChevronLeft, FiMapPin, FiBriefcase, FiClock, FiBookmark, FiCheck, FiCpu, FiAward, FiInfo, FiX, FiFileText, FiExternalLink, FiDownload, FiUploadCloud } from 'react-icons/fi';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -20,6 +20,13 @@ const JobDetails = () => {
   const [loading, setLoading] = useState(true);
   const [applyModalOpen, setApplyModalOpen] = useState(false);
   const [submittingApply, setSubmittingApply] = useState(false);
+
+  // Requirement verification states
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [changeResume, setChangeResume] = useState(false);
+  const [coverLetterText, setCoverLetterText] = useState('');
+  const [portfolioUrl, setPortfolioUrl] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
 
   useEffect(() => {
     const fetchJobDetails = () => {
@@ -59,6 +66,25 @@ const JobDetails = () => {
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext !== 'pdf' && ext !== 'docx') {
+      addToast('Only PDF and DOCX formats are supported.', 'error');
+      return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+      addToast('File size exceeds 5 MB limit.', 'error');
+      return;
+    }
+    
+    setSelectedFile(file);
+    addToast('Resume selected successfully!', 'success');
+  };
+
   const handleApplyClick = () => {
     if (!isAuthenticated) {
       addToast('Please login to apply.', 'info');
@@ -69,13 +95,79 @@ const JobDetails = () => {
       window.open(job.redirect_url, '_blank', 'noopener,noreferrer');
       return;
     }
+    setSelectedFile(null);
+    setChangeResume(false);
+    setCoverLetterText('');
+    setPortfolioUrl('');
+    setLinkedinUrl('');
     setApplyModalOpen(true);
   };
 
   const handleConfirmApply = async () => {
     setSubmittingApply(true);
+    
+    // 1. Enforce requirements checks
+    const hasExistingResume = !!(currentUser?.profileData?.resumeInfo?.fileName);
+    const isResumeReq = job.requirements?.resumeRequired;
+    
+    if (isResumeReq) {
+      if ((!hasExistingResume || changeResume) && !selectedFile) {
+        addToast('A resume is required to apply for this job.', 'error');
+        setSubmittingApply(false);
+        return;
+      }
+    }
+
+    if (job.requirements?.coverLetterRequired && !coverLetterText.trim()) {
+      addToast('A cover letter is required for this job.', 'error');
+      setSubmittingApply(false);
+      return;
+    }
+
+    if (job.requirements?.portfolioRequired && !portfolioUrl.trim()) {
+      addToast('A portfolio URL is required for this job.', 'error');
+      setSubmittingApply(false);
+      return;
+    }
+
+    if (job.requirements?.linkedinRequired && !linkedinUrl.trim()) {
+      addToast('A LinkedIn profile is required for this job.', 'error');
+      setSubmittingApply(false);
+      return;
+    }
+
     try {
+      // 2. Perform backend API application submission
       await applyToJob(job.id);
+
+      // 3. Save custom application record to recruiter_applications in localStorage
+      const appResumeName = selectedFile
+        ? selectedFile.name
+        : (currentUser?.profileData?.resumeInfo?.fileName || 'candidate_resume.pdf');
+
+      const newApp = {
+        id: Date.now(),
+        jobId: job.id,
+        candidateName: currentUser?.profileData?.fullName || currentUser?.name || 'Jane Doe',
+        candidateEmail: currentUser?.email || 'jane.doe@example.com',
+        appliedAt: new Date().toISOString(),
+        resumeUrl: appResumeName,
+        status: 'Applied',
+        experience: currentUser?.profileData?.experience || 'Fresher',
+        skills: (currentUser?.profileData?.skills || ['React', 'JavaScript']).join(', '),
+        education: `${currentUser?.profileData?.degree || 'B.Tech'}, ${currentUser?.profileData?.college || 'IIT Bombay'}`,
+        projects: 'E-commerce website, Chat application',
+        certifications: 'Standard Certificate',
+        linkedin: linkedinUrl.trim() || currentUser?.profileData?.linkedin || 'linkedin.com/in/janedoe',
+        github: currentUser?.profileData?.github || 'github.com/janedoe',
+        portfolio: portfolioUrl.trim() || currentUser?.profileData?.portfolio || 'janedoe.dev',
+        professionalSummary: 'Detail-oriented software developer.',
+        matchScore: `${job.matchScore || 85}%`
+      };
+
+      const existingApps = JSON.parse(localStorage.getItem('recruiter_applications') || '[]');
+      localStorage.setItem('recruiter_applications', JSON.stringify([newApp, ...existingApps]));
+
       addToast(`Applied to ${job.title} successfully!`, 'success');
       setApplyModalOpen(false);
     } catch (err) {
@@ -89,6 +181,7 @@ const JobDetails = () => {
     return <LoadingSpinner text="Fetching job specification..." />;
   }
 
+  const hasExistingResume = !!(currentUser?.profileData?.resumeInfo?.fileName);
   const isApplied = isJobApplied(job.id);
 
   // Compare skills to show user matching details
@@ -266,7 +359,7 @@ const JobDetails = () => {
         }
       >
         <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3 bg-brand-50 border border-brand-100 p-4 rounded-xl text-slate-700">
+          <div className="flex items-center gap-3 bg-brand-50/50 border border-brand-100 p-4 rounded-xl text-slate-700 dark:text-slate-350">
             <FiInfo className="w-5 h-5 text-brand-500 shrink-0" />
             <p className="text-xs leading-relaxed font-semibold">
               Applying will submit your current profile details and active ATS Resume to the recruiting team at <b>{job.company}</b>.
@@ -274,21 +367,149 @@ const JobDetails = () => {
           </div>
 
           <div className="space-y-3">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Application Summary:</span>
-            <div className="text-xs grid grid-cols-2 gap-y-2 border-t border-slate-100 pt-3">
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-550 uppercase tracking-wider">Application Summary:</span>
+            <div className="text-xs grid grid-cols-2 gap-y-2 border-t border-slate-100 dark:border-slate-800 pt-3">
               <span className="font-bold text-slate-500">Applying For:</span>
-              <span className="font-extrabold text-slate-800 text-right">{job.title}</span>
+              <span className="font-extrabold text-slate-800 dark:text-slate-205 text-right">{job.title}</span>
               
               <span className="font-bold text-slate-500">Company:</span>
-              <span className="font-extrabold text-slate-800 text-right">{job.company}</span>
+              <span className="font-extrabold text-slate-800 dark:text-slate-205 text-right">{job.company}</span>
 
               <span className="font-bold text-slate-500">Your Name:</span>
-              <span className="font-extrabold text-slate-800 text-right">{currentUser?.profileData?.fullName || currentUser?.name}</span>
-
-              <span className="font-bold text-slate-500">Attached Resume:</span>
-              <span className="font-extrabold text-emerald-600 text-right">{currentUser?.profileData?.resumeInfo?.fileName || 'Online Profile Resume'}</span>
+              <span className="font-extrabold text-slate-800 dark:text-slate-205 text-right">{currentUser?.profileData?.fullName || currentUser?.name}</span>
             </div>
           </div>
+
+          {/* Conditional Resume Required */}
+          {job.requirements?.resumeRequired ? (
+            <div className="space-y-3 bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-202 dark:border-slate-800">
+              <span className="text-[10px] font-black text-sky-600 dark:text-sky-400 uppercase tracking-wider block">
+                Resume Submission (Required)
+              </span>
+              
+              {hasExistingResume && !changeResume ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FiFileText className="w-5 h-5 text-emerald-500" />
+                    <div>
+                      <span className="text-xs font-bold text-slate-850 dark:text-slate-100 block">
+                        {currentUser?.profileData?.resumeInfo?.fileName}
+                      </span>
+                      <span className="text-[10px] text-slate-400 block font-semibold">
+                        Profile ATS Resume
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setChangeResume(true)}
+                    className="text-xs font-bold text-sky-600 hover:text-sky-700 dark:text-sky-400 cursor-pointer border-none bg-transparent"
+                  >
+                    Change
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex flex-col items-center justify-center p-4 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-950 relative hover:border-sky-500/50 transition-colors">
+                    <input
+                      type="file"
+                      accept=".pdf,.docx"
+                      onChange={handleFileChange}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    />
+                    <FiUploadCloud className="w-8 h-8 text-slate-400 mb-1" />
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-350 text-center">
+                      {selectedFile ? selectedFile.name : 'Click to select or drag resume file'}
+                    </span>
+                    <span className="text-[9px] text-slate-450 dark:text-slate-500 font-semibold mt-0.5">
+                      PDF, DOCX formats supported (Max 5 MB)
+                    </span>
+                  </div>
+                  {selectedFile && (
+                    <div className="flex justify-between items-center bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg text-[10px] font-bold">
+                      <span className="text-slate-600 dark:text-slate-350">Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFile(null)}
+                        className="text-rose-600 hover:text-rose-700 cursor-pointer border-none bg-transparent"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                  {hasExistingResume && (
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setChangeResume(false)}
+                        className="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer border-none bg-transparent"
+                      >
+                        Use Profile Resume
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-xs grid grid-cols-2 gap-y-2 border-t border-slate-100 dark:border-slate-800 pt-3">
+              <span className="font-bold text-slate-500">Attached Resume:</span>
+              <span className="font-extrabold text-emerald-600 text-right">
+                {currentUser?.profileData?.resumeInfo?.fileName || 'Online Profile Resume'}
+              </span>
+            </div>
+          )}
+
+          {/* Conditional Cover Letter */}
+          {job.requirements?.coverLetterRequired && (
+            <div className="space-y-1.5 flex flex-col">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                Cover Letter *
+              </label>
+              <textarea
+                rows={3}
+                required
+                value={coverLetterText}
+                onChange={e => setCoverLetterText(e.target.value)}
+                placeholder="Why do you want to apply for this role? Share your key achievements..."
+                className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100 font-sans font-semibold"
+              />
+            </div>
+          )}
+
+          {/* Conditional Portfolio Link */}
+          {job.requirements?.portfolioRequired && (
+            <div className="space-y-1.5 flex flex-col">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                Portfolio URL *
+              </label>
+              <input
+                type="url"
+                required
+                value={portfolioUrl}
+                onChange={e => setPortfolioUrl(e.target.value)}
+                placeholder="e.g. https://yourportfolio.dev"
+                className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-850 dark:text-slate-100 font-semibold"
+              />
+            </div>
+          )}
+
+          {/* Conditional LinkedIn Link */}
+          {job.requirements?.linkedinRequired && (
+            <div className="space-y-1.5 flex flex-col">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                LinkedIn Profile URL *
+              </label>
+              <input
+                type="url"
+                required
+                value={linkedinUrl}
+                onChange={e => setLinkedinUrl(e.target.value)}
+                placeholder="e.g. https://linkedin.com/in/username"
+                className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-850 dark:text-slate-100 font-semibold"
+              />
+            </div>
+          )}
         </div>
       </Modal>
 
