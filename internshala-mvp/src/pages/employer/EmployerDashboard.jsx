@@ -132,11 +132,20 @@ const EmployerDashboard = () => {
   const [candidates, setCandidates] = React.useState(initialCandidates);
 
   // --- CORE STATE ---
-  const [jobs, setJobs] = React.useState([
-    { id: 1, title: 'Frontend Developer', type: 'Full-time', status: 'Active', applicants: 45, views: 320, date: '2 days ago', location: 'Bangalore, India', salary: '$80,000 - $100,000', experience: '1-3 years', skills: 'React, Tailwind CSS, JavaScript', description: 'We are looking for a skilled Frontend Developer to build clean, responsive, and performant web interfaces.' },
-    { id: 2, title: 'Backend Node.js Engineer', type: 'Full-time', status: 'Active', applicants: 29, views: 198, date: '4 days ago', location: 'Remote, India', salary: '$90,000 - $120,000', experience: '3+ years', skills: 'Node.js, Express, PostgreSQL', description: 'Join us to design and scale powerful microservices, data schemas, and API gateways.' },
-    { id: 3, title: 'Product Management Intern', type: 'Internship', status: 'Closed', applicants: 112, views: 840, date: '1 week ago', location: 'Mumbai, India', salary: '$20,000 - $30,000 / month', experience: 'No experience required', skills: 'Product Strategy, Agile, Wireframing', description: 'An internship role for aspiring Product Managers to shadow senior leads, draft product specs, and coordinate sprints.' },
-  ]);
+  const defaultJobs = [
+    { id: '1', title: 'Frontend Developer', type: 'Full-time', status: 'Active', applicants: 45, views: 320, date: '2 days ago', location: 'Bangalore, India', salary: '$80,000 - $100,000', experience: '1-3 years', skills: 'React, Tailwind CSS, JavaScript', description: 'We are looking for a skilled Frontend Developer to build clean, responsive, and performant web interfaces.', requirements: { resumeRequired: true, coverLetterRequired: false, portfolioRequired: false, linkedinRequired: false } },
+    { id: '2', title: 'Backend Node.js Engineer', type: 'Full-time', status: 'Active', applicants: 29, views: 198, date: '4 days ago', location: 'Remote, India', salary: '$90,000 - $120,005', experience: '3+ years', skills: 'Node.js, Express, PostgreSQL', description: 'Join us to design and scale powerful microservices, data schemas, and API gateways.', requirements: { resumeRequired: true, coverLetterRequired: false, portfolioRequired: false, linkedinRequired: false } },
+    { id: '3', title: 'Product Management Intern', type: 'Internship', status: 'Closed', applicants: 112, views: 840, date: '1 week ago', location: 'Mumbai, India', salary: '$20,005 - $30,005 / month', experience: 'No experience required', skills: 'Product Strategy, Agile, Wireframing', description: 'An internship role for aspiring Product Managers to shadow senior leads, draft product specs, and coordinate sprints.', requirements: { resumeRequired: false, coverLetterRequired: false, portfolioRequired: false, linkedinRequired: false } },
+  ];
+
+  const [jobs, setJobs] = React.useState(() => {
+    const saved = localStorage.getItem('recruiter_jobs');
+    return saved ? JSON.parse(saved) : defaultJobs;
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem('recruiter_jobs', JSON.stringify(jobs));
+  }, [jobs]);
 
   const [applications, setApplications] = React.useState([
     { name: 'Rahul Sharma', role: 'Frontend Developer', time: '12 mins ago' },
@@ -158,7 +167,11 @@ const EmployerDashboard = () => {
     experienceRequired: '',
     employmentType: 'Full-time',
     skills: '',
-    description: ''
+    description: '',
+    resumeRequired: false,
+    coverLetterRequired: false,
+    portfolioRequired: false,
+    linkedinRequired: false
   });
 
   // Applicants List modal state
@@ -178,7 +191,11 @@ const EmployerDashboard = () => {
       experienceRequired: '',
       employmentType: 'Full-time',
       skills: '',
-      description: ''
+      description: '',
+      resumeRequired: false,
+      coverLetterRequired: false,
+      portfolioRequired: false,
+      linkedinRequired: false
     });
     setJobModalMode('create');
     setIsJobModalOpen(true);
@@ -193,7 +210,11 @@ const EmployerDashboard = () => {
       experienceRequired: job.experience || '',
       employmentType: job.type || 'Full-time',
       skills: job.skills || '',
-      description: job.description || ''
+      description: job.description || '',
+      resumeRequired: job.requirements?.resumeRequired || false,
+      coverLetterRequired: job.requirements?.coverLetterRequired || false,
+      portfolioRequired: job.requirements?.portfolioRequired || false,
+      linkedinRequired: job.requirements?.linkedinRequired || false
     });
     setEditingJobId(job.id);
     setJobModalMode('edit');
@@ -209,7 +230,7 @@ const EmployerDashboard = () => {
     
     if (jobModalMode === 'create') {
       const newJob = {
-        id: Date.now(),
+        id: String(Date.now()),
         title: jobForm.title,
         type: jobForm.employmentType,
         status: 'Active',
@@ -220,7 +241,13 @@ const EmployerDashboard = () => {
         salary: jobForm.salaryRange,
         experience: jobForm.experienceRequired,
         skills: jobForm.skills,
-        description: jobForm.description
+        description: jobForm.description,
+        requirements: {
+          resumeRequired: jobForm.resumeRequired,
+          coverLetterRequired: jobForm.coverLetterRequired,
+          portfolioRequired: jobForm.portfolioRequired,
+          linkedinRequired: jobForm.linkedinRequired
+        }
       };
       setJobs([newJob, ...jobs]);
       addToast('Job posting created successfully!', 'success');
@@ -233,11 +260,72 @@ const EmployerDashboard = () => {
         salary: jobForm.salaryRange,
         experience: jobForm.experienceRequired,
         skills: jobForm.skills,
-        description: jobForm.description
+        description: jobForm.description,
+        requirements: {
+          resumeRequired: jobForm.resumeRequired,
+          coverLetterRequired: jobForm.coverLetterRequired,
+          portfolioRequired: jobForm.portfolioRequired,
+          linkedinRequired: jobForm.linkedinRequired
+        }
       } : j));
       addToast('Job posting updated successfully!', 'success');
     }
     setIsJobModalOpen(false);
+  };
+
+  const getApplicantsForJob = (job) => {
+    if (!job) return [];
+    
+    // 1. Get default mock candidate names
+    const defaultNames = job.title.includes('Frontend')
+      ? ['Rahul Sharma', 'Jane Doe']
+      : job.title.includes('Backend')
+        ? ['Priya Patel']
+        : ['Rahul Sharma', 'Dev Dixit'];
+        
+    // 2. Map to their candidate objects from candidates state
+    const defaultList = defaultNames.map(name => {
+      return candidates[name] || {
+        name,
+        email: `${name.toLowerCase().replace(' ', '.')}@example.com`,
+        experience: 'Fresher',
+        skills: 'React, Node.js',
+        matchScore: '85%',
+        applicationStatus: 'Applied',
+        resumeUrl: 'resume.pdf'
+      };
+    });
+
+    // 3. Get custom applications from localStorage
+    let customList = [];
+    try {
+      const customApps = JSON.parse(localStorage.getItem('recruiter_applications') || '[]')
+        .filter(app => String(app.jobId) === String(job.id));
+        
+      customList = customApps.map(app => {
+        const stateCand = candidates[app.candidateName];
+        return stateCand ? { ...stateCand, resumeUrl: app.resumeUrl, applicationStatus: app.status } : {
+          name: app.candidateName,
+          email: app.candidateEmail,
+          experience: app.experience,
+          skills: app.skills,
+          matchScore: app.matchScore,
+          applicationStatus: app.status,
+          resumeUrl: app.resumeUrl,
+          linkedin: app.linkedin,
+          github: app.github,
+          portfolio: app.portfolio,
+          professionalSummary: app.professionalSummary,
+          education: app.education,
+          projects: app.projects,
+          certifications: app.certifications
+        };
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
+    return [...customList, ...defaultList];
   };
 
   const handleViewApplicants = (job) => {
@@ -281,6 +369,15 @@ const EmployerDashboard = () => {
       ...prev,
       applicationStatus: newStatus
     } : prev);
+
+    // Synchronize updates with recruiter_applications localStorage key
+    try {
+      const apps = JSON.parse(localStorage.getItem('recruiter_applications') || '[]');
+      const updatedApps = apps.map(app => app.candidateName === name ? { ...app, status: newStatus } : app);
+      localStorage.setItem('recruiter_applications', JSON.stringify(updatedApps));
+    } catch (err) {
+      console.error('Failed to sync application status to localStorage:', err);
+    }
   };
 
   return (
@@ -782,6 +879,58 @@ const EmployerDashboard = () => {
                 />
               </div>
 
+              {/* Application Requirements Checkboxes */}
+              <div className="flex flex-col gap-2 p-3 bg-slate-50 dark:bg-slate-950/40 border border-slate-205 dark:border-slate-800/80 rounded-xl">
+                <span className="text-[10px] font-black uppercase text-sky-600 dark:text-sky-400 tracking-wider">
+                  Application Requirements
+                </span>
+                <div className="grid grid-cols-2 gap-3 mt-1">
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={jobForm.resumeRequired}
+                      onChange={e => setJobForm({ ...jobForm, resumeRequired: e.target.checked })}
+                      className="rounded border-slate-300 text-sky-600 focus:ring-sky-500/20"
+                    />
+                    Resume Required
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={jobForm.coverLetterRequired}
+                      onChange={e => setJobForm({ ...jobForm, coverLetterRequired: e.target.checked })}
+                      className="rounded border-slate-300 text-sky-600 focus:ring-sky-500/20"
+                    />
+                    Cover Letter Required
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={jobForm.portfolioRequired}
+                      onChange={e => setJobForm({ ...jobForm, portfolioRequired: e.target.checked })}
+                      className="rounded border-slate-300 text-sky-600 focus:ring-sky-500/20"
+                    />
+                    Portfolio Required
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={jobForm.linkedinRequired}
+                      onChange={e => setJobForm({ ...jobForm, linkedinRequired: e.target.checked })}
+                      className="rounded border-slate-300 text-sky-600 focus:ring-sky-500/20"
+                    />
+                    LinkedIn Required
+                  </label>
+                </div>
+
+                {jobForm.resumeRequired && (
+                  <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400 font-semibold space-y-0.5 animate-fade-in">
+                    <div>Supported formats: <strong className="text-slate-750 dark:text-slate-300">PDF, DOCX</strong></div>
+                    <div>Maximum file size: <strong className="text-slate-750 dark:text-slate-300">5 MB</strong></div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <Button
                   type="button"
@@ -837,21 +986,7 @@ const EmployerDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-850/40 text-xs">
-                  {(activeJobForApplicants.title.includes('Frontend')
-                    ? ['Rahul Sharma', 'Jane Doe']
-                    : activeJobForApplicants.title.includes('Backend')
-                      ? ['Priya Patel']
-                      : ['Rahul Sharma', 'Dev Dixit']
-                  ).map((name) => {
-                    const cand = candidates[name] || {
-                      name,
-                      email: 'candidate@example.com',
-                      experience: 'Intern',
-                      skills: 'Web Development',
-                      matchScore: '80%',
-                      applicationStatus: 'Applied',
-                      resumeUrl: 'resume.pdf'
-                    };
+                  {getApplicantsForJob(activeJobForApplicants).map((cand) => {
                     const initials = cand.name.split(' ').map(n => n.charAt(0)).join('');
                     
                     return (

@@ -32,7 +32,9 @@ export const JobProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await jobService.getAllJobs();
-      setJobs(res.data.data || res.data);
+      const backendJobs = res.data.data || res.data;
+      const recruiterJobs = JSON.parse(localStorage.getItem('recruiter_jobs') || '[]');
+      setJobs([...recruiterJobs, ...backendJobs]);
 
       if (isAuthenticated) {
         const savedRes = await jobService.getSavedJobIds();
