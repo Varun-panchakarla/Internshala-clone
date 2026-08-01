@@ -54,63 +54,98 @@ const EmployerDashboard = () => {
     : 'C';
 
   // --- MOCK CANDIDATES DATA ---
-  const mockCandidates = {
+  const initialCandidates = {
     'Rahul Sharma': {
       name: 'Rahul Sharma',
       email: 'rahul.sharma@example.com',
       phone: '+91 9876543210',
       location: 'Bangalore, India',
+      linkedin: 'linkedin.com/in/rahulsharma',
+      github: 'github.com/rahulsharma',
+      portfolio: 'rahulsharma.dev',
+      professionalSummary: 'Passionate and detail-oriented frontend developer with a strong foundation in modern web technologies. Experienced in building responsive, scalable user interfaces using React, Redux, and Tailwind CSS. Committed to delivering clean code and optimal user experiences.',
       experience: 'Frontend Developer Intern at TechCorp (6 months), Freelance React Dev (1 year)',
       skills: 'React, Tailwind CSS, JavaScript, TypeScript, Redux, Git',
       education: 'B.Tech in Computer Science, IIT Bombay (2025)',
       projects: 'E-commerce Store Front, Personal Portfolio with dark mode',
       certifications: 'Meta Frontend Developer Professional Certificate',
-      resumeUrl: 'rahul_sharma_resume.pdf'
+      resumeUrl: 'rahul_sharma_resume.pdf',
+      matchScore: '92%',
+      applicationStatus: 'Applied'
     },
     'Priya Patel': {
       name: 'Priya Patel',
       email: 'priya.patel@example.com',
       phone: '+91 8765432109',
       location: 'Mumbai, India',
+      linkedin: 'linkedin.com/in/priyapatel',
+      github: 'github.com/priyapatel',
+      portfolio: 'priyapatel.tech',
+      professionalSummary: 'Backend software engineer specializing in JavaScript, Node.js, and relational database systems. Enthusiastic about building efficient server-side systems, microservice architectures, and secure API gateways.',
       experience: 'Backend Intern at DevSolutions (4 months), Open Source Contributor to Node.js',
       skills: 'Node.js, Express, PostgreSQL, MongoDB, REST APIs, Docker',
       education: 'B.E. in Information Technology, K.J. Somaiya (2024)',
       projects: 'Realtime Chat Application, REST API Gateway for microservices',
       certifications: 'AWS Certified Developer Associate',
-      resumeUrl: 'priya_patel_resume.pdf'
+      resumeUrl: 'priya_patel_resume.pdf',
+      matchScore: '89%',
+      applicationStatus: 'Under Review'
     },
     'Dev Dixit': {
       name: 'Dev Dixit',
       email: 'dev.dixit@example.com',
       phone: '+91 7654321098',
       location: 'Delhi, India',
+      linkedin: 'linkedin.com/in/devdixit',
+      github: 'github.com/devdixit',
+      portfolio: 'devdixit.me',
+      professionalSummary: 'Data engineer and Python developer skilled in web scraping, database optimization, and data preprocessing. Experienced in constructing web applications with Django and FastAPI.',
       experience: 'Python Intern at DataMetrics (6 months)',
       skills: 'Python, Django, FastAPI, SQL, Pandas, NumPy, Machine Learning Basics',
       education: 'M.Sc. in Data Science, Delhi University (2025)',
       projects: 'Predictive Sales Dashboard, Scraper for Job Boards',
       certifications: 'Google Advanced Data Analytics Certificate',
-      resumeUrl: 'dev_dixit_resume.pdf'
+      resumeUrl: 'dev_dixit_resume.pdf',
+      matchScore: '85%',
+      applicationStatus: 'Applied'
     },
     'Jane Doe': {
       name: 'Jane Doe',
       email: 'jane.doe@example.com',
       phone: '+91 6543210987',
       location: 'Remote, India',
+      linkedin: 'linkedin.com/in/janedoe',
+      github: 'github.com/janedoe',
+      portfolio: 'janedoe.io',
+      professionalSummary: 'Results-driven full stack software developer with hands-on experience in building enterprise-grade applications. Proficient across the MERN stack with expertise in cloud architectures and system engineering.',
       experience: 'Software Intern at IncuxAI (8 months), Web Dev Intern at StartCorp (3 months)',
       skills: 'React, Node.js, Express, MongoDB, Tailwind CSS, REST APIs',
       education: 'B.Tech in Computer Engineering, NIT Trichy (2024)',
       projects: 'AI Interview Prep portal, Company Workspace Dashboard',
       certifications: 'IncuxAI Hiring Certified Developer',
-      resumeUrl: 'jane_doe_resume.pdf'
+      resumeUrl: 'jane_doe_resume.pdf',
+      matchScore: '97%',
+      applicationStatus: 'Shortlisted'
     }
   };
 
+  const [candidates, setCandidates] = React.useState(initialCandidates);
+
   // --- CORE STATE ---
-  const [jobs, setJobs] = React.useState([
-    { id: 1, title: 'Frontend Developer', type: 'Full-time', status: 'Active', applicants: 45, views: 320, date: '2 days ago', location: 'Bangalore, India', salary: '$80,000 - $100,000', experience: '1-3 years', skills: 'React, Tailwind CSS, JavaScript', description: 'We are looking for a skilled Frontend Developer to build clean, responsive, and performant web interfaces.' },
-    { id: 2, title: 'Backend Node.js Engineer', type: 'Full-time', status: 'Active', applicants: 29, views: 198, date: '4 days ago', location: 'Remote, India', salary: '$90,000 - $120,000', experience: '3+ years', skills: 'Node.js, Express, PostgreSQL', description: 'Join us to design and scale powerful microservices, data schemas, and API gateways.' },
-    { id: 3, title: 'Product Management Intern', type: 'Internship', status: 'Closed', applicants: 112, views: 840, date: '1 week ago', location: 'Mumbai, India', salary: '$20,000 - $30,000 / month', experience: 'No experience required', skills: 'Product Strategy, Agile, Wireframing', description: 'An internship role for aspiring Product Managers to shadow senior leads, draft product specs, and coordinate sprints.' },
-  ]);
+  const defaultJobs = [
+    { id: '1', title: 'Frontend Developer', type: 'Full-time', status: 'Active', applicants: 45, views: 320, date: '2 days ago', location: 'Bangalore, India', salary: '$80,000 - $100,000', experience: '1-3 years', skills: 'React, Tailwind CSS, JavaScript', description: 'We are looking for a skilled Frontend Developer to build clean, responsive, and performant web interfaces.', requirements: { resumeRequired: true, coverLetterRequired: false, portfolioRequired: false, linkedinRequired: false } },
+    { id: '2', title: 'Backend Node.js Engineer', type: 'Full-time', status: 'Active', applicants: 29, views: 198, date: '4 days ago', location: 'Remote, India', salary: '$90,000 - $120,005', experience: '3+ years', skills: 'Node.js, Express, PostgreSQL', description: 'Join us to design and scale powerful microservices, data schemas, and API gateways.', requirements: { resumeRequired: true, coverLetterRequired: false, portfolioRequired: false, linkedinRequired: false } },
+    { id: '3', title: 'Product Management Intern', type: 'Internship', status: 'Closed', applicants: 112, views: 840, date: '1 week ago', location: 'Mumbai, India', salary: '$20,005 - $30,005 / month', experience: 'No experience required', skills: 'Product Strategy, Agile, Wireframing', description: 'An internship role for aspiring Product Managers to shadow senior leads, draft product specs, and coordinate sprints.', requirements: { resumeRequired: false, coverLetterRequired: false, portfolioRequired: false, linkedinRequired: false } },
+  ];
+
+  const [jobs, setJobs] = React.useState(() => {
+    const saved = localStorage.getItem('recruiter_jobs');
+    return saved ? JSON.parse(saved) : defaultJobs;
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem('recruiter_jobs', JSON.stringify(jobs));
+  }, [jobs]);
 
   const [applications, setApplications] = React.useState([
     { name: 'Rahul Sharma', role: 'Frontend Developer', time: '12 mins ago' },
@@ -132,7 +167,11 @@ const EmployerDashboard = () => {
     experienceRequired: '',
     employmentType: 'Full-time',
     skills: '',
-    description: ''
+    description: '',
+    resumeRequired: false,
+    coverLetterRequired: false,
+    portfolioRequired: false,
+    linkedinRequired: false
   });
 
   // Applicants List modal state
@@ -152,7 +191,11 @@ const EmployerDashboard = () => {
       experienceRequired: '',
       employmentType: 'Full-time',
       skills: '',
-      description: ''
+      description: '',
+      resumeRequired: false,
+      coverLetterRequired: false,
+      portfolioRequired: false,
+      linkedinRequired: false
     });
     setJobModalMode('create');
     setIsJobModalOpen(true);
@@ -167,7 +210,11 @@ const EmployerDashboard = () => {
       experienceRequired: job.experience || '',
       employmentType: job.type || 'Full-time',
       skills: job.skills || '',
-      description: job.description || ''
+      description: job.description || '',
+      resumeRequired: job.requirements?.resumeRequired || false,
+      coverLetterRequired: job.requirements?.coverLetterRequired || false,
+      portfolioRequired: job.requirements?.portfolioRequired || false,
+      linkedinRequired: job.requirements?.linkedinRequired || false
     });
     setEditingJobId(job.id);
     setJobModalMode('edit');
@@ -183,7 +230,7 @@ const EmployerDashboard = () => {
     
     if (jobModalMode === 'create') {
       const newJob = {
-        id: Date.now(),
+        id: String(Date.now()),
         title: jobForm.title,
         type: jobForm.employmentType,
         status: 'Active',
@@ -194,7 +241,13 @@ const EmployerDashboard = () => {
         salary: jobForm.salaryRange,
         experience: jobForm.experienceRequired,
         skills: jobForm.skills,
-        description: jobForm.description
+        description: jobForm.description,
+        requirements: {
+          resumeRequired: jobForm.resumeRequired,
+          coverLetterRequired: jobForm.coverLetterRequired,
+          portfolioRequired: jobForm.portfolioRequired,
+          linkedinRequired: jobForm.linkedinRequired
+        }
       };
       setJobs([newJob, ...jobs]);
       addToast('Job posting created successfully!', 'success');
@@ -207,11 +260,72 @@ const EmployerDashboard = () => {
         salary: jobForm.salaryRange,
         experience: jobForm.experienceRequired,
         skills: jobForm.skills,
-        description: jobForm.description
+        description: jobForm.description,
+        requirements: {
+          resumeRequired: jobForm.resumeRequired,
+          coverLetterRequired: jobForm.coverLetterRequired,
+          portfolioRequired: jobForm.portfolioRequired,
+          linkedinRequired: jobForm.linkedinRequired
+        }
       } : j));
       addToast('Job posting updated successfully!', 'success');
     }
     setIsJobModalOpen(false);
+  };
+
+  const getApplicantsForJob = (job) => {
+    if (!job) return [];
+    
+    // 1. Get default mock candidate names
+    const defaultNames = job.title.includes('Frontend')
+      ? ['Rahul Sharma', 'Jane Doe']
+      : job.title.includes('Backend')
+        ? ['Priya Patel']
+        : ['Rahul Sharma', 'Dev Dixit'];
+        
+    // 2. Map to their candidate objects from candidates state
+    const defaultList = defaultNames.map(name => {
+      return candidates[name] || {
+        name,
+        email: `${name.toLowerCase().replace(' ', '.')}@example.com`,
+        experience: 'Fresher',
+        skills: 'React, Node.js',
+        matchScore: '85%',
+        applicationStatus: 'Applied',
+        resumeUrl: 'resume.pdf'
+      };
+    });
+
+    // 3. Get custom applications from localStorage
+    let customList = [];
+    try {
+      const customApps = JSON.parse(localStorage.getItem('recruiter_applications') || '[]')
+        .filter(app => String(app.jobId) === String(job.id));
+        
+      customList = customApps.map(app => {
+        const stateCand = candidates[app.candidateName];
+        return stateCand ? { ...stateCand, resumeUrl: app.resumeUrl, applicationStatus: app.status } : {
+          name: app.candidateName,
+          email: app.candidateEmail,
+          experience: app.experience,
+          skills: app.skills,
+          matchScore: app.matchScore,
+          applicationStatus: app.status,
+          resumeUrl: app.resumeUrl,
+          linkedin: app.linkedin,
+          github: app.github,
+          portfolio: app.portfolio,
+          professionalSummary: app.professionalSummary,
+          education: app.education,
+          projects: app.projects,
+          certifications: app.certifications
+        };
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
+    return [...customList, ...defaultList];
   };
 
   const handleViewApplicants = (job) => {
@@ -220,19 +334,50 @@ const EmployerDashboard = () => {
   };
 
   const handleViewProfile = (candidateName) => {
-    const details = mockCandidates[candidateName] || {
+    const details = candidates[candidateName] || {
       name: candidateName,
       email: `${candidateName.toLowerCase().replace(' ', '.')}@example.com`,
       phone: '+91 9999999999',
       location: 'Remote, India',
+      linkedin: 'linkedin.com',
+      github: 'github.com',
+      portfolio: 'portfolio.com',
+      professionalSummary: 'Experienced software developer.',
       experience: 'Internship or project experience (6 months)',
       skills: 'React, Node.js, Web Development',
       education: 'B.Tech in Computer Science',
       projects: 'Personal Web Project',
       certifications: 'Standard Developer Certification',
-      resumeUrl: 'sample_resume.pdf'
+      resumeUrl: 'sample_resume.pdf',
+      matchScore: '80%',
+      applicationStatus: 'Applied'
     };
     setSelectedCandidate(details);
+  };
+
+  const handleUpdateStatus = (name, newStatus) => {
+    setCandidates(prev => ({
+      ...prev,
+      [name]: {
+        ...prev[name],
+        applicationStatus: newStatus
+      }
+    }));
+    
+    // Also update selectedCandidate modal view if open
+    setSelectedCandidate(prev => prev && prev.name === name ? {
+      ...prev,
+      applicationStatus: newStatus
+    } : prev);
+
+    // Synchronize updates with recruiter_applications localStorage key
+    try {
+      const apps = JSON.parse(localStorage.getItem('recruiter_applications') || '[]');
+      const updatedApps = apps.map(app => app.candidateName === name ? { ...app, status: newStatus } : app);
+      localStorage.setItem('recruiter_applications', JSON.stringify(updatedApps));
+    } catch (err) {
+      console.error('Failed to sync application status to localStorage:', err);
+    }
   };
 
   return (
@@ -734,6 +879,58 @@ const EmployerDashboard = () => {
                 />
               </div>
 
+              {/* Application Requirements Checkboxes */}
+              <div className="flex flex-col gap-2 p-3 bg-slate-50 dark:bg-slate-950/40 border border-slate-205 dark:border-slate-800/80 rounded-xl">
+                <span className="text-[10px] font-black uppercase text-sky-600 dark:text-sky-400 tracking-wider">
+                  Application Requirements
+                </span>
+                <div className="grid grid-cols-2 gap-3 mt-1">
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={jobForm.resumeRequired}
+                      onChange={e => setJobForm({ ...jobForm, resumeRequired: e.target.checked })}
+                      className="rounded border-slate-300 text-sky-600 focus:ring-sky-500/20"
+                    />
+                    Resume Required
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={jobForm.coverLetterRequired}
+                      onChange={e => setJobForm({ ...jobForm, coverLetterRequired: e.target.checked })}
+                      className="rounded border-slate-300 text-sky-600 focus:ring-sky-500/20"
+                    />
+                    Cover Letter Required
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={jobForm.portfolioRequired}
+                      onChange={e => setJobForm({ ...jobForm, portfolioRequired: e.target.checked })}
+                      className="rounded border-slate-300 text-sky-600 focus:ring-sky-500/20"
+                    />
+                    Portfolio Required
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={jobForm.linkedinRequired}
+                      onChange={e => setJobForm({ ...jobForm, linkedinRequired: e.target.checked })}
+                      className="rounded border-slate-300 text-sky-600 focus:ring-sky-500/20"
+                    />
+                    LinkedIn Required
+                  </label>
+                </div>
+
+                {jobForm.resumeRequired && (
+                  <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400 font-semibold space-y-0.5 animate-fade-in">
+                    <div>Supported formats: <strong className="text-slate-750 dark:text-slate-300">PDF, DOCX</strong></div>
+                    <div>Maximum file size: <strong className="text-slate-750 dark:text-slate-300">5 MB</strong></div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <Button
                   type="button"
@@ -759,11 +956,11 @@ const EmployerDashboard = () => {
       {/* 2. APPLICANTS LIST MODAL */}
       {isApplicantsModalOpen && activeJobForApplicants && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-md w-full flex flex-col p-6 animate-scale-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-4xl w-full flex flex-col p-6 animate-scale-in">
             {/* Header */}
             <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
-                <h3 className="font-extrabold text-slate-800 dark:text-white text-base">Applicants</h3>
+                <h3 className="font-extrabold text-slate-800 dark:text-white text-base">Applicants Pipeline</h3>
                 <p className="text-[10px] text-slate-450 dark:text-slate-500 font-semibold">{activeJobForApplicants.title} ({activeJobForApplicants.type})</p>
               </div>
               <button
@@ -774,86 +971,94 @@ const EmployerDashboard = () => {
               </button>
             </div>
 
-            {/* List */}
-            <div className="divide-y divide-slate-100 dark:divide-slate-800/60 max-h-[50vh] overflow-y-auto mt-4">
-              {activeJobForApplicants.title.includes('Frontend') ? (
-                <>
-                  <div className="py-3 flex justify-between items-center">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-750 flex items-center justify-center font-bold text-xs">RS</div>
-                      <div>
-                        <span className="font-bold text-slate-850 dark:text-slate-100 text-xs block">Rahul Sharma</span>
-                        <span className="text-[9px] text-slate-450 dark:text-slate-500 font-semibold">Applied 12 mins ago</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setIsApplicantsModalOpen(false);
-                        handleViewProfile('Rahul Sharma');
-                      }}
-                      className="px-2.5 py-1 text-[10px] font-bold text-sky-655 bg-sky-50 dark:bg-sky-955/20 rounded-lg hover:underline cursor-pointer border-none"
-                    >
-                      View Profile
-                    </button>
-                  </div>
-                  <div className="py-3 flex justify-between items-center">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-750 flex items-center justify-center font-bold text-xs">JD</div>
-                      <div>
-                        <span className="font-bold text-slate-850 dark:text-slate-100 text-xs block">Jane Doe</span>
-                        <span className="text-[9px] text-slate-450 dark:text-slate-500 font-semibold">Applied 1 day ago</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setIsApplicantsModalOpen(false);
-                        handleViewProfile('Jane Doe');
-                      }}
-                      className="px-2.5 py-1 text-[10px] font-bold text-sky-655 bg-sky-50 dark:bg-sky-955/20 rounded-lg hover:underline cursor-pointer border-none"
-                    >
-                      View Profile
-                    </button>
-                  </div>
-                </>
-              ) : activeJobForApplicants.title.includes('Backend') ? (
-                <div className="py-3 flex justify-between items-center">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-750 flex items-center justify-center font-bold text-xs">PP</div>
-                    <div>
-                      <span className="font-bold text-slate-850 dark:text-slate-100 text-xs block">Priya Patel</span>
-                      <span className="text-[9px] text-slate-450 dark:text-slate-500 font-semibold">Applied 1 hour ago</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setIsApplicantsModalOpen(false);
-                      handleViewProfile('Priya Patel');
-                    }}
-                    className="px-2.5 py-1 text-[10px] font-bold text-sky-655 bg-sky-50 dark:bg-sky-955/20 rounded-lg hover:underline cursor-pointer border-none"
-                  >
-                    View Profile
-                  </button>
-                </div>
-              ) : (
-                <div className="py-3 flex justify-between items-center">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-sky-100 text-sky-750 flex items-center justify-center font-bold text-xs">DD</div>
-                    <div>
-                      <span className="font-bold text-slate-850 dark:text-slate-100 text-xs block">Dev Dixit</span>
-                      <span className="text-[9px] text-slate-450 dark:text-slate-500 font-semibold">Applied 3 hours ago</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setIsApplicantsModalOpen(false);
-                      handleViewProfile('Dev Dixit');
-                    }}
-                    className="px-2.5 py-1 text-[10px] font-bold text-sky-655 bg-sky-50 dark:bg-sky-955/20 rounded-lg hover:underline cursor-pointer border-none"
-                  >
-                    View Profile
-                  </button>
-                </div>
-              )}
+            {/* List Table */}
+            <div className="overflow-x-auto mt-4 max-h-[50vh]">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 font-black uppercase tracking-wider">
+                    <th className="pb-3 font-black">Candidate</th>
+                    <th className="pb-3 font-black text-center">Match Score</th>
+                    <th className="pb-3 font-black">Experience</th>
+                    <th className="pb-3 font-black">Skills</th>
+                    <th className="pb-3 font-black text-center">Status</th>
+                    <th className="pb-3 font-black">Resume</th>
+                    <th className="pb-3 font-black text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 dark:divide-slate-850/40 text-xs">
+                  {getApplicantsForJob(activeJobForApplicants).map((cand) => {
+                    const initials = cand.name.split(' ').map(n => n.charAt(0)).join('');
+                    
+                    return (
+                      <tr key={cand.name} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/10 transition-colors">
+                        <td className="py-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-955/30 text-sky-650 dark:text-sky-400 flex items-center justify-center font-bold text-xs">
+                              {initials}
+                            </div>
+                            <div>
+                              <span className="font-extrabold text-slate-800 dark:text-slate-100 block">{cand.name}</span>
+                              <span className="text-[10px] text-slate-400 block">{cand.email}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 text-center">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-450 font-black text-[10px] border border-emerald-100 dark:border-emerald-900/30">
+                            {cand.matchScore}
+                          </span>
+                        </td>
+                        <td className="py-3 text-slate-650 dark:text-slate-350 max-w-[150px] truncate font-medium" title={cand.experience}>
+                          {cand.experience}
+                        </td>
+                        <td className="py-3">
+                          <div className="flex flex-wrap gap-1 max-w-[150px]">
+                            {cand.skills.split(',').slice(0, 2).map((s, idx) => (
+                              <span key={idx} className="px-1.5 py-0.2 rounded bg-slate-50 dark:bg-slate-800 text-[9px] text-slate-500 dark:text-slate-400 font-bold border border-slate-100 dark:border-slate-700/60">
+                                {s.trim()}
+                              </span>
+                            ))}
+                            {cand.skills.split(',').length > 2 && (
+                              <span className="text-[9px] text-slate-450 font-bold">+{cand.skills.split(',').length - 2}</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 text-center">
+                          <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase border ${
+                            cand.applicationStatus === 'Shortlisted'
+                              ? 'bg-emerald-50 border-emerald-100 text-emerald-600 dark:bg-emerald-950/20 dark:border-emerald-900/30 dark:text-emerald-450'
+                              : cand.applicationStatus === 'Rejected'
+                                ? 'bg-rose-50 border-rose-100 text-rose-600 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-450'
+                                : cand.applicationStatus === 'Under Review'
+                                  ? 'bg-amber-50 border-amber-100 text-amber-600 dark:bg-amber-955/20 dark:border-amber-900/30 dark:text-amber-450'
+                                  : 'bg-slate-50 border-slate-100 text-slate-500 dark:bg-slate-850 dark:border-slate-800 dark:text-slate-400'
+                          }`}>
+                            {cand.applicationStatus}
+                          </span>
+                        </td>
+                        <td className="py-3 text-slate-500 dark:text-slate-400">
+                          <div className="flex items-center gap-1">
+                            <FiFileText className="w-3.5 h-3.5 text-slate-400" />
+                            <span className="text-[10px] font-semibold max-w-[100px] truncate" title={cand.resumeUrl}>
+                              {cand.resumeUrl}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3 text-right">
+                          <button
+                            onClick={() => {
+                              setIsApplicantsModalOpen(false);
+                              handleViewProfile(cand.name);
+                            }}
+                            className="px-2.5 py-1 text-[10px] font-bold text-sky-655 bg-sky-50 dark:bg-sky-955/20 rounded-lg hover:underline cursor-pointer border-none"
+                          >
+                            View Profile
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
             
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
@@ -888,6 +1093,34 @@ const EmployerDashboard = () => {
                     <span className="flex items-center gap-1"><FiPhone /> {selectedCandidate.phone}</span>
                     <span className="flex items-center gap-1"><FiMapPin /> {selectedCandidate.location}</span>
                   </div>
+                  
+                  {/* Clickable Social Badge Links */}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <a
+                      href={`https://${selectedCandidate.linkedin || 'linkedin.com'}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-955/20 text-blue-600 dark:text-blue-400 font-bold text-[9px] hover:underline flex items-center gap-1 border border-blue-100 dark:border-blue-900/30"
+                    >
+                      <FiExternalLink className="w-2.5 h-2.5" /> LinkedIn
+                    </a>
+                    <a
+                      href={`https://${selectedCandidate.github || 'github.com'}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-350 font-bold text-[9px] hover:underline flex items-center gap-1 border border-slate-200 dark:border-slate-700"
+                    >
+                      <FiExternalLink className="w-2.5 h-2.5" /> GitHub
+                    </a>
+                    <a
+                      href={`https://${selectedCandidate.portfolio || 'portfolio.com'}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-955/20 text-sky-655 dark:text-sky-400 font-bold text-[9px] hover:underline flex items-center gap-1 border border-sky-100 dark:border-sky-900/30"
+                    >
+                      <FiExternalLink className="w-2.5 h-2.5" /> Portfolio
+                    </a>
+                  </div>
                 </div>
               </div>
               <button
@@ -902,6 +1135,16 @@ const EmployerDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-4">
               {/* Profile Details (Left) */}
               <div className="md:col-span-7 space-y-4">
+                {/* Professional Summary */}
+                <div className="space-y-1 bg-slate-50/50 dark:bg-slate-850/20 border border-slate-100 dark:border-slate-800 p-3 rounded-xl">
+                  <span className="text-[10px] font-black uppercase text-sky-600 dark:text-sky-400 tracking-wider flex items-center gap-1 font-sans">
+                    Professional Summary
+                  </span>
+                  <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-semibold">
+                    {selectedCandidate.professionalSummary || 'Highly motivated software engineering professional seeking to build elegant architectures.'}
+                  </p>
+                </div>
+
                 {/* Experience */}
                 <div className="space-y-1 bg-slate-50/50 dark:bg-slate-850/20 border border-slate-100 dark:border-slate-800 p-3 rounded-xl">
                   <span className="text-[10px] font-black uppercase text-sky-600 dark:text-sky-400 tracking-wider flex items-center gap-1">
@@ -919,7 +1162,7 @@ const EmployerDashboard = () => {
                   </span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {selectedCandidate.skills.split(',').map((skill, sIdx) => (
-                      <span key={sIdx} className="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-[10px] text-slate-750 dark:text-slate-300 font-bold">
+                      <span key={sIdx} className="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-[10px] text-slate-755 dark:text-slate-300 font-bold">
                         {skill.trim()}
                       </span>
                     ))}
@@ -1008,7 +1251,7 @@ const EmployerDashboard = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => {
-                        addToast(`${selectedCandidate.name} has been shortlisted!`, 'success');
+                        handleUpdateStatus(selectedCandidate.name, 'Shortlisted');
                         setSelectedCandidate(null);
                       }}
                       className="py-2.5 text-xs font-bold text-emerald-750 hover:text-white bg-emerald-50 dark:bg-emerald-955/20 hover:bg-emerald-600 dark:hover:bg-emerald-600 rounded-xl border border-emerald-250 dark:border-emerald-900/30 transition-all cursor-pointer"
@@ -1017,7 +1260,7 @@ const EmployerDashboard = () => {
                     </button>
                     <button
                       onClick={() => {
-                        addToast(`${selectedCandidate.name} application has been rejected.`, 'warning');
+                        handleUpdateStatus(selectedCandidate.name, 'Rejected');
                         setSelectedCandidate(null);
                       }}
                       className="py-2.5 text-xs font-bold text-rose-700 hover:text-white bg-rose-50 dark:bg-rose-955/20 hover:bg-rose-600 dark:hover:bg-rose-600 rounded-xl border border-rose-250 dark:border-rose-900/30 transition-all cursor-pointer"
