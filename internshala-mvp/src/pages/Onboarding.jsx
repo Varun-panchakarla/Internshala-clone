@@ -103,21 +103,6 @@ const Onboarding = () => {
       setContactNumber(currentUser.profileData.contactNumber);
     }
   }, [currentUser]);
-    const cleanPhone = contactNumber.replace(/[\s\-\(\)]/g, '');
-    
-    setSendingPhoneOtp(true);
-    setOtpError('');
-    try {
-      await authService.resendPhoneOtp(cleanPhone);
-      addToast('A new verification code has been sent to your phone.', 'success');
-      setPhoneTimer(60);
-      setPhoneOtp('');
-    } catch (err) {
-      addToast(err.response?.data?.error || 'Failed to resend verification code.', 'error');
-    } finally {
-      setSendingPhoneOtp(false);
-    }
-  };
 
   // Handle Dynamic Course toggle
   const toggleCustomCourse = (active) => {
