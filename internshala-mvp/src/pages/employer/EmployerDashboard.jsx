@@ -37,6 +37,23 @@ import Button from '../../components/common/Button';
 import ProgressBar from '../../components/common/ProgressBar';
 import ThemeToggle from '../../components/common/ThemeToggle';
 
+const dataUrlToBlob = (dataUrl) => {
+  const parts = String(dataUrl || '').split(',');
+  const meta = parts[0] || '';
+  const mime = (meta.match(/:(.*?);/) || [])[1] || 'application/pdf';
+  const byteString = atob(parts[1] || '');
+  const ab = new ArrayBuffer(byteString.length);
+  const u8 = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) u8[i] = byteString.charCodeAt(i);
+  return new Blob([ab], { type: mime });
+};
+
+const formatISODate = (date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+const formatTime = (iso) =>
+  new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
 const EmployerDashboard = () => {
   const { currentEmployer, logout } = useEmployerAuth();
   const { addToast } = useToast();
@@ -85,8 +102,23 @@ const EmployerDashboard = () => {
     experienceRequired: '',
     employmentType: 'Full-time',
     skills: '',
-    description: ''
+    description: '',
+    lastDateToApply: ''
   });
+
+  // Calendar modal state
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [calendarInterviews, setCalendarInterviews] = useState([]);
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
+  const [selectedCalDate, setSelectedCalDate] = useState('');
+  const [calendarLoading, setCalendarLoading] = useState(false);
+
+  // Chat modal state
+  const [chatCandidate, setChatCandidate] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatText, setChatText] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatSending, setChatSending] = useState(false);
 
   // Applicants List modal state
   const [isApplicantsModalOpen, setIsApplicantsModalOpen] = useState(false);
@@ -174,7 +206,8 @@ const EmployerDashboard = () => {
       experienceRequired: '',
       employmentType: 'Full-time',
       skills: '',
-      description: ''
+      description: '',
+      lastDateToApply: ''
     });
     setJobModalMode('create');
     setIsJobModalOpen(true);
@@ -189,7 +222,8 @@ const EmployerDashboard = () => {
       experienceRequired: job.experience || '',
       employmentType: job.type || 'Full-time',
       skills: job.skills || '',
-      description: job.description || ''
+      description: job.description || '',
+      lastDateToApply: job.lastDateToApply || ''
     });
     setEditingJobId(job.id);
     setJobModalMode('edit');
@@ -285,6 +319,140 @@ const EmployerDashboard = () => {
     } catch (err) {
       addToast('Failed to schedule interview.', 'error');
     }
+  };
+
+  // --- JOB CLOSE / REOPEN ---
+  const handleToggleJob = async (job) => {
+    const currentlyClosed = job.status === 'Closed' || job.status === 'Expired';
+    try {
+      await axios.post(`/api/employer/dashboard/jobs/${job.id}/toggle`, { isActive: currentlyClosed });
+      addToast(currentlyClosed ? 'Job reopened for applications.' : 'Job closed for applications.', 'success');
+      fetchDashboardData();
+    } catch (err) {
+      addToast('Failed to update job status.', 'error');
+    }
+  };
+
+  // --- RESUME PREVIEW / DOWNLOAD ---
+  const handlePreviewResume = async (candidate) => {
+    if (!candidate.applicationId) {
+      addToast('No resume file available for this candidate.', 'error');
+      return;
+    }
+    try {
+      const res = await axios.get(`/api/employer/dashboard/applicants/${candidate.applicationId}/resume`);
+      const { fileData } = res.data;
+      if (!fileData) {
+        addToast('Candidate has not uploaded a resume file.', 'error');
+        return;
+      }
+      const url = URL.createObjectURL(dataUrlToBlob(fileData));
+      window.open(url, '_blank');
+    } catch (err) {
+      addToast('Failed to load resume. Please try again.', 'error');
+    }
+  };
+
+  const handleDownloadResume = async (candidate) => {
+    if (!candidate.applicationId) {
+      addToast('No resume file available for this candidate.', 'error');
+      return;
+    }
+    try {
+      const res = await axios.get(`/api/employer/dashboard/applicants/${candidate.applicationId}/resume`);
+      const { fileData, fileName } = res.data;
+      if (!fileData) {
+        addToast('Candidate has not uploaded a resume file.', 'error');
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = String(fileData).startsWith('data:') ? fileData : URL.createObjectURL(dataUrlToBlob(fileData));
+      a.download = fileName || 'resume.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      addToast('Failed to download resume.', 'error');
+    }
+  };
+
+  // --- CANDIDATE CHAT ---
+  const openChat = (candidate) => {
+    if (!candidate?.userId) {
+      addToast('Candidate messaging unavailable for this application.', 'error');
+      return;
+    }
+    setChatCandidate(candidate);
+    setChatMessages([]);
+    setChatText('');
+    setChatLoading(true);
+    axios.get(`/api/messages/employer-thread/${candidate.userId}`)
+      .then(res => setChatMessages(res.data.messages || []))
+      .catch(() => addToast('Failed to load conversation.', 'error'))
+      .finally(() => setChatLoading(false));
+  };
+
+  const closeChat = () => {
+    setChatCandidate(null);
+    setChatMessages([]);
+  };
+
+  const sendChatMessage = async (e) => {
+    e.preventDefault();
+    const content = chatText.trim();
+    if (!content || !chatCandidate?.userId) return;
+    setChatSending(true);
+    try {
+      const res = await axios.post(`/api/messages/employer-send/${chatCandidate.userId}`, { content });
+      setChatMessages(prev => [...prev, res.data.message]);
+      setChatText('');
+    } catch (err) {
+      addToast('Failed to send message.', 'error');
+    } finally {
+      setChatSending(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!chatCandidate?.userId) return;
+    const interval = setInterval(() => {
+      axios.get(`/api/messages/employer-thread/${chatCandidate.userId}`)
+        .then(res => setChatMessages(res.data.messages || []))
+        .catch(() => {});
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [chatCandidate?.userId]);
+
+  // --- INTERVIEW CALENDAR ---
+  const fetchCalendarInterviews = async (month) => {
+    setCalendarLoading(true);
+    try {
+      const first = new Date(month.getFullYear(), month.getMonth(), 1);
+      const last = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+      const res = await axios.get('/api/employer/dashboard/interviews', {
+        params: { from: formatISODate(first), to: formatISODate(last) }
+      });
+      setCalendarInterviews(res.data.interviews || []);
+    } catch (err) {
+      addToast('Failed to load interview calendar.', 'error');
+    } finally {
+      setCalendarLoading(false);
+    }
+  };
+
+  const openCalendar = () => {
+    const today = new Date();
+    setCalendarMonth(today);
+    setSelectedCalDate(formatISODate(today));
+    setIsCalendarModalOpen(true);
+    fetchCalendarInterviews(today);
+  };
+
+  const changeCalendarMonth = (delta) => {
+    const next = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + delta, 1);
+    setCalendarMonth(next);
+    setSelectedCalDate(formatISODate(new Date(next.getFullYear(), next.getMonth(), 1)));
+    fetchCalendarInterviews(next);
   };
 
   // --- SEARCH FILTERING ---
@@ -477,11 +645,18 @@ const EmployerDashboard = () => {
                             <td className="py-3.5">
                               <span className="font-extrabold text-slate-800 dark:text-slate-100 block">{job.title}</span>
                               <span className="text-[10px] text-slate-450 dark:text-slate-500 font-semibold block">{job.type} - {job.location}</span>
+                              {job.lastDateToApply && (
+                                <span className="text-[9px] text-amber-600 dark:text-amber-450 font-bold block mt-0.5">
+                                  Apply by {job.lastDateToApply}
+                                </span>
+                              )}
                             </td>
                             <td className="py-3.5">
                               <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase border ${
                                 job.status === 'Active'
                                   ? 'bg-emerald-50 border-emerald-100 text-emerald-600 dark:bg-emerald-950/20 dark:border-emerald-900/30 dark:text-emerald-450'
+                                  : job.status === 'Expired'
+                                  ? 'bg-amber-50 border-amber-100 text-amber-600 dark:bg-amber-950/20 dark:border-amber-900/30 dark:text-amber-450'
                                   : 'bg-slate-50 border-slate-100 text-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'
                               }`}>
                                 {job.status}
@@ -503,6 +678,17 @@ const EmployerDashboard = () => {
                                 title="Edit Listing"
                               >
                                 <FiEdit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleToggleJob(job)}
+                                className={`p-1.5 rounded-lg inline-flex cursor-pointer border ${
+                                  job.status === 'Closed' || job.status === 'Expired'
+                                    ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/30'
+                                    : 'text-slate-450 hover:text-amber-600 dark:hover:text-amber-400 bg-slate-50 dark:bg-slate-850 border-slate-100 dark:border-slate-800'
+                                }`}
+                                title={job.status === 'Closed' || job.status === 'Expired' ? 'Reopen job for applications' : 'Close job for applications'}
+                              >
+                                {job.status === 'Closed' || job.status === 'Expired' ? <FiCheck className="w-3.5 h-3.5" /> : <FiX className="w-3.5 h-3.5" />}
                               </button>
                               <button
                                 onClick={() => handleDeleteJob(job.id)}
@@ -650,6 +836,12 @@ const EmployerDashboard = () => {
                 <div className="flex items-center gap-2 text-slate-700 dark:text-slate-250">
                   <FiCalendar className="w-4.5 h-4.5 text-sky-600" />
                   <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200">Today's Scheduled Interviews</h3>
+                  <button
+                    onClick={openCalendar}
+                    className="ml-auto flex items-center gap-1 px-2 py-1 text-[9px] font-black text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/20 rounded-lg border border-sky-100 dark:border-sky-900/30 cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors"
+                  >
+                    <FiCalendar className="w-3 h-3" /> View Calendar
+                  </button>
                 </div>
                 {interviews.length === 0 ? (
                   <div className="p-3 text-center text-xs text-slate-450 dark:text-slate-500 bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
@@ -948,6 +1140,19 @@ const EmployerDashboard = () => {
               </div>
 
               <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Last Date to Apply</label>
+                <input
+                  type="date"
+                  value={jobForm.lastDateToApply || ''}
+                  onChange={e => setJobForm({ ...jobForm, lastDateToApply: e.target.value })}
+                  className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100 font-semibold"
+                />
+                <span className="text-[9px] text-slate-400 dark:text-slate-500 font-semibold">
+                  Leave empty for no expiry. Candidates can no longer see this job after this date or once you close it.
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Skills (Comma-separated)</label>
                 <input
                   type="text"
@@ -1051,6 +1256,12 @@ const EmployerDashboard = () => {
                           className="px-2 py-0.5 text-[9px] font-bold text-slate-700 hover:text-sky-655 bg-slate-100 dark:bg-slate-800 rounded-md cursor-pointer border-none"
                         >
                           View Resume
+                        </button>
+                        <button
+                          onClick={() => openChat(app)}
+                          className="px-2 py-0.5 text-[9px] font-bold text-sky-700 hover:text-white hover:bg-sky-600 bg-sky-50 dark:bg-sky-955/20 rounded-md cursor-pointer border-none"
+                        >
+                          Message
                         </button>
                         {app.status === 'Pending' && (
                           <>
@@ -1180,13 +1391,13 @@ const EmployerDashboard = () => {
 
                   <div className="flex flex-col gap-2 w-full mt-2">
                     <button
-                      onClick={() => addToast(`Previewing resume in popout for ${selectedCandidate.name}...`, 'success')}
+                      onClick={() => handlePreviewResume(selectedCandidate)}
                       className="w-full py-2 flex items-center justify-center gap-1.5 text-xs font-extrabold text-sky-600 hover:text-sky-700 bg-sky-50 dark:bg-sky-955/20 rounded-xl border border-sky-100 dark:border-sky-900/30 cursor-pointer transition-colors"
                     >
                       <FiSearch className="w-3.5 h-3.5" /> Preview Resume
                     </button>
                     <button
-                      onClick={() => addToast(`Downloading ${selectedCandidate.resumeUrl}...`, 'success')}
+                      onClick={() => handleDownloadResume(selectedCandidate)}
                       className="w-full py-2 flex items-center justify-center gap-1.5 text-xs font-extrabold text-slate-700 hover:text-slate-900 dark:text-slate-350 dark:hover:text-white bg-slate-100 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer transition-colors"
                     >
                       <FiDownload className="w-3.5 h-3.5" /> Download Resume
@@ -1230,6 +1441,17 @@ const EmployerDashboard = () => {
                       className="w-full py-2.5 text-xs font-bold text-sky-650 dark:text-sky-300 hover:text-white bg-sky-50 dark:bg-sky-955/20 hover:bg-sky-600 dark:hover:bg-sky-600 rounded-xl border border-sky-250 dark:border-sky-900/30 transition-all cursor-pointer mt-1 border-none"
                     >
                       Schedule Interview
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const cand = { ...selectedCandidate };
+                        setSelectedCandidate(null);
+                        openChat(cand);
+                      }}
+                      className="w-full py-2.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:text-white bg-emerald-50 dark:bg-emerald-955/20 hover:bg-emerald-600 dark:hover:bg-emerald-600 rounded-xl border border-emerald-250 dark:border-emerald-900/30 transition-all cursor-pointer border-none"
+                    >
+                      Send Message
                     </button>
                   </div>
                 )}
@@ -1324,6 +1546,195 @@ const EmployerDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* 5. CANDIDATE CHAT MODAL */}
+      {chatCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-md w-full h-[560px] flex flex-col p-5 animate-scale-in">
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-sky-600 text-white flex items-center justify-center font-black text-xs shrink-0">
+                  {(chatCandidate.name || 'C').split(' ').map(n => n.charAt(0)).join('').slice(0, 2)}
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-800 dark:text-white text-sm leading-none">{chatCandidate.name}</h3>
+                  <p className="text-[9px] text-slate-400 font-semibold mt-1">{chatCandidate.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={closeChat}
+                className="text-slate-400 hover:text-slate-655 dark:hover:text-slate-200 cursor-pointer border-none bg-transparent"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2.5 py-4 pr-1">
+              {chatLoading ? (
+                <div className="text-center py-10 text-xs font-bold text-slate-500">Loading conversation...</div>
+              ) : chatMessages.length === 0 ? (
+                <div className="text-center py-10 text-xs font-bold text-slate-400">
+                  No messages yet. Say hello to {(chatCandidate.name || 'the candidate').split(' ')[0]}!
+                </div>
+              ) : (
+                chatMessages.map((msg, idx) => (
+                  <div key={msg.id || idx} className={`flex ${msg.sender === 'employer' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-xs font-semibold ${
+                      msg.sender === 'employer'
+                        ? 'bg-sky-600 text-white rounded-br-sm'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-bl-sm'
+                    }`}>
+                      {msg.content}
+                      <span className="block text-[8px] mt-1 opacity-70 font-bold">
+                        {formatTime(msg.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <form onSubmit={sendChatMessage} className="flex gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
+              <input
+                type="text"
+                value={chatText}
+                onChange={e => setChatText(e.target.value)}
+                placeholder="Type a message..."
+                className="flex-1 px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100 font-semibold"
+              />
+              <button
+                type="submit"
+                disabled={chatSending || !chatText.trim()}
+                className="px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl cursor-pointer disabled:opacity-50 border-none"
+              >
+                Send
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 6. INTERVIEW CALENDAR MODAL */}
+      {isCalendarModalOpen && (() => {
+        const year = calendarMonth.getFullYear();
+        const monthIdx = calendarMonth.getMonth();
+        const firstWeekday = new Date(year, monthIdx, 1).getDay();
+        const daysInMonth = new Date(year, monthIdx + 1, 0).getDate();
+        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        const interviewsByDate = {};
+        calendarInterviews.forEach(iv => {
+          if (!interviewsByDate[iv.date]) interviewsByDate[iv.date] = [];
+          interviewsByDate[iv.date].push(iv);
+        });
+
+        const selectedDateList = interviewsByDate[selectedCalDate] || [];
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto flex flex-col p-6 animate-scale-in">
+              <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <FiCalendar className="w-4 h-4 text-sky-600" />
+                  <h3 className="font-extrabold text-slate-800 dark:text-white text-base">Interview Calendar</h3>
+                </div>
+                <button
+                  onClick={() => setIsCalendarModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-655 dark:hover:text-slate-200 cursor-pointer border-none bg-transparent"
+                >
+                  <FiX className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between mt-4">
+                <button
+                  onClick={() => changeCalendarMonth(-1)}
+                  className="px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-850 rounded-lg cursor-pointer border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  ‹ Prev
+                </button>
+                <span className="text-sm font-black text-slate-800 dark:text-white capitalize">
+                  {calendarMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' })}
+                </span>
+                <button
+                  onClick={() => changeCalendarMonth(1)}
+                  className="px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-850 rounded-lg cursor-pointer border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  Next ›
+                </button>
+              </div>
+
+              {calendarLoading ? (
+                <div className="text-center py-14 text-xs font-bold text-slate-500">Loading calendar...</div>
+              ) : (
+                <div className="mt-4">
+                  <div className="grid grid-cols-7 gap-1 text-center">
+                    {weekdays.map(d => (
+                      <span key={d} className="text-[9px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 py-1.5">
+                        {d}
+                      </span>
+                    ))}
+                    {Array.from({ length: firstWeekday }).map((_, i) => (
+                      <div key={`blank-${i}`} />
+                    ))}
+                    {Array.from({ length: daysInMonth }).map((_, i) => {
+                      const dayNum = i + 1;
+                      const dateStr = `${year}-${String(monthIdx + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+                      const hasInterviews = interviewsByDate[dateStr]?.length > 0;
+                      const isSelected = selectedCalDate === dateStr;
+                      return (
+                        <button
+                          key={dateStr}
+                          onClick={() => setSelectedCalDate(dateStr)}
+                          className={`relative h-11 rounded-xl text-xs font-bold flex items-center justify-center cursor-pointer border transition-all ${
+                            isSelected
+                              ? 'bg-sky-600 text-white border-sky-600 shadow-sm shadow-sky-500/30'
+                              : hasInterviews
+                              ? 'bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-900/40 hover:bg-sky-100 dark:hover:bg-sky-900/30'
+                              : 'text-slate-600 dark:text-slate-300 border border-transparent hover:bg-slate-50 dark:hover:bg-slate-850'
+                          }`}
+                        >
+                          {dayNum}
+                          {hasInterviews && (
+                            <span className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-sky-500'}`} />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-5 border-t border-slate-100 dark:border-slate-800 pt-4">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                      Interviews on {selectedCalDate || 'selected date'}
+                    </span>
+                    {selectedDateList.length === 0 ? (
+                      <div className="text-xs text-slate-400 dark:text-slate-500 font-semibold py-3">
+                        No interviews scheduled for this date.
+                      </div>
+                    ) : (
+                      <div className="space-y-2 mt-2">
+                        {selectedDateList.map(iv => (
+                          <div key={iv.id} className="p-2.5 bg-slate-50 dark:bg-slate-850/40 border border-slate-100 dark:border-slate-800 rounded-xl flex justify-between items-center">
+                            <div>
+                              <span className="font-extrabold text-slate-800 dark:text-slate-100 text-xs block">{iv.candidate}</span>
+                              <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold block mt-0.5">
+                                {iv.round} · {iv.jobTitle}
+                              </span>
+                            </div>
+                            <span className="text-[10px] font-black text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/20 px-2.5 py-1 rounded-lg border border-sky-100 dark:border-sky-900/30">
+                              {iv.time}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

@@ -16,6 +16,9 @@ router.get('/', async (req, res) => {
     const params = [];
     let idx = 1;
 
+    // Hide recruiter-closed or expired jobs from candidates
+    conditions.push(`(is_active = true AND (last_date_to_apply IS NULL OR last_date_to_apply >= CURRENT_DATE))`);
+
     if (search) {
       const q = `%${search.toLowerCase()}%`;
       conditions.push(`(
@@ -173,6 +176,8 @@ function mapJob(row) {
     matchScore: row.match_score || 0,
     source: row.source,
     redirect_url: row.redirect_url,
+    isActive: row.is_active !== false,
+    lastDateToApply: row.last_date_to_apply || null,
   };
 }
 

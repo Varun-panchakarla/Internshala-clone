@@ -86,20 +86,30 @@ router.get('/jobs', employerAuthMiddleware, async (req, res) => {
       [req.employer.id]
     );
 
-    const formattedJobs = result.rows.map(row => ({
-      id: row.id,
-      title: row.title,
-      type: row.employment_type || 'Full-time',
-      status: row.posted_at === 'Closed' ? 'Closed' : 'Active',
-      applicants: row.applicants_count,
-      views: row.match_score || 0, // using match_score for view simulation or default views
-      date: formatTimeAgo(row.created_at),
-      location: row.location,
-      salary: row.salary || 'Undisclosed',
-      experience: row.experience || 'Not specified',
-      skills: Array.isArray(row.skills) ? row.skills.join(', ') : '',
-      description: row.description
-    }));
+    const formattedJobs = result.rows.map(row => {
+      const isActive = row.is_active !== false;
+      const lastDate = row.last_date_to_apply ? new Date(row.last_date_to_apply) : null;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const expired = lastDate && lastDate < today;
+      const status = !isActive ? 'Closed' : expired ? 'Expired' : 'Active';
+      return {
+        id: row.id,
+        title: row.title,
+        type: row.employment_type || 'Full-time',
+        status,
+        isActive: isActive && !expired,
+        lastDateToApply: row.last_date_to_apply || null,
+        applicants: row.applicants_count,
+        views: row.match_score || 0, // using match_score for view simulation or default views
+        date: formatTimeAgo(row.created_at),
+        location: row.location,
+        salary: row.salary || 'Undisclosed',
+        experience: row.experience || 'Not specified',
+        skills: Array.isArray(row.skills) ? row.skills.join(', ') : '',
+        description: row.description
+      };
+    });
 
     res.json({ jobs: formattedJobs });
   } catch (err) {
@@ -111,7 +121,7 @@ router.get('/jobs', employerAuthMiddleware, async (req, res) => {
 // 3. POST /api/employer/dashboard/jobs
 router.post('/jobs', employerAuthMiddleware, async (req, res) => {
   try {
-    const { title, location, salaryRange, experienceRequired, employmentType, skills, description } = req.body;
+    const { title, location, salaryRange, experienceRequired, employmentType, skills, description, lastDateToApply } = req.body;
     const employerId = req.employer.id;
 
     // Fetch company name to store in job listing
@@ -119,13 +129,15 @@ router.post('/jobs', employerAuthMiddleware, async (req, res) => {
     const companyName = companyRes.rows[0]?.company_name || 'Recruiter';
 
     const jobId = uuidv4();
-    const skillsArray = skills ? skills.split(',').map(s => s.trim()) : [];
+    const skillsArray = skills ? String(skills).split(',').map(s => s.trim()).filter(Boolean) : [];
+    const lastDate = lastDateToApply || null;
 
     const insertResult = await pool.query(
       `INSERT INTO jobs (
-        id, title, company, location, salary, experience, employment_type, skills, description, employer_id, created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW()) RETURNING *`,
-      [jobId, title, companyName, location, salaryRange, experienceRequired, employmentType, skillsArray, description, employerId]
+        id, title, company, location, salary, experience, employment_type, skills, description,
+        employer_id, last_date_to_apply, is_active, posted_at, created_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, 'Today', NOW()) RETURNING *`,
+      [jobId, title, companyName, location, salaryRange, experienceRequired, employmentType, skillsArray, description, employerId, lastDate]
     );
 
     res.json({ message: 'Job posted successfully!', job: insertResult.rows[0] });
@@ -138,17 +150,23 @@ router.post('/jobs', employerAuthMiddleware, async (req, res) => {
 // 4. PUT /api/employer/dashboard/jobs/:id
 router.put('/jobs/:id', employerAuthMiddleware, async (req, res) => {
   try {
-    const { title, location, salaryRange, experienceRequired, employmentType, skills, description } = req.body;
+    const { title, location, salaryRange, experienceRequired, employmentType, skills, description, lastDateToApply, isActive } = req.body;
     const employerId = req.employer.id;
     const jobId = req.params.id;
 
-    const skillsArray = skills ? skills.split(',').map(s => s.trim()) : [];
+    const skillsArray = skills ? String(skills).split(',').map(s => s.trim()).filter(Boolean) : [];
+    const lastDate = lastDateToApply || null;
+    const active = typeof isActive === 'boolean' ? isActive : undefined;
 
     const updateRes = await pool.query(
       `UPDATE jobs 
-       SET title = $1, location = $2, salary = $3, experience = $4, employment_type = $5, skills = $6, description = $7
-       WHERE id = $8 AND employer_id = $9 RETURNING *`,
-      [title, location, salaryRange, experienceRequired, employmentType, skillsArray, description, jobId, employerId]
+       SET title = $1, location = $2, salary = $3, experience = $4, employment_type = $5,
+           skills = $6, description = $7, last_date_to_apply = $8
+           ${active === undefined ? '' : ', is_active = $9'}
+       WHERE id = $${active === undefined ? 9 : 10} AND employer_id = $${active === undefined ? 10 : 11} RETURNING *`,
+      active === undefined
+        ? [title, location, salaryRange, experienceRequired, employmentType, skillsArray, description, lastDate, jobId, employerId]
+        : [title, location, salaryRange, experienceRequired, employmentType, skillsArray, description, lastDate, active, jobId, employerId]
     );
 
     if (updateRes.rows.length === 0) {
@@ -159,6 +177,29 @@ router.put('/jobs/:id', employerAuthMiddleware, async (req, res) => {
   } catch (err) {
     console.error('[Recruiter Update Job Error]:', err.message);
     res.status(500).json({ error: 'Failed to update job listing.' });
+  }
+});
+
+// 4b. POST /api/employer/dashboard/jobs/:id/toggle — close / reopen a listing
+router.post('/jobs/:id/toggle', employerAuthMiddleware, async (req, res) => {
+  try {
+    const { isActive } = req.body;
+    const jobId = req.params.id;
+    const employerId = req.employer.id;
+
+    const toggleRes = await pool.query(
+      "UPDATE jobs SET is_active = $1 WHERE id = $2 AND employer_id = $3 RETURNING *",
+      [isActive === true, jobId, employerId]
+    );
+
+    if (toggleRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Job listing not found or unauthorized.' });
+    }
+
+    res.json({ message: isActive === true ? 'Job reopened for applications.' : 'Job closed for applications.', job: toggleRes.rows[0] });
+  } catch (err) {
+    console.error('[Recruiter Toggle Job Error]:', err.message);
+    res.status(500).json({ error: 'Failed to update job status.' });
   }
 });
 
@@ -205,6 +246,7 @@ router.get('/applicants/:jobId', employerAuthMiddleware, async (req, res) => {
 
     const formattedApplicants = result.rows.map(row => ({
       applicationId: row.application_id,
+      userId: row.user_id,
       name: row.candidate_name,
       email: row.candidate_email,
       phone: row.contact_number || '+91 9999999999',
@@ -214,6 +256,9 @@ router.get('/applicants/:jobId', employerAuthMiddleware, async (req, res) => {
       education: `${row.degree || 'Degree'} at ${row.college || 'College'}`,
       status: row.status,
       timeAgo: formatTimeAgo(row.applied_at),
+      resumeFileName: row.resume_info?.fileName || '',
+      resumeFileType: row.resume_info?.fileType || '',
+      hasResume: !!(row.resume_info?.fileData || row.resume_info?.fileName),
       resumeUrl: row.resume_info?.fileName || 'resume.pdf'
     }));
 
@@ -221,6 +266,44 @@ router.get('/applicants/:jobId', employerAuthMiddleware, async (req, res) => {
   } catch (err) {
     console.error('[Recruiter Applicants List Error]:', err.message);
     res.status(500).json({ error: 'Failed to fetch applicants list.' });
+  }
+});
+
+// 6b. GET /api/employer/dashboard/applicants/:applicationId/resume
+// Returns the candidate's uploaded resume file for a recruiter who owns the job they applied to.
+router.get('/applicants/:applicationId/resume', employerAuthMiddleware, async (req, res) => {
+  try {
+    const employerId = req.employer.id;
+    const applicationId = req.params.applicationId;
+
+    const result = await pool.query(
+      `SELECT p.resume_info
+       FROM applied_jobs aj
+       JOIN jobs j ON aj.job_id = j.id
+       JOIN users u ON aj.user_id = u.id
+       LEFT JOIN profiles p ON u.id = p.user_id
+       WHERE aj.id = $1 AND j.employer_id = $2`,
+      [applicationId, employerId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Application not found or unauthorized.' });
+    }
+
+    const resumeInfo = result.rows[0].resume_info || {};
+    if (!resumeInfo.fileData && !resumeInfo.fileName) {
+      return res.status(404).json({ error: 'Candidate has not uploaded a resume file.' });
+    }
+
+    res.json({
+      fileName: resumeInfo.fileName || 'resume.pdf',
+      fileType: resumeInfo.fileType || 'application/pdf',
+      fileData: resumeInfo.fileData || null,
+      source: resumeInfo.source || 'upload'
+    });
+  } catch (err) {
+    console.error('[Recruiter Resume Error]:', err.message);
+    res.status(500).json({ error: 'Failed to fetch candidate resume.' });
   }
 });
 
@@ -452,23 +535,43 @@ router.get('/analytics', employerAuthMiddleware, async (req, res) => {
   }
 });
 
-// 13. GET /api/employer/dashboard/interviews
+// 13. GET /api/employer/dashboard/interviews?from=YYYY-MM-DD&to=YYYY-MM-DD
 router.get('/interviews', employerAuthMiddleware, async (req, res) => {
   try {
+    const { from, to } = req.query;
+    const params = [req.employer.id];
+
+    let dateFilter = 'DATE(i.scheduled_at) = CURRENT_DATE';
+    if (from && to) {
+      params.push(from, to);
+      dateFilter = `DATE(i.scheduled_at) BETWEEN $2 AND $3`;
+    } else if (from) {
+      params.push(from);
+      dateFilter = `DATE(i.scheduled_at) >= $2`;
+    } else if (to) {
+      params.push(to);
+      dateFilter = `DATE(i.scheduled_at) <= $2`;
+    }
+
     const result = await pool.query(
       `SELECT i.*, u.name AS candidate_name, u.email AS candidate_email, j.title AS job_title
        FROM interviews i
        JOIN users u ON i.user_id = u.id
        JOIN jobs j ON i.job_id = j.id
-       WHERE i.employer_id = $1 AND DATE(i.scheduled_at) = CURRENT_DATE
+       WHERE i.employer_id = $1 AND ${dateFilter}
        ORDER BY i.scheduled_at ASC`,
-      [req.employer.id]
+      params
     );
 
     const formatted = result.rows.map(row => ({
+      id: row.id,
       candidate: row.candidate_name,
       email: row.candidate_email,
       round: row.round,
+      status: row.status,
+      jobTitle: row.job_title,
+      scheduledAt: row.scheduled_at,
+      date: new Date(row.scheduled_at).toISOString().slice(0, 10),
       time: new Date(row.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }));
 

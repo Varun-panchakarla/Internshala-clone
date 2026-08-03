@@ -83,6 +83,7 @@ const issuesRouter = require('./routes/issues.js');
 const onboardingRouter = require('./routes/onboarding.js');
 const { router: employerAuthRouter } = require('./routes/employerAuth.js');
 const employerDashboardRouter = require('./routes/employerDashboard.js');
+const messagesRouter = require('./routes/messages.js');
 
 app.use('/api/auth', authRouter);
 app.use('/api/profile', profileRouter);
@@ -95,6 +96,7 @@ app.use('/api/issues', issuesRouter);
 app.use('/api/onboarding', onboardingRouter);
 app.use('/api/employer', employerAuthRouter);
 app.use('/api/employer/dashboard', employerDashboardRouter);
+app.use('/api/messages', messagesRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -234,7 +236,19 @@ async function initDb() {
       message TEXT NOT NULL,
       read BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMPTZ DEFAULT NOW()
-    )`
+    )`,
+    "ALTER TABLE jobs ADD COLUMN IF NOT EXISTS last_date_to_apply DATE",
+    "ALTER TABLE jobs ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true",
+    `CREATE TABLE IF NOT EXISTS messages (
+      id SERIAL PRIMARY KEY,
+      employer_id INTEGER REFERENCES employers(id) ON DELETE CASCADE,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      sender VARCHAR(20) NOT NULL,
+      content TEXT NOT NULL,
+      is_read BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_messages_thread ON messages (employer_id, user_id, created_at)`
   ];
   for (const sql of migrations) {
     try { await pool.query(sql); } catch { /* column may already exist */ }

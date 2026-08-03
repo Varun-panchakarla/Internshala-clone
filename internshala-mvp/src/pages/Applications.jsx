@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useJobs } from '../context/JobContext';
+import { jobService } from '../services/mockApi';
 import { FiCheckCircle, FiMapPin, FiCalendar, FiArrowRight, FiBriefcase, FiClock } from 'react-icons/fi';
 import Button from '../components/common/Button';
 
 const Applications = () => {
   const { appliedDetails, jobs } = useJobs();
   const navigate = useNavigate();
+  const [interviews, setInterviews] = useState([]);
+
+  useEffect(() => {
+    jobService.getInterviews()
+      .then(res => setInterviews(res.data.interviews || []))
+      .catch(() => setInterviews([]));
+  }, []);
 
   // Map detailed application logs back to job details
   const applications = appliedDetails.map(app => {
@@ -51,6 +59,39 @@ const Applications = () => {
         <h1 className="text-2xl font-black text-slate-800 dark:text-white">Applied Jobs</h1>
         <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Track the status of your submitted applications.</p>
       </div>
+
+      {interviews.length > 0 && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm">
+          <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+            <FiCalendar className="w-4 h-4 text-brand-600" />
+            <h2 className="font-extrabold text-slate-800 dark:text-white text-sm">Upcoming Interviews</h2>
+          </div>
+          <div className="space-y-2.5 mt-3">
+            {interviews.map(iv => (
+              <div key={iv.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-brand-50/40 dark:bg-brand-500/5 border border-brand-100 dark:border-brand-500/15 rounded-xl px-4 py-3">
+                <div>
+                  <span className="text-sm font-extrabold text-slate-800 dark:text-white block">{iv.jobTitle}</span>
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block mt-0.5">
+                    {iv.company} · {iv.round}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-xs font-black text-brand-700 dark:text-brand-400">
+                    {iv.date} · {iv.time}
+                  </span>
+                  <span className={`text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border ${
+                    iv.status === 'Scheduled'
+                      ? 'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-400'
+                      : 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
+                  }`}>
+                    {iv.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {applications.length > 0 ? (
         <div className="flex flex-col gap-4">

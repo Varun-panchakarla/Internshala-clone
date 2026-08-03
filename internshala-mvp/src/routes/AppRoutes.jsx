@@ -12,6 +12,7 @@ import JobsPage from '../pages/JobsPage';
 import JobDetails from '../pages/JobDetails';
 import SavedJobs from '../pages/SavedJobs';
 import Applications from '../pages/Applications';
+import Messages from '../pages/Messages';
 import RecommendedJobs from '../pages/RecommendedJobs';
 import InterviewPrep from '../pages/InterviewPrep';
 import TechnicalInterviewPrep from '../pages/TechnicalInterviewPrep';
@@ -310,6 +311,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Applications />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/messages"
+        element={
+          <ProtectedRoute>
+            <Messages />
           </ProtectedRoute>
         }
       />
