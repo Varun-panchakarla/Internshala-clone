@@ -342,11 +342,15 @@ router.post('/applications/:applicationId/status', employerAuthMiddleware, async
       [status, applicationId]
     );
 
-    // If status is shortlisted, insert notifications
+    // If status is shortlisted, upsert the notification so repeatedly
+    // updating the same candidate doesn't pile up "new" entries.
     if (status === 'Shortlisted') {
       await pool.query(
-        "INSERT INTO employer_notifications (employer_id, type, message) VALUES ($1, $2, $3)",
-        [employerId, 'shortlist', `Candidate has been successfully shortlisted for ${job_title}`]
+        `INSERT INTO employer_notifications (employer_id, type, message, reference_id)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (employer_id, reference_id)
+         DO UPDATE SET message = EXCLUDED.message, type = EXCLUDED.type, read = FALSE, created_at = NOW()`,
+        [employerId, 'shortlist', `Candidate has been successfully shortlisted for ${job_title}`, `status:${applicationId}`]
       );
     }
 
@@ -385,10 +389,14 @@ router.post('/interviews/schedule', employerAuthMiddleware, async (req, res) => 
       [userId, jobId]
     );
 
-    // Insert reminder notification
+    // Upsert notification (keyed by candidate + job) so rescheduling updates
+    // the existing entry instead of being counted as a brand new notification.
     await pool.query(
-      "INSERT INTO employer_notifications (employer_id, type, message) VALUES ($1, $2, $3)",
-      [employerId, 'interview', `Interview scheduled on ${new Date(scheduledAt).toLocaleString()} for round: ${round}`]
+      `INSERT INTO employer_notifications (employer_id, type, message, reference_id)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (employer_id, reference_id)
+       DO UPDATE SET message = EXCLUDED.message, type = EXCLUDED.type, read = FALSE, created_at = NOW()`,
+      [employerId, 'interview', `Interview scheduled on ${new Date(scheduledAt).toLocaleString()} for round: ${round}`, `interview:${userId}:${jobId}`]
     );
 
     res.json({ message: 'Interview scheduled successfully!', interview: insertRes.rows[0] });

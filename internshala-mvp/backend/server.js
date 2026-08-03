@@ -248,7 +248,9 @@ async function initDb() {
       is_read BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )`,
-    `CREATE INDEX IF NOT EXISTS idx_messages_thread ON messages (employer_id, user_id, created_at)`
+    `CREATE INDEX IF NOT EXISTS idx_messages_thread ON messages (employer_id, user_id, created_at)`,
+    "ALTER TABLE employer_notifications ADD COLUMN IF NOT EXISTS reference_id VARCHAR(255)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_employer_notif_ref ON employer_notifications (employer_id, reference_id)"
   ];
   for (const sql of migrations) {
     try { await pool.query(sql); } catch { /* column may already exist */ }
