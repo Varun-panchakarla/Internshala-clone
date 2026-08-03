@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 // Pages lazy-like imports (or direct imports)
 import Login from '../pages/Login';
 import Register from '../pages/Register';
+import VerifyOtp from '../pages/VerifyOtp';
 import Dashboard from '../pages/Dashboard';
 import JobsPage from '../pages/JobsPage';
 import JobDetails from '../pages/JobDetails';
@@ -36,6 +37,48 @@ import Onboarding from '../pages/Onboarding';
 import OnboardingStep2 from '../pages/OnboardingStep2';
 import OnboardingStep3 from '../pages/OnboardingStep3';
 import AdminPortal from '../pages/admin/AdminPortal';
+
+// Employer Auth & Pages
+import { useEmployerAuth } from '../context/EmployerAuthContext';
+import EmployerLogin from '../pages/employer/EmployerLogin';
+import EmployerRegister from '../pages/employer/EmployerRegister';
+import EmployerVerifyEmail from '../pages/employer/EmployerVerifyEmail';
+import EmployerForgotPassword from '../pages/employer/EmployerForgotPassword';
+import EmployerResetPassword from '../pages/employer/EmployerResetPassword';
+import EmployerOnboarding from '../pages/employer/EmployerOnboarding';
+import EmployerDashboard from '../pages/employer/EmployerDashboard';
+
+// Employer Protected Route Wrapper
+const EmployerProtectedRoute = ({ children, allowOnboardingIncomplete = false }) => {
+  const { isAuthenticated, loading, currentEmployer } = useEmployerAuth();
+
+  if (loading) {
+    return <LoadingSpinner fullPage text="Securing recruiter session..." />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/employer/login" replace />;
+  }
+
+  const onboardingCompleted = currentEmployer?.onboardingCompleted === true;
+
+  if (!onboardingCompleted && !allowOnboardingIncomplete) {
+    return <Navigate to="/employer/onboarding" replace />;
+  }
+
+  return children;
+};
+
+// Employer Public Route Wrapper
+const EmployerPublicRoute = ({ children }) => {
+  const { loading } = useEmployerAuth();
+
+  if (loading) {
+    return <LoadingSpinner fullPage text="Loading recruiter portal..." />;
+  }
+
+  return children;
+};
 
 // Admin Route Wrapper
 const AdminRoute = ({ children }) => {
@@ -117,6 +160,14 @@ const AppRoutes = () => {
         element={
           <PublicRoute useLayout={false}>
             <Register />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/verify-otp"
+        element={
+          <PublicRoute useLayout={false}>
+            <VerifyOtp />
           </PublicRoute>
         }
       />
@@ -348,6 +399,64 @@ const AppRoutes = () => {
           <AdminRoute>
             <AdminPortal />
           </AdminRoute>
+        }
+      />
+
+      {/* Employer Portal Routes */}
+      <Route
+        path="/employer/login"
+        element={
+          <EmployerPublicRoute>
+            <EmployerLogin />
+          </EmployerPublicRoute>
+        }
+      />
+      <Route
+        path="/employer/register"
+        element={
+          <EmployerPublicRoute>
+            <EmployerRegister />
+          </EmployerPublicRoute>
+        }
+      />
+      <Route
+        path="/employer/verify-email"
+        element={
+          <EmployerPublicRoute>
+            <EmployerVerifyEmail />
+          </EmployerPublicRoute>
+        }
+      />
+      <Route
+        path="/employer/forgot-password"
+        element={
+          <EmployerPublicRoute>
+            <EmployerForgotPassword />
+          </EmployerPublicRoute>
+        }
+      />
+      <Route
+        path="/employer/reset-password"
+        element={
+          <EmployerPublicRoute>
+            <EmployerResetPassword />
+          </EmployerPublicRoute>
+        }
+      />
+      <Route
+        path="/employer/onboarding"
+        element={
+          <EmployerProtectedRoute allowOnboardingIncomplete={true}>
+            <EmployerOnboarding />
+          </EmployerProtectedRoute>
+        }
+      />
+      <Route
+        path="/employer/dashboard"
+        element={
+          <EmployerProtectedRoute>
+            <EmployerDashboard />
+          </EmployerProtectedRoute>
         }
       />
 

@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL}/api`
+    : '/api',
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
@@ -9,11 +11,27 @@ const api = axios.create({
 export const authService = {
   login: (email, password) => api.post('/auth/login', { email, password }),
   register: (name, email, password) => api.post('/auth/register', { name, email, password }),
-  googleAuth: (credential) => api.post('/auth/google', { credential }),
+  googleAuth: (payload) => api.post('/auth/google', typeof payload === 'string' ? { credential: payload } : payload),
   logout: () => api.post('/auth/logout'),
   getCurrentUser: () => api.get('/auth/me'),
   getProfile: () => api.get('/profile'),
   updateProfile: (profileData) => api.put('/profile', profileData),
+  deleteAccount: () => api.delete('/auth/account'),
+  verifyOtp: (email, otp) => api.post('/auth/verify-otp', { email, otp }),
+  resendOtp: (email) => api.post('/auth/resend-otp', { email }),
+};
+
+export const employerService = {
+  login: (email, password) => api.post('/employer/auth/login', { email, password }),
+  register: (data) => api.post('/employer/auth/register', data),
+  verifyOtp: (email, otp) => api.post('/employer/auth/verify-email', { email, otp }),
+  resendOtp: (email) => api.post('/employer/auth/resend-otp', { email }),
+  forgotPassword: (email) => api.post('/employer/auth/forgot-password', { email }),
+  resetPassword: (token, password) => api.post('/employer/auth/reset-password', { token, password }),
+  logout: () => api.post('/employer/auth/logout'),
+  getCurrentEmployer: () => api.get('/employer/auth/me'),
+  getProfile: () => api.get('/employer/profile'),
+  updateProfile: (profileData) => api.put('/employer/profile', profileData),
 };
 
 export const jobService = {

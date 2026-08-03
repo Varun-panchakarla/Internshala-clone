@@ -5,6 +5,7 @@ import { useToast } from '../components/common/Toast';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import { FiArrowRight, FiCheck, FiPlus, FiX } from 'react-icons/fi';
+import { authService } from '../services/mockApi';
 
 const Onboarding = () => {
   const { currentUser } = useAuth();
@@ -65,12 +66,16 @@ const Onboarding = () => {
   useEffect(() => {
     const dataKey = currentUser?.id ? `onboarding_step1_${currentUser.id}` : 'onboarding_step1_guest';
     const saved = localStorage.getItem(dataKey);
+    let loadedContactNumber = '';
     if (saved) {
       try {
         const d = JSON.parse(saved);
         if (d.firstName) setFirstName(d.firstName);
         if (d.lastName) setLastName(d.lastName);
-        if (d.contactNumber) setContactNumber(d.contactNumber);
+        if (d.contactNumber) {
+          setContactNumber(d.contactNumber);
+          loadedContactNumber = d.contactNumber;
+        }
         if (d.currentCity) setCurrentCity(d.currentCity);
         if (d.gender) setGender(d.gender);
         if (Array.isArray(d.selectedLanguages)) setSelectedLanguages(d.selectedLanguages);
@@ -92,6 +97,10 @@ const Onboarding = () => {
           setLastName(parts.slice(1).join(' '));
         }
       }
+    }
+
+    if (currentUser?.profileData?.contactNumber) {
+      setContactNumber(currentUser.profileData.contactNumber);
     }
   }, [currentUser]);
 
@@ -144,7 +153,7 @@ const Onboarding = () => {
     if (!lastName.trim()) tempErrors.lastName = 'Last name is required.';
     
     // Contact Validation
-    const cleanPhone = contactNumber.replace(/[\s\-\(\)]/g, '');
+    const cleanPhone = contactNumber.replace(/[\s\-()]/g, '');
     if (!contactNumber.trim()) {
       tempErrors.contactNumber = 'Contact number is required.';
     } else if (!/^\+?\d{8,15}$/.test(cleanPhone)) {
@@ -333,7 +342,7 @@ const Onboarding = () => {
                 required
               />
               <Input 
-                label="Contact Number" 
+                label="Contact Number"
                 id="contactNumber"
                 type="tel"
                 placeholder="e.g. +91 9999999999"

@@ -8,7 +8,7 @@ const IDLE_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
 function normalizeUser(apiData) {
   if (!apiData) return null;
-  const { user, profile } = apiData;
+  const { user, profile, onboarding } = apiData;
   return {
     id: user?.id,
     email: user?.email,
@@ -16,6 +16,7 @@ function normalizeUser(apiData) {
     role: user?.role || 'candidate',
     profileCompleted: !!(profile && (profile.fullName || profile.skills?.length > 0)),
     profileData: profile || {},
+    onboardingData: onboarding || {},
   };
 }
 
@@ -117,6 +118,20 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const res = await authService.register(name, email, password);
+      return res.data;
+    } catch (err) {
+      setError(err.response?.data?.error || err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOtp = async (email, otp) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await authService.verifyOtp(email, otp);
       const user = normalizeUser(res.data);
       setCurrentUser(user);
       return user;
@@ -144,9 +159,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const profileCompletion = currentUser?.profileData
-    ? calculateProfileCompletion(currentUser.profileData)
+  const deleteAccount = async () => {
+    setLoading(true);
+    try {
+      await authService.deleteAccount();
+      setCurrentUser(null);
+    } catch (err) {
+      console.error('Account deletion failed', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const profileCompletion = currentUser
+    ? calculateProfileCompletion(currentUser)
     : 0;
+
+  console.log('[AuthContext] currentUser:', currentUser);
+  console.log('[AuthContext] profileCompletion:', profileCompletion);
+
+  const refreshResumeInfo = (resumeInfo) => {
+    setCurrentUser(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        profileData: {
+          ...prev.profileData,
+          resumeInfo,
+        },
+      };
+    });
+  };
 
   const value = {
     currentUser,
@@ -159,6 +203,9 @@ export const AuthProvider = ({ children }) => {
     googleLogin,
     logout,
     updateProfile,
+    deleteAccount,
+    refreshResumeInfo,
+    verifyOtp,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

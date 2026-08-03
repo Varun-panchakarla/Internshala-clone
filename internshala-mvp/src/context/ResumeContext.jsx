@@ -6,7 +6,7 @@ import { calculateAtsScore, calculateResumeCompletion } from '../utils/atsScorer
 const ResumeContext = createContext();
 
 export const ResumeProvider = ({ children }) => {
-  const { currentUser, isAuthenticated } = useAuth();
+  const { currentUser, isAuthenticated, refreshResumeInfo } = useAuth();
   const [resume, setResume]   = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving]   = useState(false);
@@ -68,8 +68,12 @@ export const ResumeProvider = ({ children }) => {
     setSaving(true);
     try {
       const res = await resumeService.saveResume(dataToSave);
-      setResume(res.data?.data || dataToSave);
-      return res.data?.data;
+      const savedData = res.data?.data || dataToSave;
+      setResume(savedData);
+      if (refreshResumeInfo) {
+        refreshResumeInfo(savedData);
+      }
+      return savedData;
     } catch (err) {
       console.error('Failed to save resume', err);
       throw err;

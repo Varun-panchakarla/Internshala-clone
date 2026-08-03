@@ -190,26 +190,26 @@ html.dark .mesh-bg {
    Scope all overrides away from the resume preview (#resume-preview) so
    the PDF output always renders in light mode colors.
 ─────────────────────────────────────────────────────────────────────────────── */
-html.dark .bg-white:not(#resume-preview, #resume-preview *)              { background-color: #0f1a2e !important; }
-html.dark .bg-slate-50:not(#resume-preview, #resume-preview *)           { background-color: #060d1b !important; }
-html.dark .bg-slate-100:not(#resume-preview, #resume-preview *)          { background-color: #1a2640 !important; }
-html.dark .bg-slate-200:not(#resume-preview, #resume-preview *)          { background-color: #243452 !important; }
+html.dark .bg-white:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)              { background-color: #0f1a2e !important; }
+html.dark .bg-slate-50:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)           { background-color: #060d1b !important; }
+html.dark .bg-slate-100:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)          { background-color: #1a2640 !important; }
+html.dark .bg-slate-200:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)          { background-color: #243452 !important; }
 
-html.dark .border-slate-100:not(#resume-preview, #resume-preview *),
-html.dark .border-slate-200:not(#resume-preview, #resume-preview *)      { border-color: #1e2d45 !important; }
+html.dark .border-slate-100:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *),
+html.dark .border-slate-200:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)      { border-color: #1e2d45 !important; }
 
-html.dark .text-slate-900:not(#resume-preview, #resume-preview *)        { color: #f8fafc !important; }
-html.dark .text-slate-800:not(#resume-preview, #resume-preview *)        { color: #f1f5f9 !important; }
-html.dark .text-slate-700:not(#resume-preview, #resume-preview *)        { color: #e2e8f0 !important; }
-html.dark .text-slate-600:not(#resume-preview, #resume-preview *)        { color: #94a3b8 !important; }
-html.dark .text-slate-500:not(#resume-preview, #resume-preview *)        { color: #64748b !important; }
-html.dark .text-slate-400:not(#resume-preview, #resume-preview *)        { color: #475569 !important; }
+html.dark .text-slate-900:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)        { color: #f8fafc !important; }
+html.dark .text-slate-800:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)        { color: #f1f5f9 !important; }
+html.dark .text-slate-700:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)        { color: #e2e8f0 !important; }
+html.dark .text-slate-600:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)        { color: #94a3b8 !important; }
+html.dark .text-slate-500:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)        { color: #64748b !important; }
+html.dark .text-slate-400:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)        { color: #475569 !important; }
 
-html.dark .bg-brand-50:not(#resume-preview, #resume-preview *)           { background-color: rgba(2,132,199,0.12) !important; }
-html.dark .text-brand-700:not(#resume-preview, #resume-preview *)        { color: #38bdf8 !important; }
+html.dark .bg-brand-50:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)           { background-color: rgba(2,132,199,0.12) !important; }
+html.dark .text-brand-700:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *)        { color: #38bdf8 !important; }
 
-html.dark .hover\:bg-slate-50:not(#resume-preview, #resume-preview *):hover  { background-color: #1a2640 !important; }
-html.dark .hover\:bg-brand-100:not(#resume-preview, #resume-preview *):hover { background-color: rgba(2,132,199,0.2) !important; }
+html.dark .hover\:bg-slate-50:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *):hover  { background-color: #1a2640 !important; }
+html.dark .hover\:bg-brand-100:not(#resume-preview, #resume-preview *, .light-theme-forced, .light-theme-forced *):hover { background-color: rgba(2,132,199,0.2) !important; }
 
 /* Toast/badge dark overrides */
 html.dark .bg-emerald-50:not(#resume-preview, #resume-preview *)  { background-color: rgba(5,150,105,0.1)  !important; }
@@ -253,3 +253,27 @@ html.dark .disabled\:text-slate-400:disabled { color: #475569 !important; }
 #nprogress .peg {
   box-shadow: 0 0 10px var(--color-brand-600), 0 0 5px var(--color-brand-600) !important;
 }
+
+/* Force Google Sign-In button container and iframe to be 100% full-width */
+.google-signin-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 44px !important;
+  overflow: hidden !important;
+  border-radius: 12px !important;
+}
+
+.google-signin-wrapper > div,
+.google-signin-wrapper iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: block !important;
+  border-radius: 12px !important;
+}
+
+

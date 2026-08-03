@@ -291,6 +291,59 @@ async function sendIssueResolvedEmail(email, name, subject, adminNotes) {
   });
 }
 
+function otpHTML(name, otp) {
+  return BASE_HTML(`
+<tr><td style="background:linear-gradient(135deg,#6366f1,#4f46e5);padding:36px 32px 28px;text-align:center">
+<h1 style="color:#fff;font-size:22px;margin:0 0 4px;letter-spacing:-0.3px">Verify Your Email</h1>
+<p style="color:#c7d2fe;font-size:13px;margin:0;font-weight:500">Security Verification Code</p>
+</td></tr>
+<tr><td style="padding:32px 32px 24px;text-align:center">
+<p style="color:#1e293b;font-size:15px;margin:0 0 12px;font-weight:600;text-align:left">Hi ${name || 'there'},</p>
+<p style="color:#475569;font-size:13px;line-height:1.7;margin:0 0 24px;text-align:left">Thank you for registering with IncuXAI Careers. Please use the following 6-digit one-time password (OTP) to verify your email address. This code is valid for 10 minutes:</p>
+<div style="background:#f1f5f9;border-radius:12px;padding:16px 24px;font-size:32px;font-weight:800;letter-spacing:6px;color:#4f46e5;display:inline-block;margin:0 auto 24px;border:1px dashed #cbd5e1">
+  ${otp}
+</div>
+<p style="color:#64748b;font-size:12px;line-height:1.6;margin:0;text-align:left">
+  If you did not request this verification code, please ignore this email or contact support.
+</p>
+</td></tr>`);
+}
+
+async function sendOtpEmail({ email, name, otp }) {
+  // Log OTP in non-production environments for local testing/verification
+  if (process.env.NODE_ENV !== 'production' || !SENDGRID_KEY) {
+    console.log(`\n==========================================`);
+    console.log(`[LOCAL DEV OTP] Email: ${email}, OTP: ${otp}`);
+    console.log(`==========================================\n`);
+  }
+  return send({
+    to: email,
+    subject: `Verify your email - IncuXAI Careers`,
+    html: otpHTML(name, otp)
+  });
+}
+
+async function sendEmployerOtpEmail({ email, name, otp }) {
+  if (process.env.NODE_ENV !== 'production' || !SENDGRID_KEY) {
+    console.log(`\n==========================================`);
+    console.log(`[LOCAL DEV EMPLOYER OTP] Email: ${email}, OTP: ${otp}`);
+    console.log(`==========================================\n`);
+  }
+  return send({
+    to: email,
+    subject: `Verify your email - IncuXAI Recruiter`,
+    html: otpHTML(name, otp)
+  });
+}
+
+async function sendEmployerPasswordResetEmail(employer, resetUrl) {
+  return send({
+    to: employer.email,
+    subject: 'Reset your IncuXAI Recruiter password',
+    html: passwordResetHTML(employer.recruiter_name, resetUrl)
+  });
+}
+
 module.exports = {
   sendWelcomeEmail,
   sendJobAlert,
@@ -299,5 +352,8 @@ module.exports = {
   sendDailyReminder,
   sendPasswordResetEmail,
   sendIssueReceivedEmail,
-  sendIssueResolvedEmail
+  sendIssueResolvedEmail,
+  sendOtpEmail,
+  sendEmployerOtpEmail,
+  sendEmployerPasswordResetEmail
 };

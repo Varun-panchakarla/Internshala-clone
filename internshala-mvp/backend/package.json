@@ -15,6 +15,7 @@
     "dotenv": "^17.4.2",
     "express": "^4.21.0",
     "google-auth-library": "^10.9.0",
+    "internshala-mvp": "file:..",
     "jsonwebtoken": "^9.0.3",
     "node-cron": "^3.0.3",
     "pg": "^8.22.0",

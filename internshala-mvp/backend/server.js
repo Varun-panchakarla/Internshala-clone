@@ -28,10 +28,26 @@ app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
 // Serve built frontend in production
-const distPath = path.join(__dirname, '..', 'dist');
-if (fs.existsSync(distPath)) {
-  app.use(express.static(distPath));
+const distPath = path.resolve(__dirname, '..', 'dist');
+const indexPath = path.resolve(distPath, 'index.html');
+
+// Auto-build frontend if dist doesn't exist — handles Render build config mismatches
+if (!fs.existsSync(indexPath)) {
+  console.log('[Server] dist/index.html not found. Running build...');
+  const { execSync } = require('child_process');
+  try {
+    execSync('npm run build', { cwd: path.resolve(__dirname, '..'), stdio: 'inherit', timeout: 120000 });
+  } catch (buildErr) {
+    console.error('[Server] Auto-build failed:', buildErr.message);
+  }
 }
+
+if (!fs.existsSync(indexPath)) {
+  console.warn(`[Server Warning] Frontend build not found at: ${distPath}`);
+} else {
+  console.log(`[Server] Serving frontend from: ${distPath}`);
+}
+app.use(express.static(distPath));
 
 // Routes
 const { router: authRouter } = require('./routes/auth.js');
@@ -42,6 +58,9 @@ const appliedRouter = require('./routes/applied.js');
 const resumeRouter = require('./routes/resume.js');
 const adminRouter = require('./routes/admin.js');
 const issuesRouter = require('./routes/issues.js');
+const onboardingRouter = require('./routes/onboarding.js');
+const { router: employerAuthRouter } = require('./routes/employerAuth.js');
+const employerDashboardRouter = require('./routes/employerDashboard.js');
 
 app.use('/api/auth', authRouter);
 app.use('/api/profile', profileRouter);
@@ -51,6 +70,9 @@ app.use('/api/applied', appliedRouter);
 app.use('/api/resume', resumeRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/issues', issuesRouter);
+app.use('/api/onboarding', onboardingRouter);
+app.use('/api/employer', employerAuthRouter);
+app.use('/api/employer/dashboard', employerDashboardRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -67,12 +89,12 @@ app.post('/api/scrape', async (req, res) => {
   }
 });
 
-// SPA catch-all: serve index.html for any non-API route (client-side routing)
+// SPA catch-all: serve index.html for any non-API route
 app.get('*', (req, res) => {
-  const indexPath = path.join(distPath, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
+    console.error(`[SPA Error] index.html not found at: ${indexPath}`);
     res.status(404).json({ error: 'Frontend not built. Run "npm run build" first.' });
   }
 });
@@ -121,21 +143,100 @@ async function initDb() {
       sent_at TIMESTAMP DEFAULT NOW(),
       UNIQUE(user_id, email_type, DATE(sent_at))
     )`,
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT true",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_code VARCHAR(255)",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_expires_at TIMESTAMPTZ",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_attempts INTEGER DEFAULT 0",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_otp_sent_at TIMESTAMPTZ",
+    "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN DEFAULT true",
+    `CREATE TABLE IF NOT EXISTS employers (
+      id SERIAL PRIMARY KEY,
+      company_name VARCHAR(255) NOT NULL,
+      recruiter_name VARCHAR(255) NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      phone VARCHAR(20) NOT NULL,
+      website VARCHAR(255),
+      password_hash VARCHAR(255) NOT NULL,
+      email_verified BOOLEAN DEFAULT false,
+      otp_code VARCHAR(255),
+      otp_expires_at TIMESTAMPTZ,
+      otp_attempts INTEGER DEFAULT 0,
+      last_otp_sent_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS employer_profiles (
+      id SERIAL PRIMARY KEY,
+      employer_id INTEGER UNIQUE REFERENCES employers(id) ON DELETE CASCADE,
+      company_logo TEXT,
+      industry VARCHAR(255),
+      company_size VARCHAR(100),
+      founded_year VARCHAR(10),
+      website VARCHAR(255),
+      linkedin VARCHAR(255),
+      description TEXT,
+      headquarters VARCHAR(255),
+      office_locations TEXT,
+      hiring_locations TEXT,
+      work_mode VARCHAR(100),
+      designation VARCHAR(255),
+      department VARCHAR(255),
+      official_phone VARCHAR(20),
+      onboarding_completed BOOLEAN DEFAULT false,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS employer_password_resets (
+      id SERIAL PRIMARY KEY,
+      employer_id INTEGER REFERENCES employers(id) ON DELETE CASCADE,
+      token VARCHAR(255) UNIQUE NOT NULL,
+      used BOOLEAN DEFAULT FALSE,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`,
+    "ALTER TABLE jobs ADD COLUMN IF NOT EXISTS employer_id INTEGER REFERENCES employers(id) ON DELETE SET NULL",
+    `CREATE TABLE IF NOT EXISTS interviews (
+      id SERIAL PRIMARY KEY,
+      employer_id INTEGER REFERENCES employers(id) ON DELETE CASCADE,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      job_id VARCHAR(100) REFERENCES jobs(id) ON DELETE CASCADE,
+      scheduled_at TIMESTAMPTZ NOT NULL,
+      round VARCHAR(255),
+      status VARCHAR(50) DEFAULT 'Scheduled',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS employer_notifications (
+      id SERIAL PRIMARY KEY,
+      employer_id INTEGER REFERENCES employers(id) ON DELETE CASCADE,
+      type VARCHAR(50) NOT NULL,
+      message TEXT NOT NULL,
+      read BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`
   ];
   for (const sql of migrations) {
     try { await pool.query(sql); } catch { /* column may already exist */ }
   }
   try { await seedJobs(); } catch (err) { console.error('[DB] Seed error:', err.message); }
-  // Reset sequences to match current max IDs (fixes gaps after DELETE)
-  try {
-    const seqReset = [
-      "SELECT setval('users_id_seq', COALESCE((SELECT MAX(id) FROM users), 0) + 1, false)",
-      "SELECT setval('profiles_id_seq', COALESCE((SELECT MAX(id) FROM profiles), 0) + 1, false)",
-    ];
-    for (const sql of seqReset) {
-      await pool.query(sql);
+  // Reset sequences to match current max IDs (fixes gaps after DELETE or TRUNCATE)
+  const seqReset = [
+    ['users_id_seq', 'users'],
+    ['profiles_id_seq', 'profiles'],
+    ['saved_jobs_id_seq', 'saved_jobs'],
+    ['applied_jobs_id_seq', 'applied_jobs'],
+    ['issue_reports_id_seq', 'issue_reports'],
+    ['password_resets_id_seq', 'password_resets'],
+    ['email_log_id_seq', 'email_log'],
+    ['interviews_id_seq', 'interviews'],
+    ['employer_notifications_id_seq', 'employer_notifications']
+  ];
+  for (const [seq, tbl] of seqReset) {
+    try {
+      await pool.query(`SELECT setval('${seq}', COALESCE((SELECT MAX(id) FROM ${tbl}), 0) + 1, false)`);
+    } catch {
+      // Ignore if table/sequence doesn't exist
     }
-  } catch { /* sequences may not exist */ }
+  }
 }
 
 // Check if jobs table is empty -> trigger scrape

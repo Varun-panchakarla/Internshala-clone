@@ -4,6 +4,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ToastProvider } from './components/common/Toast';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import { EmployerAuthProvider } from './context/EmployerAuthContext';
 import { JobProvider } from './context/JobContext';
 import { ResumeProvider } from './context/ResumeContext';
 import { SidebarProvider } from './context/SidebarContext';
@@ -22,13 +23,15 @@ function App() {
         <ToastProvider>
           <ThemeProvider>
             <AuthProvider>
-              <SidebarProvider>
-                <JobProvider>
-                  <ResumeProvider>
-                    <AppRoutes />
-                  </ResumeProvider>
-                </JobProvider>
-              </SidebarProvider>
+              <EmployerAuthProvider>
+                <SidebarProvider>
+                  <JobProvider>
+                    <ResumeProvider>
+                      <AppRoutes />
+                    </ResumeProvider>
+                  </JobProvider>
+                </SidebarProvider>
+              </EmployerAuthProvider>
             </AuthProvider>
           </ThemeProvider>
         </ToastProvider>

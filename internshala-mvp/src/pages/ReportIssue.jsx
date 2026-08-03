@@ -3,6 +3,8 @@ import { useToast } from '../components/common/Toast';
 import { FiAlertCircle, FiCheckCircle, FiUploadCloud, FiX, FiChevronDown } from 'react-icons/fi';
 import Button from '../components/common/Button';
 import axios from 'axios';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';
+axios.defaults.withCredentials = true;
 import { useAuth } from '../context/AuthContext';
 
 const ReportIssue = () => {
@@ -155,7 +157,7 @@ const ReportIssue = () => {
     setErrors({});
     setIsSubmitting(true);
 
-    axios.post('/api/issues', {
+    axios.post(`${import.meta.env.VITE_API_URL || ''}/api/issues`, {
       fullName,
       email,
       contactNumber,
