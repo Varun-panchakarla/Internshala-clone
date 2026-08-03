@@ -60,6 +60,7 @@ const adminRouter = require('./routes/admin.js');
 const issuesRouter = require('./routes/issues.js');
 const onboardingRouter = require('./routes/onboarding.js');
 const { router: employerAuthRouter } = require('./routes/employerAuth.js');
+const employerDashboardRouter = require('./routes/employerDashboard.js');
 
 app.use('/api/auth', authRouter);
 app.use('/api/profile', profileRouter);
@@ -71,6 +72,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/issues', issuesRouter);
 app.use('/api/onboarding', onboardingRouter);
 app.use('/api/employer', employerAuthRouter);
+app.use('/api/employer/dashboard', employerDashboardRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -191,6 +193,25 @@ async function initDb() {
       used BOOLEAN DEFAULT FALSE,
       expires_at TIMESTAMPTZ NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
+    )`,
+    "ALTER TABLE jobs ADD COLUMN IF NOT EXISTS employer_id INTEGER REFERENCES employers(id) ON DELETE SET NULL",
+    `CREATE TABLE IF NOT EXISTS interviews (
+      id SERIAL PRIMARY KEY,
+      employer_id INTEGER REFERENCES employers(id) ON DELETE CASCADE,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      job_id VARCHAR(100) REFERENCES jobs(id) ON DELETE CASCADE,
+      scheduled_at TIMESTAMPTZ NOT NULL,
+      round VARCHAR(255),
+      status VARCHAR(50) DEFAULT 'Scheduled',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS employer_notifications (
+      id SERIAL PRIMARY KEY,
+      employer_id INTEGER REFERENCES employers(id) ON DELETE CASCADE,
+      type VARCHAR(50) NOT NULL,
+      message TEXT NOT NULL,
+      read BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
     )`
   ];
   for (const sql of migrations) {
@@ -205,7 +226,9 @@ async function initDb() {
     ['applied_jobs_id_seq', 'applied_jobs'],
     ['issue_reports_id_seq', 'issue_reports'],
     ['password_resets_id_seq', 'password_resets'],
-    ['email_log_id_seq', 'email_log']
+    ['email_log_id_seq', 'email_log'],
+    ['interviews_id_seq', 'interviews'],
+    ['employer_notifications_id_seq', 'employer_notifications']
   ];
   for (const [seq, tbl] of seqReset) {
     try {
