@@ -185,13 +185,11 @@ const JobDetails = () => {
   const isApplied = isJobApplied(job.id);
 
   // Compare skills to show user matching details
-  const userSkills = currentUser?.profileData?.skills || [];
-  const matchedSkills = job.skills.filter(skill =>
-    userSkills.map(s => s.toLowerCase()).includes(skill.toLowerCase())
-  );
-  const missingSkills = job.skills.filter(skill =>
-    !userSkills.map(s => s.toLowerCase()).includes(skill.toLowerCase())
-  );
+  const userSkills = Array.isArray(currentUser?.profileData?.skills) ? currentUser.profileData.skills : [];
+  const jobSkills = Array.isArray(job.skills) ? job.skills : [];
+  const userSkillKeys = userSkills.map(s => String(s).toLowerCase());
+  const matchedSkills = jobSkills.filter(skill => userSkillKeys.includes(String(skill).toLowerCase()));
+  const missingSkills = jobSkills.filter(skill => !userSkillKeys.includes(String(skill).toLowerCase()));
 
   return (
     <div className="max-w-4xl mx-auto w-full animate-slide-up pb-8">
