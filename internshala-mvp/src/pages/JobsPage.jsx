@@ -318,7 +318,7 @@ const JobsPage = () => {
 
                     {/* Skill Tags */}
                     <div className="flex flex-wrap gap-1.5 mb-4">
-                      {job.skills.map((skill) => (
+                      {(Array.isArray(job.skills) ? job.skills : []).map((skill) => (
                         <span
                           key={skill}
                           className={`text-[10px] font-bold px-2 py-1 rounded-md ${

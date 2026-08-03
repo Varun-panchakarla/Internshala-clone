@@ -1547,13 +1547,13 @@ const AdminPortal = () => {
                           </div>
 
                           <div className="flex flex-wrap gap-1">
-                            {job.skills.slice(0, 3).map((skill, si) => (
+                            {(Array.isArray(job.skills) ? job.skills : []).slice(0, 3).map((skill, si) => (
                               <span key={si} className="bg-slate-800/70 border border-slate-700/40 text-slate-300 text-[9px] font-bold px-2 py-0.5 rounded">
                                 {skill}
                               </span>
                             ))}
-                            {job.skills.length > 3 && (
-                              <span className="text-[9px] text-slate-500 font-bold py-0.5">+{job.skills.length - 3} more</span>
+                            {(Array.isArray(job.skills) ? job.skills : []).length > 3 && (
+                              <span className="text-[9px] text-slate-500 font-bold py-0.5">+{(Array.isArray(job.skills) ? job.skills : []).length - 3} more</span>
                             )}
                           </div>
                         </div>
@@ -1569,7 +1569,7 @@ const AdminPortal = () => {
                                 salary: job.salary,
                                 experience: job.experience,
                                 employmentType: job.employment_type,
-                                skills: job.skills.join(', '),
+                                skills: (Array.isArray(job.skills) ? job.skills : []).join(', '),
                                 description: job.description
                               });
                               setJobModalOpen(true);

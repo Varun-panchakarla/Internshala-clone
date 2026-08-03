@@ -62,7 +62,7 @@ const Applications = () => {
             >
               <div className="flex items-start gap-4">
                 <div className={`w-12 h-12 rounded-xl ${app.job.logoColor || 'bg-slate-200'} text-white flex items-center justify-center font-extrabold text-xl shrink-0 shadow-inner border border-slate-100 dark:border-slate-800`}>
-                  {app.job.logoText || app.job.company.charAt(0).toUpperCase()}
+                  {app.job.logoText || (app.job.company || '').charAt(0).toUpperCase() || '?'}
                 </div>
                 <div className="min-w-0">
                   <h4 className="text-base font-extrabold text-slate-800 dark:text-white leading-snug hover:text-brand-600 dark:hover:text-brand-400 transition-colors">

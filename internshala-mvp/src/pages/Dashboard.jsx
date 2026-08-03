@@ -219,13 +219,13 @@ const Dashboard = () => {
                   </div>
                   
                   <div className="flex flex-wrap gap-1 mb-3">
-                    {job.skills.slice(0, 3).map(skill => (
+                    {(Array.isArray(job.skills) ? job.skills : []).slice(0, 3).map(skill => (
                       <span key={skill} className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded">
                         {skill}
                       </span>
                     ))}
-                    {job.skills.length > 3 && (
-                      <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 self-center">+{job.skills.length - 3} more</span>
+                    {(Array.isArray(job.skills) ? job.skills : []).length > 3 && (
+                      <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 self-center">+{(Array.isArray(job.skills) ? job.skills : []).length - 3} more</span>
                     )}
                   </div>
                   
