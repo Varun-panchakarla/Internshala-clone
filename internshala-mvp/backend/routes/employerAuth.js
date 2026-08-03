@@ -29,6 +29,29 @@ function signEmployerToken(employerId, email) {
   return jwt.sign({ employerId, email, role: 'employer' }, JWT_SECRET, { expiresIn: '7d' });
 }
 
+async function ensureEmployerFromUser(user) {
+  const existing = await pool.query('SELECT * FROM employers WHERE email = $1', [user.email]);
+  if (existing.rows.length > 0) {
+    return existing.rows[0];
+  }
+
+  const name = user.name || user.email.split('@')[0];
+  const inserted = await pool.query(
+    `INSERT INTO employers (company_name, recruiter_name, email, phone, website, password_hash, email_verified)
+     VALUES ($1, $2, $3, $4, $5, $6, true)
+     RETURNING *`,
+    [name, name, user.email, '', '', user.password_hash]
+  );
+
+  const employer = inserted.rows[0];
+  await pool.query(
+    'INSERT INTO employer_profiles (employer_id, company_logo, work_mode) VALUES ($1, $2, $3)',
+    [employer.id, '', 'Remote']
+  );
+
+  return employer;
+}
+
 // Employer Auth Middleware
 async function employerAuthMiddleware(req, res, next) {
   const token = req.cookies?.employer_token;
@@ -301,13 +324,32 @@ router.post('/auth/login', async (req, res) => {
     if (!email || !password) return res.status(400).json({ error: 'Email and password are required.' });
 
     const cleanEmail = email.trim().toLowerCase();
-    const result = await pool.query('SELECT * FROM employers WHERE email = $1', [cleanEmail]);
+    let result = await pool.query('SELECT * FROM employers WHERE email = $1', [cleanEmail]);
 
+    let employer;
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      const userRes = await pool.query(
+        "SELECT id, email, name, password_hash, email_verified FROM users WHERE email = $1 AND role = 'recruiter'",
+        [cleanEmail]
+      );
+      if (userRes.rows.length === 0) {
+        return res.status(401).json({ error: 'Invalid email or password.' });
+      }
+      const user = userRes.rows[0];
+      if (!user.email_verified) {
+        return res.status(403).json({ error: 'Please verify your email before logging in.', email: user.email });
+      }
+      if (!user.password_hash) {
+        return res.status(401).json({ error: 'This account has no password set. Contact your admin to reset it.' });
+      }
+      const validUser = await bcrypt.compare(password, user.password_hash);
+      if (!validUser) {
+        return res.status(401).json({ error: 'Invalid email or password.' });
+      }
+      employer = await ensureEmployerFromUser(user);
+    } else {
+      employer = result.rows[0];
     }
-
-    const employer = result.rows[0];
 
     if (!employer.email_verified) {
       return res.status(403).json({ error: 'Please verify your email before logging in.', email: employer.email });
