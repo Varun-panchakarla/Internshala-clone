@@ -84,6 +84,7 @@ const onboardingRouter = require('./routes/onboarding.js');
 const { router: employerAuthRouter } = require('./routes/employerAuth.js');
 const employerDashboardRouter = require('./routes/employerDashboard.js');
 const messagesRouter = require('./routes/messages.js');
+const notificationsRouter = require('./routes/notifications.js');
 
 app.use('/api/auth', authRouter);
 app.use('/api/profile', profileRouter);
@@ -97,6 +98,7 @@ app.use('/api/onboarding', onboardingRouter);
 app.use('/api/employer', employerAuthRouter);
 app.use('/api/employer/dashboard', employerDashboardRouter);
 app.use('/api/messages', messagesRouter);
+app.use('/api/notifications', notificationsRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -250,7 +252,23 @@ async function initDb() {
     )`,
     `CREATE INDEX IF NOT EXISTS idx_messages_thread ON messages (employer_id, user_id, created_at)`,
     "ALTER TABLE employer_notifications ADD COLUMN IF NOT EXISTS reference_id VARCHAR(255)",
-    "CREATE UNIQUE INDEX IF NOT EXISTS idx_employer_notif_ref ON employer_notifications (employer_id, reference_id)"
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_employer_notif_ref ON employer_notifications (employer_id, reference_id)",
+    `CREATE TABLE IF NOT EXISTS user_notifications (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      type VARCHAR(50) NOT NULL,
+      title VARCHAR(255) NOT NULL,
+      message TEXT NOT NULL,
+      read BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`,
+    "CREATE INDEX IF NOT EXISTS idx_user_notifications ON user_notifications (user_id, read, created_at DESC)",
+    `DELETE FROM interviews a USING interviews b
+     WHERE a.employer_id = b.employer_id
+       AND a.user_id = b.user_id
+       AND a.job_id = b.job_id
+       AND a.id < b.id`,
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_interviews_uniq ON interviews (employer_id, user_id, job_id)"
   ];
   for (const sql of migrations) {
     try { await pool.query(sql); } catch { /* column may already exist */ }
@@ -266,7 +284,8 @@ async function initDb() {
     ['password_resets_id_seq', 'password_resets'],
     ['email_log_id_seq', 'email_log'],
     ['interviews_id_seq', 'interviews'],
-    ['employer_notifications_id_seq', 'employer_notifications']
+    ['employer_notifications_id_seq', 'employer_notifications'],
+    ['user_notifications_id_seq', 'user_notifications']
   ];
   for (const [seq, tbl] of seqReset) {
     try {

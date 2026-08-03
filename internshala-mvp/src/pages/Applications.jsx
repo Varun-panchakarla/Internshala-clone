@@ -120,14 +120,17 @@ const Applications = () => {
         <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Track the status of your submitted applications.</p>
       </div>
 
-      {interviews.length > 0 && (
+      {(() => {
+        const upcoming = interviews.filter(iv => iv.status === 'Scheduled');
+        if (upcoming.length === 0) return null;
+        return (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm">
           <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
             <FiCalendar className="w-4 h-4 text-brand-600" />
             <h2 className="font-extrabold text-slate-800 dark:text-white text-sm">Upcoming Interviews</h2>
           </div>
           <div className="space-y-2.5 mt-3">
-            {interviews.map(iv => (
+            {upcoming.map(iv => (
               <div key={iv.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-brand-50/40 dark:bg-brand-500/5 border border-brand-100 dark:border-brand-500/15 rounded-xl px-4 py-3">
                 <div>
                   <span className="text-sm font-extrabold text-slate-800 dark:text-white block">{iv.jobTitle}</span>
@@ -151,7 +154,8 @@ const Applications = () => {
             ))}
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {applications.length > 0 ? (
         <div className="flex flex-col gap-4">

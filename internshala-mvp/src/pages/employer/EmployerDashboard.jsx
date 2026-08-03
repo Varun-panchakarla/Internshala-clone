@@ -62,6 +62,18 @@ const getCandidateSkills = (candidate) => {
 
 const getInitials = (name) => String(name || '?').split(' ').map(n => n.charAt(0)).join('').slice(0, 2).toUpperCase() || '?';
 
+// Convert an ISO timestamp into the value expected by <input type="datetime-local">
+const toDatetimeLocal = (iso) => {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } catch {
+    return '';
+  }
+};
+
 const EmployerDashboard = () => {
   const { currentEmployer, logout } = useEmployerAuth();
   const { addToast } = useToast();
@@ -140,10 +152,12 @@ const EmployerDashboard = () => {
   // Schedule Interview modal state
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
   const [interviewForm, setInterviewForm] = useState({
+    id: null, // null = create, set = updating an existing interview
     candidateEmail: '',
     jobId: '',
     scheduledAt: '',
-    round: 'Technical Round'
+    round: 'Technical Round',
+    status: 'Scheduled'
   });
 
   // --- INITIAL DATA FETCH ---
@@ -305,10 +319,25 @@ const EmployerDashboard = () => {
   // --- INTERVIEW SCHEDULER ---
   const handleOpenScheduleInterview = (candidate) => {
     setInterviewForm({
+      id: null,
       candidateEmail: candidate.email,
       jobId: activeJobForApplicants?.id || jobs[0]?.id || '',
       scheduledAt: '',
-      round: 'Technical Round'
+      round: 'Technical Round',
+      status: 'Scheduled'
+    });
+    setIsInterviewModalOpen(true);
+  };
+
+  // Open the modal pre-filled to update an existing interview.
+  const handleEditInterview = (iv) => {
+    setInterviewForm({
+      id: iv.id,
+      candidateEmail: iv.email || '',
+      jobId: iv.jobId || '',
+      scheduledAt: toDatetimeLocal(iv.scheduledAt),
+      round: iv.round || 'Technical Round',
+      status: iv.status || 'Scheduled'
     });
     setIsInterviewModalOpen(true);
   };
@@ -319,13 +348,25 @@ const EmployerDashboard = () => {
       addToast('Interview date and time are required.', 'error');
       return;
     }
+    const isEditing = Boolean(interviewForm.id);
     try {
-      await axios.post('/api/employer/dashboard/interviews/schedule', interviewForm);
-      addToast('Interview scheduled successfully!', 'success');
+      if (isEditing) {
+        await axios.put(`/api/employer/dashboard/interviews/${interviewForm.id}`, {
+          scheduledAt: interviewForm.scheduledAt,
+          round: interviewForm.round,
+          status: interviewForm.status
+        });
+        addToast('Interview updated successfully!', 'success');
+      } else {
+        await axios.post('/api/employer/dashboard/interviews/schedule', interviewForm);
+        addToast('Interview scheduled successfully!', 'success');
+      }
       setIsInterviewModalOpen(false);
       fetchDashboardData();
+      // Refresh calendar data so the month view reflects the change
+      if (isCalendarModalOpen) fetchCalendarInterviews(calendarMonth);
     } catch (err) {
-      addToast('Failed to schedule interview.', 'error');
+      addToast(isEditing ? 'Failed to update interview.' : 'Failed to schedule interview.', 'error');
     }
   };
 
@@ -1494,7 +1535,9 @@ const EmployerDashboard = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-sm w-full p-6 animate-scale-in">
             <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="font-extrabold text-slate-800 dark:text-white text-base">Schedule Candidate Interview</h3>
+              <h3 className="font-extrabold text-slate-800 dark:text-white text-base">
+                {interviewForm.id ? 'Update Interview' : 'Schedule Candidate Interview'}
+              </h3>
               <button
                 onClick={() => setIsInterviewModalOpen(false)}
                 className="text-slate-400 hover:text-slate-655 dark:hover:text-slate-200 cursor-pointer border-none bg-transparent"
@@ -1553,6 +1596,21 @@ const EmployerDashboard = () => {
                 />
               </div>
 
+              {interviewForm.id && (
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Interview Status</label>
+                  <select
+                    value={interviewForm.status}
+                    onChange={e => setInterviewForm({ ...interviewForm, status: e.target.value })}
+                    className="px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-955 rounded-xl text-slate-800 dark:text-slate-100 font-semibold"
+                  >
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+              )}
+
               <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <Button
                   type="button"
@@ -1567,7 +1625,7 @@ const EmployerDashboard = () => {
                   variant="primary"
                   className="px-4 py-2 font-bold text-xs rounded-xl cursor-pointer"
                 >
-                  Schedule
+                  {interviewForm.id ? 'Save Changes' : 'Schedule'}
                 </Button>
               </div>
             </form>
@@ -1742,16 +1800,34 @@ const EmployerDashboard = () => {
                     ) : (
                       <div className="space-y-2 mt-2">
                         {selectedDateList.map(iv => (
-                          <div key={iv.id} className="p-2.5 bg-slate-50 dark:bg-slate-850/40 border border-slate-100 dark:border-slate-800 rounded-xl flex justify-between items-center">
-                            <div>
-                              <span className="font-extrabold text-slate-800 dark:text-slate-100 text-xs block">{iv.candidate}</span>
+                          <div key={iv.id} className="p-2.5 bg-slate-50 dark:bg-slate-850/40 border border-slate-100 dark:border-slate-800 rounded-xl flex justify-between items-center gap-2">
+                            <div className="min-w-0">
+                              <span className="font-extrabold text-slate-800 dark:text-slate-100 text-xs block truncate">{iv.candidate}</span>
                               <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold block mt-0.5">
                                 {iv.round} · {iv.jobTitle}
                               </span>
+                              <span className={`inline-block mt-1 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md ${
+                                iv.status === 'Cancelled'
+                                  ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400'
+                                  : iv.status === 'Completed'
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400'
+                                  : 'bg-sky-50 dark:bg-sky-950/30 text-sky-600 dark:text-sky-400'
+                              }`}>
+                                {iv.status}
+                              </span>
                             </div>
-                            <span className="text-[10px] font-black text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/20 px-2.5 py-1 rounded-lg border border-sky-100 dark:border-sky-900/30">
-                              {iv.time}
-                            </span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-[10px] font-black text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/20 px-2.5 py-1 rounded-lg border border-sky-100 dark:border-sky-900/30">
+                                {iv.time}
+                              </span>
+                              <button
+                                onClick={() => handleEditInterview(iv)}
+                                className="flex items-center gap-1 text-[10px] font-black text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 hover:bg-sky-50 dark:hover:bg-sky-950/30 hover:text-sky-700 dark:hover:text-sky-300 cursor-pointer transition-colors"
+                                title="Update interview"
+                              >
+                                <FiEdit2 className="w-3 h-3" /> Edit
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>

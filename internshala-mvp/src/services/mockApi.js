@@ -53,6 +53,12 @@ export const messageService = {
   getUnreadCount: () => api.get('/messages/unread'),
 };
 
+export const notificationService = {
+  getNotifications: () => api.get('/notifications'),
+  markAllRead: () => api.post('/notifications/read'),
+  markRead: (id) => api.post(`/notifications/${id}/read`),
+};
+
 const getDefaultResumeTemplate = (session) => ({
   personalInfo: {
     fullName: session?.name || '',

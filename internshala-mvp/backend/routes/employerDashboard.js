@@ -21,6 +21,25 @@ function formatTimeAgo(dateStr) {
   return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
 }
 
+// Helper to push a notification into the candidate's bell.
+async function notifyCandidate(userId, type, title, message) {
+  try {
+    await pool.query(
+      `INSERT INTO user_notifications (user_id, type, title, message)
+       VALUES ($1, $2, $3, $4)`,
+      [userId, type, title, message]
+    );
+  } catch (err) {
+    console.error('[notifyCandidate] error:', err.message);
+  }
+}
+
+function formatInterviewTime(scheduledAt) {
+  return new Date(scheduledAt).toLocaleString([], {
+    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+}
+
 // 1. GET /api/employer/dashboard/metrics
 router.get('/metrics', employerAuthMiddleware, async (req, res) => {
   try {
@@ -352,6 +371,19 @@ router.post('/applications/:applicationId/status', employerAuthMiddleware, async
          DO UPDATE SET message = EXCLUDED.message, type = EXCLUDED.type, read = FALSE, created_at = NOW()`,
         [employerId, 'shortlist', `Candidate has been successfully shortlisted for ${job_title}`, `status:${applicationId}`]
       );
+      await notifyCandidate(
+        user_id,
+        'shortlist',
+        'Application Shortlisted',
+        `Congratulations! Your application for ${job_title} has been shortlisted.`
+      );
+    } else if (status === 'Rejected') {
+      await notifyCandidate(
+        user_id,
+        'rejection',
+        'Application Update',
+        `We're sorry, but your application for ${job_title} has not been shortlisted this time.`
+      );
     }
 
     res.json({ message: `Application status updated to ${status}.`, application: updateRes.rows[0] });
@@ -374,12 +406,24 @@ router.post('/interviews/schedule', employerAuthMiddleware, async (req, res) => 
     }
     const userId = userRes.rows[0].id;
 
-    // Schedule interview
-    const insertRes = await pool.query(
+    const jobRes = await pool.query('SELECT title FROM jobs WHERE id = $1', [jobId]);
+    const jobTitle = jobRes.rows[0]?.title || 'a job';
+
+    // Upsert the interview keyed by (employer_id, user_id, job_id) so
+    // re-scheduling updates the existing row instead of stacking a new one
+    // each time (no "counter" build-up).
+    const upsertRes = await pool.query(
       `INSERT INTO interviews (employer_id, user_id, job_id, scheduled_at, round, status)
-       VALUES ($1, $2, $3, $4, $5, 'Scheduled') RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5, 'Scheduled')
+       ON CONFLICT (employer_id, user_id, job_id)
+       DO UPDATE SET scheduled_at = EXCLUDED.scheduled_at,
+                     round = EXCLUDED.round,
+                     status = 'Scheduled'
+       RETURNING *, (xmax = 0) AS inserted`,
       [employerId, userId, jobId, scheduledAt, round]
     );
+    const interview = upsertRes.rows[0];
+    const isNew = interview.inserted === true;
 
     // Reflect the interview in the candidate's application status so they see
     // they were shortlisted and moved to the interview stage.
@@ -396,13 +440,99 @@ router.post('/interviews/schedule', employerAuthMiddleware, async (req, res) => 
        VALUES ($1, $2, $3, $4)
        ON CONFLICT (employer_id, reference_id)
        DO UPDATE SET message = EXCLUDED.message, type = EXCLUDED.type, read = FALSE, created_at = NOW()`,
-      [employerId, 'interview', `Interview scheduled on ${new Date(scheduledAt).toLocaleString()} for round: ${round}`, `interview:${userId}:${jobId}`]
+      [employerId, 'interview', `Interview ${isNew ? 'scheduled' : 'rescheduled'} on ${formatInterviewTime(scheduledAt)} for round: ${round}`, `interview:${userId}:${jobId}`]
     );
 
-    res.json({ message: 'Interview scheduled successfully!', interview: insertRes.rows[0] });
+    // Notify the candidate through the notification bell.
+    await notifyCandidate(
+      userId,
+      'interview',
+      isNew ? 'Interview Scheduled' : 'Interview Rescheduled',
+      isNew
+        ? `Great news! You've been shortlisted and an interview for ${jobTitle} is scheduled for ${formatInterviewTime(scheduledAt)} (${round}).`
+        : `Your interview for ${jobTitle} has been rescheduled to ${formatInterviewTime(scheduledAt)} (${round}).`
+    );
+
+    res.json({ message: isNew ? 'Interview scheduled successfully!' : 'Interview updated successfully!', interview });
   } catch (err) {
     console.error('[Recruiter Interview Schedule Error]:', err.message);
     res.status(500).json({ error: 'Failed to schedule candidate interview.' });
+  }
+});
+
+// 8b. PUT /api/employer/dashboard/interviews/:id — freely update an existing interview
+router.put('/interviews/:id', employerAuthMiddleware, async (req, res) => {
+  try {
+    const employerId = req.employer.id;
+    const interviewId = req.params.id;
+    const { scheduledAt, round, status } = req.body;
+
+    const checkRes = await pool.query(
+      `SELECT i.*, j.title AS job_title
+       FROM interviews i
+       JOIN jobs j ON i.job_id = j.id
+       WHERE i.id = $1 AND i.employer_id = $2`,
+      [interviewId, employerId]
+    );
+    if (checkRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Interview not found or unauthorized.' });
+    }
+    const existing = checkRes.rows[0];
+
+    const updateRes = await pool.query(
+      `UPDATE interviews
+       SET scheduled_at = COALESCE($1, scheduled_at),
+           round = COALESCE($2, round),
+           status = COALESCE($3, status)
+       WHERE id = $4 RETURNING *`,
+      [scheduledAt || existing.scheduled_at, round || existing.round, status || existing.status, interviewId]
+    );
+
+    // Keep the candidate's application pinned at the interview stage.
+    await pool.query(
+      `UPDATE applied_jobs SET status = 'Interview'
+       WHERE user_id = $1 AND job_id = $2 AND status NOT IN ('Rejected', 'Offer')`,
+      [existing.user_id, existing.job_id]
+    );
+
+    // Employer notification (upsert so it's not counted as a new one).
+    await pool.query(
+      `INSERT INTO employer_notifications (employer_id, type, message, reference_id)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (employer_id, reference_id)
+       DO UPDATE SET message = EXCLUDED.message, type = EXCLUDED.type, read = FALSE, created_at = NOW()`,
+      [employerId, 'interview', `Interview updated to ${formatInterviewTime(updateRes.rows[0].scheduled_at)} for round: ${updateRes.rows[0].round}`, `interview:${existing.user_id}:${existing.job_id}`]
+    );
+
+    // Notify the candidate through the notification bell.
+    const updated = updateRes.rows[0];
+    if (updated.status === 'Cancelled') {
+      await notifyCandidate(
+        existing.user_id,
+        'interview',
+        'Interview Cancelled',
+        `Your interview for ${existing.job_title} has been cancelled.`
+      );
+    } else if (updated.status === 'Completed') {
+      await notifyCandidate(
+        existing.user_id,
+        'interview',
+        'Interview Completed',
+        `Your interview for ${existing.job_title} has been marked as completed.`
+      );
+    } else {
+      await notifyCandidate(
+        existing.user_id,
+        'interview',
+        'Interview Updated',
+        `Your interview for ${existing.job_title} has been updated to ${formatInterviewTime(updated.scheduled_at)} (${updated.round}).`
+      );
+    }
+
+    res.json({ message: 'Interview updated successfully!', interview: updated });
+  } catch (err) {
+    console.error('[Recruiter Interview Update Error]:', err.message);
+    res.status(500).json({ error: 'Failed to update interview.' });
   }
 });
 
@@ -607,6 +737,8 @@ router.get('/interviews', employerAuthMiddleware, async (req, res) => {
       id: row.id,
       candidate: row.candidate_name,
       email: row.candidate_email,
+      userId: row.user_id,
+      jobId: row.job_id,
       round: row.round,
       status: row.status,
       jobTitle: row.job_title,

@@ -6,9 +6,26 @@ import { useSidebar } from '../../context/SidebarContext';
 import Logo from './Logo';
 import {
   FiUser, FiLogOut, FiMenu, FiX, FiSun, FiMoon, FiSettings,
-  FiChevronDown, FiBell, FiFileText, FiLayout, FiZap,
+  FiChevronDown, FiBell, FiFileText, FiLayout, FiZap, FiCheckCircle,
 } from 'react-icons/fi';
 import Button from './Button';
+import { notificationService } from '../../services/mockApi';
+
+const formatNotifTime = (iso) => {
+  if (!iso) return '';
+  try {
+    const date = new Date(iso);
+    const now = new Date();
+    const diffMins = Math.floor((now - date) / 60000);
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+    if (diffMins < 2880) return 'Yesterday';
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  } catch {
+    return '';
+  }
+};
 
 const Navbar = () => {
   const { currentUser, logout, isAuthenticated, profileCompletion } = useAuth();
@@ -20,12 +37,17 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navPhotoError, setNavPhotoError]  = useState(false);
   const [scrolled, setScrolled]            = useState(false);
+  const [notifOpen, setNotifOpen]          = useState(false);
+  const [notifications, setNotifications]  = useState([]);
+  const [notifUnread, setNotifUnread]      = useState(0);
   const dropdownRef = useRef(null);
+  const notifRef    = useRef(null);
+  const notifJsonRef = useRef('');
 
   useEffect(() => { setNavPhotoError(false); }, [currentUser?.profileData?.profilePhoto]);
 
   // Close mobile menu on route change
-  useEffect(() => { setMobileMenuOpen(false); setDropdownOpen(false); }, [location.pathname]);
+  useEffect(() => { setMobileMenuOpen(false); setDropdownOpen(false); setNotifOpen(false); }, [location.pathname]);
 
   // Navbar shadow on scroll
   useEffect(() => {
@@ -34,16 +56,64 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropdownOpen(false);
       }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  const isCandidate = isAuthenticated && !['admin', 'super_admin'].includes(currentUser?.role);
+
+  // Fetch notifications without re-rendering when nothing changed
+  const fetchNotifications = async (silent = false) => {
+    try {
+      const res = await notificationService.getNotifications();
+      const list = res.data.notifications || [];
+      const unread = res.data.unread || 0;
+      const json = JSON.stringify(list);
+      if (json === notifJsonRef.current && !silent) return;
+      notifJsonRef.current = json;
+      setNotifications(list);
+      setNotifUnread(unread);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  // Initial fetch + light polling + refresh on tab focus
+  useEffect(() => {
+    if (!isCandidate) return;
+    fetchNotifications();
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') fetchNotifications();
+    }, 20000);
+    const onFocus = () => fetchNotifications();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCandidate]);
+
+  const handleOpenNotifs = () => {
+    const next = !notifOpen;
+    setNotifOpen(next);
+    if (next && notifUnread > 0) {
+      setNotifUnread(0);
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      notificationService.markAllRead().catch(() => {});
+    }
+    fetchNotifications(true);
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -96,11 +166,71 @@ const Navbar = () => {
                   </Link>
                 )}
 
-                {/* Notification bell (decorative) */}
-                <button className="hidden sm:flex relative items-center justify-center w-8 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/8 hover:text-slate-800 dark:hover:text-white transition-all duration-150 focus:outline-none">
-                  <FiBell className="w-4 h-4" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-brand-500 rounded-full border-2 border-white dark:border-gray-950" />
-                </button>
+                {/* Notification bell */}
+                {isCandidate && (
+                  <div className="relative" ref={notifRef}>
+                    <button
+                      onClick={handleOpenNotifs}
+                      className="hidden sm:flex relative items-center justify-center w-8 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/8 hover:text-slate-800 dark:hover:text-white transition-all duration-150 focus:outline-none cursor-pointer"
+                      title="Notifications"
+                    >
+                      <FiBell className="w-4 h-4" />
+                      {notifUnread > 0 && (
+                        <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-gray-950 leading-none">
+                          {notifUnread > 9 ? '9+' : notifUnread}
+                        </span>
+                      )}
+                    </button>
+
+                    {notifOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xl shadow-slate-900/10 dark:shadow-black/40 py-2 animate-scale-in z-50">
+                        <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                          <span className="text-sm font-extrabold text-slate-800 dark:text-white">Notifications</span>
+                          <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                            {notifications.length} total
+                          </span>
+                        </div>
+                        <div className="max-h-80 overflow-y-auto divide-y divide-slate-50 dark:divide-slate-800/60">
+                          {notifications.length === 0 ? (
+                            <div className="text-center py-10 px-6">
+                              <FiCheckCircle className="w-7 h-7 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
+                              <p className="text-xs font-bold text-slate-400">No notifications yet</p>
+                              <p className="text-[10px] text-slate-400 font-medium mt-1">
+                                Interview and application updates will show up here.
+                              </p>
+                            </div>
+                          ) : (
+                            notifications.map(n => (
+                              <button
+                                key={n.id}
+                                onClick={() => {
+                                  setNotifOpen(false);
+                                  navigate('/applied');
+                                }}
+                                className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer border-none"
+                              >
+                                <div className="flex items-start gap-2.5">
+                                  <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${n.read ? 'bg-transparent' : 'bg-brand-500'}`} />
+                                  <div className="min-w-0">
+                                    <p className="text-xs font-extrabold text-slate-800 dark:text-white">{n.title}</p>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5 leading-snug">{n.message}</p>
+                                    <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold mt-1 block">
+                                      {formatNotifTime(n.createdAt)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                        <Link to="/applied" onClick={() => setNotifOpen(false)}
+                          className="block text-center text-xs font-bold text-brand-600 dark:text-brand-400 py-2.5 border-t border-slate-100 dark:border-slate-800 hover:bg-brand-50 dark:hover:bg-brand-950/10 transition-colors">
+                          View all updates
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Profile dropdown */}
                 <div className="relative" ref={dropdownRef}>
