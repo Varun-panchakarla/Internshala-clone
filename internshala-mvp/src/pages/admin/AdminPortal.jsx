@@ -117,7 +117,15 @@ const AdminPortal = () => {
   // Modal states
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [userForm, setUserForm] = useState({ name: '', email: '', password: '', role: 'candidate' });
+  const [userForm, setUserForm] = useState({ 
+    name: '', 
+    email: '', 
+    password: '', 
+    role: 'candidate',
+    company_name: '',
+    phone: '',
+    website: '' 
+  });
 
   const [jobModalOpen, setJobModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
@@ -503,7 +511,10 @@ const AdminPortal = () => {
         await axios.put(`/api/admin/users/${editingUser.id}`, {
           name: userForm.name,
           email: userForm.email,
-          role: userForm.role
+          role: userForm.role,
+          company_name: userForm.company_name,
+          phone: userForm.phone,
+          website: userForm.website
         });
         addToast('User details updated successfully!', 'success');
       } else {
@@ -1354,7 +1365,15 @@ const AdminPortal = () => {
                     <button
                       onClick={() => {
                         setEditingUser(null);
-                        setUserForm({ name: '', email: '', password: '', role: currentView === 'recruiters' ? 'recruiter' : 'candidate' });
+                        setUserForm({ 
+                          name: '', 
+                          email: '', 
+                          password: '', 
+                          role: currentView === 'recruiters' ? 'recruiter' : 'candidate',
+                          company_name: '',
+                          phone: '',
+                          website: '' 
+                        });
                         setUserModalOpen(true);
                       }}
                       className="flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 rounded-xl text-xs font-extrabold text-white transition-all shadow-md cursor-pointer"
@@ -1371,7 +1390,9 @@ const AdminPortal = () => {
                           <th className="py-3 px-4">Name</th>
                           <th className="py-3 px-4">Email</th>
                           <th className="py-3 px-4">Role</th>
-                          <th className="py-3 px-4">Academic Background</th>
+                          <th className="py-3 px-4">
+                            {currentView === 'recruiters' ? 'Company & Details' : 'Academic Background'}
+                          </th>
                           <th className="py-3 px-4">Registered On</th>
                           <th className="py-3 px-4 text-right">Actions</th>
                         </tr>
@@ -1398,7 +1419,17 @@ const AdminPortal = () => {
                               </span>
                             </td>
                             <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400">
-                              {user.college ? (
+                              {currentView === 'recruiters' ? (
+                                <div className="flex flex-col gap-0.5">
+                                  <p className="font-bold text-slate-900 dark:text-slate-200 truncate max-w-xs">{user.company_name || 'N/A'}</p>
+                                  {user.phone && <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Tel: {user.phone}</p>}
+                                  {user.website && (
+                                    <a href={user.website} target="_blank" rel="noopener noreferrer" className="text-[10px] text-brand-500 hover:text-brand-600 hover:underline truncate max-w-xs font-semibold">
+                                      {user.website}
+                                    </a>
+                                  )}
+                                </div>
+                              ) : user.college ? (
                                 <p className="truncate max-w-xs">{user.college} ({user.degree || 'N/A'})</p>
                               ) : (
                                 <span className="text-slate-400 dark:text-slate-600 italic">No academic data</span>
@@ -1412,7 +1443,15 @@ const AdminPortal = () => {
                                 <button
                                   onClick={() => {
                                     setEditingUser(user);
-                                    setUserForm({ name: user.name, email: user.email, password: '', role: user.role });
+                                    setUserForm({ 
+                                      name: user.name, 
+                                      email: user.email, 
+                                      password: '', 
+                                      role: user.role,
+                                      company_name: user.company_name || '',
+                                      phone: user.phone || '',
+                                      website: user.website || ''
+                                    });
                                     setUserModalOpen(true);
                                   }}
                                   className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-200/80 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors"
@@ -2704,6 +2743,44 @@ const AdminPortal = () => {
                   <option value="super_admin">Super Admin</option>
                 </select>
               </div>
+
+              {userForm.role === 'recruiter' && (
+                <>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Company Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={userForm.company_name}
+                      onChange={(e) => setUserForm(prev => ({ ...prev, company_name: e.target.value }))}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-xs font-semibold text-slate-200 focus:outline-none focus:border-brand-500"
+                      placeholder="e.g. Acme Corp"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Phone</label>
+                    <input
+                      type="text"
+                      value={userForm.phone}
+                      onChange={(e) => setUserForm(prev => ({ ...prev, phone: e.target.value }))}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-xs font-semibold text-slate-200 focus:outline-none focus:border-brand-500"
+                      placeholder="e.g. +1234567890"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-black uppercase tracking-wider text-slate-550">Website</label>
+                    <input
+                      type="url"
+                      value={userForm.website}
+                      onChange={(e) => setUserForm(prev => ({ ...prev, website: e.target.value }))}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-xs font-semibold text-slate-200 focus:outline-none focus:border-brand-500"
+                      placeholder="e.g. https://acme.com"
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="flex gap-3 border-t border-slate-800/80 pt-4 mt-2">
                 <button
