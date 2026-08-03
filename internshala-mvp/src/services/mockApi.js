@@ -42,7 +42,15 @@ export const jobService = {
   unsaveJob: (jobId) => api.delete(`/saved/${jobId}`),
   getAppliedJobIds: () => api.get('/applied'),
   getAppliedJobDetails: () => api.get('/applied/details'),
+  getInterviews: () => api.get('/applied/interviews'),
   applyToJob: (jobId) => api.post(`/applied/${jobId}`),
+};
+
+export const messageService = {
+  getConversations: () => api.get('/messages/conversations'),
+  getThread: (employerId) => api.get(`/messages/employer/${employerId}`),
+  sendMessage: (employerId, content) => api.post(`/messages/employer/${employerId}`, { content }),
+  getUnreadCount: () => api.get('/messages/unread'),
 };
 
 const getDefaultResumeTemplate = (session) => ({

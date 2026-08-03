@@ -52,4 +52,35 @@ router.post('/:jobId', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/applied/interviews — upcoming interviews scheduled for the candidate
+router.get('/interviews', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT i.id, i.job_id, i.round, i.status, i.scheduled_at, j.title AS job_title, j.company
+       FROM interviews i
+       JOIN jobs j ON i.job_id = j.id
+       WHERE i.user_id = $1
+       ORDER BY i.scheduled_at ASC`,
+      [req.user.userId]
+    );
+
+    const formatted = result.rows.map(row => ({
+      id: row.id,
+      jobId: row.job_id,
+      round: row.round,
+      status: row.status,
+      jobTitle: row.job_title,
+      company: row.company,
+      scheduledAt: row.scheduled_at,
+      date: new Date(row.scheduled_at).toISOString().slice(0, 10),
+      time: new Date(row.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }));
+
+    res.json({ interviews: formatted });
+  } catch (err) {
+    console.error('[Applied] Interviews error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch interviews.' });
+  }
+});
+
 module.exports = router;

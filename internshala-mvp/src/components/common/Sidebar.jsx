@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useJobs } from '../../context/JobContext';
 import { useResume } from '../../context/ResumeContext';
 import { useSidebar } from '../../context/SidebarContext';
+import { messageService } from '../../services/mockApi';
 import {
   FiBriefcase, FiUser, FiBookmark, FiFileText,
-  FiGrid, FiLayout, FiZap, FiX, FiMenu, FiAward
+  FiGrid, FiLayout, FiZap, FiX, FiMenu, FiAward, FiMail
 } from 'react-icons/fi';
 
 const Sidebar = () => {
@@ -14,10 +15,23 @@ const Sidebar = () => {
   const { savedJobs } = useJobs();
   const { atsScore: builderScore, resumeCompletion } = useResume();
   const { collapsed, toggleSidebar, mobileOpen, closeMobile } = useSidebar();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const resumeInfo = currentUser?.profileData?.resumeInfo;
   const hasResume = !!(resumeInfo?.fileName);
   const effectiveAtsScore = resumeInfo?.atsScore ?? builderScore;
+
+  useEffect(() => {
+    if (!isAuthenticated || currentUser?.role === 'employer') return;
+    const fetchUnread = () => {
+      messageService.getUnreadCount()
+        .then(res => setUnreadCount(res.data.count || 0))
+        .catch(() => {});
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 15000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, currentUser?.role]);
 
   console.log('[Sidebar] profileCompletion:', profileCompletion);
   console.log('[Sidebar] resumeCompletion:', resumeCompletion);
@@ -35,6 +49,7 @@ const Sidebar = () => {
   links.push(
     { to: '/jobs',             label: 'Search Jobs',    icon: FiBriefcase, description: 'Find opportunities' },
     { to: '/saved-jobs',       label: 'Saved Jobs',     icon: FiBookmark, description: 'Your shortlist', badge: savedJobs?.length },
+    { to: '/messages',         label: 'Messages',       icon: FiMail,     description: 'Recruiter chat', badge: unreadCount },
     { to: '/resume',           label: 'Resume Builder', icon: FiFileText, description: 'Build & export', scoreBadge: effectiveAtsScore },
     { to: '/resume-templates', label: 'Templates',      icon: FiLayout,   description: '8 pro designs' },
     { to: '/interview-prep',   label: 'Interview Prep', icon: FiAward,    description: 'Tech Q&As' },
