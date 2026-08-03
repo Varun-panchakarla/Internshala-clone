@@ -146,8 +146,9 @@ const LandingPage = () => {
 
   const getSandboxMatchingJobs = () => {
     return jobs.map(job => {
-      const matches = job.skills.filter(s => selectedSkills.map(sk => sk.toLowerCase()).includes(s.toLowerCase()));
-      const score = job.skills.length > 0 ? Math.round((matches.length / job.skills.length) * 100) : 0;
+      const skills = Array.isArray(job.skills) ? job.skills : [];
+      const matches = skills.filter(s => selectedSkills.map(sk => sk.toLowerCase()).includes(String(s).toLowerCase()));
+      const score = skills.length > 0 ? Math.round((matches.length / skills.length) * 100) : 0;
       return { ...job, sandboxScore: score };
     }).filter(j => j.sandboxScore > 0).sort((a, b) => b.sandboxScore - a.sandboxScore).slice(0, 3);
   };
@@ -189,55 +190,61 @@ const LandingPage = () => {
       const filterVal = activeIntFilter.toLowerCase();
       if (filterVal === 'big brands') {
         const bigBrands = ['google', 'stripe', 'canva', 'slack', 'netflix', 'meta', 'figma', 'spotify', 'airbnb', 'purplle', 'tripjack', 'jsw severfield structures ltd. (jssl)'];
-        list = list.filter(j => bigBrands.includes(j.company.toLowerCase()));
+        list = list.filter(j => bigBrands.includes((j.company || '').toLowerCase()));
       } else if (filterVal === 'work from home') {
-        list = list.filter(j => j.location.toLowerCase().includes('remote') || j.location.toLowerCase().includes('work from home'));
+        list = list.filter(j => (j.location || '').toLowerCase().includes('remote') || (j.location || '').toLowerCase().includes('work from home'));
       } else if (filterVal === 'part-time') {
-        list = list.filter(j => j.employmentType === 'Part-time' || j.title.toLowerCase().includes('part-time'));
+        list = list.filter(j => j.employmentType === 'Part-time' || (j.title || '').toLowerCase().includes('part-time'));
       } else if (filterVal === 'mba') {
         list = list.filter(j => 
-          j.title.toLowerCase().includes('sales') || 
-          j.title.toLowerCase().includes('business') || 
-          j.title.toLowerCase().includes('marketing') ||
-          j.title.toLowerCase().includes('hr') ||
-          j.title.toLowerCase().includes('talent') ||
-          j.title.toLowerCase().includes('recruitment')
+          (j.title || '').toLowerCase().includes('sales') || 
+          (j.title || '').toLowerCase().includes('business') || 
+          (j.title || '').toLowerCase().includes('marketing') ||
+          (j.title || '').toLowerCase().includes('hr') ||
+          (j.title || '').toLowerCase().includes('talent') ||
+          (j.title || '').toLowerCase().includes('recruitment')
         );
       } else if (filterVal === 'engineering') {
-        list = list.filter(j => 
-          j.title.toLowerCase().includes('engineer') || 
-          j.title.toLowerCase().includes('developer') || 
-          j.title.toLowerCase().includes('web') || 
-          j.title.toLowerCase().includes('tech') || 
-          j.title.toLowerCase().includes('code') || 
-          j.title.toLowerCase().includes('software') || 
-          j.skills.some(s => ['react', 'node.js', 'javascript', 'python', 'sql', 'css', 'html'].includes(s.toLowerCase()))
-        );
+        const techSkills = ['react', 'node.js', 'javascript', 'python', 'sql', 'css', 'html'];
+        list = list.filter(j => {
+          const title = (j.title || '').toLowerCase();
+          const skills = Array.isArray(j.skills) ? j.skills : [];
+          return title.includes('engineer') || 
+            title.includes('developer') || 
+            title.includes('web') || 
+            title.includes('tech') || 
+            title.includes('code') || 
+            title.includes('software') || 
+            skills.some(s => techSkills.includes(String(s).toLowerCase()));
+        });
       } else if (filterVal === 'media') {
-        list = list.filter(j => 
-          j.title.toLowerCase().includes('video') || 
-          j.title.toLowerCase().includes('editing') || 
-          j.title.toLowerCase().includes('media') || 
-          j.title.toLowerCase().includes('content') || 
-          j.title.toLowerCase().includes('write')
-        );
+        list = list.filter(j => {
+          const title = (j.title || '').toLowerCase();
+          return title.includes('video') || 
+            title.includes('editing') || 
+            title.includes('media') || 
+            title.includes('content') || 
+            title.includes('write');
+        });
       } else if (filterVal === 'design') {
-        list = list.filter(j => 
-          j.title.toLowerCase().includes('design') || 
-          j.title.toLowerCase().includes('figma') || 
-          j.title.toLowerCase().includes('ui') || 
-          j.title.toLowerCase().includes('ux') || 
-          j.title.toLowerCase().includes('graphic')
-        );
+        list = list.filter(j => {
+          const title = (j.title || '').toLowerCase();
+          return title.includes('design') || 
+            title.includes('figma') || 
+            title.includes('ui') || 
+            title.includes('ux') || 
+            title.includes('graphic');
+        });
       } else if (filterVal === 'data science') {
-        list = list.filter(j => 
-          j.title.toLowerCase().includes('data') || 
-          j.title.toLowerCase().includes('analyst') || 
-          j.title.toLowerCase().includes('science') || 
-          j.title.toLowerCase().includes('python') || 
-          j.title.toLowerCase().includes('database') ||
-          j.title.toLowerCase().includes('ai')
-        );
+        list = list.filter(j => {
+          const title = (j.title || '').toLowerCase();
+          return title.includes('data') || 
+            title.includes('analyst') || 
+            title.includes('science') || 
+            title.includes('python') || 
+            title.includes('database') ||
+            title.includes('ai');
+        });
       }
     }
     return list;
@@ -249,55 +256,61 @@ const LandingPage = () => {
       const filterVal = activeJobFilter.toLowerCase();
       if (filterVal === 'big brands') {
         const bigBrands = ['google', 'stripe', 'canva', 'slack', 'netflix', 'meta', 'figma', 'spotify', 'airbnb'];
-        list = list.filter(j => bigBrands.includes(j.company.toLowerCase()));
+        list = list.filter(j => bigBrands.includes((j.company || '').toLowerCase()));
       } else if (filterVal === 'work from home') {
-        list = list.filter(j => j.location.toLowerCase().includes('remote') || j.location.toLowerCase().includes('work from home'));
+        list = list.filter(j => (j.location || '').toLowerCase().includes('remote') || (j.location || '').toLowerCase().includes('work from home'));
       } else if (filterVal === 'part-time') {
-        list = list.filter(j => j.employmentType === 'Part-time' || j.title.toLowerCase().includes('part-time'));
+        list = list.filter(j => j.employmentType === 'Part-time' || (j.title || '').toLowerCase().includes('part-time'));
       } else if (filterVal === 'mba') {
         list = list.filter(j => 
-          j.title.toLowerCase().includes('sales') || 
-          j.title.toLowerCase().includes('business') || 
-          j.title.toLowerCase().includes('marketing') ||
-          j.title.toLowerCase().includes('hr') ||
-          j.title.toLowerCase().includes('talent') ||
-          j.title.toLowerCase().includes('recruitment')
+          (j.title || '').toLowerCase().includes('sales') || 
+          (j.title || '').toLowerCase().includes('business') || 
+          (j.title || '').toLowerCase().includes('marketing') ||
+          (j.title || '').toLowerCase().includes('hr') ||
+          (j.title || '').toLowerCase().includes('talent') ||
+          (j.title || '').toLowerCase().includes('recruitment')
         );
       } else if (filterVal === 'engineering') {
-        list = list.filter(j => 
-          j.title.toLowerCase().includes('engineer') || 
-          j.title.toLowerCase().includes('developer') || 
-          j.title.toLowerCase().includes('web') || 
-          j.title.toLowerCase().includes('tech') || 
-          j.title.toLowerCase().includes('code') || 
-          j.title.toLowerCase().includes('software') || 
-          j.skills.some(s => ['react', 'node.js', 'javascript', 'python', 'sql', 'css', 'html'].includes(s.toLowerCase()))
-        );
+        const techSkills = ['react', 'node.js', 'javascript', 'python', 'sql', 'css', 'html'];
+        list = list.filter(j => {
+          const title = (j.title || '').toLowerCase();
+          const skills = Array.isArray(j.skills) ? j.skills : [];
+          return title.includes('engineer') || 
+            title.includes('developer') || 
+            title.includes('web') || 
+            title.includes('tech') || 
+            title.includes('code') || 
+            title.includes('software') || 
+            skills.some(s => techSkills.includes(String(s).toLowerCase()));
+        });
       } else if (filterVal === 'media') {
-        list = list.filter(j => 
-          j.title.toLowerCase().includes('video') || 
-          j.title.toLowerCase().includes('editing') || 
-          j.title.toLowerCase().includes('media') || 
-          j.title.toLowerCase().includes('content') || 
-          j.title.toLowerCase().includes('write')
-        );
+        list = list.filter(j => {
+          const title = (j.title || '').toLowerCase();
+          return title.includes('video') || 
+            title.includes('editing') || 
+            title.includes('media') || 
+            title.includes('content') || 
+            title.includes('write');
+        });
       } else if (filterVal === 'design') {
-        list = list.filter(j => 
-          j.title.toLowerCase().includes('design') || 
-          j.title.toLowerCase().includes('figma') || 
-          j.title.toLowerCase().includes('ui') || 
-          j.title.toLowerCase().includes('ux') || 
-          j.title.toLowerCase().includes('graphic')
-        );
+        list = list.filter(j => {
+          const title = (j.title || '').toLowerCase();
+          return title.includes('design') || 
+            title.includes('figma') || 
+            title.includes('ui') || 
+            title.includes('ux') || 
+            title.includes('graphic');
+        });
       } else if (filterVal === 'data science') {
-        list = list.filter(j => 
-          j.title.toLowerCase().includes('data') || 
-          j.title.toLowerCase().includes('analyst') || 
-          j.title.toLowerCase().includes('science') || 
-          j.title.toLowerCase().includes('python') || 
-          j.title.toLowerCase().includes('database') ||
-          j.title.toLowerCase().includes('ai')
-        );
+        list = list.filter(j => {
+          const title = (j.title || '').toLowerCase();
+          return title.includes('data') || 
+            title.includes('analyst') || 
+            title.includes('science') || 
+            title.includes('python') || 
+            title.includes('database') ||
+            title.includes('ai');
+        });
       }
     }
     return list;
@@ -440,7 +453,7 @@ const LandingPage = () => {
                     <div>
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-3">
-                          <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company.charAt(0)} color={job.logoColor || 'bg-slate-800'} size="sm" />
+                          <CompanyLogo logo={job.companyLogo} name={job.logoText || (job.company || '').charAt(0)} color={job.logoColor || 'bg-slate-800'} size="sm" />
                           <div>
                             <h3 className="font-bold text-slate-800 dark:text-white text-sm leading-tight">{job.title}</h3>
                             <p className="text-xs text-slate-400 font-medium">{job.company}</p>
@@ -565,7 +578,7 @@ const LandingPage = () => {
                         {job.companyLogo ? (
                           <img src={job.companyLogo} alt="logo" className="w-10 h-10 rounded-xl object-contain bg-slate-50 border border-slate-100" />
                         ) : (
-                          <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company.charAt(0)} color={job.logoColor || 'bg-sky-600'} size="sm" />
+                          <CompanyLogo logo={job.companyLogo} name={job.logoText || (job.company || '').charAt(0)} color={job.logoColor || 'bg-sky-600'} size="sm" />
                         )}
                       </div>
 
@@ -730,7 +743,7 @@ const LandingPage = () => {
                     onClick={() => navigate(`/jobs/${job.id}`)}
                     className="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl hover:shadow-md transition-all cursor-pointer flex items-center gap-4"
                   >
-                    <CompanyLogo logo={job.companyLogo} name={job.logoText || job.company.charAt(0)} color={job.logoColor || 'bg-sky-600'} size="sm" />
+                    <CompanyLogo logo={job.companyLogo} name={job.logoText || (job.company || '').charAt(0)} color={job.logoColor || 'bg-sky-600'} size="sm" />
                     <div className="flex-1 min-w-0">
                       <h4 className="font-bold text-slate-800 dark:text-white text-sm">{job.title}</h4>
                       <p className="text-xs text-slate-400">{job.company}</p>
