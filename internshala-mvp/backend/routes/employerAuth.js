@@ -12,15 +12,17 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
+  path: '/',
   maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
 };
 
 const CLEAR_COOKIE_OPTIONS = {
   httpOnly: true,
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax'
+  path: '/'
 };
 
 function signEmployerToken(employerId, email) {
