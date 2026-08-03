@@ -1728,26 +1728,19 @@ const AdminPortal = () => {
                               {new Date(app.applied_at).toLocaleDateString()}
                             </td>
                             <td className="py-3.5 px-4">
-                              <select
-                                value={app.status}
-                                onChange={(e) => handleAppStatusChange(app.id, e.target.value)}
-                                className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider focus:outline-none border cursor-pointer ${
-                                  app.status === 'Accepted'
+                              <span
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border inline-block ${
+                                  app.status === 'Accepted' || app.status === 'Offer' || app.status === 'Shortlisted'
                                     ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20'
                                     : app.status === 'Rejected'
                                     ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-500/20'
-                                    : app.status === 'Shortlisted' || app.status === 'Interviewing'
+                                    : app.status === 'Interview' || app.status === 'Interviewing'
                                     ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20'
                                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-700/50'
                                 }`}
                               >
-                                <option value="Pending">Pending</option>
-                                <option value="Reviewed">Reviewed</option>
-                                <option value="Shortlisted">Shortlisted</option>
-                                <option value="Interviewing">Interviewing</option>
-                                <option value="Accepted">Accepted</option>
-                                <option value="Rejected">Rejected</option>
-                              </select>
+                                {app.status || 'Pending'}
+                              </span>
                             </td>
                             <td className="py-3.5 px-4 text-right">
                               <button

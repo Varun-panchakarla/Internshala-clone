@@ -536,6 +536,56 @@ router.put('/interviews/:id', employerAuthMiddleware, async (req, res) => {
   }
 });
 
+// 8c. GET /api/employer/dashboard/applications - retrieve all candidate applications for this employer's jobs
+router.get('/applications', employerAuthMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT aj.id AS application_id, aj.status, aj.applied_at,
+              u.id AS user_id, u.name AS candidate_name, u.email AS candidate_email,
+              j.id AS job_id, j.title AS job_title,
+              p.experience, p.skills, p.college, p.degree, p.resume_info, p.contact_number, p.current_city
+       FROM applied_jobs aj
+       JOIN jobs j ON aj.job_id = j.id
+       JOIN users u ON aj.user_id = u.id
+       LEFT JOIN profiles p ON u.id = p.user_id
+       WHERE j.employer_id = $1
+       ORDER BY aj.applied_at DESC`,
+      [req.employer.id]
+    );
+
+    const formatEducation = (degree, college) => {
+      if (degree && college) return `${degree}, ${college}`;
+      if (degree) return degree;
+      if (college) return college;
+      return 'Not specified';
+    };
+
+    const formatted = result.rows.map(row => ({
+      applicationId: row.application_id,
+      userId: row.user_id,
+      name: row.candidate_name,
+      email: row.candidate_email,
+      phone: row.contact_number || 'Not provided',
+      location: row.current_city || 'Not specified',
+      experience: row.experience || 'Fresher',
+      skills: Array.isArray(row.skills) ? row.skills.join(', ') : '',
+      education: formatEducation(row.degree, row.college),
+      status: row.status,
+      timeAgo: formatTimeAgo(row.applied_at),
+      role: row.job_title,
+      jobId: row.job_id,
+      hasResume: !!(row.resume_info?.fileData || row.resume_info?.fileName),
+      resumeFileName: row.resume_info?.fileName || '',
+      resumeUrl: row.resume_info?.fileName || ''
+    }));
+
+    res.json({ applications: formatted });
+  } catch (err) {
+    console.error('[Recruiter All Applications Error]:', err.message);
+    res.status(500).json({ error: 'Failed to fetch applications.' });
+  }
+});
+
 // 9. GET /api/employer/dashboard/recent-applications
 router.get('/recent-applications', employerAuthMiddleware, async (req, res) => {
   try {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useEmployerAuth } from '../../context/EmployerAuthContext';
 import { useToast } from '../../components/common/Toast';
@@ -129,6 +129,8 @@ const EmployerDashboard = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [conversations, setConversations] = useState([]);
   const [recruiterUnreadMessages, setRecruiterUnreadMessages] = useState(0);
+  const [allApplications, setAllApplications] = useState([]);
+  const messagesEndRef = useRef(null);
   const [profileForm, setProfileForm] = useState({
     companyName: currentEmployer?.companyName || '',
     recruiterName: currentEmployer?.recruiterName || '',
@@ -163,6 +165,11 @@ const EmployerDashboard = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Scroll to bottom of messages when chatMessages updates
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
 
   // Poll for messages in background
   useEffect(() => {
@@ -275,7 +282,8 @@ const EmployerDashboard = () => {
         notificationsRes,
         analyticsRes,
         unreadMsgsRes,
-        convsRes
+        convsRes,
+        allAppsRes
       ] = await Promise.all([
         axios.get('/api/employer/dashboard/metrics'),
         axios.get('/api/employer/dashboard/jobs'),
@@ -285,7 +293,8 @@ const EmployerDashboard = () => {
         axios.get('/api/employer/dashboard/notifications'),
         axios.get('/api/employer/dashboard/analytics'),
         axios.get('/api/messages/employer-unread'),
-        axios.get('/api/messages/employer-conversations')
+        axios.get('/api/messages/employer-conversations'),
+        axios.get('/api/employer/dashboard/applications')
       ]);
 
       setMetrics(metricsRes.data);
@@ -313,6 +322,7 @@ const EmployerDashboard = () => {
         officialPhone: comp.official_phone || ''
       });
       setRecentApplications(recentAppsRes.data.applications || []);
+      setAllApplications(allAppsRes.data.applications || []);
       setInterviews(interviewsRes.data.interviews || []);
       const notifs = notificationsRes.data.notifications || [];
       setNotifications(notifs);
@@ -998,6 +1008,122 @@ const EmployerDashboard = () => {
     );
   };
 
+
+  const renderApplicationsView = () => {
+    // Filter applications
+    const filteredApps = allApplications.filter(app => {
+      const q = searchTerm.toLowerCase();
+      return (
+        app.name.toLowerCase().includes(q) ||
+        app.email.toLowerCase().includes(q) ||
+        (app.role || '').toLowerCase().includes(q)
+      );
+    });
+
+    return (
+      <div className="space-y-6 text-left animate-fade-in">
+        {/* Top Header & Search */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div>
+            <h2 className="text-lg font-black text-slate-855 dark:text-white">Candidate Applications</h2>
+            <p className="text-xs text-slate-400 dark:text-slate-550 font-semibold mt-0.5">Review submissions, update stages, and schedule interviews.</p>
+          </div>
+          <div className="relative w-full md:w-80">
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search by candidate name, email, or role..."
+              className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100 font-semibold"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Applications Table Card */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+          {filteredApps.length === 0 ? (
+            <div className="text-center py-12 text-slate-455 dark:text-slate-500 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+              <FiFileText className="w-10 h-10 mx-auto mb-2 opacity-30" />
+              <p className="text-xs font-bold">No candidate applications found.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 font-black uppercase tracking-wider">
+                    <th className="pb-3 font-black">Candidate</th>
+                    <th className="pb-3 font-black">Job Position</th>
+                    <th className="pb-3 font-black">Applied</th>
+                    <th className="pb-3 font-black">Update Status</th>
+                    <th className="pb-3 font-black text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 dark:divide-slate-850/40 text-xs">
+                  {filteredApps.map((app) => (
+                    <tr key={app.applicationId} className="hover:bg-slate-50/50 dark:hover:bg-slate-855/10 transition-colors">
+                      <td className="py-3.5">
+                        <span className="font-extrabold text-slate-855 dark:text-slate-100 block">{app.name}</span>
+                        <span className="text-[10px] text-slate-450 font-semibold block">{app.email}</span>
+                      </td>
+                      <td className="py-3.5 font-bold text-slate-700 dark:text-slate-250">
+                        {app.role}
+                      </td>
+                      <td className="py-3.5 text-slate-500 dark:text-slate-400 font-bold">
+                        {app.timeAgo}
+                      </td>
+                      <td className="py-3.5">
+                        <select
+                          value={app.status}
+                          onChange={(e) => handleUpdateStatus(app.applicationId, e.target.value)}
+                          className={`px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider focus:outline-none border cursor-pointer ${
+                            app.status === 'Shortlisted' || app.status === 'Interview' || app.status === 'Offer'
+                              ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20'
+                              : app.status === 'Rejected'
+                              ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-450 border-rose-200 dark:border-rose-500/20'
+                              : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700/50'
+                          }`}
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Shortlisted">Shortlisted</option>
+                          <option value="Interview">Interview</option>
+                          <option value="Rejected">Rejected</option>
+                          <option value="Offer">Offer</option>
+                        </select>
+                      </td>
+                      <td className="py-3.5 text-right space-x-2">
+                        <button
+                          onClick={() => setSelectedCandidate(app)}
+                          className="px-2.5 py-1 text-[10px] font-bold text-sky-655 hover:text-sky-700 bg-sky-50 dark:bg-sky-955/20 rounded-lg hover:underline cursor-pointer border-none"
+                        >
+                          View Profile
+                        </button>
+                        <button
+                          onClick={() => openChat(app)}
+                          className="p-1.5 text-slate-455 hover:text-sky-600 dark:hover:text-sky-400 bg-slate-50 dark:bg-slate-850 rounded-lg inline-flex cursor-pointer border border-slate-100 dark:border-slate-800"
+                          title="Message Candidate"
+                        >
+                          <FiMail className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleOpenScheduleInterview(app)}
+                          className="p-1.5 text-slate-455 hover:text-emerald-600 dark:hover:text-emerald-400 bg-slate-50 dark:bg-slate-850 rounded-lg inline-flex cursor-pointer border border-slate-100 dark:border-slate-800"
+                          title="Schedule Interview"
+                        >
+                          <FiCalendar className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderAnalyticsView = () => {
     return (
       <div className="space-y-6 text-left animate-fade-in">
@@ -1283,7 +1409,7 @@ const EmployerDashboard = () => {
                     (() => {
                       let lastDay = '';
                       return chatMessages.map((msg, idx) => {
-                        const day = msg.createdAt ? new Date(msg.createdAt).toDateString() : '';
+                        const day = (msg.createdAt || msg.created_at) ? new Date(msg.createdAt || msg.created_at).toDateString() : '';
                         const showSep = day && day !== lastDay;
                         lastDay = day;
                         const isRecruiter = msg.sender === 'employer';
@@ -1292,7 +1418,7 @@ const EmployerDashboard = () => {
                             {showSep && (
                               <div className="flex justify-center py-2">
                                 <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
-                                  {formatDay(msg.createdAt)}
+                                  {formatDay(msg.createdAt || msg.created_at)}
                                 </span>
                               </div>
                             )}
@@ -1309,7 +1435,7 @@ const EmployerDashboard = () => {
                               }`}>
                                 {msg.content}
                                 <span className={`block text-[8px] mt-1 font-bold ${isRecruiter ? 'text-white/70' : 'text-slate-400 dark:text-slate-500'}`}>
-                                  {formatTime(msg.createdAt)}
+                                  {formatTime(msg.createdAt || msg.created_at)}
                                 </span>
                               </div>
                             </div>
@@ -1660,7 +1786,8 @@ const EmployerDashboard = () => {
               </p>
               {[
                 { id: 'dashboard', label: 'Dashboard', icon: FiGrid, desc: 'Hiring Overview' },
-                { id: 'jobs', label: 'Jobs & Applications', icon: FiBriefcase, desc: 'Manage Listings', badge: jobs.length },
+                { id: 'jobs', label: 'Jobs', icon: FiBriefcase, desc: 'Manage Listings', badge: jobs.length },
+                { id: 'applications', label: 'Applications', icon: FiFileText, desc: 'Candidate Applications', badge: allApplications.length },
                 { id: 'analytics', label: 'Analytics', icon: FiTrendingUp, desc: 'Pipeline Metrics' },
                 { id: 'messages', label: 'Messages', icon: FiMail, desc: 'Candidate Chat', badge: recruiterUnreadMessages },
                 { id: 'profile', label: 'Company Profile', icon: FiUser, desc: 'Company Details' }
@@ -1705,6 +1832,7 @@ const EmployerDashboard = () => {
           <main className="flex-1 min-w-0 overflow-y-auto px-6 py-8 flex flex-col gap-6 animate-slide-up">
             {activeSection === 'dashboard' && renderDashboardView()}
             {activeSection === 'jobs' && renderJobsView()}
+            {activeSection === 'applications' && renderApplicationsView()}
             {activeSection === 'analytics' && renderAnalyticsView()}
             {activeSection === 'messages' && renderMessagesView()}
             {activeSection === 'profile' && renderProfileView()}

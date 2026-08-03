@@ -117,10 +117,10 @@ router.get('/stats', async (req, res) => {
   try {
     const appsResult = await pool.query(`
       SELECT 
-        TO_CHAR(created_at, 'YYYY-MM') AS month_key,
+        TO_CHAR(applied_at, 'YYYY-MM') AS month_key,
         COUNT(*)::int AS count
       FROM applied_jobs
-      GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+      GROUP BY TO_CHAR(applied_at, 'YYYY-MM')
     `);
     appsResult.rows.forEach(row => {
       appCounts[row.month_key] = row.count;
