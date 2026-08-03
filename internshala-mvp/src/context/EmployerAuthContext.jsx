@@ -100,10 +100,13 @@ export const EmployerAuthProvider = ({ children }) => {
     try {
       const res = await employerService.updateProfile(profileData);
       const profile = res.data.profile;
+      const employer = res.data.employer;
       setCurrentEmployer(prev => {
         if (!prev) return null;
         return {
           ...prev,
+          recruiterName: employer?.recruiterName || prev.recruiterName,
+          companyName: employer?.companyName || prev.companyName,
           onboardingCompleted: profile.onboardingCompleted === true,
           profileData: profile,
         };

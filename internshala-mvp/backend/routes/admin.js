@@ -28,14 +28,6 @@ router.use(adminMiddleware);
 // ── 1. DASHBOARD STATISTICS & CHARTS ───────────────────────────────────────
 router.get('/stats', async (req, res) => {
   // 1. PostgreSQL KPI counts with separate try-catch blocks
-  let totalUsers = 0;
-  try {
-    const r = await pool.query('SELECT COUNT(*) FROM users');
-    totalUsers = parseInt(r.rows[0].count);
-  } catch (err) {
-    console.error('[Admin Stats Detail Error] SELECT COUNT(*) FROM users failed:', err.message);
-  }
-
   let candidates = 0;
   try {
     const r = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'candidate'");
@@ -46,10 +38,18 @@ router.get('/stats', async (req, res) => {
 
   let recruiters = 0;
   try {
-    const r = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'recruiter'");
+    const r = await pool.query("SELECT COUNT(*) FROM employers");
     recruiters = parseInt(r.rows[0].count);
   } catch (err) {
-    console.error("[Admin Stats Detail Error] SELECT COUNT(*) FROM users WHERE role = 'recruiter' failed:", err.message);
+    console.error("[Admin Stats Detail Error] SELECT COUNT(*) FROM employers failed:", err.message);
+  }
+
+  let totalUsers = 0;
+  try {
+    const r = await pool.query('SELECT COUNT(*) FROM users');
+    totalUsers = parseInt(r.rows[0].count) + recruiters;
+  } catch (err) {
+    console.error('[Admin Stats Detail Error] SELECT COUNT(*) FROM users failed:', err.message);
   }
 
   let activeJobs = 0;
@@ -78,12 +78,18 @@ router.get('/stats', async (req, res) => {
 
   let recentRegistrations = [];
   try {
-    const r = await pool.query(
-      'SELECT id, email, name, role, created_at FROM users ORDER BY created_at DESC LIMIT 5'
-    );
+    const r = await pool.query(`
+      SELECT id, email, name, role, created_at 
+      FROM (
+        SELECT id, email, name, role, created_at FROM users
+        UNION ALL
+        SELECT id, email, recruiter_name AS name, 'recruiter' AS role, created_at FROM employers
+      ) combined
+      ORDER BY created_at DESC LIMIT 5
+    `);
     recentRegistrations = r.rows;
   } catch (err) {
-    console.error('[Admin Stats Detail Error] SELECT users ORDER BY created_at DESC LIMIT 5 failed:', err.message);
+    console.error('[Admin Stats Detail Error] SELECT combined registrations failed:', err.message);
   }
 
   let recentJobsList = [];
@@ -124,16 +130,24 @@ router.get('/stats', async (req, res) => {
     console.error('[Admin Stats PG Error] Grouped applications query failed:', pgErr.message);
   }
 
-  // 3. PostgreSQL grouped users query
+  // 3. PostgreSQL grouped users query (Candidates + Recruiters/Employers)
   const userCounts = {};
   try {
     const usersResult = await pool.query(`
       SELECT 
-        TO_CHAR(created_at, 'YYYY-MM') AS month_key,
-        COUNT(*)::int AS count
-      FROM users
-      WHERE role = 'candidate'
-      GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+        month_key,
+        SUM(count)::int AS count
+      FROM (
+        SELECT TO_CHAR(created_at, 'YYYY-MM') AS month_key, COUNT(*) AS count
+        FROM users
+        WHERE role = 'candidate'
+        GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+        UNION ALL
+        SELECT TO_CHAR(created_at, 'YYYY-MM') AS month_key, COUNT(*) AS count
+        FROM employers
+        GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+      ) combined
+      GROUP BY month_key
     `);
     usersResult.rows.forEach(row => {
       userCounts[row.month_key] = row.count;
@@ -294,6 +308,57 @@ router.get('/users', async (req, res) => {
     const { search, role, page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
 
+    if (role === 'recruiter') {
+      const conditions = [];
+      const params = [];
+      let paramIndex = 1;
+
+      if (search) {
+        conditions.push(`(LOWER(recruiter_name) LIKE $${paramIndex} OR LOWER(company_name) LIKE $${paramIndex} OR LOWER(email) LIKE $${paramIndex})`);
+        params.push(`%${search.toLowerCase()}%`);
+        paramIndex++;
+      }
+
+      const whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+
+      const countRes = await pool.query(`SELECT COUNT(*) FROM employers ${whereClause}`, params);
+      const total = parseInt(countRes.rows[0].count);
+
+      const employersQuery = `
+        SELECT 
+          id, 
+          email, 
+          recruiter_name AS name, 
+          'recruiter' AS role, 
+          created_at, 
+          company_name,
+          phone,
+          website,
+          email_verified AS verified
+        FROM employers
+        ${whereClause}
+        ORDER BY created_at DESC
+        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      `;
+
+      const dataRes = await pool.query(employersQuery, [...params, parseInt(limit), offset]);
+
+      const users = dataRes.rows.map(row => ({
+        ...row,
+        academicBackground: row.company_name ? `Company: ${row.company_name}` : 'No company data',
+        college: row.company_name || 'N/A',
+        degree: row.phone || 'N/A',
+        experience: row.website || 'N/A',
+        skills: [],
+        company_name: row.company_name,
+        phone: row.phone,
+        website: row.website,
+        verified: row.verified
+      }));
+
+      return res.json({ users, total, page: parseInt(page), limit: parseInt(limit) });
+    }
+
     const conditions = [];
     const params = [];
     let paramIndex = 1;
@@ -342,7 +407,7 @@ router.get('/users', async (req, res) => {
 
 router.post('/users', async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, company_name, phone, website } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email, and password are required.' });
     }
@@ -350,6 +415,30 @@ router.post('/users', async (req, res) => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanName = name.trim();
     const selectedRole = ['candidate', 'recruiter', 'admin', 'super_admin'].includes(role) ? role : 'candidate';
+
+    if (selectedRole === 'recruiter') {
+      const existing = await pool.query('SELECT id FROM employers WHERE email = $1', [cleanEmail]);
+      if (existing.rows.length > 0) {
+        return res.status(409).json({ error: 'Recruiter already exists.' });
+      }
+
+      const hash = await bcrypt.hash(password, SALT_ROUNDS);
+      const recruiterResult = await pool.query(
+        `INSERT INTO employers (company_name, recruiter_name, email, phone, website, password_hash, email_verified)
+         VALUES ($1, $2, $3, $4, $5, $6, true)
+         RETURNING id, email, recruiter_name AS name, company_name, phone, website, created_at`,
+        [(company_name || 'Company Name').trim(), cleanName, cleanEmail, (phone || '').trim(), (website || '').trim(), hash]
+      );
+      const recruiter = recruiterResult.rows[0];
+
+      // Create profile stub
+      await pool.query(
+        'INSERT INTO employer_profiles (employer_id, company_logo, work_mode) VALUES ($1, $2, $3)',
+        [recruiter.id, '', 'Remote']
+      );
+
+      return res.status(201).json({ user: { ...recruiter, role: 'recruiter' } });
+    }
 
     const existing = await pool.query('SELECT id FROM users WHERE email = $1', [cleanEmail]);
     if (existing.rows.length > 0) {
@@ -378,11 +467,28 @@ router.post('/users', async (req, res) => {
 
 router.put('/users/:id', async (req, res) => {
   try {
-    const { name, email, role } = req.body;
+    const { name, email, role, company_name, phone, website } = req.body;
     const userId = parseInt(req.params.id);
 
     if (userId === req.user.userId && role && role !== req.user.role) {
       return res.status(400).json({ error: 'You cannot change your own administrator privileges.' });
+    }
+
+    // Check if this user is a recruiter in employers table
+    const checkEmployer = await pool.query('SELECT id FROM employers WHERE id = $1', [userId]);
+    if (checkEmployer.rows.length > 0) {
+      const updateRes = await pool.query(
+        `UPDATE employers SET 
+          recruiter_name = COALESCE($1, recruiter_name), 
+          email = COALESCE($2, email), 
+          company_name = COALESCE($3, company_name),
+          phone = COALESCE($4, phone),
+          website = COALESCE($5, website),
+          updated_at = NOW() 
+         WHERE id = $6 RETURNING id, email, recruiter_name AS name, company_name, phone, website`,
+        [name?.trim() || null, email?.trim().toLowerCase() || null, company_name?.trim() || null, phone?.trim() || null, website?.trim() || null, userId]
+      );
+      return res.json({ user: { ...updateRes.rows[0], role: 'recruiter' } });
     }
 
     const updateRes = await pool.query(
@@ -411,6 +517,13 @@ router.delete('/users/:id', async (req, res) => {
     const userId = parseInt(req.params.id);
     if (userId === req.user.userId) {
       return res.status(400).json({ error: 'You cannot delete your own account.' });
+    }
+
+    // Check if it's a recruiter in employers table
+    const checkEmployer = await pool.query('SELECT id FROM employers WHERE id = $1', [userId]);
+    if (checkEmployer.rows.length > 0) {
+      await pool.query('DELETE FROM employers WHERE id = $1', [userId]);
+      return res.json({ message: 'Recruiter deleted successfully.' });
     }
 
     const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [userId]);

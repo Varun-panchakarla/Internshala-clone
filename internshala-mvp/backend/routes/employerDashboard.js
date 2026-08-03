@@ -600,6 +600,22 @@ router.get('/notifications', employerAuthMiddleware, async (req, res) => {
   }
 });
 
+// 10b. POST /api/employer/dashboard/notifications/read
+router.post('/notifications/read', employerAuthMiddleware, async (req, res) => {
+  try {
+    await pool.query(
+      `UPDATE employer_notifications 
+       SET read = TRUE 
+       WHERE employer_id = $1`,
+      [req.employer.id]
+    );
+    res.json({ message: 'Notifications marked as read.' });
+  } catch (err) {
+    console.error('[Recruiter Read Notifications Error]:', err.message);
+    res.status(500).json({ error: 'Failed to mark notifications as read.' });
+  }
+});
+
 // 11. GET /api/employer/dashboard/company
 router.get('/company', employerAuthMiddleware, async (req, res) => {
   try {

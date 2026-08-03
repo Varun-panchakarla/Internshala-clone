@@ -490,10 +490,23 @@ router.get('/profile', employerAuthMiddleware, async (req, res) => {
 router.put('/profile', employerAuthMiddleware, async (req, res) => {
   try {
     const {
+      companyName, recruiterName,
       companyLogo, industry, companySize, foundedYear, website, linkedin,
       description, headquarters, officeLocations, hiringLocations, workMode,
       designation, department, officialPhone, onboardingCompleted
     } = req.body;
+
+    // Update the base employers table if names are provided
+    if (companyName || recruiterName) {
+      await pool.query(
+        `UPDATE employers SET
+          company_name = COALESCE($1, company_name),
+          recruiter_name = COALESCE($2, recruiter_name),
+          updated_at = NOW()
+         WHERE id = $3`,
+        [companyName?.trim() || null, recruiterName?.trim() || null, req.employer.id]
+      );
+    }
 
     const result = await pool.query(
       `INSERT INTO employer_profiles (
@@ -528,7 +541,14 @@ router.put('/profile', employerAuthMiddleware, async (req, res) => {
       ]
     );
 
-    res.json({ profile: mapEmployerProfile(result.rows[0]) });
+    // Fetch updated employer info
+    const empRes = await pool.query('SELECT id, email, recruiter_name as "recruiterName", company_name as "companyName" FROM employers WHERE id = $1', [req.employer.id]);
+    const employer = empRes.rows[0];
+
+    res.json({ 
+      profile: mapEmployerProfile(result.rows[0]),
+      employer
+    });
   } catch (err) {
     console.error('[Employer Update Profile] Error:', err.message);
     res.status(500).json({ error: 'Failed to update recruiter/company profile.' });
