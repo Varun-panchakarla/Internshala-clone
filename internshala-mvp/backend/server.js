@@ -27,16 +27,33 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
-// Serve built frontend in production
-const distPath = path.resolve(__dirname, '..', 'dist');
-const indexPath = path.resolve(distPath, 'index.html');
+// Serve built frontend in production (dynamically check possible paths)
+const possibleDistPaths = [
+  path.resolve(__dirname, '..', 'dist'),
+  path.resolve(__dirname, 'dist'),
+  path.resolve(__dirname, '..', '..', 'dist'),
+  path.resolve('/opt/render/project/src/dist'),
+  path.resolve('/opt/render/project/src/internshala-mvp/dist'),
+  path.resolve('/opt/render/project/src/internshala-mvp/backend/dist')
+];
+
+let distPath = possibleDistPaths[0];
+let indexPath = path.resolve(distPath, 'index.html');
+
+for (const p of possibleDistPaths) {
+  if (fs.existsSync(path.resolve(p, 'index.html'))) {
+    distPath = p;
+    indexPath = path.resolve(distPath, 'index.html');
+    break;
+  }
+}
 
 // If the frontend build is missing (e.g., Render's build phase didn't produce it),
 // build it in the background so the API server still comes up immediately and the
 // frontend becomes available as soon as the build finishes. This avoids blocking
 // app.listen and tripping Render's health check, which would restart the service.
 function autoBuildFrontend() {
-  console.log(`[Server] Frontend build missing at: ${indexPath}. Building in the background...`);
+  console.log(`[Server] Frontend build missing. Building in the background...`);
   const { exec } = require('child_process');
   const projectRoot = path.resolve(__dirname, '..');
   const run = (cmd) => new Promise((resolve, reject) => {
@@ -57,6 +74,14 @@ function autoBuildFrontend() {
       // Use vite directly instead of "npm run build" to skip the redundant
       // "npm install --prefix backend" step.
       await run('npx vite build');
+      // Re-scan paths after build completes
+      for (const p of possibleDistPaths) {
+        if (fs.existsSync(path.resolve(p, 'index.html'))) {
+          distPath = p;
+          indexPath = path.resolve(distPath, 'index.html');
+          break;
+        }
+      }
       console.log(`[Server] Frontend build complete: ${distPath}`);
     } catch (buildErr) {
       console.error('[Server] Auto-build failed:', buildErr.message);
@@ -117,8 +142,18 @@ app.post('/api/scrape', async (req, res) => {
 
 // SPA catch-all: serve index.html for any non-API route
 app.get('*', (req, res) => {
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
+  let liveIndexPath = indexPath;
+  if (!fs.existsSync(liveIndexPath)) {
+    for (const p of possibleDistPaths) {
+      if (fs.existsSync(path.resolve(p, 'index.html'))) {
+        liveIndexPath = path.resolve(p, 'index.html');
+        break;
+      }
+    }
+  }
+
+  if (fs.existsSync(liveIndexPath)) {
+    res.sendFile(liveIndexPath);
   } else {
     console.error(`[SPA Error] index.html not found at: ${indexPath}`);
     res.status(404).json({ error: 'Frontend not built. Run "npm run build" first.' });
