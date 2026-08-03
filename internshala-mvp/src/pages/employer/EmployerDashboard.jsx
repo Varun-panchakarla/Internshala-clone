@@ -59,6 +59,15 @@ const formatISODate = (date) =>
 const formatTime = (iso) =>
   new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+const formatDay = (iso) => {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  } catch {
+    return '';
+  }
+};
+
 const getCandidateSkills = (candidate) => {
   if (!candidate) return [];
   if (Array.isArray(candidate.skills)) return candidate.skills.map(s => String(s).trim()).filter(Boolean);
@@ -1160,141 +1169,177 @@ const EmployerDashboard = () => {
 
   const renderMessagesView = () => {
     return (
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex h-[calc(100vh-12rem)] min-h-[500px] text-left animate-fade-in">
-        {/* Conversations List (Left Side) */}
-        <div className="w-1/3 border-r border-slate-105 dark:border-slate-800/80 flex flex-col h-full bg-slate-50/30 dark:bg-slate-955/20">
-          <div className="p-4 border-b border-slate-100 dark:border-slate-800/80 shrink-0">
-            <h3 className="font-extrabold text-sm text-slate-850 dark:text-white uppercase tracking-wider">Inbox</h3>
-            <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Manage recruiter-candidate threads</p>
-          </div>
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-50 dark:divide-slate-850/30">
-            {conversations.length === 0 ? (
-              <div className="text-center py-20 text-slate-400 text-xs font-semibold px-4">
-                No conversations yet. Shortlist a candidate and send a message to start!
-              </div>
-            ) : (
-              conversations.map(conv => {
-                const isSelected = chatCandidate?.userId === conv.userId;
-                return (
-                  <button
-                    key={conv.userId}
-                    onClick={() => openChat(conv)}
-                    className={`w-full text-left p-3.5 flex gap-2.5 items-start transition-colors border-none cursor-pointer ${
-                      isSelected
-                        ? 'bg-sky-50/50 dark:bg-sky-955/15'
-                        : 'hover:bg-slate-50 dark:hover:bg-white/5 bg-transparent'
-                    }`}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-955/30 text-sky-655 dark:text-sky-400 flex items-center justify-center font-bold text-xs shrink-0">
-                      {(conv.candidateName || 'C').charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">{conv.candidateName}</span>
+      <div className="flex flex-col gap-6 w-full animate-slide-up text-left">
+        <div>
+          <h1 className="text-2xl font-black text-slate-800 dark:text-white">Messages</h1>
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">
+            Chat with candidates you shortlisted.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Conversation List */}
+          <div className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <FiMail className="w-4 h-4 text-sky-600" />
+              <h2 className="font-extrabold text-slate-800 dark:text-white text-sm">Inbox</h2>
+              {conversations.some(cv => cv.unread > 0) && (
+                <span className="ml-auto text-[9px] font-black bg-rose-500 text-white px-2 py-0.5 rounded-full">
+                  {conversations.reduce((a, cv) => a + cv.unread, 0)} new
+                </span>
+              )}
+            </div>
+
+            <div className="divide-y divide-slate-50 dark:divide-slate-805/40 max-h-[520px] overflow-y-auto">
+              {conversations.length === 0 ? (
+                <div className="text-center py-12 px-6">
+                  <FiMessageSquare className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
+                  <p className="text-xs font-bold text-slate-400">No conversations yet.</p>
+                  <p className="text-[10px] text-slate-400 font-medium mt-1">
+                    Shortlist a candidate and send a message to start!
+                  </p>
+                </div>
+              ) : (
+                conversations.map(conv => {
+                  const isSelected = chatCandidate?.userId === conv.userId;
+                  return (
+                    <button
+                      key={conv.userId}
+                      onClick={() => openChat(conv)}
+                      className={`w-full text-left px-5 py-4 flex items-start gap-3 transition-colors cursor-pointer border-none ${
+                        isSelected
+                          ? 'bg-sky-50/60 dark:bg-sky-900/15'
+                          : 'hover:bg-slate-50 dark:hover:bg-white/5 bg-transparent'
+                      }`}
+                    >
+                      <div className="w-10 h-10 rounded-full bg-sky-600 text-white flex items-center justify-center font-black text-sm shrink-0">
+                        {(conv.candidateName || 'C').charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`text-sm truncate ${conv.unread > 0 ? 'font-black text-slate-950 dark:text-white' : 'font-extrabold text-slate-800 dark:text-slate-100'}`}>
+                            {conv.candidateName}
+                          </span>
+                          {conv.unread > 0 && (
+                            <span className="bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full leading-none shrink-0">
+                              {conv.unread}
+                            </span>
+                          )}
+                        </div>
+                        <p className={`text-xs mt-0.5 truncate ${conv.unread > 0 ? 'font-bold text-slate-700 dark:text-slate-300' : 'font-medium text-slate-550 dark:text-slate-400'}`}>
+                          {conv.lastMessage || 'No messages yet'}
+                        </p>
                         {conv.lastMessageAt && (
-                          <span className="text-[9px] text-slate-400 font-bold">
-                            {new Date(conv.lastMessageAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold mt-0.5 block">
+                            {formatTime(conv.lastMessageAt)}
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium truncate mt-0.5 leading-snug">
-                        {conv.lastMessage || 'Click to view conversation'}
-                      </p>
-                    </div>
-                    {conv.unread > 0 && (
-                      <span className="bg-rose-500 text-white text-[8px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0">
-                        {conv.unread}
-                      </span>
-                    )}
-                  </button>
-                );
-              })
-            )}
+                    </button>
+                  );
+                })
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Message Thread (Right Side) */}
-        <div className="flex-1 flex flex-col h-full bg-white dark:bg-slate-900">
-          {chatCandidate ? (
-            <>
-              {/* Active Conversation Header */}
-              <div className="p-4 border-b border-slate-100 dark:border-slate-800/80 flex justify-between items-center bg-slate-50/20 dark:bg-slate-950/10 shrink-0">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-sky-100 dark:bg-sky-955/30 text-sky-655 dark:text-sky-400 flex items-center justify-center font-extrabold text-sm shadow-xs">
+          {/* Active Thread */}
+          <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col overflow-hidden min-h-[520px] lg:sticky lg:top-6">
+            {!chatCandidate ? (
+              <div className="flex-1 flex flex-col items-center justify-center py-20 px-6 text-center">
+                <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-3">
+                  <FiMail className="w-7 h-7 text-slate-400" />
+                </div>
+                <p className="text-sm font-extrabold text-slate-800 dark:text-white">Select a conversation</p>
+                <p className="text-xs text-slate-400 font-medium mt-1">Choose a candidate on the left to start chatting.</p>
+              </div>
+            ) : (
+              <>
+                <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-sky-600 text-white flex items-center justify-center font-black text-xs shrink-0">
                     {(chatCandidate.candidateName || chatCandidate.name || 'C').charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h4 className="text-xs font-black text-slate-800 dark:text-white leading-tight">
+                    <h2 className="font-extrabold text-slate-800 dark:text-white text-sm leading-none">
                       {chatCandidate.candidateName || chatCandidate.name}
-                    </h4>
-                    <p className="text-[9px] text-slate-400 dark:text-slate-550 font-semibold mt-0.5">
+                    </h2>
+                    <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
                       {chatCandidate.candidateEmail || chatCandidate.email}
                     </p>
                   </div>
                 </div>
-              </div>
 
-              {/* Chat Thread Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-50/20 dark:bg-slate-955/10">
-                {chatLoading ? (
-                  <div className="h-full flex items-center justify-center">
-                    <div className="w-6 h-6 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                ) : chatMessages.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center text-slate-400 p-6">
-                    <FiMail className="w-8 h-8 opacity-30 mb-2" />
-                    <p className="text-xs font-bold">No messages yet.</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Say hello to start the conversation!</p>
-                  </div>
-                ) : (
-                  chatMessages.map(m => {
-                    const isRecruiter = m.sender === 'employer';
-                    return (
-                      <div key={m.id} className={`flex ${isRecruiter ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-xs font-semibold shadow-xs ${
-                          isRecruiter
-                            ? 'bg-sky-600 text-white rounded-tr-none'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-850 dark:text-slate-150 rounded-tl-none border border-slate-200/40 dark:border-slate-800/60'
-                        }`}>
-                          <p className="leading-relaxed whitespace-pre-wrap">{m.content}</p>
-                          <span className={`text-[8px] mt-1 block text-right font-medium ${
-                            isRecruiter ? 'text-sky-100' : 'text-slate-400 dark:text-slate-500'
-                          }`}>
-                            {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+                <div className="flex-1 overflow-y-auto px-5 py-4 min-h-[380px] max-h-[420px] space-y-2.5 bg-slate-50/20 dark:bg-slate-955/10">
+                  {chatLoading ? (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="w-6 h-6 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : chatMessages.length === 0 ? (
+                    <div className="text-center py-12">
+                      <FiClock className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
+                      <p className="text-xs font-bold text-slate-400">No messages in this conversation yet.</p>
+                      <p className="text-[10px] text-slate-400 font-medium mt-1">Say hello to get started.</p>
+                    </div>
+                  ) : (
+                    (() => {
+                      let lastDay = '';
+                      return chatMessages.map((msg, idx) => {
+                        const day = msg.createdAt ? new Date(msg.createdAt).toDateString() : '';
+                        const showSep = day && day !== lastDay;
+                        lastDay = day;
+                        const isRecruiter = msg.sender === 'employer';
+                        return (
+                          <React.Fragment key={msg.id || idx}>
+                            {showSep && (
+                              <div className="flex justify-center py-2">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
+                                  {formatDay(msg.createdAt)}
+                                </span>
+                              </div>
+                            )}
+                            <div className={`flex items-end gap-2 ${isRecruiter ? 'justify-end' : 'justify-start'}`}>
+                              {!isRecruiter && (
+                                <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 text-sky-655 dark:text-sky-400 flex items-center justify-center font-black text-[10px] shrink-0 mb-0.5">
+                                  {(chatCandidate.candidateName || chatCandidate.name || 'C').charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                              <div className={`max-w-[75%] px-3.5 py-2.5 rounded-2xl text-xs font-semibold shadow-sm ${
+                                isRecruiter
+                                  ? 'bg-sky-600 text-white rounded-br-sm'
+                                  : 'bg-slate-150 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-tl-sm border border-slate-200/40 dark:border-slate-800/60'
+                              }`}>
+                                {msg.content}
+                                <span className={`block text-[8px] mt-1 font-bold ${isRecruiter ? 'text-white/70' : 'text-slate-400 dark:text-slate-500'}`}>
+                                  {formatTime(msg.createdAt)}
+                                </span>
+                              </div>
+                            </div>
+                          </React.Fragment>
+                        );
+                      });
+                    })()
+                  )}
+                </div>
 
-              {/* Chat Text Input */}
-              <form onSubmit={sendChatMessage} className="p-4 border-t border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 flex gap-3 shrink-0">
-                <input
-                  type="text"
-                  required
-                  placeholder="Type a message to candidate..."
-                  value={chatText}
-                  onChange={e => setChatText(e.target.value)}
-                  className="flex-1 px-4 py-2.5 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100 font-semibold"
-                />
-                <button
-                  type="submit"
-                  disabled={chatSending}
-                  className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 disabled:bg-slate-350 text-xs font-extrabold text-white rounded-xl shadow-md transition-colors cursor-pointer border-none"
-                >
-                  {chatSending ? 'Sending...' : 'Send'}
-                </button>
-              </form>
-            </>
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center text-slate-400 p-6">
-              <FiMail className="w-12 h-12 opacity-30 mb-2" />
-              <p className="text-xs font-bold">Select a Conversation</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">Choose a candidate thread from the list on the left to start messaging.</p>
-            </div>
-          )}
+                <form onSubmit={sendChatMessage} className="flex gap-2 px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-955/50">
+                  <input
+                    type="text"
+                    required
+                    value={chatText}
+                    onChange={e => setChatText(e.target.value)}
+                    placeholder="Type a message..."
+                    className="flex-1 px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100 font-semibold"
+                  />
+                  <button
+                    type="submit"
+                    disabled={chatSending || !chatText.trim()}
+                    className="px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl cursor-pointer disabled:opacity-50 flex items-center gap-1.5 border-none transition-colors"
+                  >
+                    {chatSending ? 'Sending...' : <FiSend className="w-3 h-3" />} Send
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
         </div>
       </div>
     );
