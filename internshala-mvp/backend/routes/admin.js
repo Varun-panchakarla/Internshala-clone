@@ -27,8 +27,6 @@ router.use(adminMiddleware);
 
 // ── 1. DASHBOARD STATISTICS & CHARTS ───────────────────────────────────────
 router.get('/stats', async (req, res) => {
-  console.log('[Admin Stats API] Request received.');
-  
   // 1. PostgreSQL KPI counts with separate try-catch blocks
   let totalUsers = 0;
   try {
@@ -122,7 +120,6 @@ router.get('/stats', async (req, res) => {
       appCounts[row.month_key] = row.count;
       totalApps += row.count;
     });
-    console.log('[Admin Stats PG Success] Grouped application counts:', appCounts);
   } catch (pgErr) {
     console.error('[Admin Stats PG Error] Grouped applications query failed:', pgErr.message);
   }
@@ -141,7 +138,6 @@ router.get('/stats', async (req, res) => {
     usersResult.rows.forEach(row => {
       userCounts[row.month_key] = row.count;
     });
-    console.log('[Admin Stats PG Success] Grouped user registrations count:', userCounts);
   } catch (pgErr) {
     console.error('[Admin Stats PG Error] Grouped users query failed:', pgErr.message);
   }
@@ -164,7 +160,6 @@ router.get('/stats', async (req, res) => {
   }
 
   // Return HTTP 200 with Stats and Growth Data using real database data
-  console.log('[Admin Stats API Success] Returning stats and growthData. Length:', growthData.length);
   return res.status(200).json({
     stats: {
       totalUsers,
@@ -329,11 +324,7 @@ router.get('/users', async (req, res) => {
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 
-    console.log('[Backend GET /users] Executing SQL Query:', usersQuery);
-    console.log('[Backend GET /users] Query params:', [...params, parseInt(limit), offset]);
-
     const dataRes = await pool.query(usersQuery, [...params, parseInt(limit), offset]);
-    console.log('[Backend GET /users] Rows returned:', dataRes.rows.length);
 
     const users = dataRes.rows.map(row => ({
       ...row,
@@ -341,7 +332,6 @@ router.get('/users', async (req, res) => {
     }));
 
     const responsePayload = { users, total, page: parseInt(page), limit: parseInt(limit) };
-    console.log('[Backend GET /users] Sending response payload:', responsePayload);
 
     res.json(responsePayload);
   } catch (err) {
@@ -474,11 +464,7 @@ router.get('/jobs', async (req, res) => {
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 
-    console.log('[Backend GET /jobs] Executing SQL Query:', jobsQuery);
-    console.log('[Backend GET /jobs] Query params:', [...params, parseInt(limit), offset]);
-
     const dataRes = await pool.query(jobsQuery, [...params, parseInt(limit), offset]);
-    console.log('[Backend GET /jobs] Rows returned:', dataRes.rows.length);
 
     const jobs = dataRes.rows.map(row => ({
       ...row,
@@ -486,7 +472,6 @@ router.get('/jobs', async (req, res) => {
     }));
 
     const responsePayload = { jobs, total, page: parseInt(page), limit: parseInt(limit) };
-    console.log('[Backend GET /jobs] Sending response payload:', responsePayload);
 
     res.json(responsePayload);
   } catch (err) {
