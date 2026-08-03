@@ -97,9 +97,9 @@ export const JobProvider = ({ children }) => {
 
   // Calculate skill matches for each job based on user profile skills
   const calculateSkillMatch = (jobSkills) => {
-    if (!currentUser?.profileData?.skills || !jobSkills) return 0;
-    const userSkills = currentUser.profileData.skills.map(s => s.toLowerCase());
-    const matches = jobSkills.filter(s => userSkills.includes(s.toLowerCase()));
+    if (!Array.isArray(jobSkills) || !Array.isArray(currentUser?.profileData?.skills)) return 0;
+    const userSkills = currentUser.profileData.skills.map(s => String(s).toLowerCase());
+    const matches = jobSkills.filter(s => userSkills.includes(String(s).toLowerCase()));
     return Math.round((matches.length / jobSkills.length) * 100);
   };
 
@@ -141,40 +141,47 @@ export const JobProvider = ({ children }) => {
 
   // Filter jobs based on search query and filters
   const filteredJobs = processedJobs.filter(job => {
+    const title = job.title?.toLowerCase() || '';
+    const company = job.company?.toLowerCase() || '';
+    const location = job.location?.toLowerCase() || '';
+    const experience = job.experience?.toLowerCase() || '';
+    const employmentType = job.employmentType?.toLowerCase() || '';
+    const skills = Array.isArray(job.skills) ? job.skills : [];
+
     // 1. Search Query Check (title, company, skills)
     const matchesSearch = searchQuery === '' || 
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
+      title.includes(searchQuery.toLowerCase()) ||
+      company.includes(searchQuery.toLowerCase()) ||
+      skills.some(skill => String(skill).toLowerCase().includes(searchQuery.toLowerCase()));
 
     // 2. Role Filter Check
     const matchesRole = filters.role === '' || 
-      job.title.toLowerCase().includes(filters.role.toLowerCase());
+      title.includes(filters.role.toLowerCase());
 
     // 3. Location Filter Check
     const matchesLocation = filters.location === '' || 
-      job.location.toLowerCase().includes(filters.location.toLowerCase());
+      location.includes(filters.location.toLowerCase());
 
     // 4. Experience Filter Check
     const matchesExperience = filters.experience === '' || 
-      job.experience.toLowerCase().includes(filters.experience.toLowerCase()) ||
-      (filters.experience === 'Fresher' && job.experience === 'Fresher') ||
-      (filters.experience === '1-3 years' && job.experience.includes('1-3')) ||
-      (filters.experience === '3+ years' && (job.experience.includes('3+') || job.experience.includes('5+')));
+      experience.includes(filters.experience.toLowerCase()) ||
+      (filters.experience === 'Fresher' && experience === 'fresher') ||
+      (filters.experience === '1-3 years' && experience.includes('1-3')) ||
+      (filters.experience === '3+ years' && (experience.includes('3+') || experience.includes('5+')));
 
     // 5. Employment Type Filter Check
     const matchesType = filters.employmentType === '' || 
-      job.employmentType.toLowerCase() === filters.employmentType.toLowerCase();
+      employmentType === filters.employmentType.toLowerCase();
 
     // 6. Skills Filter Check
     const matchesSkills = filters.skills.length === 0 || 
       filters.skills.every(skill => 
-        job.skills.map(s => s.toLowerCase()).includes(skill.toLowerCase())
+        skills.map(s => String(s).toLowerCase()).includes(skill.toLowerCase())
       );
 
     // 7. Company Filter Check
     const matchesCompany = filters.company === '' || 
-      job.company.toLowerCase().includes(filters.company.toLowerCase());
+      company.includes(filters.company.toLowerCase());
 
     // 8. Salary Range Filter Check
     let matchesSalary = true;
@@ -210,9 +217,9 @@ export const JobProvider = ({ children }) => {
 
     // 10. Work Mode Filter Check
     const matchesWorkMode = filters.workMode === '' ||
-      (filters.workMode.toLowerCase() === 'remote' && job.location.toLowerCase().includes('remote')) ||
-      (filters.workMode.toLowerCase() === 'hybrid' && job.location.toLowerCase().includes('hybrid')) ||
-      (filters.workMode.toLowerCase() === 'on-site' && !job.location.toLowerCase().includes('remote') && !job.location.toLowerCase().includes('hybrid'));
+      (filters.workMode.toLowerCase() === 'remote' && location.includes('remote')) ||
+      (filters.workMode.toLowerCase() === 'hybrid' && location.includes('hybrid')) ||
+      (filters.workMode.toLowerCase() === 'on-site' && !location.includes('remote') && !location.includes('hybrid'));
 
     return matchesSearch && matchesRole && matchesLocation && matchesExperience && matchesType && matchesSkills && matchesCompany && matchesSalary && matchesDate && matchesWorkMode;
   });
@@ -242,8 +249,8 @@ export const JobProvider = ({ children }) => {
       const prefRole = currentUser.profileData.preferredRole?.toLowerCase();
       const prefLoc = currentUser.profileData.preferredLocation?.toLowerCase();
       
-      const roleMatches = prefRole ? job.title.toLowerCase().includes(prefRole) : false;
-      const locationMatches = prefLoc ? job.location.toLowerCase().includes(prefLoc) : false;
+      const roleMatches = prefRole ? (job.title || '').toLowerCase().includes(prefRole) : false;
+      const locationMatches = prefLoc ? (job.location || '').toLowerCase().includes(prefLoc) : false;
       const highSkillMatch = job.matchScore >= 50;
 
       return roleMatches || locationMatches || highSkillMatch;
