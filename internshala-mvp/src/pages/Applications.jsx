@@ -53,6 +53,66 @@ const Applications = () => {
     }
   };
 
+  // Derive which stage the application is at so candidates can see
+  // shortlist / interview progress at a glance.
+  const statusSteps = ['Applied', 'Shortlisted', 'Interview'];
+
+  const getStatusStep = (status) => {
+    const s = (status || '').toLowerCase();
+    if (s.includes('reject') || s.includes('offer')) return -1;
+    if (s.includes('interview')) return 3;
+    if (s.includes('shortlist') || s.includes('review')) return 2;
+    return 1;
+  };
+
+  const StatusTimeline = ({ status }) => {
+    const step = getStatusStep(status);
+    if (step === -1) {
+      const rejected = (status || '').toLowerCase().includes('reject');
+      return (
+        <div className="flex items-center gap-2 mt-3">
+          <span className={`text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border ${
+            rejected
+              ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-400'
+              : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400'
+          }`}>
+            {status}
+          </span>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center gap-0 mt-3">
+        {statusSteps.map((label, idx) => {
+          const position = idx + 1;
+          const done = step >= position;
+          const current = step === position;
+          return (
+            <div key={label} className="flex items-center">
+              {idx > 0 && (
+                <div className={`w-5 sm:w-8 h-0.5 -mx-0.5 ${step > idx ? 'bg-brand-500 dark:bg-brand-400' : 'bg-slate-200 dark:bg-slate-700'}`} />
+              )}
+              <div className="flex flex-col items-center gap-1">
+                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                  done
+                    ? 'bg-brand-500 border-brand-500 dark:bg-brand-400 dark:border-brand-400'
+                    : current
+                      ? 'border-brand-400 dark:border-brand-500 bg-brand-50 dark:bg-brand-500/10'
+                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900'
+                }`}>
+                  {done && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </div>
+                <span className={`text-[9px] font-black uppercase tracking-wider ${done ? 'text-brand-600 dark:text-brand-400' : current ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-slate-600'}`}>
+                  {label}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-6 w-full animate-slide-up">
       <div>
@@ -118,6 +178,21 @@ const Applications = () => {
                     <span>•</span>
                     <span className="flex items-center gap-1"><FiClock className="opacity-70" /> {app.job.employmentType}</span>
                   </div>
+
+                  <StatusTimeline status={app.status} />
+
+                  {(() => {
+                    const iv = interviews.find(i => i.jobId === app.job_id && i.status === 'Scheduled');
+                    if (!iv) return null;
+                    return (
+                      <div className="flex flex-wrap items-center gap-2 mt-2.5">
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg px-2.5 py-1">
+                          <FiCalendar className="w-3.5 h-3.5" />
+                          Interview: {iv.date} · {iv.time} · {iv.round}
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 

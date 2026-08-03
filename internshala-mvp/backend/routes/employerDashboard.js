@@ -377,6 +377,14 @@ router.post('/interviews/schedule', employerAuthMiddleware, async (req, res) => 
       [employerId, userId, jobId, scheduledAt, round]
     );
 
+    // Reflect the interview in the candidate's application status so they see
+    // they were shortlisted and moved to the interview stage.
+    await pool.query(
+      `UPDATE applied_jobs SET status = 'Interview'
+       WHERE user_id = $1 AND job_id = $2 AND status NOT IN ('Rejected', 'Offer')`,
+      [userId, jobId]
+    );
+
     // Insert reminder notification
     await pool.query(
       "INSERT INTO employer_notifications (employer_id, type, message) VALUES ($1, $2, $3)",

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Fragment } from 'react';
 import { FiMail, FiSend, FiMessageSquare, FiClock } from 'react-icons/fi';
 import { messageService } from '../services/mockApi';
 
@@ -11,6 +11,22 @@ const formatTime = (iso) => {
   }
 };
 
+const formatDay = (iso) => {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  } catch {
+    return '';
+  }
+};
+
+const Spinner = ({ className = '' }) => (
+  <div className={`inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin ${className}`} />
+);
+
+const dedupe = (msgs) =>
+  Array.from(new Map(msgs.map(m => [m.id, m])).values());
+
 const Messages = () => {
   const [conversations, setConversations] = useState([]);
   const [activeEmployerId, setActiveEmployerId] = useState(null);
@@ -22,6 +38,26 @@ const Messages = () => {
   const [sending, setSending] = useState(false);
   const threadEndRef = useRef(null);
 
+  // Change-detection refs so polling only re-renders when data actually moves.
+  const threadJsonRef = useRef('');
+  const threadLenRef = useRef(0);
+  const activeRef = useRef(null);
+  activeRef.current = activeEmployerId;
+
+  const applyThread = (nextMsgs, forceScroll = false) => {
+    const clean = dedupe(nextMsgs || []);
+    const json = JSON.stringify(clean);
+    if (json === threadJsonRef.current && !forceScroll) return;
+    const prevLen = threadLenRef.current;
+    threadLenRef.current = clean.length;
+    threadJsonRef.current = json;
+    setThread(clean);
+    if (forceScroll || clean.length > prevLen) {
+      setTimeout(() => threadEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 60);
+    }
+  };
+
+  // Initial conversation list load
   useEffect(() => {
     messageService.getConversations()
       .then(res => setConversations(res.data.conversations || []))
@@ -29,52 +65,90 @@ const Messages = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  // Load thread when switching conversations
   useEffect(() => {
     if (!activeEmployerId) return;
     setThreadLoading(true);
+    setThread([]);
+    threadJsonRef.current = '';
+    threadLenRef.current = 0;
     messageService.getThread(activeEmployerId)
       .then(res => {
-        setThread(res.data.messages || []);
         setThreadMeta(res.data.employer || null);
+        applyThread(res.data.messages || [], true);
       })
       .catch(() => setThread([]))
       .finally(() => setThreadLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeEmployerId]);
 
+  // Light polling: only refetch thread when the tab is visible, and only
+  // re-render when the message list actually changed.
   useEffect(() => {
     if (!activeEmployerId) return;
     const interval = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
       messageService.getThread(activeEmployerId)
-        .then(res => setThread(res.data.messages || []))
+        .then(res => {
+          applyThread(res.data.messages || []);
+          if (res.data.employer) setThreadMeta(res.data.employer);
+        })
         .catch(() => {});
-    }, 5000);
+    }, 4000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeEmployerId]);
 
+  // Gentle conversation-list poll (unread badges / previews)
   useEffect(() => {
-    threadEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [thread]);
-
-  const handleSend = async (e) => {
-    e.preventDefault();
-    const content = text.trim();
-    if (!content || !activeEmployerId) return;
-    setSending(true);
-    try {
-      const res = await messageService.sendMessage(activeEmployerId, content);
-      setThread(prev => [...prev, res.data.message]);
-      setText('');
-    } catch {
-      setText('');
-    } finally {
-      setSending(false);
-    }
-  };
+    const interval = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      messageService.getConversations()
+        .then(res => setConversations(prev => {
+          const fresh = res.data.conversations || [];
+          if (JSON.stringify(prev) === JSON.stringify(fresh)) return prev;
+          return fresh;
+        }))
+        .catch(() => {});
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
 
   const refreshConversations = () => {
     messageService.getConversations()
       .then(res => setConversations(res.data.conversations || []))
       .catch(() => {});
+  };
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    const content = text.trim();
+    if (!content || !activeEmployerId) return;
+    const optimistic = {
+      id: `tmp-${Date.now()}`,
+      sender: 'user',
+      content,
+      createdAt: new Date().toISOString(),
+      is_read: true,
+    };
+    setSending(true);
+    setText('');
+    applyThread([...thread, optimistic], true);
+    try {
+      await messageService.sendMessage(activeEmployerId, content);
+      const res = await messageService.getThread(activeEmployerId);
+      applyThread(res.data.messages || [], true);
+      if (res.data.employer) setThreadMeta(res.data.employer);
+      setConversations(prev => prev.map(cv =>
+        cv.employerId === activeEmployerId
+          ? { ...cv, lastMessage: content, lastMessageAt: new Date().toISOString(), unread: 0 }
+          : cv
+      ));
+    } catch {
+      applyThread([...thread], true);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -86,17 +160,24 @@ const Messages = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Conversation List */}
         <div className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
             <FiMail className="w-4 h-4 text-brand-600" />
             <h2 className="font-extrabold text-slate-800 dark:text-white text-sm">Recruiters</h2>
+            {conversations.some(cv => cv.unread > 0) && (
+              <span className="ml-auto text-[9px] font-black bg-rose-500 text-white px-2 py-0.5 rounded-full">
+                {conversations.reduce((a, cv) => a + cv.unread, 0)} new
+              </span>
+            )}
           </div>
 
           <div className="divide-y divide-slate-50 dark:divide-slate-800/60 max-h-[520px] overflow-y-auto">
             {loading ? (
-              <div className="text-center py-12 text-xs font-bold text-slate-500">Loading conversations...</div>
+              <div className="flex items-center justify-center gap-2 py-12 text-xs font-bold text-slate-500">
+                <Spinner className="text-brand-500" /> Loading conversations...
+              </div>
             ) : conversations.length === 0 ? (
               <div className="text-center py-12 px-6">
                 <FiMessageSquare className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
@@ -124,7 +205,7 @@ const Messages = () => {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-extrabold text-slate-800 dark:text-slate-100 truncate">
+                      <span className={`text-sm truncate ${cv.unread > 0 ? 'font-black text-slate-900 dark:text-white' : 'font-extrabold text-slate-800 dark:text-slate-100'}`}>
                         {cv.companyName}
                       </span>
                       {cv.unread > 0 && (
@@ -133,7 +214,7 @@ const Messages = () => {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 truncate">
+                    <p className={`text-xs mt-0.5 truncate ${cv.unread > 0 ? 'font-bold text-slate-700 dark:text-slate-300' : 'font-medium text-slate-500 dark:text-slate-400'}`}>
                       {cv.lastMessage || 'No messages yet'}
                     </p>
                     {cv.lastMessageAt && (
@@ -149,7 +230,7 @@ const Messages = () => {
         </div>
 
         {/* Active Thread */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col overflow-hidden min-h-[520px]">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col overflow-hidden min-h-[520px] lg:sticky lg:top-6">
           {!activeEmployerId ? (
             <div className="flex-1 flex flex-col items-center justify-center py-20 px-6 text-center">
               <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-3">
@@ -174,47 +255,73 @@ const Messages = () => {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto space-y-2.5 px-5 py-4 max-h-[400px]">
+              <div className="flex-1 overflow-y-auto px-5 py-4 min-h-[380px] max-h-[420px] space-y-2.5">
                 {threadLoading ? (
-                  <div className="text-center py-12 text-xs font-bold text-slate-500">Loading conversation...</div>
+                  <div className="flex items-center justify-center gap-2 py-12 text-xs font-bold text-slate-500">
+                    <Spinner className="text-brand-500" /> Loading conversation...
+                  </div>
                 ) : thread.length === 0 ? (
                   <div className="text-center py-12">
                     <FiClock className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
                     <p className="text-xs font-bold text-slate-400">No messages in this conversation yet.</p>
+                    <p className="text-[10px] text-slate-400 font-medium mt-1">Say hello to get started.</p>
                   </div>
                 ) : (
-                  thread.map((msg, idx) => (
-                    <div key={msg.id || idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[75%] px-3.5 py-2.5 rounded-2xl text-xs font-semibold ${
-                        msg.sender === 'user'
-                          ? 'bg-brand-600 text-white rounded-br-sm'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-bl-sm'
-                      }`}>
-                        {msg.content}
-                        <span className="block text-[8px] mt-1 opacity-70 font-bold">
-                          {formatTime(msg.createdAt)}
-                        </span>
-                      </div>
-                    </div>
-                  ))
+                  (() => {
+                    let lastDay = '';
+                    return thread.map((msg, idx) => {
+                      const day = msg.createdAt ? new Date(msg.createdAt).toDateString() : '';
+                      const showSep = day && day !== lastDay;
+                      lastDay = day;
+                      const isUser = msg.sender === 'user';
+                      return (
+                        <Fragment key={msg.id || idx}>
+                          {showSep && (
+                            <div className="flex justify-center py-2">
+                              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
+                                {formatDay(msg.createdAt)}
+                              </span>
+                            </div>
+                          )}
+                          <div className={`flex items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
+                            {!isUser && (
+                              <div className="w-6 h-6 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 flex items-center justify-center font-black text-[10px] shrink-0 mb-0.5">
+                                {(threadMeta?.companyName || 'C').charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <div className={`max-w-[75%] px-3.5 py-2.5 rounded-2xl text-xs font-semibold shadow-sm ${
+                              isUser
+                                ? 'bg-brand-600 text-white rounded-br-sm'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-bl-sm'
+                            }`}>
+                              {msg.content}
+                              <span className={`block text-[8px] mt-1 font-bold ${isUser ? 'text-white/70' : 'text-slate-400 dark:text-slate-500'}`}>
+                                {formatTime(msg.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        </Fragment>
+                      );
+                    });
+                  })()
                 )}
                 <div ref={threadEndRef} />
               </div>
 
-              <form onSubmit={handleSend} className="flex gap-2 px-5 py-3 border-t border-slate-100 dark:border-slate-800">
+              <form onSubmit={handleSend} className="flex gap-2 px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-955/50">
                 <input
                   type="text"
                   value={text}
                   onChange={e => setText(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-1 px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 text-slate-800 dark:text-slate-100 font-semibold"
+                  className="flex-1 px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 text-slate-800 dark:text-slate-100 font-semibold"
                 />
                 <button
                   type="submit"
                   disabled={sending || !text.trim()}
-                  className="px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl cursor-pointer disabled:opacity-50 flex items-center gap-1.5 border-none"
+                  className="px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl cursor-pointer disabled:opacity-50 flex items-center gap-1.5 border-none transition-colors"
                 >
-                  <FiSend className="w-3 h-3" /> Send
+                  {sending ? <Spinner /> : <FiSend className="w-3 h-3" />} Send
                 </button>
               </form>
             </>
