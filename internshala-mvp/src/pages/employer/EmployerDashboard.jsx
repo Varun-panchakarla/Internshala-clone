@@ -54,6 +54,14 @@ const formatISODate = (date) =>
 const formatTime = (iso) =>
   new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+const getCandidateSkills = (candidate) => {
+  if (!candidate) return [];
+  if (Array.isArray(candidate.skills)) return candidate.skills.map(s => String(s).trim()).filter(Boolean);
+  return String(candidate.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+};
+
+const getInitials = (name) => String(name || '?').split(' ').map(n => n.charAt(0)).join('').slice(0, 2).toUpperCase() || '?';
+
 const EmployerDashboard = () => {
   const { currentEmployer, logout } = useEmployerAuth();
   const { addToast } = useToast();
@@ -334,46 +342,57 @@ const EmployerDashboard = () => {
   };
 
   // --- RESUME PREVIEW / DOWNLOAD ---
-  const handlePreviewResume = async (candidate) => {
-    if (!candidate.applicationId) {
-      addToast('No resume file available for this candidate.', 'error');
-      return;
+  const fetchResume = async (candidate) => {
+    if (!candidate?.applicationId) {
+      return { error: 'No resume file available for this candidate.' };
     }
     try {
       const res = await axios.get(`/api/employer/dashboard/applicants/${candidate.applicationId}/resume`);
-      const { fileData } = res.data;
+      const { fileData, fileName, fileType } = res.data;
       if (!fileData) {
-        addToast('Candidate has not uploaded a resume file.', 'error');
-        return;
+        return { error: 'Candidate has not uploaded a resume file.' };
       }
-      const url = URL.createObjectURL(dataUrlToBlob(fileData));
-      window.open(url, '_blank');
+      return { fileData, fileName, fileType };
     } catch (err) {
-      addToast('Failed to load resume. Please try again.', 'error');
+      return { error: 'Failed to load resume. Please try again.' };
     }
   };
 
-  const handleDownloadResume = async (candidate) => {
-    if (!candidate.applicationId) {
-      addToast('No resume file available for this candidate.', 'error');
+  const handlePreviewResume = async (candidate) => {
+    const resume = await fetchResume(candidate);
+    if (resume.error) {
+      addToast(resume.error, 'error');
       return;
     }
-    try {
-      const res = await axios.get(`/api/employer/dashboard/applicants/${candidate.applicationId}/resume`);
-      const { fileData, fileName } = res.data;
-      if (!fileData) {
-        addToast('Candidate has not uploaded a resume file.', 'error');
-        return;
-      }
+    const { fileData, fileType, fileName } = resume;
+    const previewable = fileType && /pdf|image/.test(fileType);
+    if (!previewable) {
+      // Non-PDF/non-image files can't render in a tab — download instead
       const a = document.createElement('a');
       a.href = String(fileData).startsWith('data:') ? fileData : URL.createObjectURL(dataUrlToBlob(fileData));
-      a.download = fileName || 'resume.pdf';
+      a.download = fileName || 'resume';
       document.body.appendChild(a);
       a.click();
       a.remove();
-    } catch (err) {
-      addToast('Failed to download resume.', 'error');
+      return;
     }
+    const url = URL.createObjectURL(dataUrlToBlob(fileData));
+    window.open(url, '_blank');
+  };
+
+  const handleDownloadResume = async (candidate) => {
+    const resume = await fetchResume(candidate);
+    if (resume.error) {
+      addToast(resume.error, 'error');
+      return;
+    }
+    const { fileData, fileName } = resume;
+    const a = document.createElement('a');
+    a.href = String(fileData).startsWith('data:') ? fileData : URL.createObjectURL(dataUrlToBlob(fileData));
+    a.download = fileName || 'resume.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   };
 
   // --- CANDIDATE CHAT ---
@@ -456,9 +475,9 @@ const EmployerDashboard = () => {
   };
 
   // --- SEARCH FILTERING ---
-  const filteredJobs = jobs.filter(job => 
-    job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job.location.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredJobs = jobs.filter(job =>
+    (job.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (job.location || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const companyInitial = company?.company_name
@@ -802,22 +821,7 @@ const EmployerDashboard = () => {
                           {app.time}
                         </span>
                         <button
-                          onClick={() => {
-                            // View details by looking up this application row
-                            const details = {
-                              name: app.name,
-                              email: `${app.name.toLowerCase().replace(' ', '.')}@example.com`,
-                              phone: '+91 9876543210',
-                              location: 'Remote, India',
-                              experience: 'Software Engineer (1 year)',
-                              skills: 'React, Node.js, Express, PostgreSQL',
-                              education: 'B.Tech in Computer Science',
-                              projects: 'Web Application Portfolio',
-                              certifications: 'Developer Certification',
-                              resumeUrl: 'candidate_resume.pdf'
-                            };
-                            setSelectedCandidate(details);
-                          }}
+                          onClick={() => setSelectedCandidate(app)}
                           className="px-2.5 py-1 text-[10px] font-bold text-sky-655 hover:text-sky-700 bg-sky-50 dark:bg-sky-955/20 rounded-lg hover:underline cursor-pointer border-none"
                         >
                           View Profile
@@ -1225,7 +1229,7 @@ const EmployerDashboard = () => {
                   <div key={index} className="py-3 flex justify-between items-start gap-4">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-650 dark:text-sky-400 flex items-center justify-center font-black text-xs shrink-0">
-                        {app.name.split(' ').map(n => n.charAt(0)).join('')}
+                        {getInitials(app.name)}
                       </div>
                       <div>
                         <span className="font-bold text-slate-850 dark:text-slate-100 text-xs block leading-none">{app.name}</span>
@@ -1315,7 +1319,7 @@ const EmployerDashboard = () => {
             <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-sky-100 dark:bg-sky-955/30 text-sky-650 dark:text-sky-400 flex items-center justify-center font-black text-base shadow-sm">
-                  {selectedCandidate.name.split(' ').map(n => n.charAt(0)).join('')}
+                  {getInitials(selectedCandidate.name)}
                 </div>
                 <div>
                   <h3 className="font-extrabold text-slate-900 dark:text-white text-base leading-tight">
@@ -1356,11 +1360,15 @@ const EmployerDashboard = () => {
                     <FiLayers className="w-3 h-3" /> Skills
                   </span>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {selectedCandidate.skills.split(',').map((skill, sIdx) => (
-                      <span key={sIdx} className="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-[10px] text-slate-750 dark:text-slate-300 font-bold">
-                        {skill.trim()}
-                      </span>
-                    ))}
+                    {getCandidateSkills(selectedCandidate).length > 0 ? (
+                      getCandidateSkills(selectedCandidate).map((skill, sIdx) => (
+                        <span key={sIdx} className="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-[10px] text-slate-750 dark:text-slate-300 font-bold">
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[10px] text-slate-400 font-semibold">No skills listed.</span>
+                    )}
                   </div>
                 </div>
 
@@ -1379,30 +1387,50 @@ const EmployerDashboard = () => {
               <div className="md:col-span-5 flex flex-col gap-4">
                 {/* Resume Preview Section */}
                 <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 bg-slate-50 dark:bg-slate-955/40">
-                  <FiFileText className="w-12 h-12 text-slate-350 dark:text-slate-500" />
-                  <div>
-                    <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100 block">
-                      {selectedCandidate.resumeUrl}
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-bold block mt-0.5">
-                      Candidate Resume
-                    </span>
-                  </div>
+                  {selectedCandidate.hasResume ? (
+                    <>
+                      <div className="w-14 h-14 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/30 flex items-center justify-center">
+                        <FiFileText className="w-6 h-6 text-sky-600 dark:text-sky-400" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100 block break-all">
+                          {selectedCandidate.resumeFileName || selectedCandidate.resumeUrl || 'Candidate Resume'}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-bold block mt-0.5">
+                          Candidate Resume
+                        </span>
+                      </div>
 
-                  <div className="flex flex-col gap-2 w-full mt-2">
-                    <button
-                      onClick={() => handlePreviewResume(selectedCandidate)}
-                      className="w-full py-2 flex items-center justify-center gap-1.5 text-xs font-extrabold text-sky-600 hover:text-sky-700 bg-sky-50 dark:bg-sky-955/20 rounded-xl border border-sky-100 dark:border-sky-900/30 cursor-pointer transition-colors"
-                    >
-                      <FiSearch className="w-3.5 h-3.5" /> Preview Resume
-                    </button>
-                    <button
-                      onClick={() => handleDownloadResume(selectedCandidate)}
-                      className="w-full py-2 flex items-center justify-center gap-1.5 text-xs font-extrabold text-slate-700 hover:text-slate-900 dark:text-slate-350 dark:hover:text-white bg-slate-100 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer transition-colors"
-                    >
-                      <FiDownload className="w-3.5 h-3.5" /> Download Resume
-                    </button>
-                  </div>
+                      <div className="flex flex-col gap-2 w-full mt-2">
+                        <button
+                          onClick={() => handlePreviewResume(selectedCandidate)}
+                          className="w-full py-2 flex items-center justify-center gap-1.5 text-xs font-extrabold text-sky-600 hover:text-sky-700 bg-sky-50 dark:bg-sky-955/20 rounded-xl border border-sky-100 dark:border-sky-900/30 cursor-pointer transition-colors"
+                        >
+                          <FiSearch className="w-3.5 h-3.5" /> Preview Resume
+                        </button>
+                        <button
+                          onClick={() => handleDownloadResume(selectedCandidate)}
+                          className="w-full py-2 flex items-center justify-center gap-1.5 text-xs font-extrabold text-slate-700 hover:text-slate-900 dark:text-slate-350 dark:hover:text-white bg-slate-100 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer transition-colors"
+                        >
+                          <FiDownload className="w-3.5 h-3.5" /> Download Resume
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                        <FiFileText className="w-6 h-6 text-slate-400 dark:text-slate-500" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-extrabold text-slate-500 dark:text-slate-400 block">
+                          No resume uploaded
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-bold block mt-0.5">
+                          This candidate hasn't uploaded a resume file yet.
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Recruiter Decision Block */}
@@ -1554,7 +1582,7 @@ const EmployerDashboard = () => {
             <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-full bg-sky-600 text-white flex items-center justify-center font-black text-xs shrink-0">
-                  {(chatCandidate.name || 'C').split(' ').map(n => n.charAt(0)).join('').slice(0, 2)}
+                  {(chatCandidate.name || 'C').charAt(0).toUpperCase()}
                 </div>
                 <div>
                   <h3 className="font-extrabold text-slate-800 dark:text-white text-sm leading-none">{chatCandidate.name}</h3>
