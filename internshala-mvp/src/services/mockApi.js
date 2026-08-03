@@ -32,6 +32,8 @@ export const employerService = {
   getCurrentEmployer: () => api.get('/employer/auth/me'),
   getProfile: () => api.get('/employer/profile'),
   updateProfile: (profileData) => api.put('/employer/profile', profileData),
+  getNotifications: () => api.get('/employer/dashboard/notifications'),
+  markNotificationsRead: () => api.post('/employer/dashboard/notifications/read'),
 };
 
 export const jobService = {

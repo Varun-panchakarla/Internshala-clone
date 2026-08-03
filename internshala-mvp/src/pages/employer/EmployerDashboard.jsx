@@ -30,12 +30,16 @@ import {
   FiAward,
   FiCheck,
   FiTrash2,
-  FiInfo
+  FiInfo,
+  FiUser,
+  FiChevronDown,
+  FiSettings
 } from 'react-icons/fi';
 import Logo from '../../components/common/Logo';
 import Button from '../../components/common/Button';
 import ProgressBar from '../../components/common/ProgressBar';
 import ThemeToggle from '../../components/common/ThemeToggle';
+import { employerService } from '../../services/mockApi';
 
 const dataUrlToBlob = (dataUrl) => {
   const parts = String(dataUrl || '').split(',');
@@ -75,7 +79,7 @@ const toDatetimeLocal = (iso) => {
 };
 
 const EmployerDashboard = () => {
-  const { currentEmployer, logout } = useEmployerAuth();
+  const { currentEmployer, logout, updateEmployerProfile } = useEmployerAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -107,6 +111,71 @@ const EmployerDashboard = () => {
   });
 
   const [searchTerm, setSearchTerm] = useState('');
+
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifUnread, setNotifUnread] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    companyName: currentEmployer?.companyName || '',
+    recruiterName: currentEmployer?.recruiterName || '',
+    companyLogo: '',
+    industry: '',
+    companySize: '',
+    foundedYear: '',
+    website: '',
+    linkedin: '',
+    description: '',
+    headquarters: '',
+    officeLocations: '',
+    hiringLocations: '',
+    workMode: 'Remote',
+    designation: '',
+    department: '',
+    officialPhone: ''
+  });
+
+  const notifRef = React.useRef(null);
+  const profileDropdownRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleOpenNotifs = async () => {
+    const next = !notifOpen;
+    setNotifOpen(next);
+    if (next && notifUnread > 0) {
+      setNotifUnread(0);
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      try {
+        await employerService.markNotificationsRead();
+      } catch (err) {
+        console.error('Failed to mark recruiter notifications as read:', err);
+      }
+    }
+  };
+
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await updateEmployerProfile(profileForm);
+      addToast('Profile updated successfully!', 'success');
+      setIsProfileModalOpen(false);
+      fetchDashboardData();
+    } catch (err) {
+      addToast(err.response?.data?.error || 'Failed to update profile.', 'error');
+    }
+  };
 
   // Modals state
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
@@ -184,10 +253,31 @@ const EmployerDashboard = () => {
 
       setMetrics(metricsRes.data);
       setJobs(jobsRes.data.jobs || []);
-      setCompany(companyRes.data.company || {});
+      const comp = companyRes.data.company || {};
+      setCompany(comp);
+      setProfileForm({
+        companyName: comp.company_name || currentEmployer?.companyName || '',
+        recruiterName: comp.recruiter_name || currentEmployer?.recruiterName || '',
+        companyLogo: comp.company_logo || '',
+        industry: comp.industry || '',
+        companySize: comp.company_size || '',
+        foundedYear: comp.founded_year || '',
+        website: comp.website || '',
+        linkedin: comp.linkedin || '',
+        description: comp.description || '',
+        headquarters: comp.headquarters || '',
+        officeLocations: comp.office_locations || '',
+        hiringLocations: comp.hiring_locations || '',
+        workMode: comp.work_mode || 'Remote',
+        designation: comp.designation || '',
+        department: comp.department || '',
+        officialPhone: comp.official_phone || ''
+      });
       setRecentApplications(recentAppsRes.data.applications || []);
       setInterviews(interviewsRes.data.interviews || []);
-      setNotifications(notificationsRes.data.notifications || []);
+      const notifs = notificationsRes.data.notifications || [];
+      setNotifications(notifs);
+      setNotifUnread(notifs.filter(n => !n.read).length);
       setAnalytics(analyticsRes.data || {
         jobWiseApplicants: [],
         dailyTrend: [],
@@ -537,27 +627,106 @@ const EmployerDashboard = () => {
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-sm shadow-sm shadow-sky-500/20">
-              {companyInitial}
-            </div>
-            <div className="hidden sm:flex flex-col text-left">
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-105 leading-none">
+          {/* Notification bell */}
+          <div className="relative" ref={notifRef}>
+            <button
+              onClick={handleOpenNotifs}
+              className="flex relative items-center justify-center w-8 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/8 hover:text-slate-800 dark:hover:text-white transition-all duration-150 focus:outline-none cursor-pointer"
+              title="Notifications"
+            >
+              <FiBell className="w-4 h-4" />
+              {notifUnread > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-gray-950 leading-none">
+                  {notifUnread > 9 ? '9+' : notifUnread}
+                </span>
+              )}
+            </button>
+
+            {notifOpen && (
+              <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xl shadow-slate-900/10 dark:shadow-black/40 py-2 animate-scale-in z-50">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <span className="text-sm font-extrabold text-slate-800 dark:text-white">Notifications</span>
+                  <span className="text-[9px] font-black text-slate-400 dark:text-slate-550 uppercase tracking-wider">
+                    {notifications.length} total
+                  </span>
+                </div>
+                <div className="max-h-80 overflow-y-auto divide-y divide-slate-50 dark:divide-slate-800/60">
+                  {notifications.length === 0 ? (
+                    <div className="text-center py-10 px-6">
+                      <FiBell className="w-7 h-7 text-slate-350 dark:text-slate-700 mx-auto mb-2" />
+                      <p className="text-xs font-bold text-slate-400">No notifications yet</p>
+                      <p className="text-[10px] text-slate-400 font-medium mt-1 text-center">
+                        Applicant and system updates will show up here.
+                      </p>
+                    </div>
+                  ) : (
+                    notifications.map(n => (
+                      <div
+                        key={n.id}
+                        className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                      >
+                        <div className="flex items-start gap-2.5">
+                          <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${n.read ? 'bg-transparent' : 'bg-sky-500'}`} />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-extrabold text-slate-850 dark:text-white">
+                              {n.type === 'new_application' ? 'New Application' : n.type === 'interview' ? 'Interview Scheduled' : 'System Notification'}
+                            </p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5 leading-snug">{n.message}</p>
+                            <span className="text-[9px] text-slate-400 dark:text-slate-550 font-bold mt-1 block">
+                              {new Date(n.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <ThemeToggle />
+
+          {/* Profile dropdown */}
+          <div className="relative" ref={profileDropdownRef}>
+            <button
+              onClick={() => setDropdownOpen(o => !o)}
+              className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/8 transition-all duration-150 focus:outline-none cursor-pointer"
+            >
+              <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                {companyInitial}
+              </div>
+              <span className="hidden sm:inline text-xs font-extrabold text-slate-700 dark:text-slate-300">
                 {currentEmployer?.recruiterName || 'Recruiter'}
               </span>
-              <span className="text-[10px] text-slate-400 font-semibold mt-0.5">
-                {company?.company_name || currentEmployer?.companyName || 'Company'}
-              </span>
-            </div>
+              <FiChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {dropdownOpen && (
+              <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xl shadow-slate-900/10 dark:shadow-black/40 py-2 animate-scale-in z-50">
+                <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800">
+                  <p className="text-xs font-black text-slate-850 dark:text-slate-100 truncate">{currentEmployer?.recruiterName || 'Recruiter'}</p>
+                  <p className="text-[10px] text-slate-450 dark:text-slate-500 font-semibold truncate mt-0.5">{currentEmployer?.email}</p>
+                </div>
+                <div className="p-1">
+                  <button
+                    onClick={() => { setDropdownOpen(false); setIsProfileModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-650 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors cursor-pointer text-left border-none bg-transparent"
+                  >
+                    <FiUser className="w-4 h-4 text-slate-400" />
+                    Edit Company Profile
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-600 dark:text-rose-455 hover:bg-rose-50 dark:hover:bg-rose-955/10 rounded-xl transition-colors cursor-pointer text-left border-none bg-transparent"
+                  >
+                    <FiLogOut className="w-4 h-4 text-slate-400" />
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-          <ThemeToggle />
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-rose-600 transition-colors bg-slate-50 hover:bg-rose-50 dark:bg-slate-850 dark:hover:bg-rose-955/20 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800 cursor-pointer"
-          >
-            <FiLogOut className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Logout</span>
-          </button>
         </div>
       </header>
 
@@ -770,9 +939,18 @@ const EmployerDashboard = () => {
             {/* Right Sidebar: Compact Company Summary */}
             <div className="lg:col-span-4 space-y-6">
               <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-4">
-                <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-                  <FiLayers className="w-5 h-5 text-sky-600" />
-                  <h2 className="font-extrabold text-slate-800 dark:text-white text-base">Company Summary</h2>
+                <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FiLayers className="w-5 h-5 text-sky-600" />
+                    <h2 className="font-extrabold text-slate-800 dark:text-white text-base">Company Summary</h2>
+                  </div>
+                  <button
+                    onClick={() => setIsProfileModalOpen(true)}
+                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-200/80 dark:hover:bg-slate-750 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                    title="Edit Company Profile"
+                  >
+                    <FiEdit2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
                 
                 <div className="space-y-4">
@@ -1839,6 +2017,204 @@ const EmployerDashboard = () => {
           </div>
         );
       })()}
+
+      {/* ───────────────────────────────────────────────────────────────────────
+         MODAL: EDIT RECRUITER PROFILE
+      ─────────────────────────────────────────────────────────────────────── */}
+      {isProfileModalOpen && (
+        <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in" onClick={() => setIsProfileModalOpen(false)}>
+          <div className="bg-white dark:bg-[#0a1222] border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl text-slate-900 dark:text-white max-w-2xl w-full overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40">
+              <h2 className="font-extrabold text-sm text-slate-800 dark:text-white uppercase tracking-wider">
+                Edit Recruiter & Company Profile
+              </h2>
+              <button onClick={() => setIsProfileModalOpen(false)} className="text-slate-400 hover:text-slate-650 dark:hover:text-white cursor-pointer bg-transparent border-none">
+                <FiX className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleProfileSubmit} className="p-6 flex flex-col gap-4 overflow-y-auto max-h-[75vh] custom-scrollbar text-left">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Section: Recruiter Details */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Recruiter Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={profileForm.recruiterName}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, recruiterName: e.target.value }))}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold text-slate-850 dark:text-slate-250 focus:outline-none focus:border-sky-500"
+                    placeholder="Recruiter Name"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Official Designation</label>
+                  <input
+                    type="text"
+                    value={profileForm.designation}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, designation: e.target.value }))}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold text-slate-850 dark:text-slate-250 focus:outline-none focus:border-sky-500"
+                    placeholder="e.g. HR Manager, Co-founder"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Department</label>
+                  <input
+                    type="text"
+                    value={profileForm.department}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, department: e.target.value }))}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold text-slate-850 dark:text-slate-250 focus:outline-none focus:border-sky-500"
+                    placeholder="e.g. Human Resources"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Official Phone</label>
+                  <input
+                    type="text"
+                    value={profileForm.officialPhone}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, officialPhone: e.target.value }))}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold text-slate-850 dark:text-slate-250 focus:outline-none focus:border-sky-500"
+                    placeholder="e.g. +1234567890"
+                  />
+                </div>
+              </div>
+
+              <div className="border-t border-slate-100 dark:border-slate-850/60 my-2 pt-3">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Company Information</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-550">Company Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={profileForm.companyName}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, companyName: e.target.value }))}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold text-slate-850 dark:text-slate-250 focus:outline-none focus:border-sky-500"
+                    placeholder="Company Name"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-550">Industry</label>
+                  <input
+                    type="text"
+                    value={profileForm.industry}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, industry: e.target.value }))}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold text-slate-850 dark:text-slate-250 focus:outline-none focus:border-sky-500"
+                    placeholder="e.g. Software, E-Commerce"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-550">Company Size</label>
+                  <select
+                    value={profileForm.companySize}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, companySize: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-sky-500"
+                  >
+                    <option value="">Select Size</option>
+                    <option value="1-10 employees">1-10 employees</option>
+                    <option value="11-50 employees">11-50 employees</option>
+                    <option value="51-200 employees">51-200 employees</option>
+                    <option value="201-500 employees">201-500 employees</option>
+                    <option value="501-1000 employees">501-1000 employees</option>
+                    <option value="1000+ employees">1000+ employees</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-550">Founded Year</label>
+                  <input
+                    type="text"
+                    value={profileForm.foundedYear}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, foundedYear: e.target.value }))}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold text-slate-850 dark:text-slate-250 focus:outline-none focus:border-sky-500"
+                    placeholder="e.g. 2018"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-550">Company Website</label>
+                  <input
+                    type="url"
+                    value={profileForm.website}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, website: e.target.value }))}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold text-slate-850 dark:text-slate-250 focus:outline-none focus:border-sky-500"
+                    placeholder="https://company.com"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-550">LinkedIn Profile</label>
+                  <input
+                    type="url"
+                    value={profileForm.linkedin}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, linkedin: e.target.value }))}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold text-slate-850 dark:text-slate-250 focus:outline-none focus:border-sky-500"
+                    placeholder="https://linkedin.com/company/..."
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-550">Headquarters</label>
+                  <input
+                    type="text"
+                    value={profileForm.headquarters}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, headquarters: e.target.value }))}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold text-slate-850 dark:text-slate-250 focus:outline-none focus:border-sky-500"
+                    placeholder="e.g. Bangalore, Karnataka"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-550">Work Mode Preference</label>
+                  <select
+                    value={profileForm.workMode}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, workMode: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-sky-500"
+                  >
+                    <option value="Remote">Remote</option>
+                    <option value="On-site">On-site</option>
+                    <option value="Hybrid">Hybrid</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-black uppercase tracking-wider text-slate-550">Company Description</label>
+                <textarea
+                  rows={3}
+                  value={profileForm.description}
+                  onChange={(e) => setProfileForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold text-slate-850 dark:text-slate-250 focus:outline-none focus:border-sky-500"
+                  placeholder="Tell potential candidates about your company mission and culture..."
+                />
+              </div>
+
+              <div className="flex gap-3 border-t border-slate-100 dark:border-slate-850/60 pt-4 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsProfileModalOpen(false)}
+                  className="flex-1 py-2.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-500 rounded-xl cursor-pointer bg-transparent"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 bg-sky-600 hover:bg-sky-700 text-xs font-extrabold text-white rounded-xl shadow-md cursor-pointer border-none"
+                >
+                  Save Profile
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
