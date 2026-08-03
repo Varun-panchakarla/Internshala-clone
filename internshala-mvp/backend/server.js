@@ -31,19 +31,41 @@ app.use(cookieParser());
 const distPath = path.resolve(__dirname, '..', 'dist');
 const indexPath = path.resolve(distPath, 'index.html');
 
-// Auto-build frontend if dist doesn't exist — handles Render build config mismatches
-if (!fs.existsSync(indexPath)) {
-  console.log('[Server] dist/index.html not found. Running build...');
-  const { execSync } = require('child_process');
-  try {
-    execSync('npm run build', { cwd: path.resolve(__dirname, '..'), stdio: 'inherit', timeout: 120000 });
-  } catch (buildErr) {
-    console.error('[Server] Auto-build failed:', buildErr.message);
-  }
+// If the frontend build is missing (e.g., Render's build phase didn't produce it),
+// build it in the background so the API server still comes up immediately and the
+// frontend becomes available as soon as the build finishes. This avoids blocking
+// app.listen and tripping Render's health check, which would restart the service.
+function autoBuildFrontend() {
+  console.log(`[Server] Frontend build missing at: ${indexPath}. Building in the background...`);
+  const { exec } = require('child_process');
+  const projectRoot = path.resolve(__dirname, '..');
+  const run = (cmd) => new Promise((resolve, reject) => {
+    exec(cmd, { cwd: projectRoot, timeout: 600000 }, (err, stdout, stderr) => {
+      if (stdout) process.stdout.write(stdout);
+      if (stderr) process.stderr.write(stderr);
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+  (async () => {
+    try {
+      // Render sets NODE_ENV=production, which makes npm skip devDependencies,
+      // so vite is never installed and the build would fail. Force dev deps in.
+      console.log('[Server] Installing dependencies (including dev)...');
+      await run('npm install --include=dev --no-audit --no-fund');
+      console.log('[Server] Building frontend...');
+      // Use vite directly instead of "npm run build" to skip the redundant
+      // "npm install --prefix backend" step.
+      await run('npx vite build');
+      console.log(`[Server] Frontend build complete: ${distPath}`);
+    } catch (buildErr) {
+      console.error('[Server] Auto-build failed:', buildErr.message);
+    }
+  })();
 }
 
 if (!fs.existsSync(indexPath)) {
-  console.warn(`[Server Warning] Frontend build not found at: ${distPath}`);
+  autoBuildFrontend();
 } else {
   console.log(`[Server] Serving frontend from: ${distPath}`);
 }
