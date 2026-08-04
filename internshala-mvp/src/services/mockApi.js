@@ -1,13 +1,43 @@
 import axios from 'axios';
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1200;
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL
     ? `${import.meta.env.VITE_API_URL}/api`
     : '/api',
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
+  timeout: 20000,
   validateStatus: (status) => (status >= 200 && status < 300) || status === 304,
 });
+
+// Retry idempotent GETs on transient failures (network timeout, cold-start 5xx)
+// so a slow Render boot or a dropped connection doesn't nuke the session.
+const shouldRetry = (error) => {
+  if (!error.config) return false;
+  if (error.config.method !== 'get') return false;
+  if (!error.response) return true;
+  return [502, 503, 504].includes(error.response.status);
+};
+
+api.interceptors.response.use(
+  (res) => res,
+  async (error) => {
+    const config = error.config;
+    if (!config || !shouldRetry(error)) {
+      return Promise.reject(error);
+    }
+    config.__retryCount = config.__retryCount || 0;
+    if (config.__retryCount >= MAX_RETRIES) {
+      return Promise.reject(error);
+    }
+    config.__retryCount += 1;
+    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS * config.__retryCount));
+    return api.request(config);
+  }
+);
 
 export const authService = {
   login: (email, password) => api.post('/auth/login', { email, password }),
