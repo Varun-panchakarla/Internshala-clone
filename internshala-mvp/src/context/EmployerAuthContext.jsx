@@ -107,7 +107,9 @@ export const EmployerAuthProvider = ({ children }) => {
           ...prev,
           recruiterName: employer?.recruiterName || prev.recruiterName,
           companyName: employer?.companyName || prev.companyName,
-          onboardingCompleted: profile.onboardingCompleted === true,
+          onboardingCompleted: profile?.onboardingCompleted === undefined
+            ? prev.onboardingCompleted
+            : profile.onboardingCompleted === true,
           profileData: profile,
         };
       });

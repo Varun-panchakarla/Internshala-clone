@@ -706,10 +706,10 @@ const EmployerDashboard = () => {
               Recruiter Session Active
             </span>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight mt-1.5">
-              Hello, ${currentEmployer?.recruiterName || 'Recruiter'}!
+              Hello, {currentEmployer?.recruiterName || 'Recruiter'}!
             </h1>
             <p className="text-sky-100/90 text-xs font-semibold max-w-xl">
-              Hiring overview and candidate metrics dashboard for <strong className="text-white">${company?.company_name || currentEmployer?.companyName}</strong>.
+              Hiring overview and candidate metrics dashboard for <strong className="text-white">{company?.company_name || currentEmployer?.companyName}</strong>.
             </p>
           </div>
         </div>
@@ -1033,8 +1033,8 @@ const EmployerDashboard = () => {
     const filteredApps = allApplications.filter(app => {
       const q = searchTerm.toLowerCase();
       return (
-        app.name.toLowerCase().includes(q) ||
-        app.email.toLowerCase().includes(q) ||
+        (app.name || '').toLowerCase().includes(q) ||
+        (app.email || '').toLowerCase().includes(q) ||
         (app.role || '').toLowerCase().includes(q)
       );
     });
