@@ -34,7 +34,9 @@ import {
   FiUser,
   FiChevronDown,
   FiSettings,
-  FiGrid
+  FiGrid,
+  FiMessageSquare,
+  FiSend
 } from 'react-icons/fi';
 import Logo from '../../components/common/Logo';
 import Button from '../../components/common/Button';
