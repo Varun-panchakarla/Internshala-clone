@@ -14,6 +14,10 @@ const { notifyNewJobs, sendDailyJobReminders, sendResumeReminders } = require('.
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Render/Cloudflare terminate TLS in front of the app; trust their
+// x-forwarded-proto so req.secure/protocol reflect HTTPS correctly.
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'

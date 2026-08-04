@@ -3,10 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "predev": "kill-port 4000 5173",
     "dev": "concurrently \"vite\" \"node backend/server.js\"",
-    "build": "vite build && npm install --prefix backend",
+    "build": "vite build",
     "start": "cd backend && node server.js",
     "lint": "oxlint",
     "preview": "vite preview"
