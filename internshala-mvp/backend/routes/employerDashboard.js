@@ -333,6 +333,97 @@ router.get('/applicants/:applicationId/resume', employerAuthMiddleware, async (r
   }
 });
 
+// 6c. GET /api/employer/dashboard/applicants/:applicationId/detail
+// Returns the full candidate profile plus their structured resume sections
+// (education, experience, projects, certifications, etc.) for the drawer.
+router.get('/applicants/:applicationId/detail', employerAuthMiddleware, async (req, res) => {
+  try {
+    const employerId = req.employer.id;
+    const applicationId = req.params.applicationId;
+
+    const result = await pool.query(
+      `SELECT aj.id AS application_id, aj.status, aj.applied_at,
+              j.id AS job_id, j.title AS job_title,
+              u.id AS user_id, u.name, u.email,
+              p.college, p.degree, p.skills, p.experience, p.preferred_role, p.preferred_location,
+              p.contact_number, p.current_city, p.gender, p.languages, p.profile_photo, p.resume_info
+       FROM applied_jobs aj
+       JOIN jobs j ON aj.job_id = j.id
+       JOIN users u ON aj.user_id = u.id
+       LEFT JOIN profiles p ON u.id = p.user_id
+       WHERE aj.id = $1 AND j.employer_id = $2`,
+      [applicationId, employerId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Application not found or unauthorized.' });
+    }
+
+    const row = result.rows[0];
+    const resume = row.resume_info || {};
+    const personalInfo = resume.personalInfo || {};
+
+    const formatEducation = (degree, college) => {
+      if (degree && college) return `${degree}, ${college}`;
+      if (degree) return degree;
+      if (college) return college;
+      return 'Not specified';
+    };
+
+    res.json({
+      application: {
+        applicationId: row.application_id,
+        jobId: row.job_id,
+        jobTitle: row.job_title,
+        status: row.status,
+        appliedAt: row.applied_at,
+        timeAgo: formatTimeAgo(row.applied_at)
+      },
+      applicant: {
+        userId: row.user_id,
+        name: row.name,
+        email: row.email,
+        phone: row.contact_number || personalInfo.phone || 'Not provided',
+        location: row.current_city || personalInfo.location || 'Not specified',
+        experience: row.experience || 'Fresher',
+        skills: Array.isArray(row.skills) ? row.skills : [],
+        education: formatEducation(row.degree, row.college),
+        college: row.college || '',
+        degree: row.degree || '',
+        gender: row.gender || personalInfo.gender || '',
+        preferredRole: row.preferred_role || '',
+        preferredLocation: row.preferred_location || '',
+        languages: Array.isArray(row.languages) && row.languages.length
+          ? row.languages
+          : Array.isArray(resume.languages) ? resume.languages : [],
+        profilePhoto: row.profile_photo || personalInfo.photo || '',
+        summary: personalInfo.summary || resume.summary || '',
+        linkedin: personalInfo.linkedin || '',
+        github: personalInfo.github || '',
+        website: personalInfo.website || ''
+      },
+      resume: {
+        personalInfo,
+        education: Array.isArray(resume.education) ? resume.education : [],
+        experience: Array.isArray(resume.experience) ? resume.experience : [],
+        internship: Array.isArray(resume.internship) ? resume.internship : [],
+        projects: Array.isArray(resume.projects) ? resume.projects : [],
+        certifications: Array.isArray(resume.certifications) ? resume.certifications : [],
+        achievements: Array.isArray(resume.achievements) ? resume.achievements : [],
+        languages: Array.isArray(resume.languages) ? resume.languages : [],
+        skills: Array.isArray(resume.skills) ? resume.skills : [],
+        interests: Array.isArray(resume.interests) ? resume.interests : [],
+        fileName: resume.fileName || '',
+        fileType: resume.fileType || '',
+        hasFile: !!(resume.fileData || resume.fileName)
+      }
+    });
+  } catch (err) {
+    console.error('[Recruiter Applicant Detail Error]:', err.message);
+    res.status(500).json({ error: 'Failed to fetch applicant details.' });
+  }
+});
+
 // 7. POST /api/employer/dashboard/applications/:applicationId/status
 router.post('/applications/:applicationId/status', employerAuthMiddleware, async (req, res) => {
   try {
@@ -361,8 +452,9 @@ router.post('/applications/:applicationId/status', employerAuthMiddleware, async
       [status, applicationId]
     );
 
-    // If status is shortlisted, upsert the notification so repeatedly
-    // updating the same candidate doesn't pile up "new" entries.
+    // Notify the candidate for every stage change. Shortlisted also upserts
+    // the employer notification so repeatedly updating the same candidate
+    // doesn't pile up "new" entries on the recruiter's side.
     if (status === 'Shortlisted') {
       await pool.query(
         `INSERT INTO employer_notifications (employer_id, type, message, reference_id)
@@ -377,12 +469,33 @@ router.post('/applications/:applicationId/status', employerAuthMiddleware, async
         'Application Shortlisted',
         `Congratulations! Your application for ${job_title} has been shortlisted.`
       );
+    } else if (status === 'Interview') {
+      await notifyCandidate(
+        user_id,
+        'interview',
+        'Called for Interview',
+        `Great news! You have been shortlisted and called for an interview for ${job_title}.`
+      );
+    } else if (status === 'Offer') {
+      await notifyCandidate(
+        user_id,
+        'offer',
+        'Job Offer',
+        `Congratulations! You have been offered the position of ${job_title}.`
+      );
     } else if (status === 'Rejected') {
       await notifyCandidate(
         user_id,
         'rejection',
         'Application Update',
         `We're sorry, but your application for ${job_title} has not been shortlisted this time.`
+      );
+    } else if (status === 'Pending') {
+      await notifyCandidate(
+        user_id,
+        'update',
+        'Application Under Review',
+        `Your application for ${job_title} is back under review.`
       );
     }
 

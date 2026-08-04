@@ -10,9 +10,61 @@ import Button from '../../../components/common/Button';
 
 const STATUS_OPTIONS = ['Pending', 'Shortlisted', 'Interview', 'Offer', 'Rejected'];
 
-function CandidateDrawer({ candidate, onClose, onStatusChange, onScheduleInterview, onMessage, getResume, downloadResume, previewResume }) {
+function Section({ title, children }) {
+  if (!children) return null;
+  return (
+    <div>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">{title}</p>
+      {children}
+    </div>
+  );
+}
+
+function ItemField({ item }) {
+  const rows = Object.entries(item)
+    .filter(([, v]) => v != null && v !== '' && typeof v !== 'object')
+    .map(([k, v]) => {
+      const label = String(k)
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, c => c.toUpperCase());
+      return (
+        <p key={k} className="text-xs text-slate-600 dark:text-slate-300">
+          <span className="text-slate-400 font-semibold">{label}:</span> {String(v)}
+        </p>
+      );
+    });
+  const desc = typeof item.description === 'string' && item.description.trim()
+    ? <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 whitespace-pre-wrap">{item.description}</p>
+    : null;
+  if (!rows.length && !desc) return null;
+  return (
+    <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-2.5">
+      {rows}
+      {desc}
+    </div>
+  );
+}
+
+function ItemList({ items }) {
+  if (!Array.isArray(items) || items.length === 0) return null;
+  return (
+    <div className="space-y-2">
+      {items.map((it, i) => {
+        if (it == null) return null;
+        if (typeof it === 'string') {
+          return <p key={i} className="text-xs text-slate-600 dark:text-slate-300 font-medium">{it}</p>;
+        }
+        return <ItemField key={i} item={it} />;
+      })}
+    </div>
+  );
+}
+
+function CandidateDrawer({ candidate, onClose, onStatusChange, onScheduleInterview, onMessage, getResume, downloadResume, getApplicantDetail }) {
   const [resume, setResume] = useState(null);
   const [resumeLoading, setResumeLoading] = useState(false);
+  const [detail, setDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const loadResume = async () => {
     if (resume) return;
@@ -21,6 +73,16 @@ function CandidateDrawer({ candidate, onClose, onStatusChange, onScheduleIntervi
     setResume(r);
     setResumeLoading(false);
   };
+
+  React.useEffect(() => {
+    if (!candidate) return;
+    setDetail(null);
+    setDetailLoading(true);
+    getApplicantDetail(candidate.applicationId).then(d => {
+      setDetail(d);
+      setDetailLoading(false);
+    });
+  }, [candidate, getApplicantDetail]);
 
   if (!candidate) return null;
   const previewable = resume?.fileType && /pdf|image/.test(resume.fileType);
@@ -69,6 +131,79 @@ function CandidateDrawer({ candidate, onClose, onStatusChange, onScheduleIntervi
               {!candidate.skills && <span className="text-[11px] text-slate-400">Not specified</span>}
             </div>
           </div>
+
+          {detailLoading && (
+            <p className="text-[11px] text-slate-400 font-semibold animate-pulse">Loading full profile...</p>
+          )}
+          {detail?.error && (
+            <p className="text-[11px] text-rose-500 font-medium">{detail.error}</p>
+          )}
+
+          {detail && !detail.error && (
+            <div className="space-y-4">
+              {(() => {
+                const applicant = detail.applicant || {};
+                const r = detail.resume || {};
+                const links = [
+                  applicant.linkedin && { label: 'LinkedIn', href: applicant.linkedin },
+                  applicant.github && { label: 'GitHub', href: applicant.github },
+                  applicant.website && { label: 'Website', href: applicant.website }
+                ].filter(Boolean);
+                const work = [...(r.experience || []), ...(r.internship || [])];
+
+                return (
+                  <>
+                    <Section title="About">
+                      {applicant.summary ? (
+                        <p className="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-wrap">{applicant.summary}</p>
+                      ) : (
+                        <span className="text-[11px] text-slate-400">No summary provided</span>
+                      )}
+                    </Section>
+
+                    <Section title="Links">
+                      {links.length ? (
+                        <div className="space-y-1">
+                          {links.map(l => (
+                            <a
+                              key={l.label}
+                              href={l.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block text-xs text-brand-700 dark:text-brand-400 font-semibold truncate hover:underline"
+                            >
+                              {l.label} · {l.href}
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-[11px] text-slate-400">Not provided</span>
+                      )}
+                    </Section>
+
+                    <Section title="Work Experience">
+                      <ItemList items={work} />
+                    </Section>
+                    <Section title="Education">
+                      <ItemList items={r.education} />
+                    </Section>
+                    <Section title="Projects">
+                      <ItemList items={r.projects} />
+                    </Section>
+                    <Section title="Certifications">
+                      <ItemList items={r.certifications} />
+                    </Section>
+                    <Section title="Achievements">
+                      <ItemList items={r.achievements} />
+                    </Section>
+                    <Section title="Languages">
+                      <ItemList items={r.languages} />
+                    </Section>
+                  </>
+                );
+              })()}
+            </div>
+          )}
 
           {candidate.hasResume && (
             <div>
@@ -140,8 +275,8 @@ export default function ApplicationsView({
   onScheduleInterview,
   onMessage,
   getResume,
-  previewResume,
   downloadResume,
+  getApplicantDetail,
   focusApplication,
   clearFocus
 }) {
@@ -297,8 +432,8 @@ export default function ApplicationsView({
         onScheduleInterview={onScheduleInterview}
         onMessage={onMessage}
         getResume={getResume}
-        previewResume={previewResume}
         downloadResume={downloadResume}
+        getApplicantDetail={getApplicantDetail}
       />
     </div>
   );

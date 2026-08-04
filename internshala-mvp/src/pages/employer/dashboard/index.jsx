@@ -134,6 +134,15 @@ export default function EmployerDashboard() {
     }
   }, []);
 
+  const getApplicantDetail = useCallback(async (applicationId) => {
+    try {
+      const res = await employerDashboardService.getApplicantDetail(applicationId);
+      return res.data;
+    } catch (err) {
+      return { error: err.response?.data?.error || 'Failed to load applicant details.' };
+    }
+  }, []);
+
   const downloadResume = useCallback(async (app) => {
     try {
       const res = await employerDashboardService.getResume(app.applicationId);
@@ -336,6 +345,7 @@ export default function EmployerDashboard() {
             getResume={getResume}
             previewResume={previewResume}
             downloadResume={downloadResume}
+            getApplicantDetail={getApplicantDetail}
             focusApplication={focusApplication}
             clearFocus={() => setFocusApplication(null)}
           />
