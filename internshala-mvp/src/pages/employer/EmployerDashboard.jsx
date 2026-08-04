@@ -272,36 +272,56 @@ const EmployerDashboard = () => {
   // --- INITIAL DATA FETCH ---
   const fetchDashboardData = async () => {
     setLoading(true);
-    try {
-      const [
-        metricsRes,
-        jobsRes,
-        companyRes,
-        recentAppsRes,
-        interviewsRes,
-        notificationsRes,
-        analyticsRes,
-        unreadMsgsRes,
-        convsRes,
-        allAppsRes
-      ] = await Promise.all([
-        axios.get('/api/employer/dashboard/metrics'),
-        axios.get('/api/employer/dashboard/jobs'),
-        axios.get('/api/employer/dashboard/company'),
-        axios.get('/api/employer/dashboard/recent-applications'),
-        axios.get('/api/employer/dashboard/interviews'),
-        axios.get('/api/employer/dashboard/notifications'),
-        axios.get('/api/employer/dashboard/analytics'),
-        axios.get('/api/messages/employer-unread'),
-        axios.get('/api/messages/employer-conversations'),
-        axios.get('/api/employer/dashboard/applications')
-      ]);
+    const defaultMetrics = {
+      activeJobs: 0,
+      totalApplicants: 0,
+      shortlistedMatches: 0,
+      todayInterviews: 0,
+      trends: {
+        activeJobsTrend: '+0 this week',
+        totalApplicantsTrend: '+0 total',
+        shortlistedMatchesTrend: '+0 matches',
+        todayInterviewsTrend: '0 scheduled today'
+      }
+    };
+    // Fetch each endpoint independently so a single failing request
+    // (e.g. a stale backend, a 500, or malformed data) cannot blank the
+    // entire recruiter dashboard.
+    const endpoints = [
+      '/api/employer/dashboard/metrics',
+      '/api/employer/dashboard/jobs',
+      '/api/employer/dashboard/company',
+      '/api/employer/dashboard/recent-applications',
+      '/api/employer/dashboard/interviews',
+      '/api/employer/dashboard/notifications',
+      '/api/employer/dashboard/analytics',
+      '/api/messages/employer-unread',
+      '/api/messages/employer-conversations',
+      '/api/employer/dashboard/applications'
+    ];
+    const settled = await Promise.allSettled(endpoints.map(u => axios.get(u)));
+    const data = settled.map(r => (r.status === 'fulfilled' ? r.value.data : {}));
+    const [
+      metricsData,
+      jobsData,
+      companyData,
+      recentAppsData,
+      interviewsData,
+      notificationsData,
+      analyticsData,
+      unreadMsgsData,
+      convsData,
+      allAppsData
+    ] = data;
 
-      setMetrics(metricsRes.data);
-      setJobs(jobsRes.data.jobs || []);
-      setRecruiterUnreadMessages(unreadMsgsRes.data.count || 0);
-      setConversations(convsRes.data.conversations || []);
-      const comp = companyRes.data.company || {};
+    try {
+      setMetrics(metricsData && typeof metricsData === 'object' && metricsData.activeJobs !== undefined
+        ? metricsData
+        : defaultMetrics);
+      setJobs(Array.isArray(jobsData?.jobs) ? jobsData.jobs : []);
+      setRecruiterUnreadMessages(typeof unreadMsgsData?.count === 'number' ? unreadMsgsData.count : 0);
+      setConversations(Array.isArray(convsData?.conversations) ? convsData.conversations : []);
+      const comp = companyData && typeof companyData === 'object' ? companyData.company || {} : {};
       setCompany(comp);
       setProfileForm({
         companyName: comp.company_name || currentEmployer?.companyName || '',
@@ -321,21 +341,18 @@ const EmployerDashboard = () => {
         department: comp.department || '',
         officialPhone: comp.official_phone || ''
       });
-      setRecentApplications(recentAppsRes.data.applications || []);
-      setAllApplications(allAppsRes.data.applications || []);
-      setInterviews(interviewsRes.data.interviews || []);
-      const notifs = notificationsRes.data.notifications || [];
+      setRecentApplications(Array.isArray(recentAppsData?.applications) ? recentAppsData.applications : []);
+      setAllApplications(Array.isArray(allAppsData?.applications) ? allAppsData.applications : []);
+      setInterviews(Array.isArray(interviewsData?.interviews) ? interviewsData.interviews : []);
+      const notifs = Array.isArray(notificationsData?.notifications) ? notificationsData.notifications : [];
       setNotifications(notifs);
       setNotifUnread(notifs.filter(n => !n.read).length);
-      setAnalytics(analyticsRes.data || {
-        jobWiseApplicants: [],
-        dailyTrend: [],
-        monthlyTrend: [],
-        hiringPipeline: []
-      });
+      setAnalytics(analyticsData && typeof analyticsData === 'object'
+        ? analyticsData
+        : { jobWiseApplicants: [], dailyTrend: [], monthlyTrend: [], hiringPipeline: [] });
     } catch (err) {
-      console.error('[Recruiter Dashboard Fetch Error]', err);
-      addToast('Failed to load recruiter workspace dashboard.', 'error');
+      console.error('[Recruiter Dashboard Render Error]', err);
+      addToast('Failed to load some recruiter dashboard data.', 'error');
     } finally {
       setLoading(false);
     }
