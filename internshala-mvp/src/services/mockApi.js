@@ -3,6 +3,26 @@ import axios from 'axios';
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1200;
 
+const CANDIDATE_TOKEN_KEY = 'jobportal_token';
+const EMPLOYER_TOKEN_KEY = 'jobportal_employer_token';
+
+// JWT storage. The static frontend and the API are different origins, so the
+// httpOnly cookie is treated as a third-party cookie and blocked by browsers.
+// Sending the token as an Authorization header keeps sessions alive across
+// refreshes without relying on cookies.
+export const tokenStorage = {
+  getCandidate: () => localStorage.getItem(CANDIDATE_TOKEN_KEY),
+  setCandidate: (token) => {
+    if (token) localStorage.setItem(CANDIDATE_TOKEN_KEY, token);
+    else localStorage.removeItem(CANDIDATE_TOKEN_KEY);
+  },
+  getEmployer: () => localStorage.getItem(EMPLOYER_TOKEN_KEY),
+  setEmployer: (token) => {
+    if (token) localStorage.setItem(EMPLOYER_TOKEN_KEY, token);
+    else localStorage.removeItem(EMPLOYER_TOKEN_KEY);
+  },
+};
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL
     ? `${import.meta.env.VITE_API_URL}/api`
@@ -11,6 +31,17 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
   timeout: 20000,
   validateStatus: (status) => (status >= 200 && status < 300) || status === 304,
+});
+
+// Attach the right JWT for the request (employer endpoints use the employer token)
+api.interceptors.request.use((config) => {
+  const isEmployer = String(config.url || '').includes('/employer/');
+  const token = isEmployer ? tokenStorage.getEmployer() : tokenStorage.getCandidate();
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // Retry idempotent GETs on transient failures (network timeout, cold-start 5xx)

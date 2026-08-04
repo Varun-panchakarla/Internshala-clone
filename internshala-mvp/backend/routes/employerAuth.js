@@ -58,7 +58,10 @@ async function ensureEmployerFromUser(user) {
 
 // Employer Auth Middleware
 async function employerAuthMiddleware(req, res, next) {
-  const token = req.cookies?.employer_token;
+  const bearer = req.headers.authorization;
+  const token = bearer && bearer.startsWith('Bearer ')
+    ? bearer.slice(7)
+    : (req.cookies?.employer_token || null);
   if (!token) return res.status(401).json({ error: 'Employer authentication required.' });
 
   try {
@@ -262,6 +265,7 @@ router.post('/auth/verify-email', async (req, res) => {
         role: 'employer'
       },
       profile: mapEmployerProfile(profile),
+      token,
       message: 'Email verified successfully.'
     });
   } catch (err) {
@@ -378,7 +382,8 @@ router.post('/auth/login', async (req, res) => {
         companyName: employer.company_name,
         role: 'employer'
       },
-      profile: mapEmployerProfile(profile)
+      profile: mapEmployerProfile(profile),
+      token
     });
   } catch (err) {
     console.error('[Employer Login] Error:', err.message);
