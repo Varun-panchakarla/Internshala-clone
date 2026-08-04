@@ -10,9 +10,10 @@ const SALT_ROUNDS = 12;
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  sameSite: 'lax',
   secure: process.env.NODE_ENV === 'production',
   path: '/',
+  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days, matches the 7d JWT
 };
 
 const MAX_NAME_LENGTH = 255;

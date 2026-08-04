@@ -12,7 +12,11 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  // Frontend and API are always same-origin (Vite proxy in dev, single Render
+  // host in prod), so 'lax' is the correct, most compatible value. 'none'
+  // would require Secure and can be stripped by browsers with third-party
+  // cookie blocking.
+  sameSite: 'lax',
   secure: process.env.NODE_ENV === 'production',
   path: '/',
   maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
@@ -20,7 +24,7 @@ const COOKIE_OPTIONS = {
 
 const CLEAR_COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  sameSite: 'lax',
   secure: process.env.NODE_ENV === 'production',
   path: '/'
 };
