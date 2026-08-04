@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { authService } from '../services/mockApi';
+import { authService, tokenStorage } from '../services/mockApi';
 import { calculateProfileCompletion } from '../utils/atsScorer';
 
 const AuthContext = createContext();
@@ -30,6 +30,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = useCallback(async () => {
     setLoading(true);
+    tokenStorage.setCandidate(null);
     try {
       await authService.logout();
       setCurrentUser(null);
@@ -86,6 +87,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const res = await authService.login(email, password);
+      tokenStorage.setCandidate(res.data.token);
       const user = normalizeUser(res.data);
       setCurrentUser(user);
       return user;
@@ -102,6 +104,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const res = await authService.googleAuth(credential);
+      tokenStorage.setCandidate(res.data.token);
       const user = normalizeUser(res.data);
       setCurrentUser(user);
       return user;
@@ -132,6 +135,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const res = await authService.verifyOtp(email, otp);
+      tokenStorage.setCandidate(res.data.token);
       const user = normalizeUser(res.data);
       setCurrentUser(user);
       return user;
@@ -161,6 +165,7 @@ export const AuthProvider = ({ children }) => {
 
   const deleteAccount = async () => {
     setLoading(true);
+    tokenStorage.setCandidate(null);
     try {
       await authService.deleteAccount();
       setCurrentUser(null);
