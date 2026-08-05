@@ -58,7 +58,10 @@ async function ensureEmployerFromUser(user) {
 
 // Employer Auth Middleware
 async function employerAuthMiddleware(req, res, next) {
-  const token = req.cookies?.employer_token;
+  const bearer = req.headers.authorization;
+  const token = bearer && bearer.startsWith('Bearer ')
+    ? bearer.slice(7)
+    : (req.cookies?.employer_token || null);
   if (!token) return res.status(401).json({ error: 'Employer authentication required.' });
 
   try {
@@ -262,6 +265,7 @@ router.post('/auth/verify-email', async (req, res) => {
         role: 'employer'
       },
       profile: mapEmployerProfile(profile),
+      token,
       message: 'Email verified successfully.'
     });
   } catch (err) {
@@ -378,7 +382,8 @@ router.post('/auth/login', async (req, res) => {
         companyName: employer.company_name,
         role: 'employer'
       },
-      profile: mapEmployerProfile(profile)
+      profile: mapEmployerProfile(profile),
+      token
     });
   } catch (err) {
     console.error('[Employer Login] Error:', err.message);
@@ -512,6 +517,22 @@ router.put('/profile', employerAuthMiddleware, async (req, res) => {
       );
     }
 
+    // Preserve the onboarding state unless the request explicitly changes it.
+    // Dashboard profile edits don't send `onboardingCompleted`, so without this
+    // the flag would reset to false and lock the recruiter out of the dashboard.
+    let effectiveOnboardingCompleted = false;
+    if (req.body.onboardingCompleted === true) {
+      effectiveOnboardingCompleted = true;
+    } else if (req.body.onboardingCompleted === false) {
+      effectiveOnboardingCompleted = false;
+    } else {
+      const cur = await pool.query(
+        'SELECT onboarding_completed FROM employer_profiles WHERE employer_id = $1',
+        [req.employer.id]
+      );
+      effectiveOnboardingCompleted = cur.rows[0]?.onboarding_completed === true;
+    }
+
     const result = await pool.query(
       `INSERT INTO employer_profiles (
         employer_id, company_logo, industry, company_size, founded_year, website, linkedin,
@@ -541,7 +562,7 @@ router.put('/profile', employerAuthMiddleware, async (req, res) => {
         req.employer.id, companyLogo || '', industry || '', companySize || '', foundedYear || '',
         website || '', linkedin || '', description || '', headquarters || '',
         officeLocations || '', hiringLocations || '', workMode || 'Remote',
-        designation || '', department || '', officialPhone || '', onboardingCompleted || false
+        designation || '', department || '', officialPhone || '', effectiveOnboardingCompleted
       ]
     );
 

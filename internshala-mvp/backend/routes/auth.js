@@ -35,9 +35,15 @@ function setCookie(res, token) {
   res.cookie('token', token, COOKIE_OPTIONS);
 }
 
-// Auth middleware — attaches req.user if valid token
+// Auth middleware — attaches req.user if valid token.
+// Accepts a Bearer token (Authorization header) OR the httpOnly cookie, so the
+// static frontend (separate origin from the API) works even when third-party
+// cookies are blocked by the browser.
 async function authMiddleware(req, res, next) {
-  const token = req.cookies?.token;
+  const bearer = req.headers.authorization;
+  const token = bearer && bearer.startsWith('Bearer ')
+    ? bearer.slice(7)
+    : (req.cookies?.token || null);
   if (!token) return res.status(401).json({ error: 'Authentication required.' });
 
   try {
@@ -190,6 +196,7 @@ router.post('/login', async (req, res) => {
     res.json({
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
       profile: mapProfile(profile),
+      token,
     });
   } catch (err) {
     console.error('[Auth] Login error:', err.message);
@@ -278,6 +285,7 @@ router.post('/google', async (req, res) => {
     res.json({
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
       profile: mapProfile(profile),
+      token,
     });
   } catch (err) {
     console.error('[Auth] Google auth error:', err.message);
@@ -655,6 +663,7 @@ router.post('/verify-otp', async (req, res) => {
     res.json({
       user: { id: user.id, email: user.email, name: user.name, role: user.role },
       profile: mapProfile(profile),
+      token,
       message: 'Email verified successfully.'
     });
   } catch (err) {

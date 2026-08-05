@@ -202,7 +202,7 @@ const EmployerOnboarding = () => {
                 ? 'bg-sky-600 border-sky-600 text-white'
                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500'
             }`}>
-              '3'
+              {3}
             </div>
             <span className={`text-[11px] font-black uppercase tracking-wider ${step === 3 ? 'text-sky-600' : 'text-slate-400 dark:text-slate-500'}`}>
               Recruiter Info

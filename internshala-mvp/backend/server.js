@@ -14,6 +14,12 @@ const { notifyNewJobs, sendDailyJobReminders, sendResumeReminders } = require('.
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Do not send ETags. Express generates an ETag for every res.json() and honors
+// the browser's If-None-Match by replying 304 WITHOUT a body. Axios (default
+// validateStatus: 200-299) treats 304 as an error, so a cached GET like
+// /api/auth/me throws, the session is dropped and the user is logged out on
+// refresh. The same 304 empties /messages/conversations and /notifications.
+app.set('etag', false);
 // Render/Cloudflare terminate TLS in front of the app; trust their
 // x-forwarded-proto so req.secure/protocol reflect HTTPS correctly.
 app.set('trust proxy', 1);
@@ -23,13 +29,25 @@ app.use(cors({
   origin: process.env.NODE_ENV === 'production'
     ? [
         process.env.FRONTEND_URL || 'https://incuxai-careers.onrender.com',
-        'https://incuxai-careers-2tv2.onrender.com'
+        'https://incuxai-careers-2tv2.onrender.com',
+        'https://incuxai-careers-b42k.onrender.com'
       ]
     : ['http://localhost:5173', 'http://127.0.0.1:5173'],
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
+
+// API responses must never be cached: prevents the browser from sending
+// If-None-Match revalidation requests and keeps authenticated data fresh.
+app.use('/api', (req, res, next) => {
+  res.set({
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+  });
+  next();
+});
 
 // Serve built frontend in production (dynamically check possible paths)
 const possibleDistPaths = [

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { employerService } from '../services/mockApi';
+import { employerService, tokenStorage } from '../services/mockApi';
 
 const EmployerAuthContext = createContext();
 
@@ -26,6 +26,7 @@ export const EmployerAuthProvider = ({ children }) => {
 
   const logout = useCallback(async () => {
     setLoading(true);
+    tokenStorage.setEmployer(null);
     try {
       await employerService.logout();
       setCurrentEmployer(null);
@@ -55,6 +56,7 @@ export const EmployerAuthProvider = ({ children }) => {
     setError(null);
     try {
       const res = await employerService.login(email, password);
+      tokenStorage.setEmployer(res.data.token);
       const employer = normalizeEmployer(res.data);
       setCurrentEmployer(employer);
       return employer;
@@ -85,6 +87,7 @@ export const EmployerAuthProvider = ({ children }) => {
     setError(null);
     try {
       const res = await employerService.verifyOtp(email, otp);
+      tokenStorage.setEmployer(res.data.token);
       const employer = normalizeEmployer(res.data);
       setCurrentEmployer(employer);
       return employer;
@@ -107,7 +110,9 @@ export const EmployerAuthProvider = ({ children }) => {
           ...prev,
           recruiterName: employer?.recruiterName || prev.recruiterName,
           companyName: employer?.companyName || prev.companyName,
-          onboardingCompleted: profile.onboardingCompleted === true,
+          onboardingCompleted: profile?.onboardingCompleted === undefined
+            ? prev.onboardingCompleted
+            : profile.onboardingCompleted === true,
           profileData: profile,
         };
       });
