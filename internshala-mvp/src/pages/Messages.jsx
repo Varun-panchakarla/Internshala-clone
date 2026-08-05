@@ -162,7 +162,7 @@ const Messages = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Conversation List */}
-        <div className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col lg:h-[calc(100vh-215px)]">
           <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
             <FiMail className="w-4 h-4 text-brand-600" />
             <h2 className="font-extrabold text-slate-800 dark:text-white text-sm">Recruiters</h2>
@@ -173,7 +173,7 @@ const Messages = () => {
             )}
           </div>
 
-          <div className="divide-y divide-slate-50 dark:divide-slate-800/60 max-h-[520px] overflow-y-auto">
+          <div className="divide-y divide-slate-50 dark:divide-slate-800/60 flex-1 overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center gap-2 py-12 text-xs font-bold text-slate-500">
                 <Spinner className="text-brand-500" /> Loading conversations...
@@ -230,7 +230,7 @@ const Messages = () => {
         </div>
 
         {/* Active Thread */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col overflow-hidden min-h-[520px] lg:sticky lg:top-6">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col overflow-hidden min-h-[360px] lg:h-[calc(100vh-215px)]">
           {!activeEmployerId ? (
             <div className="flex-1 flex flex-col items-center justify-center py-20 px-6 text-center">
               <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-3">
@@ -255,7 +255,7 @@ const Messages = () => {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-5 py-4 min-h-[380px] max-h-[420px] space-y-2.5">
+              <div className="flex-1 overflow-y-auto px-5 py-4 min-h-[160px] space-y-2.5">
                 {threadLoading ? (
                   <div className="flex items-center justify-center gap-2 py-12 text-xs font-bold text-slate-500">
                     <Spinner className="text-brand-500" /> Loading conversation...

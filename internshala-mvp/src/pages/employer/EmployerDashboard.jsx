@@ -133,6 +133,8 @@ const EmployerDashboard = () => {
   const [recruiterUnreadMessages, setRecruiterUnreadMessages] = useState(0);
   const [allApplications, setAllApplications] = useState([]);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const chatAutoScrollRef = useRef(true);
   const [profileForm, setProfileForm] = useState({
     companyName: currentEmployer?.companyName || '',
     recruiterName: currentEmployer?.recruiterName || '',
@@ -246,10 +248,18 @@ const EmployerDashboard = () => {
   const [chatLoading, setChatLoading] = useState(false);
   const [chatSending, setChatSending] = useState(false);
 
-  // Scroll to bottom of messages when chatMessages updates
+  // Scroll to bottom of messages when chatMessages updates (only if the recruiter is near the bottom)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!chatAutoScrollRef.current) return;
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [chatMessages]);
+
+  // Track whether the recruiter is near the bottom of the chat so polls don't yank them up
+  const handleMessagesScroll = () => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    chatAutoScrollRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  };
 
   // Applicants List modal state
   const [isApplicantsModalOpen, setIsApplicantsModalOpen] = useState(false);
@@ -605,6 +615,7 @@ const EmployerDashboard = () => {
     setChatMessages([]);
     setChatText('');
     setChatLoading(true);
+    chatAutoScrollRef.current = true;
     setActiveSection('messages');
     axios.get(`/api/messages/employer-thread/${targetUserId}`)
       .then(res => setChatMessages(res.data.messages || []))
@@ -623,6 +634,7 @@ const EmployerDashboard = () => {
     const targetUserId = chatCandidate?.userId || chatCandidate?.id;
     if (!content || !targetUserId) return;
     setChatSending(true);
+    chatAutoScrollRef.current = true;
     try {
       const res = await axios.post(`/api/messages/employer-send/${targetUserId}`, { content });
       setChatMessages(prev => [...prev, res.data.message]);
@@ -1324,7 +1336,7 @@ const EmployerDashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Conversation List */}
-          <div className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col lg:h-[calc(100vh-215px)]">
             <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
               <FiMail className="w-4 h-4 text-sky-600" />
               <h2 className="font-extrabold text-slate-800 dark:text-white text-sm">Inbox</h2>
@@ -1335,7 +1347,7 @@ const EmployerDashboard = () => {
               )}
             </div>
 
-            <div className="divide-y divide-slate-50 dark:divide-slate-805/40 max-h-[520px] overflow-y-auto">
+            <div className="divide-y divide-slate-50 dark:divide-slate-805/40 flex-1 overflow-y-auto">
               {conversations.length === 0 ? (
                 <div className="text-center py-12 px-6">
                   <FiMessageSquare className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
@@ -1388,7 +1400,7 @@ const EmployerDashboard = () => {
           </div>
 
           {/* Active Thread */}
-          <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col overflow-hidden min-h-[520px] lg:sticky lg:top-6">
+          <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col overflow-hidden min-h-[360px] lg:h-[calc(100vh-215px)]">
             {!chatCandidate ? (
               <div className="flex-1 flex flex-col items-center justify-center py-20 px-6 text-center">
                 <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-3">
@@ -1413,7 +1425,7 @@ const EmployerDashboard = () => {
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-5 py-4 min-h-[380px] max-h-[420px] space-y-2.5 bg-slate-50/20 dark:bg-slate-955/10">
+                <div ref={messagesContainerRef} onScroll={handleMessagesScroll} className="flex-1 overflow-y-auto px-5 py-4 min-h-[160px] space-y-2.5 bg-slate-50/20 dark:bg-slate-955/10">
                   {chatLoading ? (
                     <div className="h-full flex items-center justify-center">
                       <div className="w-6 h-6 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
@@ -1463,6 +1475,7 @@ const EmployerDashboard = () => {
                       });
                     })()
                   )}
+                  <div ref={messagesEndRef} />
                 </div>
 
                 <form onSubmit={sendChatMessage} className="flex gap-2 px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-955/50">
