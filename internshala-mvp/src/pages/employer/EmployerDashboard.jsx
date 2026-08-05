@@ -168,11 +168,6 @@ const EmployerDashboard = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Scroll to bottom of messages when chatMessages updates
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
-
   // Poll for messages in background
   useEffect(() => {
     if (!currentEmployer) return;
@@ -250,6 +245,11 @@ const EmployerDashboard = () => {
   const [chatText, setChatText] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [chatSending, setChatSending] = useState(false);
+
+  // Scroll to bottom of messages when chatMessages updates
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
 
   // Applicants List modal state
   const [isApplicantsModalOpen, setIsApplicantsModalOpen] = useState(false);
@@ -428,7 +428,7 @@ const EmployerDashboard = () => {
       setIsJobModalOpen(false);
       fetchDashboardData();
     } catch (err) {
-      addToast('Failed to save job listing.', 'error');
+      addToast(err.response?.data?.error || 'Failed to save job listing.', 'error');
     }
   };
 
