@@ -318,7 +318,7 @@ const Messages = () => {
                 <div ref={threadEndRef} />
               </div>
 
-              <form onSubmit={handleSend} className="flex gap-2 px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-955/50">
+              <form onSubmit={handleSend} className="flex gap-2 px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
                 <input
                   type="text"
                   value={text}

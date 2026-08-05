@@ -35,7 +35,7 @@ const api = axios.create({
 
 // Attach the right JWT for the request (employer endpoints use the employer token)
 api.interceptors.request.use((config) => {
-  const isEmployer = String(config.url || '').includes('/employer/');
+  const isEmployer = String(config.url || '').includes('/employer/') && !String(config.url || '').includes('/messages/employer/');
   const token = isEmployer ? tokenStorage.getEmployer() : tokenStorage.getCandidate();
   if (token) {
     config.headers = config.headers || {};
