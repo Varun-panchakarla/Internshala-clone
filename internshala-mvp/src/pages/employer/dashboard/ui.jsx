@@ -203,14 +203,26 @@ export function timeAgo(iso) {
 
 export function formatDateTime(iso) {
   if (!iso) return '';
-  return new Date(iso).toLocaleString([], {
-    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-  });
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleString([], {
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+  } catch {
+    return '';
+  }
 }
 
 export function formatDate(iso) {
   if (!iso) return '';
-  return new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch {
+    return '';
+  }
 }
 
 export function toDatetimeLocal(iso) {

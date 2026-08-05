@@ -126,7 +126,7 @@ router.get('/', async (req, res) => {
     const total = parseInt(countResult.rows[0].count);
 
     const dataResult = await pool.query(
-      `SELECT * FROM jobs ${whereClause} ORDER BY created_at DESC LIMIT $${idx} OFFSET $${idx + 1}`,
+      `SELECT * FROM jobs ${whereClause} ORDER BY (employer_id IS NOT NULL) DESC, created_at DESC LIMIT $${idx} OFFSET $${idx + 1}`,
       [...params, limitNum, offset]
     );
 

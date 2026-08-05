@@ -20,7 +20,6 @@ const PORT = process.env.PORT || 4000;
 // /api/auth/me throws, the session is dropped and the user is logged out on
 // refresh. The same 304 empties /messages/conversations and /notifications.
 app.set('etag', false);
-
 // Render/Cloudflare terminate TLS in front of the app; trust their
 // x-forwarded-proto so req.secure/protocol reflect HTTPS correctly.
 app.set('trust proxy', 1);
