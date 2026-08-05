@@ -23,7 +23,7 @@ router.get('/conversations', authMiddleware, async (req, res) => {
        FROM employers e
        WHERE EXISTS (SELECT 1 FROM messages m WHERE m.employer_id = e.id AND m.user_id = $1)
           OR EXISTS (SELECT 1 FROM applied_jobs aj JOIN jobs j ON aj.job_id = j.id WHERE j.employer_id = e.id AND aj.user_id = $1 AND aj.status IN ('Shortlisted', 'Interview', 'Offer', 'Selected'))
-       ORDER BY COALESCE(last_message_at, NOW() - INTERVAL '10 years') DESC`,
+       ORDER BY last_message_at DESC NULLS LAST`,
       [req.user.userId]
     );
 
@@ -149,7 +149,7 @@ router.get('/employer-conversations', employerAuthMiddleware, async (req, res) =
        FROM users u
        WHERE EXISTS (SELECT 1 FROM messages m WHERE m.employer_id = $1 AND m.user_id = u.id)
           OR EXISTS (SELECT 1 FROM applied_jobs aj JOIN jobs j ON aj.job_id = j.id WHERE j.employer_id = $1 AND aj.user_id = u.id AND aj.status IN ('Shortlisted', 'Interview', 'Offer', 'Selected'))
-       ORDER BY COALESCE(last_message_at, NOW() - INTERVAL '10 years') DESC`,
+       ORDER BY last_message_at DESC NULLS LAST`,
       [employerId]
     );
 
