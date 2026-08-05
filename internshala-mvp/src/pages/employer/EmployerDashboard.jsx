@@ -58,8 +58,16 @@ const dataUrlToBlob = (dataUrl) => {
 const formatISODate = (date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-const formatTime = (iso) =>
-  new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+const formatTime = (iso) => {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '';
+  }
+};
 
 const formatDay = (iso) => {
   if (!iso) return '';
@@ -2402,72 +2410,7 @@ const EmployerDashboard = () => {
         </div>
       )}
 
-      {/* 5. CANDIDATE CHAT MODAL */}
-      {chatCandidate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-md w-full h-[560px] flex flex-col p-5 animate-scale-in">
-            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full bg-sky-600 text-white flex items-center justify-center font-black text-xs shrink-0">
-                  {(chatCandidate.name || 'C').charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-slate-800 dark:text-white text-sm leading-none">{chatCandidate.name}</h3>
-                  <p className="text-[9px] text-slate-400 font-semibold mt-1">{chatCandidate.email}</p>
-                </div>
-              </div>
-              <button
-                onClick={closeChat}
-                className="text-slate-400 hover:text-slate-655 dark:hover:text-slate-200 cursor-pointer border-none bg-transparent"
-              >
-                <FiX className="w-5 h-5" />
-              </button>
-            </div>
 
-            <div className="flex-1 overflow-y-auto space-y-2.5 py-4 pr-1">
-              {chatLoading ? (
-                <div className="text-center py-10 text-xs font-bold text-slate-500">Loading conversation...</div>
-              ) : chatMessages.length === 0 ? (
-                <div className="text-center py-10 text-xs font-bold text-slate-400">
-                  No messages yet. Say hello to {(chatCandidate.name || 'the candidate').split(' ')[0]}!
-                </div>
-              ) : (
-                chatMessages.map((msg, idx) => (
-                  <div key={msg.id || idx} className={`flex ${msg.sender === 'employer' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-xs font-semibold ${
-                      msg.sender === 'employer'
-                        ? 'bg-sky-600 text-white rounded-br-sm'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-bl-sm'
-                    }`}>
-                      {msg.content}
-                      <span className="block text-[8px] mt-1 opacity-70 font-bold">
-                        {formatTime(msg.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <form onSubmit={sendChatMessage} className="flex gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
-              <input
-                type="text"
-                value={chatText}
-                onChange={e => setChatText(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1 px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 text-slate-800 dark:text-slate-100 font-semibold"
-              />
-              <button
-                type="submit"
-                disabled={chatSending || !chatText.trim()}
-                className="px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl cursor-pointer disabled:opacity-50 border-none"
-              >
-                Send
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* 6. INTERVIEW CALENDAR MODAL */}
       {isCalendarModalOpen && (() => {
