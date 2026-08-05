@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, Fragment } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FiMail, FiSend, FiMessageSquare, FiClock } from 'react-icons/fi';
 import { messageService } from '../services/mockApi';
 
@@ -28,8 +29,9 @@ const dedupe = (msgs) =>
   Array.from(new Map(msgs.map(m => [m.id, m])).values());
 
 const Messages = () => {
+  const location = useLocation();
   const [conversations, setConversations] = useState([]);
-  const [activeEmployerId, setActiveEmployerId] = useState(null);
+  const [activeEmployerId, setActiveEmployerId] = useState(location.state?.employerId || null);
   const [thread, setThread] = useState([]);
   const [threadMeta, setThreadMeta] = useState(null);
   const [text, setText] = useState('');
@@ -56,6 +58,14 @@ const Messages = () => {
       setTimeout(() => threadEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 60);
     }
   };
+
+  // Handle navigation redirect state changes
+  useEffect(() => {
+    if (location.state?.employerId) {
+      setActiveEmployerId(location.state.employerId);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Initial conversation list load
   useEffect(() => {
