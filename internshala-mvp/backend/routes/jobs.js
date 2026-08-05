@@ -178,6 +178,7 @@ function mapJob(row) {
     redirect_url: row.redirect_url,
     isActive: row.is_active !== false,
     lastDateToApply: row.last_date_to_apply || null,
+    employerId: row.employer_id,
   };
 }
 

@@ -22,7 +22,8 @@ router.get('/conversations', authMiddleware, async (req, res) => {
                WHERE m4.employer_id = e.id AND m4.user_id = $1 AND m4.sender = 'employer' AND m4.is_read = false) AS unread
        FROM employers e
        WHERE EXISTS (SELECT 1 FROM messages m WHERE m.employer_id = e.id AND m.user_id = $1)
-       ORDER BY last_message_at DESC`,
+          OR EXISTS (SELECT 1 FROM applied_jobs aj JOIN jobs j ON aj.job_id = j.id WHERE j.employer_id = e.id AND aj.user_id = $1 AND aj.status IN ('Shortlisted', 'Interview', 'Offer', 'Selected'))
+       ORDER BY COALESCE(last_message_at, NOW() - INTERVAL '10 years') DESC`,
       [req.user.userId]
     );
 
@@ -147,7 +148,8 @@ router.get('/employer-conversations', employerAuthMiddleware, async (req, res) =
                WHERE m4.employer_id = $1 AND m4.user_id = u.id AND m4.sender = 'user' AND m4.is_read = false) AS unread
        FROM users u
        WHERE EXISTS (SELECT 1 FROM messages m WHERE m.employer_id = $1 AND m.user_id = u.id)
-       ORDER BY last_message_at DESC`,
+          OR EXISTS (SELECT 1 FROM applied_jobs aj JOIN jobs j ON aj.job_id = j.id WHERE j.employer_id = $1 AND aj.user_id = u.id AND aj.status IN ('Shortlisted', 'Interview', 'Offer', 'Selected'))
+       ORDER BY COALESCE(last_message_at, NOW() - INTERVAL '10 years') DESC`,
       [employerId]
     );
 

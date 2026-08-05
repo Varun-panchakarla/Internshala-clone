@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useJobs } from '../context/JobContext';
 import { jobService } from '../services/mockApi';
-import { FiCheckCircle, FiMapPin, FiCalendar, FiArrowRight, FiBriefcase, FiClock } from 'react-icons/fi';
+import { FiCheckCircle, FiMapPin, FiCalendar, FiArrowRight, FiBriefcase, FiClock, FiMail } from 'react-icons/fi';
 import Button from '../components/common/Button';
 
 const Applications = () => {
@@ -205,6 +205,21 @@ const Applications = () => {
                 <span className={`text-[10px] font-black border px-2.5 py-1 rounded-full uppercase tracking-wider ${getStatusBadgeStyle(app.status)}`}>
                   {app.status}
                 </span>
+
+                {/* Chat with Recruiter */}
+                {['shortlisted', 'interview', 'offer', 'selected'].includes(app.status?.toLowerCase()) && app.job?.employerId && (
+                  <Button
+                    variant="light"
+                    size="xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/messages', { state: { employerId: app.job.employerId } });
+                    }}
+                    className="flex items-center gap-1 font-bold text-brand-700 dark:text-brand-400 border border-brand-200 dark:border-brand-500/20 bg-brand-50/50 dark:bg-brand-500/5 hover:bg-brand-50 dark:hover:bg-brand-500/10 rounded-lg"
+                  >
+                    <FiMail className="w-3.5 h-3.5" /> Chat with Recruiter
+                  </Button>
+                )}
 
                 {/* Application Date */}
                 <span className="flex items-center gap-1 text-[11px] font-bold text-slate-400 dark:text-slate-500">
