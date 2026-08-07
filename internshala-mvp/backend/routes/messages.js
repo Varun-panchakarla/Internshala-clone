@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/conversations', authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT e.id AS employer_id, e.company_name, e.recruiter_name,
+      `SELECT e.id AS employer_id, e.company_name, e.recruiter_name, ep.company_logo,
               (SELECT content FROM messages m2
                WHERE m2.employer_id = e.id AND m2.user_id = $1
                ORDER BY m2.created_at DESC LIMIT 1) AS last_message,
@@ -21,6 +21,7 @@ router.get('/conversations', authMiddleware, async (req, res) => {
               (SELECT COUNT(*) FROM messages m4
                WHERE m4.employer_id = e.id AND m4.user_id = $1 AND m4.sender = 'employer' AND m4.is_read = false) AS unread
        FROM employers e
+       LEFT JOIN employer_profiles ep ON ep.employer_id = e.id
        WHERE EXISTS (SELECT 1 FROM messages m WHERE m.employer_id = e.id AND m.user_id = $1)
           OR EXISTS (SELECT 1 FROM applied_jobs aj JOIN jobs j ON aj.job_id = j.id WHERE j.employer_id = e.id AND aj.user_id = $1 AND aj.status IN ('Shortlisted', 'Interview', 'Offer', 'Selected'))
        ORDER BY last_message_at DESC NULLS LAST`,
@@ -31,6 +32,7 @@ router.get('/conversations', authMiddleware, async (req, res) => {
       employerId: row.employer_id,
       companyName: row.company_name || 'Company',
       recruiterName: row.recruiter_name || 'Recruiter',
+      companyLogo: row.company_logo || '',
       lastMessage: row.last_message || '',
       lastMessageAt: row.last_message_at,
       unread: Number(row.unread) || 0
@@ -50,7 +52,10 @@ router.get('/employer/:employerId', authMiddleware, async (req, res) => {
     const userId = req.user.userId;
 
     const employerRes = await pool.query(
-      'SELECT id, company_name, recruiter_name FROM employers WHERE id = $1',
+      `SELECT e.id, e.company_name, e.recruiter_name, ep.company_logo
+       FROM employers e
+       LEFT JOIN employer_profiles ep ON ep.employer_id = e.id
+       WHERE e.id = $1`,
       [employerId]
     );
     if (employerRes.rows.length === 0) {
@@ -75,7 +80,8 @@ router.get('/employer/:employerId', authMiddleware, async (req, res) => {
       employer: {
         id: employerRes.rows[0].id,
         companyName: employerRes.rows[0].company_name || 'Company',
-        recruiterName: employerRes.rows[0].recruiter_name || 'Recruiter'
+        recruiterName: employerRes.rows[0].recruiter_name || 'Recruiter',
+        companyLogo: employerRes.rows[0].company_logo || ''
       },
       messages: threadRes.rows.map(m => ({
         id: m.id,
@@ -176,7 +182,9 @@ router.get('/employer-thread/:userId', employerAuthMiddleware, async (req, res) 
     const employerId = req.employer.id;
 
     const userRes = await pool.query(
-      'SELECT id, name, email FROM users WHERE id = $1',
+      `SELECT u.id, u.name, u.email
+       FROM users u
+       WHERE u.id = $1`,
       [userId]
     );
     if (userRes.rows.length === 0) {

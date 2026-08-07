@@ -566,6 +566,14 @@ router.put('/profile', employerAuthMiddleware, async (req, res) => {
       ]
     );
 
+    // Keep logos on the employer's job listings in sync with the profile logo
+    if (companyLogo !== undefined) {
+      await pool.query(
+        'UPDATE jobs SET company_logo = $1 WHERE employer_id = $2',
+        [companyLogo || '', req.employer.id]
+      );
+    }
+
     // Fetch updated employer info
     const empRes = await pool.query('SELECT id, email, recruiter_name as "recruiterName", company_name as "companyName" FROM employers WHERE id = $1', [req.employer.id]);
     const employer = empRes.rows[0];

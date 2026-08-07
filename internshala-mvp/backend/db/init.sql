@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   id VARCHAR(100) PRIMARY KEY,
   title VARCHAR(500) NOT NULL,
   company VARCHAR(255) NOT NULL,
-  company_logo VARCHAR(500) DEFAULT '',
+  company_logo TEXT DEFAULT '',
   logo_color VARCHAR(50),
   logo_text VARCHAR(10),
   location VARCHAR(255),
