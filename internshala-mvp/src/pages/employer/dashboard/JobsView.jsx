@@ -184,20 +184,28 @@ export default function JobsView({
                 {job.salary && job.salary !== 'Undisclosed' && <span className="truncate">{job.salary}</span>}
               </div>
 
-              {job.skills && (
-                <div className="flex flex-wrap gap-1 mt-2.5">
-                  {job.skills.split(',').slice(0, 4).map((s, i) => (
-                    <span key={i} className="px-1.5 py-0.5 text-[9px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-md">
-                      {s.trim()}
-                    </span>
-                  ))}
-                  {job.skills.split(',').length > 4 && (
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold text-slate-400">
-                      +{job.skills.split(',').length - 4}
-                    </span>
-                  )}
-                </div>
-              )}
+              {job.skills && (() => {
+                const skillsArr = typeof job.skills === 'string'
+                  ? job.skills.split(',').map(s => s.trim()).filter(Boolean)
+                  : Array.isArray(job.skills)
+                    ? job.skills
+                    : [];
+                if (skillsArr.length === 0) return null;
+                return (
+                  <div className="flex flex-wrap gap-1 mt-2.5">
+                    {skillsArr.slice(0, 4).map((s, i) => (
+                      <span key={i} className="px-1.5 py-0.5 text-[9px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-md">
+                        {s}
+                      </span>
+                    ))}
+                    {skillsArr.length > 4 && (
+                      <span className="px-1.5 py-0.5 text-[9px] font-bold text-slate-400">
+                        +{skillsArr.length - 4}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
 
               <div className="flex items-center gap-1.5 mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button

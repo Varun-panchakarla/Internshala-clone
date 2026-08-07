@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FiBarChart2, FiTrendingUp, FiLayers } from 'react-icons/fi';
+import { FiBarChart2, FiTrendingUp, FiLayers, FiEye, FiUsers, FiActivity, FiAward } from 'react-icons/fi';
 import { Card, SectionHeader, EmptyState } from './ui';
 
 function BarChart({ data, height = 160, color = 'var(--brand-600, #0ea5e9)' }) {
@@ -72,6 +72,49 @@ export default function AnalyticsView({ analytics, loading }) {
     <div className="space-y-4">
       <SectionHeader icon={FiBarChart2} title="Recruiting Analytics" subtitle="Job performance, trends and your hiring funnel" />
 
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400">
+            <FiEye className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Job Views</p>
+            <p className="text-lg font-black text-slate-800 dark:text-white mt-0.5">{analytics.summary?.totalViews ?? 0}</p>
+          </div>
+        </Card>
+
+        <Card className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-brand-50 dark:bg-brand-950/30 text-brand-600 dark:text-brand-400">
+            <FiUsers className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Candidates</p>
+            <p className="text-lg font-black text-slate-800 dark:text-white mt-0.5">{analytics.summary?.totalApplicants ?? 0}</p>
+          </div>
+        </Card>
+
+        <Card className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400">
+            <FiActivity className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Shortlist Rate</p>
+            <p className="text-lg font-black text-slate-800 dark:text-white mt-0.5">{analytics.summary?.conversionRate ?? 0}%</p>
+          </div>
+        </Card>
+
+        <Card className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400">
+            <FiAward className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Hiring Success</p>
+            <p className="text-lg font-black text-slate-800 dark:text-white mt-0.5">{analytics.summary?.hiringRate ?? 0}%</p>
+          </div>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
           <p className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 mb-4">Applications · last 30 days</p>
@@ -83,7 +126,7 @@ export default function AnalyticsView({ analytics, loading }) {
         </Card>
 
         <Card>
-          <p className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 mb-4">Jobs posted · this year</p>
+          <p className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 mb-4">Jobs posted · last 6 months</p>
           {analytics.monthlyTrend?.length ? (
             <BarChart data={analytics.monthlyTrend} height={170} color="var(--brand-500, #8b5cf6)" />
           ) : (

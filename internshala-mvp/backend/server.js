@@ -325,7 +325,13 @@ async function initDb() {
        AND a.user_id = b.user_id
        AND a.job_id = b.job_id
        AND a.id < b.id`,
-    "CREATE UNIQUE INDEX IF NOT EXISTS idx_interviews_uniq ON interviews (employer_id, user_id, job_id)"
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_interviews_uniq ON interviews (employer_id, user_id, job_id)",
+    "ALTER TABLE jobs ALTER COLUMN company_logo TYPE TEXT",
+    `UPDATE jobs SET company_logo = ep.company_logo
+     FROM employer_profiles ep
+     WHERE jobs.employer_id = ep.employer_id
+       AND (jobs.company_logo IS NULL OR jobs.company_logo = '')
+       AND ep.company_logo IS NOT NULL AND ep.company_logo <> ''`
   ];
   for (const sql of migrations) {
     try { await pool.query(sql); } catch { /* column may already exist */ }

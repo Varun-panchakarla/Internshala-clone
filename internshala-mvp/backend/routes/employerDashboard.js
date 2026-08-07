@@ -92,6 +92,43 @@ router.get('/metrics', employerAuthMiddleware, async (req, res) => {
   }
 });
 
+function formatEmployerJobSync(row, applicantsCount) {
+  if (!row) return null;
+  const isActive = row.is_active !== false;
+  const lastDate = row.last_date_to_apply ? new Date(row.last_date_to_apply) : null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const expired = lastDate && lastDate < today;
+  const status = !isActive ? 'Closed' : expired ? 'Expired' : 'Active';
+  return {
+    id: row.id,
+    title: row.title,
+    type: row.employment_type || 'Full-time',
+    status,
+    isActive: isActive && !expired,
+    lastDateToApply: row.last_date_to_apply || null,
+    applicants: applicantsCount ?? row.applicants_count ?? 0,
+    views: row.match_score || 0,
+    date: formatTimeAgo(row.created_at),
+    location: row.location,
+    salary: row.salary || 'Undisclosed',
+    experience: row.experience || 'Not specified',
+    skills: Array.isArray(row.skills) ? row.skills.join(', ') : typeof row.skills === 'string' ? row.skills : '',
+    description: row.description,
+    companyLogo: row.company_logo || ''
+  };
+}
+
+async function formatEmployerJob(row) {
+  if (!row) return null;
+  const appsRes = await pool.query(
+    "SELECT COUNT(*)::int FROM applied_jobs WHERE job_id = $1",
+    [row.id]
+  );
+  const count = appsRes.rows[0].count || 0;
+  return formatEmployerJobSync(row, count);
+}
+
 // 2. GET /api/employer/dashboard/jobs
 router.get('/jobs', employerAuthMiddleware, async (req, res) => {
   try {
@@ -105,30 +142,7 @@ router.get('/jobs', employerAuthMiddleware, async (req, res) => {
       [req.employer.id]
     );
 
-    const formattedJobs = result.rows.map(row => {
-      const isActive = row.is_active !== false;
-      const lastDate = row.last_date_to_apply ? new Date(row.last_date_to_apply) : null;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const expired = lastDate && lastDate < today;
-      const status = !isActive ? 'Closed' : expired ? 'Expired' : 'Active';
-      return {
-        id: row.id,
-        title: row.title,
-        type: row.employment_type || 'Full-time',
-        status,
-        isActive: isActive && !expired,
-        lastDateToApply: row.last_date_to_apply || null,
-        applicants: row.applicants_count,
-        views: row.match_score || 0, // using match_score for view simulation or default views
-        date: formatTimeAgo(row.created_at),
-        location: row.location,
-        salary: row.salary || 'Undisclosed',
-        experience: row.experience || 'Not specified',
-        skills: Array.isArray(row.skills) ? row.skills.join(', ') : '',
-        description: row.description
-      };
-    });
+    const formattedJobs = result.rows.map(row => formatEmployerJobSync(row, row.applicants_count));
 
     res.json({ jobs: formattedJobs });
   } catch (err) {
@@ -144,8 +158,15 @@ router.post('/jobs', employerAuthMiddleware, async (req, res) => {
     const employerId = req.employer.id;
 
     // Fetch company name to store in job listing
-    const companyRes = await pool.query("SELECT company_name FROM employers WHERE id = $1", [employerId]);
+    const companyRes = await pool.query(
+      `SELECT e.company_name, ep.company_logo
+       FROM employers e
+       LEFT JOIN employer_profiles ep ON ep.employer_id = e.id
+       WHERE e.id = $1`,
+      [employerId]
+    );
     const companyName = companyRes.rows[0]?.company_name || 'Recruiter';
+    const companyLogo = companyRes.rows[0]?.company_logo || '';
 
     const jobId = uuidv4();
     const skillsArray = skills ? String(skills).split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -153,13 +174,14 @@ router.post('/jobs', employerAuthMiddleware, async (req, res) => {
 
     const insertResult = await pool.query(
       `INSERT INTO jobs (
-        id, title, company, location, salary, experience, employment_type, skills, description,
+        id, title, company, company_logo, location, salary, experience, employment_type, skills, description,
         employer_id, last_date_to_apply, is_active, posted_at, created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, 'Today', NOW()) RETURNING *`,
-      [jobId, title, companyName, location, salaryRange, experienceRequired, employmentType, skillsArray, description, employerId, lastDate]
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, true, 'Today', NOW()) RETURNING *`,
+      [jobId, title, companyName, companyLogo, location, salaryRange, experienceRequired, employmentType, skillsArray, description, employerId, lastDate]
     );
 
-    res.json({ message: 'Job posted successfully!', job: insertResult.rows[0] });
+    const formatted = await formatEmployerJob(insertResult.rows[0]);
+    res.json({ message: 'Job posted successfully!', job: formatted });
   } catch (err) {
     console.error('[Recruiter Post Job Error]:', err.message);
     res.status(500).json({ error: 'Failed to post new job listing.' });
@@ -192,7 +214,8 @@ router.put('/jobs/:id', employerAuthMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Job listing not found or unauthorized.' });
     }
 
-    res.json({ message: 'Job updated successfully!', job: updateRes.rows[0] });
+    const formatted = await formatEmployerJob(updateRes.rows[0]);
+    res.json({ message: 'Job updated successfully!', job: formatted });
   } catch (err) {
     console.error('[Recruiter Update Job Error]:', err.message);
     res.status(500).json({ error: 'Failed to update job listing.' });
@@ -215,7 +238,8 @@ router.post('/jobs/:id/toggle', employerAuthMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Job listing not found or unauthorized.' });
     }
 
-    res.json({ message: isActive === true ? 'Job reopened for applications.' : 'Job closed for applications.', job: toggleRes.rows[0] });
+    const formatted = await formatEmployerJob(toggleRes.rows[0]);
+    res.json({ message: isActive === true ? 'Job reopened for applications.' : 'Job closed for applications.', job: formatted });
   } catch (err) {
     console.error('[Recruiter Toggle Job Error]:', err.message);
     res.status(500).json({ error: 'Failed to update job status.' });
@@ -253,7 +277,10 @@ router.get('/applicants/:jobId', employerAuthMiddleware, async (req, res) => {
     const result = await pool.query(
       `SELECT aj.id AS application_id, aj.status, aj.applied_at, 
               u.id AS user_id, u.name AS candidate_name, u.email AS candidate_email,
-              p.experience, p.skills, p.college, p.degree, p.resume_info, p.contact_number, p.current_city
+              p.experience, p.skills, p.college, p.degree, p.contact_number, p.current_city,
+              (p.resume_info->>'fileName') AS resume_file_name,
+              (p.resume_info->>'fileType') AS resume_file_type,
+              (p.resume_info->>'fileData') IS NOT NULL OR (p.resume_info->>'fileName') IS NOT NULL AS has_resume
        FROM applied_jobs aj
        JOIN jobs j ON aj.job_id = j.id
        JOIN users u ON aj.user_id = u.id
@@ -282,10 +309,10 @@ router.get('/applicants/:jobId', employerAuthMiddleware, async (req, res) => {
       education: formatEducation(row.degree, row.college),
       status: row.status,
       timeAgo: formatTimeAgo(row.applied_at),
-      resumeFileName: row.resume_info?.fileName || '',
-      resumeFileType: row.resume_info?.fileType || '',
-      hasResume: !!(row.resume_info?.fileData || row.resume_info?.fileName),
-      resumeUrl: row.resume_info?.fileName || ''
+      resumeFileName: row.resume_file_name || '',
+      resumeFileType: row.resume_file_type || '',
+      hasResume: !!row.has_resume,
+      resumeUrl: row.resume_file_name || ''
     }));
 
     res.json({ applicants: formattedApplicants });
@@ -346,7 +373,8 @@ router.get('/applicants/:applicationId/detail', employerAuthMiddleware, async (r
               j.id AS job_id, j.title AS job_title,
               u.id AS user_id, u.name, u.email,
               p.college, p.degree, p.skills, p.experience, p.preferred_role, p.preferred_location,
-              p.contact_number, p.current_city, p.gender, p.languages, p.profile_photo, p.resume_info
+              p.contact_number, p.current_city, p.gender, p.languages, p.profile_photo,
+              p.resume_info - 'fileData' AS resume_info
        FROM applied_jobs aj
        JOIN jobs j ON aj.job_id = j.id
        JOIN users u ON aj.user_id = u.id
@@ -656,7 +684,9 @@ router.get('/applications', employerAuthMiddleware, async (req, res) => {
       `SELECT aj.id AS application_id, aj.status, aj.applied_at,
               u.id AS user_id, u.name AS candidate_name, u.email AS candidate_email,
               j.id AS job_id, j.title AS job_title,
-              p.experience, p.skills, p.college, p.degree, p.resume_info, p.contact_number, p.current_city
+              p.experience, p.skills, p.college, p.degree, p.contact_number, p.current_city,
+              (p.resume_info->>'fileName') AS resume_file_name,
+              (p.resume_info->>'fileData') IS NOT NULL OR (p.resume_info->>'fileName') IS NOT NULL AS has_resume
        FROM applied_jobs aj
        JOIN jobs j ON aj.job_id = j.id
        JOIN users u ON aj.user_id = u.id
@@ -687,9 +717,9 @@ router.get('/applications', employerAuthMiddleware, async (req, res) => {
       timeAgo: formatTimeAgo(row.applied_at),
       role: row.job_title,
       jobId: row.job_id,
-      hasResume: !!(row.resume_info?.fileData || row.resume_info?.fileName),
-      resumeFileName: row.resume_info?.fileName || '',
-      resumeUrl: row.resume_info?.fileName || ''
+      hasResume: !!row.has_resume,
+      resumeFileName: row.resume_file_name || '',
+      resumeUrl: row.resume_file_name || ''
     }));
 
     res.json({ applications: formatted });
@@ -706,7 +736,10 @@ router.get('/recent-applications', employerAuthMiddleware, async (req, res) => {
       `SELECT aj.id AS application_id, aj.status, aj.applied_at,
               u.id AS user_id, u.name AS candidate_name, u.email AS candidate_email,
               j.title AS job_title,
-              p.experience, p.skills, p.college, p.degree, p.resume_info, p.contact_number, p.current_city
+              p.experience, p.skills, p.college, p.degree, p.contact_number, p.current_city,
+              (p.resume_info->>'fileName') AS resume_file_name,
+              (p.resume_info->>'fileType') AS resume_file_type,
+              (p.resume_info->>'fileData') IS NOT NULL OR (p.resume_info->>'fileName') IS NOT NULL AS has_resume
        FROM applied_jobs aj
        JOIN jobs j ON aj.job_id = j.id
        JOIN users u ON aj.user_id = u.id
@@ -732,10 +765,10 @@ router.get('/recent-applications', employerAuthMiddleware, async (req, res) => {
       education: row.degree || row.college
         ? `${[row.degree, row.college].filter(Boolean).join(', ')}`
         : 'Not specified',
-      resumeFileName: row.resume_info?.fileName || '',
-      resumeFileType: row.resume_info?.fileType || '',
-      hasResume: !!(row.resume_info?.fileData || row.resume_info?.fileName),
-      resumeUrl: row.resume_info?.fileName || ''
+      resumeFileName: row.resume_file_name || '',
+      resumeFileType: row.resume_file_type || '',
+      hasResume: !!row.has_resume,
+      resumeUrl: row.resume_file_name || ''
     }));
 
     res.json({ applications: formattedApps });
@@ -837,13 +870,13 @@ router.get('/analytics', employerAuthMiddleware, async (req, res) => {
       [employerId]
     );
 
-    // C. Monthly job postings graph (last 12 months)
+    // C. Monthly job postings graph (last 6 months)
     const monthlyJobs = await pool.query(
       `SELECT TO_CHAR(d.month, 'YYYY-MM') AS month_key, 
               TO_CHAR(d.month, 'Mon') AS month_label, 
               COALESCE(COUNT(j.id), 0)::int AS count
        FROM generate_series(
-         DATE_TRUNC('year', CURRENT_DATE),
+         DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '5 months',
          DATE_TRUNC('month', CURRENT_DATE),
          '1 month'::interval
        ) d(month)
@@ -853,7 +886,7 @@ router.get('/analytics', employerAuthMiddleware, async (req, res) => {
       [employerId]
     );
 
-    // D. Hiring pipeline states (Applied -> Shortlisted -> Interview -> Selected -> Rejected)
+    // D. Hiring pipeline states (Applied/Pending -> Shortlisted -> Interview -> Offer -> Selected -> Rejected)
     const pipelineRes = await pool.query(
       `SELECT aj.status, COUNT(*)::int AS count 
        FROM applied_jobs aj 
@@ -863,7 +896,7 @@ router.get('/analytics', employerAuthMiddleware, async (req, res) => {
       [employerId]
     );
 
-    const stages = ['Pending', 'Shortlisted', 'Interview', 'Selected', 'Rejected'];
+    const stages = ['Pending', 'Shortlisted', 'Interview', 'Offer', 'Selected', 'Rejected'];
     const hiringPipeline = stages.map(stage => {
       const existing = pipelineRes.rows.find(r => r.status === stage);
       return {
@@ -872,11 +905,36 @@ router.get('/analytics', employerAuthMiddleware, async (req, res) => {
       };
     });
 
+    // E. Total job views (sum of match_score)
+    const viewsRes = await pool.query(
+      "SELECT COALESCE(SUM(match_score), 0)::int AS total FROM jobs WHERE employer_id = $1",
+      [employerId]
+    );
+    const totalViews = viewsRes.rows[0].total || 0;
+
+    // F. Summary Conversion calculations
+    const totalApps = pipelineRes.rows.reduce((sum, r) => sum + r.count, 0);
+    const shortlistedApps = pipelineRes.rows
+      .filter(r => ['Shortlisted', 'Interview', 'Offer', 'Selected'].includes(r.status))
+      .reduce((sum, r) => sum + r.count, 0);
+    const hiredApps = pipelineRes.rows
+      .filter(r => r.status === 'Selected')
+      .reduce((sum, r) => sum + r.count, 0);
+
+    const conversionRate = totalApps > 0 ? Math.round((shortlistedApps / totalApps) * 100) : 0;
+    const hiringRate = totalApps > 0 ? Math.round((hiredApps / totalApps) * 100) : 0;
+
     res.json({
       jobWiseApplicants: jobStats.rows,
       dailyTrend: dailyApps.rows.map(r => ({ label: r.date_label, count: r.count })),
       monthlyTrend: monthlyJobs.rows.map(r => ({ label: r.month_label, count: r.count })),
-      hiringPipeline
+      hiringPipeline,
+      summary: {
+        totalViews,
+        totalApplicants: totalApps,
+        conversionRate,
+        hiringRate
+      }
     });
   } catch (err) {
     console.error('[Recruiter Analytics Error]:', err.message);

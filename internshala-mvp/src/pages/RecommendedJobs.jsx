@@ -42,8 +42,12 @@ const RecommendedJobs = () => {
                 <div>
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl ${job.logoColor || 'bg-brand-500'} text-white flex items-center justify-center font-extrabold text-lg shrink-0`}>
-                        {job.logoText || (job.company || '').charAt(0).toUpperCase() || '?'}
+                      <div className={`w-10 h-10 rounded-xl ${job.logoColor || 'bg-brand-500'} text-white flex items-center justify-center font-extrabold text-lg shrink-0 overflow-hidden`}>
+                        {job.companyLogo ? (
+                          <img src={job.companyLogo} alt={job.company} className="w-full h-full object-cover bg-white" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                        ) : (
+                          job.logoText || (job.company || '').charAt(0).toUpperCase() || '?'
+                        )}
                       </div>
                       <div>
                         <h4 className="text-sm font-extrabold text-slate-800 dark:text-white leading-snug hover:text-brand-600 dark:hover:text-brand-400 transition-colors">

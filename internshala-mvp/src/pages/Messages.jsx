@@ -210,8 +210,12 @@ const Messages = () => {
                       : 'hover:bg-slate-50 dark:hover:bg-white/5'
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-black text-sm shrink-0">
-                    {(cv.companyName || 'C').charAt(0).toUpperCase()}
+                  <div className="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-black text-sm shrink-0 overflow-hidden">
+                    {cv.companyLogo ? (
+                      <img src={cv.companyLogo} alt={cv.companyName} className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                    ) : (
+                      (cv.companyName || 'C').charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
@@ -252,8 +256,12 @@ const Messages = () => {
           ) : (
             <>
               <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center font-black text-xs shrink-0">
-                  {(threadMeta?.companyName || 'C').charAt(0).toUpperCase()}
+                <div className="w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center font-black text-xs shrink-0 overflow-hidden">
+                  {threadMeta?.companyLogo ? (
+                    <img src={threadMeta.companyLogo} alt={threadMeta.companyName} className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                  ) : (
+                    (threadMeta?.companyName || 'C').charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div>
                   <h2 className="font-extrabold text-slate-800 dark:text-white text-sm leading-none">
@@ -295,8 +303,12 @@ const Messages = () => {
                           )}
                           <div className={`flex items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
                             {!isUser && (
-                              <div className="w-6 h-6 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 flex items-center justify-center font-black text-[10px] shrink-0 mb-0.5">
-                                {(threadMeta?.companyName || 'C').charAt(0).toUpperCase()}
+                              <div className="w-6 h-6 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 flex items-center justify-center font-black text-[10px] shrink-0 mb-0.5 overflow-hidden">
+                                {threadMeta?.companyLogo ? (
+                                  <img src={threadMeta.companyLogo} alt={threadMeta.companyName} className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                                ) : (
+                                  (threadMeta?.companyName || 'C').charAt(0).toUpperCase()
+                                )}
                               </div>
                             )}
                             <div className={`max-w-[75%] px-3.5 py-2.5 rounded-2xl text-xs font-semibold shadow-sm ${

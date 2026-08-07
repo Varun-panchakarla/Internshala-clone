@@ -166,8 +166,12 @@ const Applications = () => {
               className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-700 transition-all duration-200 cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
             >
               <div className="flex items-start gap-4">
-                <div className={`w-12 h-12 rounded-xl ${app.job.logoColor || 'bg-slate-200'} text-white flex items-center justify-center font-extrabold text-xl shrink-0 shadow-inner border border-slate-100 dark:border-slate-800`}>
-                  {app.job.logoText || (app.job.company || '').charAt(0).toUpperCase() || '?'}
+                <div className={`w-12 h-12 rounded-xl ${app.job.logoColor || 'bg-slate-200'} text-white flex items-center justify-center font-extrabold text-xl shrink-0 shadow-inner border border-slate-100 dark:border-slate-800 overflow-hidden`}>
+                  {app.job.companyLogo ? (
+                    <img src={app.job.companyLogo} alt={app.job.company} className="w-full h-full object-cover bg-white" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                  ) : (
+                    app.job.logoText || (app.job.company || '').charAt(0).toUpperCase() || '?'
+                  )}
                 </div>
                 <div className="min-w-0">
                   <h4 className="text-base font-extrabold text-slate-800 dark:text-white leading-snug hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
